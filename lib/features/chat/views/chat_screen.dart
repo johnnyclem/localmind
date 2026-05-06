@@ -14,6 +14,7 @@ import '../data/models/message.dart';
 import '../providers/chat_providers.dart';
 import 'components/chat_bubble.dart';
 import 'components/chat_input_bar.dart';
+import 'components/edit_message_dialog.dart';
 import '../providers/chat_mcp_providers.dart';
 import 'components/chat_settings_sheet.dart';
 import 'components/notification_permission_banner.dart';
@@ -265,6 +266,17 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                   },
                   onDelete: (messageId) {
                     ref.read(chatProvider.notifier).deleteMessage(messageId);
+                  },
+                  onEdit: (messageId, currentContent) async {
+                    final newContent = await EditMessageDialog.show(
+                      context,
+                      initialContent: currentContent,
+                    );
+                    if (newContent != null && newContent != currentContent) {
+                      await ref
+                          .read(chatProvider.notifier)
+                          .editMessage(messageId, newContent);
+                    }
                   },
                   hasSmartReplies:
                       !chatState.isStreaming &&
@@ -1096,6 +1108,7 @@ class _MessageList extends StatelessWidget {
     required this.isStreaming,
     required this.onRetry,
     required this.onDelete,
+    required this.onEdit,
     this.hasSmartReplies = false,
   });
 
@@ -1105,6 +1118,7 @@ class _MessageList extends StatelessWidget {
   final bool isStreaming;
   final void Function(String) onRetry;
   final void Function(String) onDelete;
+  final void Function(String messageId, String currentContent) onEdit;
   final bool hasSmartReplies;
 
   @override
@@ -1147,6 +1161,9 @@ class _MessageList extends StatelessWidget {
               isLast && isStreaming && message.id == streamingMessage?.id,
           onRetry: () => onRetry(message.id),
           onDelete: () => onDelete(message.id),
+          onEdit: message.role == MessageRole.user
+              ? () => onEdit(message.id, message.content)
+              : null,
         );
       },
     );
