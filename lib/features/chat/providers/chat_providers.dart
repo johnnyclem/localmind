@@ -1106,6 +1106,38 @@ class ChatNotifier extends Notifier<ChatState> {
     );
   }
 
+  Future<void> editMessage(String messageId, String newContent) async {
+    final messageIndex = state.messages.indexWhere((m) => m.id == messageId);
+    if (messageIndex == -1) return;
+
+    final message = state.messages[messageIndex];
+    if (message.role != MessageRole.user) return;
+    if (newContent.trim().isEmpty) return;
+    if (newContent == message.content) return;
+
+    final attachmentPaths = message.attachmentPaths;
+
+    final messagesToRemove = state.messages.sublist(messageIndex);
+    final db = ref.read(databaseProvider);
+    for (final msg in messagesToRemove) {
+      final query = db.messageBox
+          .query(MessageEntity_.id.equals(msg.id))
+          .build();
+      db.messageBox.removeMany(query.findIds());
+      query.close();
+    }
+
+    state = state.copyWith(
+      messages: state.messages.sublist(0, messageIndex),
+      clearStreaming: true,
+    );
+
+    await sendMessage(
+      newContent,
+      attachments: attachmentPaths?.map((p) => File(p)).toList(),
+    );
+  }
+
   Future<void> _saveMessage(Message message) async {
     final db = ref.read(databaseProvider);
     final query = db.messageBox
