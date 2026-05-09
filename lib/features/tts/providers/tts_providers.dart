@@ -1,52 +1,43 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'dart:async';
+import 'dart:io';
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:localmind/features/tts/providers/tts_model_providers.dart'
+    hide Log;
+import 'package:neural_tts/neural_tts.dart';
+
+import '../../../core/logger/app_logger.dart';
 import '../../../core/models/enums.dart';
 import '../../../core/providers/app_providers.dart';
-import '../data/kitten_tts_service.dart';
-import '../data/tts_service.dart';
 
-/// Provider for the system TTS service (flutter_tts).
-final systemTtsProvider = Provider<TtsService>((ref) {
-  return TtsService();
+final ttsRuntimeProvider = Provider<TTSRuntime>((ref) {
+  return TTSRuntime.instance;
 });
 
-/// Provider for the KittenTTS neural TTS service.
-///
-/// This is a lazy-initialized provider. The service copies model files
-/// from assets to the filesystem on first use.
-final kittenTtsServiceProvider = Provider<KittenTtsService>((ref) {
-  return KittenTtsService();
+final ttsProvider = NotifierProvider<TtsNotifier, TtsState>(() {
+  return TtsNotifier();
 });
 
-/// Notifier that manages the currently active TTS engine state.
-///
-/// Delegates to either [TtsService] (system) or [KittenTtsService]
-/// based on the user's settings preference.
-final unifiedTtsProvider =
-    NotifierProvider<UnifiedTtsNotifier, UnifiedTtsState>(() {
-  return UnifiedTtsNotifier();
-    });
-
-class UnifiedTtsState {
+class TtsState {
   final bool isSpeaking;
   final bool isInitializing;
   final String? error;
-  final TtsEngine activeEngine;
+  final EngineId? activeEngine;
 
-  const UnifiedTtsState({
+  const TtsState({
     this.isSpeaking = false,
     this.isInitializing = false,
     this.error,
-    this.activeEngine = TtsEngine.system,
+    this.activeEngine,
   });
 
-  UnifiedTtsState copyWith({
+  TtsState copyWith({
     bool? isSpeaking,
     bool? isInitializing,
     String? error,
-    TtsEngine? activeEngine,
+    EngineId? activeEngine,
   }) {
-    return UnifiedTtsState(
+    return TtsState(
       isSpeaking: isSpeaking ?? this.isSpeaking,
       isInitializing: isInitializing ?? this.isInitializing,
       error: error,
@@ -55,103 +46,146 @@ class UnifiedTtsState {
   }
 }
 
-class UnifiedTtsNotifier extends Notifier<UnifiedTtsState> {
-  TtsService? _systemTts;
-  KittenTtsService? _kittenTts;
+class TtsNotifier extends Notifier<TtsState> {
+  Engine? _currentEngine;
+  final Phonemizer _phonemizer = Phonemizer();
+  EspeakPhonemizer? _espeakPhonemizer;
 
   @override
-  UnifiedTtsState build() {
+  TtsState build() {
     final settings = ref.watch(settingsProvider);
-    return UnifiedTtsState(activeEngine: settings.ttsEngine);
+    ref.onDispose(() {
+      _currentEngine?.release();
+    });
+
+    // Initialize espeak data if pre-bundled
+    _initEspeak();
+
+    return TtsState(activeEngine: settings.ttsEngine);
   }
 
-  TtsService get _systemTtsInstance {
-    _systemTts ??= ref.read(systemTtsProvider);
-    return _systemTts!;
+  Future<void> _initEspeak() async {
+    final downloader = ref.read(modelDownloaderProvider);
+    final ttsDir = await downloader.getTtsDir();
+    final espeakDir = Directory('${ttsDir.path}/espeak-ng-data');
+
+    if (await espeakDir.exists()) {
+      try {
+        _espeakPhonemizer = EspeakPhonemizer(
+          dataPath: ttsDir.path,
+          language: 'en-us',
+        );
+      } catch (e) {
+        Log.error('Failed to init EspeakPhonemizer: $e');
+      }
+    }
   }
 
-  KittenTtsService get _kittenTtsInstance {
-    _kittenTts ??= ref.read(kittenTtsServiceProvider);
-    return _kittenTts!;
+  Voice? get _currentVoice {
+    final settings = ref.read(settingsProvider);
+    return voiceFromSettings(settings.ttsVoiceId, settings.ttsEngine);
   }
 
-  /// Speak the given text using the currently selected TTS engine.
+  Future<Engine> _resolveEngine() async {
+    if (_currentEngine != null) return _currentEngine!;
+    final engine = createEngine(ref.read(settingsProvider).ttsEngine);
+    _currentEngine = engine;
+    return engine;
+  }
+
   Future<void> speak(String text) async {
     if (text.trim().isEmpty) return;
 
     final settings = ref.read(settingsProvider);
-    final engine = settings.ttsEngine;
+    final engineId = settings.ttsEngine;
 
     state = state.copyWith(
       isSpeaking: true,
-      isInitializing: engine == TtsEngine.kitten,
+      isInitializing: engineId != EngineId.system,
       error: null,
+      activeEngine: engineId,
     );
 
     try {
-      if (engine == TtsEngine.kitten) {
-        final variant = settings.kittenTtsModelVariant;
-        await _kittenTtsInstance.initialize(variant: variant);
-        await _kittenTtsInstance.speak(
+      final voice = _currentVoice;
+      final engine = await _resolveEngine();
+      final runtime = TTSRuntime.instance;
+      runtime.resetStop();
+      await runtime.acquire(engine, () async {
+        final resultVoice = voice ?? (await engine.getVoices()).firstOrNull;
+        if (resultVoice == null) {
+          throw StateError('No voice available for engine ${engine.id}');
+        }
+
+        // Set phonemizer based on settings
+        if (settings.useEspeak && _espeakPhonemizer != null) {
+          engine.setPhonemizer(_espeakPhonemizer!);
+        } else {
+          engine.setPhonemizer(_phonemizer);
+        }
+
+        await engine.play(
           text,
-          voice: settings.kittenTtsVoice,
-          speed: settings.kittenTtsSpeed,
+          resultVoice,
+          language: 'en',
+          inferenceSteps: settings.supertonicSteps,
+          phonemize: settings.usePhonemizer,
         );
-      } else {
-        await _systemTtsInstance.speak(text);
-      }
-    } catch (e) {
+      });
+    } catch (e, st) {
+      Log.error('TTS speak error: $e\n$st');
       state = state.copyWith(
         isSpeaking: false,
         isInitializing: false,
-        error: 'TTS error: ${e.toString()}',
+        error: e.toString(),
       );
+      rethrow;
     } finally {
-      state = state.copyWith(
-        isSpeaking: false,
-        isInitializing: false,
-      );
+      state = state.copyWith(isSpeaking: false, isInitializing: false);
     }
   }
 
-  /// Stop any ongoing speech.
   Future<void> stop() async {
-    final settings = ref.read(settingsProvider);
-    if (settings.ttsEngine == TtsEngine.kitten) {
-      await _kittenTtsInstance.stop();
-    } else {
-      await _systemTtsInstance.stop();
+    await TTSRuntime.instance.stop();
+    _currentEngine?.stop();
+    state = state.copyWith(isSpeaking: false, isInitializing: false);
+  }
+
+  Future<void> release() async {
+    await TTSRuntime.instance.release();
+    if (_currentEngine != null) {
+      await _currentEngine!.release();
+      _currentEngine = null;
     }
     state = state.copyWith(isSpeaking: false);
   }
 
-  /// Pause ongoing speech.
-  Future<void> pause() async {
+  Future<void> previewVoice(Voice voice) async {
+    state = state.copyWith(isSpeaking: true, isInitializing: true, error: null);
     final settings = ref.read(settingsProvider);
-    if (settings.ttsEngine == TtsEngine.kitten) {
-      await _kittenTtsInstance.pause();
-    } else {
-      await _systemTtsInstance.pause();
-    }
-    state = state.copyWith(isSpeaking: false);
-  }
-
-  /// Dispose all TTS resources.
-  Future<void> dispose() async {
     try {
-      await _kittenTtsInstance.dispose();
-    } catch (_) {}
-    try {
-      await _systemTtsInstance.dispose();
-    } catch (_) {}
-  }
+      final engine = createEngine(voice.engine);
+      final runtime = TTSRuntime.instance;
+      runtime.resetStop();
+      await runtime.acquire(engine, () async {
+        // Set phonemizer based on settings
+        if (settings.useEspeak && _espeakPhonemizer != null) {
+          engine.setPhonemizer(_espeakPhonemizer!);
+        } else {
+          engine.setPhonemizer(_phonemizer);
+        }
 
-  /// Check if any TTS engine is currently speaking.
-  bool get isSpeaking {
-    final settings = ref.read(settingsProvider);
-    if (settings.ttsEngine == TtsEngine.kitten) {
-      return _kittenTtsInstance.isSpeaking;
+        await engine.play(
+          ttsPreviewSample,
+          voice,
+          language: 'en',
+          phonemize: settings.usePhonemizer,
+        );
+      });
+    } catch (e) {
+      state = state.copyWith(error: e.toString());
+    } finally {
+      state = state.copyWith(isSpeaking: false, isInitializing: false);
     }
-    return _systemTtsInstance.isSpeaking;
   }
 }

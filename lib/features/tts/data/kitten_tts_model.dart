@@ -77,13 +77,13 @@ enum KittenTtsModelVariant {
   String get huggingFaceRepoId {
     switch (this) {
       case KittenTtsModelVariant.nano:
-        return 'KittenML/kitten-tts-nano-0.8-fp32';
+        return 'palshub/kitten-tts-nano-0.8-fp32';
       case KittenTtsModelVariant.nanoInt8:
-        return 'KittenML/kitten-tts-nano-0.8-int8';
+        return 'palshub/kitten-tts-nano-0.8-int8';
       case KittenTtsModelVariant.micro:
-        return 'KittenML/kitten-tts-micro-0.8';
+        return 'palshub/kitten-tts-micro-0.8';
       case KittenTtsModelVariant.mini:
-        return 'KittenML/kitten-tts-mini-0.8';
+        return 'palshub/kitten-tts-mini-0.8';
     }
   }
 

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:localmind/features/sidebar/sidebar_widget.dart';
+import 'package:neural_tts/neural_tts.dart';
 import '../../../core/providers/app_providers.dart';
 import '../../../core/models/enums.dart';
 import '../../../core/routes/app_routes.dart';
@@ -58,9 +59,10 @@ class SettingsViews extends ConsumerWidget {
           ),
           const Divider(height: 32),
           _SectionHeader(title: 'Text-to-Speech'),
-          _TtsEngineToggle(
+          _EngineDropdown(
             current: settings.ttsEngine,
-            ref: ref,
+            onChanged: (v) =>
+                ref.read(settingsProvider.notifier).setTtsEngine(v),
             isDark: isDark,
           ),
           Padding(
@@ -77,26 +79,42 @@ class SettingsViews extends ConsumerWidget {
               ),
             ),
           ),
-          if (settings.ttsEngine == TtsEngine.kitten) ...[
+          if (settings.ttsEngine != EngineId.system) ...[
             const SizedBox(height: 8),
-            _KittenVoiceDropdown(
-              current: settings.kittenTtsVoice,
+            _VoiceSelector(
+              engine: settings.ttsEngine,
+              currentVoiceId: settings.ttsVoiceId,
               onChanged: (v) =>
-                  ref.read(settingsProvider.notifier).setKittenTtsVoice(v),
+                  ref.read(settingsProvider.notifier).setTtsVoiceId(v?.id),
               isDark: isDark,
             ),
             _SliderSetting(
-              label: 'Kitten TTS Speed',
-              value: settings.kittenTtsSpeed,
+              label: 'TTS Speed',
+              value: settings.ttsSpeed,
               min: 0.5,
               max: 2.0,
               divisions: 15,
-              description: 'Adjust the playback rate of neural TTS.',
+              description: 'Adjust the playback rate.',
               onChanged: (v) =>
-                  ref.read(settingsProvider.notifier).setKittenTtsSpeed(v),
+                  ref.read(settingsProvider.notifier).setTtsSpeed(v),
               isDark: isDark,
               valueFormat: (v) => '${v.toStringAsFixed(2)}x',
             ),
+            if (settings.ttsEngine == EngineId.supertonic)
+              _SliderSetting(
+                label: 'Quality Steps',
+                value: settings.supertonicSteps.toDouble(),
+                min: 1,
+                max: 20,
+                divisions: 5,
+                description:
+                    'Diffusion steps. Higher = better quality, slower.',
+                onChanged: (v) => ref
+                    .read(settingsProvider.notifier)
+                    .setSupertonicSteps(v.round()),
+                isDark: isDark,
+                valueFormat: (v) => v.toStringAsFixed(0),
+              ),
           ],
           const Divider(height: 32),
           _SectionHeader(title: 'Behavior'),
@@ -166,7 +184,7 @@ class SettingsViews extends ConsumerWidget {
               ),
             ),
           ),
-          const _OnDeviceEngineStatus(),
+          const _OnDeviceOnDeviceEngineStatus(),
           const Divider(height: 32),
           _SectionHeader(title: 'Default Server'),
           _DropdownSetting(
@@ -898,21 +916,19 @@ class _DangerousAction extends StatelessWidget {
   }
 }
 
-class _TtsEngineToggle extends StatelessWidget {
-  const _TtsEngineToggle({
+class _EngineDropdown extends StatelessWidget {
+  const _EngineDropdown({
     required this.current,
-    required this.ref,
+    required this.onChanged,
     required this.isDark,
   });
 
-  final TtsEngine current;
-  final WidgetRef ref;
+  final EngineId current;
+  final ValueChanged<EngineId> onChanged;
   final bool isDark;
 
   @override
   Widget build(BuildContext context) {
-    final accent = isDark ? const Color(0xFF3B82F6) : const Color(0xFF2563EB);
-
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       child: Column(
@@ -920,160 +936,6 @@ class _TtsEngineToggle extends StatelessWidget {
         children: [
           Text(
             'TTS Engine',
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-              color: isDark ? Colors.white : Colors.black,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              Expanded(
-                child: GestureDetector(
-                  onTap: () => ref
-                      .read(settingsProvider.notifier)
-                      .setTtsEngine(TtsEngine.system),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                    decoration: BoxDecoration(
-                      color: current == TtsEngine.system
-                          ? accent.withValues(alpha: 0.15)
-                          : (isDark
-                                ? const Color(0xFF1F1F1F)
-                                : const Color(0xFFF5F5F5)),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color: current == TtsEngine.system
-                            ? accent
-                            : (isDark
-                                  ? const Color(0xFF3A3A3A)
-                                  : const Color(0xFFE5E5E5)),
-                      ),
-                    ),
-                    child: Column(
-                      children: [
-                        Icon(
-                          Icons.record_voice_over,
-                          size: 20,
-                          color: current == TtsEngine.system
-                              ? accent
-                              : (isDark
-                                    ? const Color(0xFF888888)
-                                    : const Color(0xFF999999)),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'System TTS',
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: current == TtsEngine.system
-                                ? FontWeight.w600
-                                : FontWeight.normal,
-                            color: current == TtsEngine.system
-                                ? accent
-                                : (isDark
-                                      ? const Color(0xFF888888)
-                                      : const Color(0xFF999999)),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: GestureDetector(
-                  onTap: () => ref
-                      .read(settingsProvider.notifier)
-                      .setTtsEngine(TtsEngine.kitten),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                    decoration: BoxDecoration(
-                      color: current == TtsEngine.kitten
-                          ? accent.withValues(alpha: 0.15)
-                          : (isDark
-                                ? const Color(0xFF1F1F1F)
-                                : const Color(0xFFF5F5F5)),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color: current == TtsEngine.kitten
-                            ? accent
-                            : (isDark
-                                  ? const Color(0xFF3A3A3A)
-                                  : const Color(0xFFE5E5E5)),
-                      ),
-                    ),
-                    child: Column(
-                      children: [
-                        Icon(
-                          Icons.auto_awesome,
-                          size: 20,
-                          color: current == TtsEngine.kitten
-                              ? accent
-                              : (isDark
-                                    ? const Color(0xFF888888)
-                                    : const Color(0xFF999999)),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'Kitten TTS',
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: current == TtsEngine.kitten
-                                ? FontWeight.w600
-                                : FontWeight.normal,
-                            color: current == TtsEngine.kitten
-                                ? accent
-                                : (isDark
-                                      ? const Color(0xFF888888)
-                                      : const Color(0xFF999999)),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 4),
-          Text(
-            current == TtsEngine.system
-                ? 'Uses your device\'s built-in text-to-speech engine.'
-                : 'Uses the Kitten neural TTS model running locally on your device.',
-            style: TextStyle(
-              fontSize: 12,
-              color: isDark ? const Color(0xFF666666) : const Color(0xFF999999),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _KittenVoiceDropdown extends StatelessWidget {
-  const _KittenVoiceDropdown({
-    required this.current,
-    required this.onChanged,
-    required this.isDark,
-  });
-
-  final KittenTtsVoice current;
-  final ValueChanged<KittenTtsVoice> onChanged;
-  final bool isDark;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Neural Voice',
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w500,
@@ -1092,24 +954,34 @@ class _KittenVoiceDropdown extends StatelessWidget {
               ),
             ),
             child: DropdownButtonHideUnderline(
-              child: DropdownButton<KittenTtsVoice>(
+              child: DropdownButton<EngineId>(
                 value: current,
                 isExpanded: true,
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 borderRadius: BorderRadius.circular(8),
                 dropdownColor: isDark ? const Color(0xFF1F1F1F) : Colors.white,
-                items: KittenTtsVoice.values.map((voice) {
-                  return DropdownMenuItem(
-                    value: voice,
-                    child: Text(
-                      voice.displayName,
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: isDark ? Colors.white : Colors.black,
-                      ),
-                    ),
-                  );
-                }).toList(),
+                items: [
+                  _engineItem(
+                    EngineId.system,
+                    'System TTS',
+                    Icons.record_voice_over,
+                  ),
+                  _engineItem(
+                    EngineId.kitten,
+                    'Kitten TTS',
+                    Icons.auto_awesome,
+                  ),
+                  _engineItem(
+                    EngineId.kokoro,
+                    'Kokoro TTS',
+                    Icons.auto_awesome,
+                  ),
+                  _engineItem(
+                    EngineId.supertonic,
+                    'Supertonic TTS',
+                    Icons.auto_awesome,
+                  ),
+                ],
                 onChanged: (v) {
                   if (v != null) onChanged(v);
                 },
@@ -1120,17 +992,211 @@ class _KittenVoiceDropdown extends StatelessWidget {
       ),
     );
   }
+
+  DropdownMenuItem<EngineId> _engineItem(
+    EngineId id,
+    String label,
+    IconData icon,
+  ) {
+    final meta = EngineMeta.forEngine(id);
+    return DropdownMenuItem(
+      value: id,
+      child: Row(
+        children: [
+          Icon(icon, size: 16, color: Color(meta.accentColor)),
+          const SizedBox(width: 8),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 14,
+              color: isDark ? Colors.white : Colors.black,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
-class _OnDeviceEngineStatus extends ConsumerWidget {
-  const _OnDeviceEngineStatus();
+class _VoiceSelector extends StatelessWidget {
+  const _VoiceSelector({
+    required this.engine,
+    required this.currentVoiceId,
+    required this.onChanged,
+    required this.isDark,
+  });
+
+  final EngineId engine;
+  final String? currentVoiceId;
+  final ValueChanged<Voice?> onChanged;
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    final voices = voicesForEngine(engine);
+
+    if (voices.isEmpty) return const SizedBox.shrink();
+
+    final femaleVoices = voices.where((v) => v.gender == 'f').toList();
+    final maleVoices = voices.where((v) => v.gender == 'm').toList();
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Voice',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: isDark ? Colors.white : Colors.black,
+            ),
+          ),
+          const SizedBox(height: 8),
+          if (femaleVoices.isNotEmpty) ...[
+            Text(
+              'Female',
+              style: TextStyle(
+                fontSize: 11,
+                color: isDark
+                    ? const Color(0xFF888888)
+                    : const Color(0xFF999999),
+              ),
+            ),
+            const SizedBox(height: 4),
+            ...femaleVoices.map(
+              (v) => _VoiceTile(
+                voice: v,
+                selected: v.id == currentVoiceId,
+                onTap: () => onChanged(v),
+                isDark: isDark,
+              ),
+            ),
+            const SizedBox(height: 8),
+          ],
+          if (maleVoices.isNotEmpty) ...[
+            Text(
+              'Male',
+              style: TextStyle(
+                fontSize: 11,
+                color: isDark
+                    ? const Color(0xFF888888)
+                    : const Color(0xFF999999),
+              ),
+            ),
+            const SizedBox(height: 4),
+            ...maleVoices.map(
+              (v) => _VoiceTile(
+                voice: v,
+                selected: v.id == currentVoiceId,
+                onTap: () => onChanged(v),
+                isDark: isDark,
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _VoiceTile extends StatelessWidget {
+  const _VoiceTile({
+    required this.voice,
+    required this.selected,
+    required this.onTap,
+    required this.isDark,
+  });
+
+  final Voice voice;
+  final bool selected;
+  final VoidCallback onTap;
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    final accent = isDark ? const Color(0xFF3B82F6) : const Color(0xFF2563EB);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          decoration: BoxDecoration(
+            color: selected
+                ? accent.withValues(alpha: 0.1)
+                : (isDark ? const Color(0xFF1A1A1A) : const Color(0xFFFAFAFA)),
+            borderRadius: BorderRadius.circular(6),
+            border: Border.all(
+              color: selected
+                  ? accent
+                  : (isDark
+                        ? const Color(0xFF3A3A3A)
+                        : const Color(0xFFE5E5E5)),
+            ),
+          ),
+          child: Row(
+            children: [
+              Icon(
+                selected ? Icons.radio_button_checked : Icons.radio_button_off,
+                size: 16,
+                color: selected
+                    ? accent
+                    : (isDark
+                          ? const Color(0xFF666666)
+                          : const Color(0xFF999999)),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                voice.name,
+                style: TextStyle(
+                  fontSize: 13,
+                  color: isDark ? Colors.white : Colors.black,
+                  fontWeight: selected ? FontWeight.w600 : FontWeight.normal,
+                ),
+              ),
+              if (voice.language != null) ...[
+                const SizedBox(width: 6),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 4,
+                    vertical: 1,
+                  ),
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? const Color(0xFF2A2A2A)
+                        : const Color(0xFFEEEEEE),
+                    borderRadius: BorderRadius.circular(3),
+                  ),
+                  child: Text(
+                    voice.language!,
+                    style: TextStyle(
+                      fontSize: 9,
+                      color: isDark
+                          ? const Color(0xFF888888)
+                          : const Color(0xFF666666),
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _OnDeviceOnDeviceEngineStatus extends ConsumerWidget {
+  const _OnDeviceOnDeviceEngineStatus();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final engineState = ref.watch(onDeviceEngineProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    if (engineState.status == EngineStatus.notLoaded) {
+    if (engineState.status == OnDeviceEngineStatus.notLoaded) {
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
         child: Text(
@@ -1148,16 +1214,16 @@ class _OnDeviceEngineStatus extends ConsumerWidget {
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: engineState.status == EngineStatus.loaded
+          color: engineState.status == OnDeviceEngineStatus.loaded
               ? Colors.green.withValues(alpha: 0.1)
-              : engineState.status == EngineStatus.error
+              : engineState.status == OnDeviceEngineStatus.error
               ? Colors.red.withValues(alpha: 0.1)
               : Colors.blue.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: engineState.status == EngineStatus.loaded
+            color: engineState.status == OnDeviceEngineStatus.loaded
                 ? Colors.green
-                : engineState.status == EngineStatus.error
+                : engineState.status == OnDeviceEngineStatus.error
                 ? Colors.red
                 : Colors.blue,
           ),
@@ -1165,31 +1231,31 @@ class _OnDeviceEngineStatus extends ConsumerWidget {
         child: Row(
           children: [
             Icon(
-              engineState.status == EngineStatus.loaded
+              engineState.status == OnDeviceEngineStatus.loaded
                   ? Icons.check_circle
-                  : engineState.status == EngineStatus.error
+                  : engineState.status == OnDeviceEngineStatus.error
                   ? Icons.error
                   : Icons.hourglass_top,
               size: 18,
-              color: engineState.status == EngineStatus.loaded
+              color: engineState.status == OnDeviceEngineStatus.loaded
                   ? Colors.green
-                  : engineState.status == EngineStatus.error
+                  : engineState.status == OnDeviceEngineStatus.error
                   ? Colors.red
                   : Colors.blue,
             ),
             const SizedBox(width: 8),
             Expanded(
               child: Text(
-                engineState.status == EngineStatus.loaded
+                engineState.status == OnDeviceEngineStatus.loaded
                     ? 'Loaded: ${engineState.loadedModelId ?? "unknown"} (${engineState.backend?.name ?? "CPU"})'
-                    : engineState.status == EngineStatus.loading
+                    : engineState.status == OnDeviceEngineStatus.loading
                     ? 'Loading model...'
                     : 'Error: ${engineState.error ?? "Unknown error"}',
                 style: TextStyle(
                   fontSize: 13,
-                  color: engineState.status == EngineStatus.loaded
+                  color: engineState.status == OnDeviceEngineStatus.loaded
                       ? Colors.green
-                      : engineState.status == EngineStatus.error
+                      : engineState.status == OnDeviceEngineStatus.error
                       ? Colors.red
                       : Colors.blue,
                 ),

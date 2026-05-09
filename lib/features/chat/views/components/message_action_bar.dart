@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
-import '../../../tts/providers/tts_providers.dart';
+import '../../../tts/providers/tts_providers.dart' as tts;
 
 class MessageActionBar extends ConsumerStatefulWidget {
   const MessageActionBar({
@@ -31,8 +31,8 @@ class _MessageActionBarState extends ConsumerState<MessageActionBar> {
   bool _isInitializing = false;
 
   void _toggleTts() async {
-    final ttsNotifier = ref.read(unifiedTtsProvider.notifier);
-    final ttsState = ref.read(unifiedTtsProvider);
+    final ttsNotifier = ref.read(tts.ttsProvider.notifier);
+    final ttsState = ref.read(tts.ttsProvider);
 
     if (_isSpeaking || ttsState.isSpeaking) {
       await ttsNotifier.stop();
@@ -57,7 +57,7 @@ class _MessageActionBarState extends ConsumerState<MessageActionBar> {
 
   @override
   Widget build(BuildContext context) {
-    final ttsState = ref.watch(unifiedTtsProvider);
+    final ttsState = ref.watch(tts.ttsProvider);
     final isTtsActive = _isSpeaking || ttsState.isSpeaking;
 
     return Row(
@@ -152,7 +152,7 @@ class _MessageActionBarState extends ConsumerState<MessageActionBar> {
   }
 
   void _showMoreOptions(BuildContext context) {
-    final ttsState = ref.read(unifiedTtsProvider);
+    final ttsState = ref.read(tts.ttsProvider);
     final isTtsActive = _isSpeaking || ttsState.isSpeaking;
 
     showShadSheet(

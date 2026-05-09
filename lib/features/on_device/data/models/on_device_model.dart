@@ -119,7 +119,7 @@ class OnDeviceModelStateInfo {
   final double downloadProgress;
   final String? error;
   final LiteLmBackendType backend;
-  final EngineStatus engineStatus;
+  final OnDeviceEngineStatus engineStatus;
 
   const OnDeviceModelStateInfo({
     required this.modelId,
@@ -127,7 +127,7 @@ class OnDeviceModelStateInfo {
     this.downloadProgress = 0.0,
     this.error,
     this.backend = LiteLmBackendType.cpu,
-    this.engineStatus = EngineStatus.notLoaded,
+    this.engineStatus = OnDeviceEngineStatus.notLoaded,
   });
 
   OnDeviceModelStateInfo copyWith({
@@ -136,7 +136,7 @@ class OnDeviceModelStateInfo {
     double? downloadProgress,
     String? error,
     LiteLmBackendType? backend,
-    EngineStatus? engineStatus,
+    OnDeviceEngineStatus? engineStatus,
   }) {
     return OnDeviceModelStateInfo(
       modelId: modelId ?? this.modelId,

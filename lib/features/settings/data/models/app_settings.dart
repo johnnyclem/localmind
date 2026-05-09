@@ -1,14 +1,12 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:neural_tts/neural_tts.dart';
 
 import '../../../../core/models/enums.dart';
 import '../../../../features/tts/data/kitten_tts_model.dart';
 
-enum SyntaxThemeName {
-  light,
-  dark,
-}
+enum SyntaxThemeName { light, dark }
 
 class AppSettings {
   final double temperature;
@@ -32,10 +30,14 @@ class AppSettings {
   final SyntaxThemeName codeThemeDark;
   final SyntaxThemeName codeThemeLight;
   final LiteLmBackendType preferredBackend;
-  final TtsEngine ttsEngine;
-  final KittenTtsVoice kittenTtsVoice;
-  final double kittenTtsSpeed;
+  final EngineId ttsEngine;
+  final String? ttsVoiceId;
+  final double ttsSpeed;
   final KittenTtsModelVariant kittenTtsModelVariant;
+  final int supertonicSteps;
+  final bool autoSpeakEnabled;
+  final bool usePhonemizer;
+  final bool useEspeak;
 
   AppSettings({
     this.temperature = 0.7,
@@ -59,10 +61,14 @@ class AppSettings {
     this.codeThemeDark = SyntaxThemeName.dark,
     this.codeThemeLight = SyntaxThemeName.light,
     this.preferredBackend = LiteLmBackendType.cpu,
-    this.ttsEngine = TtsEngine.system,
-    this.kittenTtsVoice = KittenTtsVoice.bella,
-    this.kittenTtsSpeed = 1.0,
+    this.ttsEngine = EngineId.system,
+    this.ttsVoiceId,
+    this.ttsSpeed = 1.0,
     this.kittenTtsModelVariant = KittenTtsModelVariant.nanoInt8,
+    this.supertonicSteps = 5,
+    this.autoSpeakEnabled = false,
+    this.usePhonemizer = true,
+    this.useEspeak = true,
   });
 
   AppSettings copyWith({
@@ -87,10 +93,14 @@ class AppSettings {
     SyntaxThemeName? codeThemeDark,
     SyntaxThemeName? codeThemeLight,
     LiteLmBackendType? preferredBackend,
-    TtsEngine? ttsEngine,
-    KittenTtsVoice? kittenTtsVoice,
-    double? kittenTtsSpeed,
+    EngineId? ttsEngine,
+    String? ttsVoiceId,
+    double? ttsSpeed,
     KittenTtsModelVariant? kittenTtsModelVariant,
+    int? supertonicSteps,
+    bool? autoSpeakEnabled,
+    bool? usePhonemizer,
+    bool? useEspeak,
   }) {
     return AppSettings(
       temperature: temperature ?? this.temperature,
@@ -118,9 +128,14 @@ class AppSettings {
       codeThemeLight: codeThemeLight ?? this.codeThemeLight,
       preferredBackend: preferredBackend ?? this.preferredBackend,
       ttsEngine: ttsEngine ?? this.ttsEngine,
-      kittenTtsVoice: kittenTtsVoice ?? this.kittenTtsVoice,
-      kittenTtsSpeed: kittenTtsSpeed ?? this.kittenTtsSpeed,
-      kittenTtsModelVariant: kittenTtsModelVariant ?? this.kittenTtsModelVariant,
+      ttsVoiceId: ttsVoiceId ?? this.ttsVoiceId,
+      ttsSpeed: ttsSpeed ?? this.ttsSpeed,
+      kittenTtsModelVariant:
+          kittenTtsModelVariant ?? this.kittenTtsModelVariant,
+      supertonicSteps: supertonicSteps ?? this.supertonicSteps,
+      autoSpeakEnabled: autoSpeakEnabled ?? this.autoSpeakEnabled,
+      usePhonemizer: usePhonemizer ?? this.usePhonemizer,
+      useEspeak: useEspeak ?? this.useEspeak,
     );
   }
 
@@ -147,10 +162,14 @@ class AppSettings {
       'codeThemeDark': codeThemeDark.index,
       'codeThemeLight': codeThemeLight.index,
       'preferredBackend': preferredBackend.index,
-      'ttsEngine': ttsEngine.index,
-      'kittenTtsVoice': kittenTtsVoice.index,
-      'kittenTtsSpeed': kittenTtsSpeed,
+      'ttsEngine': ttsEngine.name,
+      'ttsVoiceId': ttsVoiceId,
+      'ttsSpeed': ttsSpeed,
       'kittenTtsModelVariant': kittenTtsModelVariant.name,
+      'supertonicSteps': supertonicSteps,
+      'autoSpeakEnabled': autoSpeakEnabled,
+      'usePhonemizer': usePhonemizer,
+      'useEspeak': useEspeak,
     };
   }
 
@@ -177,11 +196,25 @@ class AppSettings {
       codeThemeDark: SyntaxThemeName.values[map['codeThemeDark'] ?? 0],
       codeThemeLight: SyntaxThemeName.values[map['codeThemeLight'] ?? 1],
       preferredBackend: LiteLmBackendType.values[map['preferredBackend'] ?? 0],
-      ttsEngine: TtsEngine.values[map['ttsEngine'] ?? 0],
-      kittenTtsVoice: KittenTtsVoice.values[map['kittenTtsVoice'] ?? 0],
-      kittenTtsSpeed: map['kittenTtsSpeed']?.toDouble() ?? 1.0,
+      ttsEngine: _parseEngine(map['ttsEngine']),
+      ttsVoiceId: map['ttsVoiceId'],
+      ttsSpeed: map['ttsSpeed']?.toDouble() ?? 1.0,
       kittenTtsModelVariant: _parseVariant(map['kittenTtsModelVariant']),
+      supertonicSteps: map['supertonicSteps'] ?? 5,
+      autoSpeakEnabled: map['autoSpeakEnabled'] ?? false,
+      usePhonemizer: map['usePhonemizer'] ?? true,
+      useEspeak: map['useEspeak'] ?? true,
     );
+  }
+
+  static EngineId _parseEngine(dynamic value) {
+    if (value is String) {
+      return engineIdFromString(value);
+    }
+    if (value is int) {
+      return EngineId.values[value];
+    }
+    return EngineId.system;
   }
 
   static KittenTtsModelVariant _parseVariant(dynamic value) {

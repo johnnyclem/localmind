@@ -59,9 +59,9 @@ dependencies:
   flutter_litert_lm: ^0.3.0
   wakelock_plus: ^1.2.8
   flutter_local_notifications: ^18.0.1
-  kitten_tts_flutter: ^0.0.1
   audioplayers: ^6.4.0
   device_info_plus: ^12.4.0
+  neural_tts: 0.4.0
 
 dev_dependencies:
   flutter_test:
@@ -91,7 +91,7 @@ flutter:
   assets:
     - assets/google_fonts/
     - assets/images/
-
+    - assets/espeak-ng-data.zip
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
 

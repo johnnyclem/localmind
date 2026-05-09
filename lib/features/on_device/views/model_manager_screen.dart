@@ -57,7 +57,7 @@ class OnDeviceModelManagerScreen extends ConsumerWidget {
               ),
             ),
           _buildMemoryInfo(context, ref, deviceMemoryAsync),
-          if (engineState.status == EngineStatus.loaded)
+          if (engineState.status == OnDeviceEngineStatus.loaded)
             Container(
               padding: const EdgeInsets.all(12),
               margin: const EdgeInsets.only(bottom: 16),
@@ -79,12 +79,12 @@ class OnDeviceModelManagerScreen extends ConsumerWidget {
                 ],
               ),
             )
-          else if (engineState.status == EngineStatus.loading)
+          else if (engineState.status == OnDeviceEngineStatus.loading)
             const Padding(
               padding: EdgeInsets.only(bottom: 16),
               child: LinearProgressIndicator(),
             )
-          else if (engineState.status == EngineStatus.error)
+          else if (engineState.status == OnDeviceEngineStatus.error)
             Container(
               padding: const EdgeInsets.all(12),
               margin: const EdgeInsets.only(bottom: 16),
@@ -422,7 +422,7 @@ class _ModelCard extends ConsumerWidget {
     );
 
     final isLoading =
-        engineState.status == EngineStatus.loading &&
+        engineState.status == OnDeviceEngineStatus.loading &&
         engineState.loadedModelId == model.id;
 
     final isDownloading =

@@ -61,14 +61,14 @@ final onDeviceModelStateProvider =
     });
 
 class OnDeviceEngineState {
-  final EngineStatus status;
+  final OnDeviceEngineStatus status;
   final String? loadedModelId;
   final String? loadedModelPath;
   final LiteLmBackendType? backend;
   final String? error;
 
   const OnDeviceEngineState({
-    this.status = EngineStatus.notLoaded,
+    this.status = OnDeviceEngineStatus.notLoaded,
     this.loadedModelId,
     this.loadedModelPath,
     this.backend,
@@ -76,7 +76,7 @@ class OnDeviceEngineState {
   });
 
   OnDeviceEngineState copyWith({
-    EngineStatus? status,
+    OnDeviceEngineStatus? status,
     String? loadedModelId,
     String? loadedModelPath,
     LiteLmBackendType? backend,
@@ -106,13 +106,13 @@ class OnDeviceEngineNotifier extends Notifier<OnDeviceEngineState> {
   }
 
   Future<void> loadModel(String modelId, LiteLmBackendType backend) async {
-    state = state.copyWith(status: EngineStatus.loading, error: null);
+    state = state.copyWith(status: OnDeviceEngineStatus.loading, error: null);
 
     try {
       final modelPath = await OnDeviceEngineService.getModelPath(modelId);
       if (modelPath == null) {
         state = state.copyWith(
-          status: EngineStatus.error,
+          status: OnDeviceEngineStatus.error,
           error: 'Model not found. Please download it first.',
         );
         return;
@@ -121,7 +121,7 @@ class OnDeviceEngineNotifier extends Notifier<OnDeviceEngineState> {
       await engineService.createEngine(modelPath, backend);
 
       state = state.copyWith(
-        status: EngineStatus.loaded,
+        status: OnDeviceEngineStatus.loaded,
         loadedModelId: modelId,
         loadedModelPath: modelPath,
         backend: backend,
@@ -131,7 +131,7 @@ class OnDeviceEngineNotifier extends Notifier<OnDeviceEngineState> {
     } catch (e) {
       Log.error('Failed to load model $modelId: $e');
       state = state.copyWith(
-        status: EngineStatus.error,
+        status: OnDeviceEngineStatus.error,
         error: 'Failed to load model: ${e.toString()}',
       );
     }
@@ -163,7 +163,7 @@ class OnDeviceModelStateNotifier
     double? downloadProgress,
     String? error,
     LiteLmBackendType? backend,
-    EngineStatus? engineStatus,
+    OnDeviceEngineStatus? engineStatus,
   }) {
     final current =
         state[modelId] ?? OnDeviceModelStateInfo(modelId: modelId);

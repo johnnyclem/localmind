@@ -3,58 +3,55 @@ import 'dart:async';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:neural_tts/neural_tts.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
-import '../../../core/models/enums.dart';
 import '../../../core/providers/app_providers.dart';
 import '../../sidebar/sidebar_widget.dart';
-import '../data/kitten_tts_model.dart';
-import '../data/kitten_tts_service.dart';
 import '../providers/tts_model_providers.dart';
+import '../providers/tts_providers.dart' as tts;
+
+/// Async provider for the set of installed engine IDs.
+final installedEnginesProvider = FutureProvider<Set<EngineId>>((ref) async {
+  final downloader = ref.read(modelDownloaderProvider);
+  final result = <EngineId>{};
+  for (final id in EngineId.values) {
+    if (id == EngineId.system) {
+      result.add(id);
+      continue;
+    }
+    if (await downloader.isEngineDownloaded(id)) {
+      result.add(id);
+    }
+  }
+  return result;
+});
 
 class TtsModelManagerScreen extends ConsumerWidget {
   const TtsModelManagerScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
-    final models = ref.watch(kittenTtsModelsProvider);
-    final downloadedAsync = ref.watch(downloadedKittenTtsVariantsProvider);
-    final downloadProgress = ref.watch(ttsDownloadProgressProvider);
     final settings = ref.watch(settingsProvider);
 
     return Scaffold(
       drawer: const SidebarWidget(),
-      appBar: AppBar(title: const Text('Kitten TTS Models')),
+      appBar: AppBar(title: const Text('TTS Models')),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          Text(
-            'Available Models',
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'Download a KittenTTS model to use neural text-to-speech. '
-            'Models are stored locally on your device.',
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
-            ),
+          _PhonemizationSettingsCard(),
+          const SizedBox(height: 16),
+          _SystemEngineCard(isSelected: settings.ttsEngine == EngineId.system),
+          const SizedBox(height: 16),
+          _KittenEngineCard(
+            isSelected: settings.ttsEngine == EngineId.kitten,
           ),
           const SizedBox(height: 16),
-          ...models.map(
-            (model) => _ModelVariantCard(
-              model: model,
-              isSelected: settings.kittenTtsModelVariant == model.variant,
-              isDownloaded: downloadedAsync.when(
-                data: (set) => set.contains(model.variant),
-                loading: () => false,
-                error: (_, _) => false,
-              ),
-              progress: downloadProgress[model.variant],
-            ),
+          _KokoroEngineCard(isSelected: settings.ttsEngine == EngineId.kokoro),
+          const SizedBox(height: 16),
+          _SupertonicEngineCard(
+            isSelected: settings.ttsEngine == EngineId.supertonic,
           ),
           const SizedBox(height: 24),
         ],
@@ -63,501 +60,749 @@ class TtsModelManagerScreen extends ConsumerWidget {
   }
 }
 
-class _ModelVariantCard extends ConsumerStatefulWidget {
-  const _ModelVariantCard({
-    required this.model,
-    required this.isSelected,
-    required this.isDownloaded,
-    this.progress,
-  });
+// ── System Engine ──
 
-  final KittenTtsModel model;
+class _SystemEngineCard extends ConsumerWidget {
   final bool isSelected;
-  final bool isDownloaded;
-  final Map<String, KittenTtsFileProgress>? progress;
+
+  const _SystemEngineCard({required this.isSelected});
 
   @override
-  ConsumerState<_ModelVariantCard> createState() => _ModelVariantCardState();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final meta = EngineMeta.system;
+
+    return _EngineCard(
+      isSelected: isSelected,
+      meta: meta,
+      engine: EngineId.system,
+      installed: true,
+      statusText: 'Always available',
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (!isSelected)
+            ShadButton.outline(
+              size: ShadButtonSize.sm,
+              onPressed: () => ref
+                  .read(settingsProvider.notifier)
+                  .setTtsEngine(EngineId.system),
+              child: const Text('Select'),
+            ),
+        ],
+      ),
+      child: _SystemVoicesList(),
+    );
+  }
 }
 
-class _ModelVariantCardState extends ConsumerState<_ModelVariantCard> {
-  bool _showPreview = false;
+class _SystemVoicesList extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: Text(
+        'Uses your device\'s built-in text-to-speech engine.\nNo downloads required.',
+        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+        ),
+      ),
+    );
+  }
+}
+
+// ── Kitten Engine ──
+
+class _KittenEngineCard extends ConsumerWidget {
+  final bool isSelected;
+
+  const _KittenEngineCard({required this.isSelected});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final meta = EngineMeta.kitten;
+    final installedAsync = ref.watch(installedEnginesProvider);
+    final downloadProgress = ref.watch(engineDownloadProgressProvider);
+    final isInstalled = installedAsync.when(
+      data: (set) => set.contains(EngineId.kitten),
+      loading: () => false,
+      error: (_, _) => false,
+    );
+    final progress = downloadProgress[EngineId.kitten];
+    final isDownloading = ref
+        .read(engineDownloadProgressProvider.notifier)
+        .isDownloading(EngineId.kitten);
+
+    return _EngineCard(
+      isSelected: isSelected,
+      meta: meta,
+      engine: EngineId.kitten,
+      installed: isInstalled,
+      statusText: isInstalled
+          ? 'Installed'
+          : isDownloading
+          ? 'Downloading...'
+          : 'Not installed',
+      trailing: _buildAction(ref, isInstalled, isDownloading, EngineId.kitten),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 12),
+            child: Text(
+              'Lightning-fast neural TTS with 8 expressive voices.\n'
+              'Requires ~57 MB download.',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.6),
+              ),
+            ),
+          ),
+          if (isDownloading) ...[
+            const SizedBox(height: 12),
+            _buildDownloadProgress(context, ref, EngineId.kitten, progress),
+          ],
+          if (isInstalled) ...[
+            _VoiceChips(voices: kittenVoices, engine: EngineId.kitten),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAction(
+    WidgetRef ref,
+    bool isInstalled,
+    bool isDownloading,
+    EngineId engine,
+  ) {
+    if (isDownloading) {
+      return ShadButton.outline(
+        size: ShadButtonSize.sm,
+        onPressed: () => ref
+            .read(engineDownloadProgressProvider.notifier)
+            .cancelDownload(engine),
+        child: const Text('Cancel'),
+      );
+    }
+    if (isInstalled) {
+      if (isSelected) return const SizedBox.shrink();
+      return ShadButton.outline(
+        size: ShadButtonSize.sm,
+        onPressed: () =>
+            ref.read(settingsProvider.notifier).setTtsEngine(engine),
+        child: const Text('Select'),
+      );
+    }
+    return ShadButton.outline(
+      size: ShadButtonSize.sm,
+      onPressed: () => ref
+          .read(engineDownloadProgressProvider.notifier)
+          .startDownload(engine),
+      child: const Text('Install'),
+    );
+  }
+
+  Widget _buildDownloadProgress(
+    BuildContext context,
+    WidgetRef ref,
+    EngineId engine,
+    Map<String, FileProgress>? progress,
+  ) {
+    final fraction = ref
+        .read(engineDownloadProgressProvider.notifier)
+        .getOverallFraction(engine);
+    return Column(
+      children: [
+        LinearProgressIndicator(value: fraction),
+        const SizedBox(height: 4),
+        if (progress != null)
+          ...progress.entries.map(
+            (e) => Padding(
+              padding: const EdgeInsets.only(bottom: 2),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      e.key,
+                      style: Theme.of(context).textTheme.labelSmall,
+                    ),
+                  ),
+                  Text(
+                    '${(e.value.fraction * 100).toStringAsFixed(0)}%',
+                    style: Theme.of(context).textTheme.labelSmall,
+                  ),
+                ],
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+// ── Kokoro Engine ──
+
+class _KokoroEngineCard extends ConsumerWidget {
+  final bool isSelected;
+
+  const _KokoroEngineCard({required this.isSelected});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final meta = EngineMeta.kokoro;
+    final installedAsync = ref.watch(installedEnginesProvider);
+    final downloadProgress = ref.watch(engineDownloadProgressProvider);
+    final isInstalled = installedAsync.when(
+      data: (set) => set.contains(EngineId.kokoro),
+      loading: () => false,
+      error: (_, _) => false,
+    );
+    final progress = downloadProgress[EngineId.kokoro];
+    final isDownloading = ref
+        .read(engineDownloadProgressProvider.notifier)
+        .isDownloading(EngineId.kokoro);
+
+    return _EngineCard(
+      isSelected: isSelected,
+      meta: meta,
+      engine: EngineId.kokoro,
+      installed: isInstalled,
+      statusText: isInstalled
+          ? 'Installed'
+          : isDownloading
+          ? 'Downloading...'
+          : 'Not installed',
+      trailing: _buildAction(ref, isInstalled, isDownloading, EngineId.kokoro),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 12),
+            child: Text(
+              'Kokoro 82M parameter model with 22 expressive voices.\n'
+              'Requires ~170 MB download.',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.6),
+              ),
+            ),
+          ),
+          if (isDownloading) ...[
+            const SizedBox(height: 12),
+            _buildDownloadProgress(context, ref, EngineId.kokoro, progress),
+          ],
+          if (isInstalled) ...[
+            _VoiceChips(voices: kokoroVoices, engine: EngineId.kokoro),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAction(
+    WidgetRef ref,
+    bool isInstalled,
+    bool isDownloading,
+    EngineId engine,
+  ) {
+    if (isDownloading) {
+      return ShadButton.outline(
+        size: ShadButtonSize.sm,
+        onPressed: () => ref
+            .read(engineDownloadProgressProvider.notifier)
+            .cancelDownload(engine),
+        child: const Text('Cancel'),
+      );
+    }
+    if (isInstalled) {
+      if (isSelected) return const SizedBox.shrink();
+      return ShadButton.outline(
+        size: ShadButtonSize.sm,
+        onPressed: () =>
+            ref.read(settingsProvider.notifier).setTtsEngine(engine),
+        child: const Text('Select'),
+      );
+    }
+    return ShadButton.outline(
+      size: ShadButtonSize.sm,
+      onPressed: () => ref
+          .read(engineDownloadProgressProvider.notifier)
+          .startDownload(engine),
+      child: const Text('Install'),
+    );
+  }
+
+  Widget _buildDownloadProgress(
+    BuildContext context,
+    WidgetRef ref,
+    EngineId engine,
+    Map<String, FileProgress>? progress,
+  ) {
+    final fraction = ref
+        .read(engineDownloadProgressProvider.notifier)
+        .getOverallFraction(engine);
+    return Column(
+      children: [
+        LinearProgressIndicator(value: fraction),
+        const SizedBox(height: 4),
+        if (progress != null)
+          ...progress.entries.map(
+            (e) => Padding(
+              padding: const EdgeInsets.only(bottom: 2),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      e.key,
+                      style: Theme.of(context).textTheme.labelSmall,
+                    ),
+                  ),
+                  Text(
+                    '${(e.value.fraction * 100).toStringAsFixed(0)}%',
+                    style: Theme.of(context).textTheme.labelSmall,
+                  ),
+                ],
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+// ── Supertonic Engine ──
+
+class _SupertonicEngineCard extends ConsumerWidget {
+  final bool isSelected;
+
+  const _SupertonicEngineCard({required this.isSelected});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final meta = EngineMeta.supertonic;
+    final installedAsync = ref.watch(installedEnginesProvider);
+    final downloadProgress = ref.watch(engineDownloadProgressProvider);
+    final isInstalled = installedAsync.when(
+      data: (set) => set.contains(EngineId.supertonic),
+      loading: () => false,
+      error: (_, _) => false,
+    );
+    final progress = downloadProgress[EngineId.supertonic];
+    final isDownloading = ref
+        .read(engineDownloadProgressProvider.notifier)
+        .isDownloading(EngineId.supertonic);
+
+    return _EngineCard(
+      isSelected: isSelected,
+      meta: meta,
+      engine: EngineId.supertonic,
+      installed: isInstalled,
+      statusText: isInstalled
+          ? 'Installed'
+          : isDownloading
+          ? 'Downloading...'
+          : 'Not installed',
+      trailing: _buildAction(
+        ref,
+        isInstalled,
+        isDownloading,
+        EngineId.supertonic,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 12),
+            child: Text(
+              'Studio-quality multilingual TTS with 10 voices.\n'
+              'Supports EN, KO, ES, PT, FR. Requires ~265 MB download.',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.6),
+              ),
+            ),
+          ),
+          if (isDownloading) ...[
+            const SizedBox(height: 12),
+            _buildDownloadProgress(context, ref, EngineId.supertonic, progress),
+          ],
+          if (isInstalled) ...[
+            _VoiceChips(voices: supertonicVoices, engine: EngineId.supertonic),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAction(
+    WidgetRef ref,
+    bool isInstalled,
+    bool isDownloading,
+    EngineId engine,
+  ) {
+    if (isDownloading) {
+      return ShadButton.outline(
+        size: ShadButtonSize.sm,
+        onPressed: () => ref
+            .read(engineDownloadProgressProvider.notifier)
+            .cancelDownload(engine),
+        child: const Text('Cancel'),
+      );
+    }
+    if (isInstalled) {
+      if (isSelected) return const SizedBox.shrink();
+      return ShadButton.outline(
+        size: ShadButtonSize.sm,
+        onPressed: () =>
+            ref.read(settingsProvider.notifier).setTtsEngine(engine),
+        child: const Text('Select'),
+      );
+    }
+    return ShadButton.outline(
+      size: ShadButtonSize.sm,
+      onPressed: () => ref
+          .read(engineDownloadProgressProvider.notifier)
+          .startDownload(engine),
+      child: const Text('Install'),
+    );
+  }
+
+  Widget _buildDownloadProgress(
+    BuildContext context,
+    WidgetRef ref,
+    EngineId engine,
+    Map<String, FileProgress>? progress,
+  ) {
+    final fraction = ref
+        .read(engineDownloadProgressProvider.notifier)
+        .getOverallFraction(engine);
+    return Column(
+      children: [
+        LinearProgressIndicator(value: fraction),
+        const SizedBox(height: 4),
+        if (progress != null)
+          ...progress.entries.map(
+            (e) => Padding(
+              padding: const EdgeInsets.only(bottom: 2),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      e.key,
+                      style: Theme.of(context).textTheme.labelSmall,
+                    ),
+                  ),
+                  Text(
+                    '${(e.value.fraction * 100).toStringAsFixed(0)}%',
+                    style: Theme.of(context).textTheme.labelSmall,
+                  ),
+                ],
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+// ── Shared Widgets ──
+
+class _EngineCard extends StatelessWidget {
+  final bool isSelected;
+  final EngineMeta meta;
+  final EngineId engine;
+  final bool installed;
+  final String statusText;
+  final Widget? trailing;
+  final Widget? child;
+
+  const _EngineCard({
+    required this.isSelected,
+    required this.meta,
+    required this.engine,
+    required this.installed,
+    required this.statusText,
+    this.trailing,
+    this.child,
+  });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDownloading =
-        widget.progress != null &&
-        widget.progress!.isNotEmpty &&
-        !widget.progress!.values.every((f) => f.isComplete);
+    final accentColor = Color(meta.accentColor);
 
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: theme.colorScheme.surface,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: widget.isSelected
-                ? theme.colorScheme.primary.withValues(alpha: 0.5)
-                : widget.isDownloaded
-                ? Colors.green.withValues(alpha: 0.3)
-                : theme.colorScheme.outline.withValues(alpha: 0.3),
-            width: widget.isSelected ? 1.5 : 1,
-          ),
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: isSelected
+              ? accentColor.withValues(alpha: 0.6)
+              : installed
+              ? Colors.green.withValues(alpha: 0.3)
+              : theme.colorScheme.outline.withValues(alpha: 0.3),
+          width: isSelected ? 1.5 : 1,
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Expanded(
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: accentColor.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  Icons.record_voice_over,
+                  size: 18,
+                  color: accentColor,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      meta.name,
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      meta.tagline,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurface.withValues(
+                          alpha: 0.6,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    statusText,
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: installed
+                          ? Colors.green
+                          : theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    '${meta.sizeMb} MB · ${meta.ramMb} MB RAM · ${meta.voiceCount} voices',
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
+                      fontSize: 10,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              if (isSelected)
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 3,
+                  ),
+                  decoration: BoxDecoration(
+                    color: accentColor.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(4),
+                    border: Border.all(
+                      color: accentColor.withValues(alpha: 0.3),
+                    ),
+                  ),
                   child: Text(
-                    widget.model.displayName,
-                    style: theme.textTheme.titleSmall?.copyWith(
+                    'Active',
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: accentColor,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
-                if (widget.model.isRecommended)
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.primary.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Text(
-                      'RECOMMENDED',
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: theme.colorScheme.primary,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-            const SizedBox(height: 4),
-            Text(
-              widget.model.description,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
-              ),
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Text(
-                  _formatBytes(widget.model.totalSizeBytes),
-                  style: theme.textTheme.labelMedium,
-                ),
-                const SizedBox(width: 12),
-                Text(
-                  '${widget.model.parameterLabel} params',
-                  style: theme.textTheme.labelMedium?.copyWith(
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
-                  ),
-                ),
-                const Spacer(),
-                if (widget.isSelected)
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.primary.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(4),
-                      border: Border.all(
-                        color: theme.colorScheme.primary.withValues(alpha: 0.3),
-                      ),
-                    ),
-                    child: Text(
-                      'Selected',
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: theme.colorScheme.primary,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            _buildActionRow(isDownloading),
-            if (isDownloading) ...[
-              const SizedBox(height: 12),
-              _buildFileProgress(),
-            ],
-            if (widget.isDownloaded) ...[
-              const SizedBox(height: 12),
-              _buildPreviewToggle(),
-              if (_showPreview) ...[
-                const SizedBox(height: 8),
-                _VoicePreviewSection(variant: widget.model.variant),
-              ],
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildActionRow(bool isDownloading) {
-    if (widget.isDownloaded) {
-      return Row(
-        children: [
-          Icon(
-            Icons.check_circle,
-            color: Colors.green,
-            size: 18,
-          ),
-          const SizedBox(width: 4),
-          Text(
-            'Downloaded',
-            style: TextStyle(
-              fontSize: 13,
-              color: Colors.green,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const Spacer(),
-          if (!widget.isSelected)
-            ShadButton.outline(
-              size: ShadButtonSize.sm,
-              onPressed: () {
-                ref
-                    .read(settingsProvider.notifier)
-                    .setKittenTtsModelVariant(widget.model.variant);
-              },
-              child: const Text('Select'),
-            ),
-          if (!widget.isSelected) const SizedBox(width: 8),
-          ShadButton.outline(
-            size: ShadButtonSize.sm,
-            onPressed: () => _deleteModel(),
-            child: const Text('Delete'),
-          ),
-        ],
-      );
-    }
-
-    if (isDownloading) {
-      final overallFraction = ref
-          .read(ttsDownloadProgressProvider.notifier)
-          .getOverallFraction(widget.model.variant);
-
-      return Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                LinearProgressIndicator(
-                  value: overallFraction,
-                  backgroundColor:
-                      Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  '${(overallFraction * 100).toStringAsFixed(0)}%',
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 12),
-          ShadButton.outline(
-            size: ShadButtonSize.sm,
-            onPressed: () {
-              ref
-                  .read(ttsDownloadProgressProvider.notifier)
-                  .cancelDownload(widget.model.variant);
-            },
-            child: const Text('Cancel'),
-          ),
-        ],
-      );
-    }
-
-    return Row(
-      children: [
-        const Spacer(),
-        ShadButton.outline(
-          size: ShadButtonSize.sm,
-          onPressed: () => _startDownload(),
-          child: const Text('Download'),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildFileProgress() {
-    if (widget.progress == null || widget.progress!.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
-    final theme = Theme.of(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: widget.progress!.entries.map((entry) {
-        final fileName = entry.key;
-        final progress = entry.value;
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 6),
-          child: Row(
-            children: [
-              SizedBox(
-                width: 100,
-                child: Text(
-                  fileName,
-                  style: theme.textTheme.labelSmall,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: LinearProgressIndicator(
-                  value: progress.fraction,
-                  backgroundColor:
-                      theme.colorScheme.primary.withValues(alpha: 0.1),
-                  minHeight: 4,
-                ),
-              ),
-              const SizedBox(width: 8),
-              SizedBox(
-                width: 50,
-                child: Text(
-                  progress.isComplete
-                      ? 'Done'
-                      : '${(progress.fraction * 100).toStringAsFixed(0)}%',
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                  textAlign: TextAlign.right,
-                ),
-              ),
+              const Spacer(),
+              if (trailing != null) trailing!,
             ],
           ),
-        );
-      }).toList(),
-    );
-  }
-
-  Widget _buildPreviewToggle() {
-    return InkWell(
-      onTap: () => setState(() => _showPreview = !_showPreview),
-      borderRadius: BorderRadius.circular(8),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4),
-        child: Row(
-          children: [
-            Icon(
-              _showPreview ? Icons.expand_less : Icons.expand_more,
-              size: 18,
-              color: Theme.of(context).colorScheme.primary,
-            ),
-            const SizedBox(width: 4),
-            Text(
-              'Voice Preview',
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: Theme.of(context).colorScheme.primary,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Future<void> _startDownload() async {
-    await ref
-        .read(ttsDownloadProgressProvider.notifier)
-        .startDownload(widget.model);
-  }
-
-  Future<void> _deleteModel() async {
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Delete Model'),
-        content: Text(
-          'Are you sure you want to delete ${widget.model.displayName}?',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Delete'),
-          ),
+          if (child != null) child!,
         ],
       ),
     );
-
-    if (confirm == true) {
-      await ref
-          .read(ttsDownloadProgressProvider.notifier)
-          .deleteVariant(widget.model.variant);
-
-      final settings = ref.read(settingsProvider);
-      if (settings.kittenTtsModelVariant == widget.model.variant) {
-        ref
-            .read(settingsProvider.notifier)
-            .setKittenTtsModelVariant(KittenTtsModelVariant.nanoInt8);
-      }
-    }
-  }
-
-  String _formatBytes(int bytes) {
-    final mb = bytes / (1024 * 1024);
-    if (mb >= 1024) {
-      return '${(mb / 1024).toStringAsFixed(1)} GB';
-    }
-    return '${mb.toStringAsFixed(0)} MB';
   }
 }
 
-/// Section that lists all voices with play buttons for the downloaded variant.
-class _VoicePreviewSection extends ConsumerStatefulWidget {
-  const _VoicePreviewSection({required this.variant});
+class _VoiceChips extends ConsumerStatefulWidget {
+  final List<Voice> voices;
+  final EngineId engine;
 
-  final KittenTtsModelVariant variant;
+  const _VoiceChips({required this.voices, required this.engine});
 
   @override
-  ConsumerState<_VoicePreviewSection> createState() =>
-      _VoicePreviewSectionState();
+  ConsumerState<_VoiceChips> createState() => _VoiceChipsState();
 }
 
-class _VoicePreviewSectionState extends ConsumerState<_VoicePreviewSection> {
-  KittenTtsService? _previewService;
-  AudioPlayer? _audioPlayer;
-  KittenTtsVoice? _playingVoice;
-  bool _isLoading = false;
+class _VoiceChipsState extends ConsumerState<_VoiceChips> {
+  final AudioPlayer _player = AudioPlayer();
+  Voice? _playingVoice;
 
   @override
   void dispose() {
-    _audioPlayer?.dispose();
-    _previewService?.dispose();
+    _player.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final females = widget.voices.where((v) => v.gender == 'f').toList();
+    final males = widget.voices.where((v) => v.gender == 'm').toList();
+    final accent = Color(EngineMeta.forEngine(widget.engine).accentColor);
 
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-        borderRadius: BorderRadius.circular(8),
-      ),
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Tap a voice to hear a preview',
-            style: theme.textTheme.labelSmall?.copyWith(
-              color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+          if (females.isNotEmpty) ...[
+            Text(
+              'Female',
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+              ),
             ),
-          ),
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: KittenTtsVoice.values.map((voice) {
-              final isPlaying = _playingVoice == voice;
-              return ActionChip(
-                avatar: Icon(
-                  isPlaying ? Icons.stop : Icons.play_arrow,
-                  size: 18,
-                  color: isPlaying
-                      ? theme.colorScheme.primary
-                      : theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                ),
-                label: Text(voice.displayName),
-                labelStyle: theme.textTheme.labelMedium?.copyWith(
-                  color: isPlaying
-                      ? theme.colorScheme.primary
-                      : theme.colorScheme.onSurface,
-                  fontWeight: isPlaying ? FontWeight.bold : FontWeight.normal,
-                ),
-                backgroundColor: isPlaying
-                    ? theme.colorScheme.primary.withValues(alpha: 0.1)
-                    : theme.colorScheme.surface,
-                side: BorderSide(
-                  color: isPlaying
-                      ? theme.colorScheme.primary.withValues(alpha: 0.3)
-                      : theme.colorScheme.outline.withValues(alpha: 0.2),
-                ),
-                onPressed: _isLoading && !isPlaying
-                    ? null
-                    : () => _togglePreview(voice),
-              );
-            }).toList(),
-          ),
+            const SizedBox(height: 6),
+            Wrap(
+              spacing: 6,
+              runSpacing: 6,
+              children: females
+                  .map((v) => _voiceChip(v, theme, accent))
+                  .toList(),
+            ),
+            const SizedBox(height: 8),
+          ],
+          if (males.isNotEmpty) ...[
+            Text(
+              'Male',
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+              ),
+            ),
+            const SizedBox(height: 6),
+            Wrap(
+              spacing: 6,
+              runSpacing: 6,
+              children: males.map((v) => _voiceChip(v, theme, accent)).toList(),
+            ),
+          ],
         ],
       ),
     );
   }
 
-  Future<void> _togglePreview(KittenTtsVoice voice) async {
+  Widget _voiceChip(Voice voice, ThemeData theme, Color accent) {
+    final isPlaying = _playingVoice == voice;
+    return ActionChip(
+      avatar: Icon(
+        isPlaying ? Icons.stop : Icons.play_arrow,
+        size: 16,
+        color: isPlaying
+            ? accent
+            : theme.colorScheme.onSurface.withValues(alpha: 0.5),
+      ),
+      label: Text(voice.name),
+      labelStyle: theme.textTheme.labelSmall?.copyWith(
+        color: isPlaying ? accent : theme.colorScheme.onSurface,
+        fontWeight: isPlaying ? FontWeight.bold : FontWeight.normal,
+      ),
+      backgroundColor: isPlaying
+          ? accent.withValues(alpha: 0.1)
+          : Colors.transparent,
+      side: BorderSide(
+        color: isPlaying
+            ? accent.withValues(alpha: 0.3)
+            : theme.colorScheme.outline.withValues(alpha: 0.2),
+      ),
+      onPressed: () => _togglePreview(voice),
+    );
+  }
+
+  Future<void> _togglePreview(Voice voice) async {
     if (_playingVoice == voice) {
-      await _audioPlayer?.stop();
+      await _player.stop();
       setState(() => _playingVoice = null);
       return;
     }
-
-    setState(() {
-      _isLoading = true;
-      _playingVoice = null;
-    });
-
     try {
-      if (_previewService == null ||
-          _previewService!.currentVariant != widget.variant) {
-        _previewService?.dispose();
-        _previewService = KittenTtsService();
-        await _previewService!.initialize(variant: widget.variant);
-      }
-
-      _audioPlayer ??= AudioPlayer();
-      await _audioPlayer!.stop();
-
-      final sampleText =
-          "Hello, I am ${voice.displayName}. It's a pleasure to meet you.";
-      final wavBytes = await _previewService!.generatePreviewWav(
-        sampleText,
-        voice: voice,
-        speed: 1.0,
-      );
-
+      await ref.read(tts.ttsProvider.notifier).previewVoice(voice);
       setState(() => _playingVoice = voice);
-
-      await _audioPlayer!.play(BytesSource(wavBytes));
-      _audioPlayer!.onPlayerComplete.first.then((_) {
-        if (mounted) {
-          setState(() => _playingVoice = null);
-        }
+      Future.delayed(const Duration(seconds: 2), () {
+        if (mounted) setState(() => _playingVoice = null);
       });
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Preview failed: $e')),
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Preview failed: $e')));
       }
     }
+  }
+}
+
+class _PhonemizationSettingsCard extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final settings = ref.watch(settingsProvider);
+
+    return ShadCard(
+      title: const Text('Phonemization Settings'),
+      description: const Text('Improve pronunciation using IPA phonemes.'),
+      child: Column(
+        children: [
+          ShadSwitch(
+            value: settings.usePhonemizer && settings.useEspeak,
+            onChanged: (v) {
+              if (v) {
+                ref.read(settingsProvider.notifier).setUsePhonemizer(true);
+                ref.read(settingsProvider.notifier).setUseEspeak(true);
+              } else {
+                ref.read(settingsProvider.notifier).setUsePhonemizer(false);
+              }
+            },
+            label: const Text('Use Espeak-NG (Recommended)'),
+            sublabel: const Text('High-fidelity IPA phonemization'),
+          ),
+          const SizedBox(height: 12),
+          ShadSwitch(
+            value: settings.usePhonemizer && !settings.useEspeak,
+            onChanged: (v) {
+              if (v) {
+                ref.read(settingsProvider.notifier).setUsePhonemizer(true);
+                ref.read(settingsProvider.notifier).setUseEspeak(false);
+              } else {
+                ref.read(settingsProvider.notifier).setUsePhonemizer(false);
+              }
+            },
+            label: const Text('Use Rule-based (Legacy)'),
+            sublabel: const Text('Lightweight but less accurate'),
+          ),
+        ],
+      ),
+    );
   }
 }

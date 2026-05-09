@@ -712,7 +712,7 @@ class _OnDeviceModelList extends ConsumerWidget {
             final isDownloaded = downloadedIds.contains(model.id);
             final isLoaded = engineState.loadedModelId == model.id;
             final isCurrentlyLoading =
-                engineState.status == EngineStatus.loading &&
+                engineState.status == OnDeviceEngineStatus.loading &&
                 engineState.loadedModelId == model.id;
             final isSelected = selectedModelId == model.id;
 
