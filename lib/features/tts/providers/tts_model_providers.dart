@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/model_downloader.dart';
@@ -7,6 +8,8 @@ import '../data/kitten_tts_model.dart';
 import '../data/kitten_tts_downloader.dart';
 import '../data/kokoro_tts_model.dart';
 import '../data/kokoro_tts_downloader.dart';
+import '../data/piper_tts_model.dart';
+import '../data/piper_tts_downloader.dart';
 
 /// Provider for the KittenTTS downloader instance.
 final kittenTtsDownloaderProvider = Provider<KittenTtsDownloader>((ref) {
@@ -16,6 +19,11 @@ final kittenTtsDownloaderProvider = Provider<KittenTtsDownloader>((ref) {
 /// Provider for the Kokoro TTS downloader instance.
 final kokoroTtsDownloaderProvider = Provider<KokoroTtsDownloader>((ref) {
   return KokoroTtsDownloader();
+});
+
+/// Provider for the Piper TTS downloader instance.
+final piperTtsDownloaderProvider = Provider<PiperTtsDownloader>((ref) {
+  return PiperTtsDownloader();
 });
 
 final modelDownloaderProvider = Provider<ModelDownloader>((ref) {
@@ -43,6 +51,13 @@ final downloadedKittenTtsVariantsProvider =
 final downloadedKokoroTtsVariantsProvider =
     FutureProvider<Set<KokoroTtsModelVariant>>((ref) async {
       final downloader = ref.read(kokoroTtsDownloaderProvider);
+      return downloader.getDownloadedVariants();
+    });
+
+/// Async provider for the set of downloaded Piper variants.
+final downloadedPiperTtsVariantsProvider =
+    FutureProvider<Set<PiperTtsModelVariant>>((ref) async {
+      final downloader = ref.read(piperTtsDownloaderProvider);
       return downloader.getDownloadedVariants();
     });
 
@@ -261,8 +276,107 @@ class KokoroTtsDownloadNotifier
   }
 }
 
+// ── Piper TTS Download Progress ──
+
+/// Notifier that tracks per-file download progress for Piper TTS models.
+final piperTtsDownloadProgressProvider = NotifierProvider<
+  PiperTtsDownloadNotifier,
+  Map<PiperTtsModelVariant, Map<String, PiperTtsFileProgress>>
+>(() => PiperTtsDownloadNotifier());
+
+class PiperTtsDownloadNotifier extends Notifier<
+  Map<PiperTtsModelVariant, Map<String, PiperTtsFileProgress>>
+> {
+  final Map<PiperTtsModelVariant, StreamSubscription<PiperTtsFileProgress>>
+  _subscriptions = {};
+
+  @override
+  Map<PiperTtsModelVariant, Map<String, PiperTtsFileProgress>> build() {
+    ref.onDispose(() {
+      for (final sub in _subscriptions.values) {
+        sub.cancel();
+      }
+      _subscriptions.clear();
+    });
+    return {};
+  }
+
+  Future<void> startDownload(PiperTtsModelVariant variant) async {
+    final currentVariantProgress = Map<String, PiperTtsFileProgress>.from(
+      state[variant] ?? {},
+    );
+
+    state = {...state, variant: currentVariantProgress};
+
+    final downloader = ref.read(piperTtsDownloaderProvider);
+
+    _subscriptions[variant]?.cancel();
+    _subscriptions[variant] = downloader.downloadModel(variant).listen(
+      (progress) {
+        final variantMap = Map<String, PiperTtsFileProgress>.from(
+          state[variant] ?? {},
+        );
+        variantMap[progress.fileName] = progress;
+        state = {...state, variant: variantMap};
+      },
+      onDone: () {
+        _subscriptions.remove(variant);
+        ref.invalidate(downloadedPiperTtsVariantsProvider);
+      },
+      onError: (e) {
+        _ModelLog.error(
+          'Piper TTS download error for ${variant.displayName}: $e',
+        );
+        _subscriptions.remove(variant);
+      },
+    );
+  }
+
+  void cancelDownload(PiperTtsModelVariant variant) {
+    ref.read(piperTtsDownloaderProvider).cancelDownload(variant);
+    _subscriptions[variant]?.cancel();
+    _subscriptions.remove(variant);
+
+    final newState =
+        Map<PiperTtsModelVariant, Map<String, PiperTtsFileProgress>>.from(
+      state,
+    );
+    newState.remove(variant);
+    state = newState;
+  }
+
+  Future<void> deleteVariant(PiperTtsModelVariant variant) async {
+    cancelDownload(variant);
+    await ref.read(piperTtsDownloaderProvider).deleteVariant(variant);
+
+    final newState =
+        Map<PiperTtsModelVariant, Map<String, PiperTtsFileProgress>>.from(
+      state,
+    );
+    newState.remove(variant);
+    state = newState;
+
+    ref.invalidate(downloadedPiperTtsVariantsProvider);
+  }
+
+  bool isDownloading(PiperTtsModelVariant variant) {
+    final variantProgress = state[variant];
+    if (variantProgress == null || variantProgress.isEmpty) return false;
+    return !variantProgress.values.every((f) => f.isComplete);
+  }
+
+  double getOverallFraction(PiperTtsModelVariant variant) {
+    final variantProgress = state[variant];
+    if (variantProgress == null || variantProgress.isEmpty) return 0.0;
+    final total = variantProgress.values
+        .map((f) => f.fraction)
+        .fold<double>(0.0, (a, b) => a + b);
+    return total / variantProgress.length;
+  }
+}
+
 class _ModelLog {
   static void error(String message) {
-    print('[TtsModel] ERROR: $message');
+    debugPrint('[TtsModel] ERROR: $message');
   }
 }

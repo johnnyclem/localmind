@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'dart:io';
+import 'dart:isolate';
 import 'dart:typed_data';
 
 import 'package:archive/archive.dart';
@@ -12,7 +14,10 @@ import 'package:path_provider/path_provider.dart';
 import '../../../core/logger/app_logger.dart';
 import '../../../core/models/enums.dart';
 import '../../../core/providers/app_providers.dart';
+import '../data/kitten_tts_model.dart';
+import '../data/kokoro_tts_model.dart';
 import 'tts_model_providers.dart';
+import 'tts_worker.dart';
 
 final ttsProvider = NotifierProvider<TtsNotifier, TtsState>(() {
   return TtsNotifier();
@@ -51,24 +56,46 @@ class TtsState {
 }
 
 class TtsNotifier extends Notifier<TtsState> {
-  MeoKitten? _kitten;
-  MeoKokoro? _kokoro;
-  MeoPiper? _piper;
   FlutterTts? _flutterTts;
   final AudioPlayer _player = AudioPlayer();
   bool _isPlayerDisposed = false;
+  bool _isStopping = false;
+  List<String> _chunks = [];
+  int _currentChunkIndex = 0;
+  EngineId? _currentEngine;
+  String? _currentVoice;
+
+  // Isolate worker fields
+  Isolate? _workerIsolate;
+  SendPort? _workerSendPort;
+  final ReceivePort _mainReceivePort = ReceivePort();
+  final Map<int, Uint8List> _synthesizedChunks = {};
+  int _lastEnqueuedChunk = -1;
+  static const int _lookAheadCount = 2;
+  Completer<void>? _initCompleter;
+  bool _isWorkerInitializing = false;
+  int _currentSessionId = 0;
 
   @override
   TtsState build() {
     ref.keepAlive();
-    final settings = ref.watch(settingsProvider);
-    _player.onPlayerComplete.listen((_) {
-      _onPlaybackFinished();
+
+    // Listen for engine changes to update the state without rebuilding the whole notifier
+    ref.listen(settingsProvider, (previous, next) {
+      if (previous?.ttsEngine != next.ttsEngine) {
+        state = state.copyWith(activeEngine: next.ttsEngine);
+      }
     });
+
+    _player.onPlayerComplete.listen((_) {
+      _onChunkFinished();
+    });
+
+    _setupWorkerListener();
+
     ref.onDispose(() {
-      _kitten?.dispose();
-      _kokoro?.dispose();
-      _piper?.dispose();
+      _workerIsolate?.kill();
+      _mainReceivePort.close();
       if (!_isPlayerDisposed) {
         _isPlayerDisposed = true;
         try {
@@ -77,11 +104,66 @@ class TtsNotifier extends Notifier<TtsState> {
       }
     });
 
+    final settings = ref.read(settingsProvider);
     return TtsState(activeEngine: settings.ttsEngine);
   }
 
+  void _setupWorkerListener() {
+    _mainReceivePort.listen((message) {
+      if (message is SendPort) {
+        _workerSendPort = message;
+      } else if (message is TtsWorkerResponse) {
+        if (message.isInitResponse) {
+          _initCompleter?.complete();
+          _initCompleter = null;
+        } else if (message.chunkIndex != null) {
+          if (message.sessionId != _currentSessionId) {
+            Log.debug('Ignoring stale chunk ${message.chunkIndex}');
+            return;
+          }
+          if (message.wavBytes != null) {
+            _synthesizedChunks[message.chunkIndex!] = message.wavBytes!;
+            // If this was the chunk we were waiting for, play it
+            if (message.chunkIndex == _currentChunkIndex && state.isSpeaking) {
+              _playNextChunk();
+            }
+          } else {
+            Log.error(
+              'Worker error for chunk ${message.chunkIndex}: ${message.error}',
+            );
+            if (message.chunkIndex == _currentChunkIndex) {
+              _onChunkFinished();
+            }
+          }
+        } else if (message.error != null) {
+          Log.error('Worker general error: ${message.error}');
+          _initCompleter?.completeError(message.error!);
+          _initCompleter = null;
+        }
+      }
+    });
+  }
+
+  Future<void> _ensureWorker() async {
+    if (_workerIsolate != null) return;
+
+    Log.info('Spawning TTS worker isolate...');
+    _workerIsolate = await Isolate.spawn(ttsWorkerEntry, _mainReceivePort.sendPort);
+    
+    // Wait for worker to send its SendPort
+    int attempts = 0;
+    while (_workerSendPort == null && attempts < 200) {
+      await Future.delayed(const Duration(milliseconds: 50));
+      attempts++;
+    }
+    
+    if (_workerSendPort == null) {
+      throw StateError('Failed to establish communication with TTS worker');
+    }
+  }
+
   void _onPlaybackFinished() {
-    if (_isPlayerDisposed || !state.isSpeaking) return;
+    if (_isStopping) return;
     state = state.copyWith(
       isSpeaking: false,
       isInitializing: false,
@@ -89,32 +171,103 @@ class TtsNotifier extends Notifier<TtsState> {
     );
   }
 
+  void _onChunkFinished() {
+    if (_isStopping) return;
+    _currentChunkIndex++;
+    if (_currentChunkIndex < _chunks.length) {
+      _playNextChunk();
+    } else {
+      _onPlaybackFinished();
+    }
+  }
+
+  List<String> _splitText(String text) {
+    if (text.length <= 250) return [text];
+
+    // Split by common sentence terminators but keep them
+    final regex = RegExp(r'(?<=[.!?])\s+');
+    final sentences = text.split(regex);
+
+    final List<String> chunks = [];
+    String currentChunk = "";
+
+    for (final sentence in sentences) {
+      if ((currentChunk.length + sentence.length) > 250 &&
+          currentChunk.isNotEmpty) {
+        chunks.add(currentChunk.trim());
+        currentChunk = "";
+      }
+
+      if (sentence.length > 250) {
+        // If a single sentence is too long, split it by commas or spaces
+        final subRegex = RegExp(r'(?<=[,;])\s+');
+        final parts = sentence.split(subRegex);
+        for (final part in parts) {
+          if ((currentChunk.length + part.length) > 250 &&
+              currentChunk.isNotEmpty) {
+            chunks.add(currentChunk.trim());
+            currentChunk = "";
+          }
+          currentChunk += "$part ";
+        }
+      } else {
+        currentChunk += "$sentence ";
+      }
+    }
+
+    if (currentChunk.trim().isNotEmpty) {
+      chunks.add(currentChunk.trim());
+    }
+
+    return chunks;
+  }
+
   Future<void> _ensureEspeakData(String targetPath) async {
     final dir = Directory(targetPath);
-    if (await dir.exists()) {
-      // Basic check: if it has espeak-ng-data, assume it's valid
-      if (await Directory('$targetPath/espeak-ng-data').exists()) {
+    final espeakNgDataDir = Directory('$targetPath/espeak-ng-data');
+    final voicesDir = Directory('$targetPath/espeak-ng-data/voices');
+    Log.info('Checking espeak-data at $targetPath');
+    if (await espeakNgDataDir.exists() && await voicesDir.exists()) {
+      final entities = await espeakNgDataDir.list().toList();
+      if (entities.length > 5) {
+        Log.info('espeak-data looks valid with ${entities.length} entities.');
         return;
       }
     }
 
-    Log.info('Extracting espeak-data.zip to $targetPath...');
+    Log.info('espeak-data invalid or missing. (Re)extracting espeak-data.zip to $targetPath...');
+    if (await dir.exists()) {
+      try {
+        await dir.delete(recursive: true);
+      } catch (e) {
+        Log.error('Failed to clear old espeak-data: $e');
+      }
+    }
+    await dir.create(recursive: true);
     try {
       final data = await rootBundle.load('assets/espeak-data.zip');
       final bytes = data.buffer.asUint8List();
-      final archive = ZipDecoder().decodeBytes(bytes);
 
-      for (final file in archive) {
-        final filename = file.name;
-        if (file.isFile) {
-          final data = file.content as List<int>;
-          final f = File('$targetPath/$filename');
-          await f.create(recursive: true);
-          await f.writeAsBytes(data);
-        } else {
-          await Directory('$targetPath/$filename').create(recursive: true);
+      await Isolate.run(() async {
+        final archive = ZipDecoder().decodeBytes(bytes);
+
+        for (final file in archive) {
+          String filename = file.name;
+          if (filename.startsWith('espeak-data/')) {
+            filename = filename.substring('espeak-data/'.length);
+          }
+          if (filename.isEmpty) continue;
+
+          if (file.isFile) {
+            final fileData = file.content as List<int>;
+            final f = File('$targetPath/$filename');
+            await f.create(recursive: true);
+            await f.writeAsBytes(fileData);
+          } else {
+            await Directory('$targetPath/$filename').create(recursive: true);
+          }
         }
-      }
+      });
       Log.info('espeak-data extraction complete.');
     } catch (e) {
       Log.error('Failed to extract espeak-data: $e');
@@ -131,69 +284,82 @@ class TtsNotifier extends Notifier<TtsState> {
       await _ensureEspeakData(resolvedEspeakPath);
     }
 
+    await _ensureWorker();
+
+    if (_currentEngine == engineId && !_isWorkerInitializing) return;
+    _isWorkerInitializing = true;
+
+    String modelPath = '';
+    String voicesPath = '';
+
     switch (engineId) {
       case EngineId.kitten:
-        if (_kitten != null) return;
-        final kittenDl = ref.read(kittenTtsDownloaderProvider);
         final variant = ref.read(settingsProvider).kittenTtsModelVariant;
-        final modelPath = await kittenDl.getFilePath(
-          variant,
-          variant.modelFileName,
-        );
-        final voicesPath = await kittenDl.getFilePath(variant, 'voices.npz');
-        if (modelPath == null || voicesPath == null) {
+        final kittenDl = ref.read(kittenTtsDownloaderProvider);
+        final mPath = await kittenDl.getFilePath(variant, variant.modelFileName);
+        final vPath = await kittenDl.getFilePath(variant, 'voices.npz');
+        if (mPath == null || vPath == null) {
           throw StateError(
-            'Kitten model files not found. Please download them in the Model Manager.',
+            'Kitten model files not found for ${variant.name}. Please download them in the Model Manager.',
           );
         }
-        _kitten = MeoKitten(
-          model: modelPath,
-          voices: voicesPath,
-          espeakData: resolvedEspeakPath,
-        );
+        modelPath = mPath;
+        voicesPath = vPath;
         break;
       case EngineId.kokoro:
-        if (_kokoro != null) return;
+        final variant = ref.read(settingsProvider).kokoroTtsModelVariant;
         final kokoroDl = ref.read(kokoroTtsDownloaderProvider);
-        final variant =
-            ref.read(settingsProvider).kokoroTtsModelVariant;
-        final modelPath = await kokoroDl.getModelPath(variant);
-        final voicesDir = await kokoroDl.getVoicesDir(variant);
-        if (modelPath == null) {
+        final mPath = await kokoroDl.getModelPath(variant);
+        final vDir = await kokoroDl.getVoicesDir(variant);
+        if (mPath == null) {
           throw StateError(
-            'Kokoro model file not found. Please download it in the Model Manager.',
+            'Kokoro model files not found for ${variant.name}. Please download them in the Model Manager.',
           );
         }
-        _kokoro = MeoKokoro(
-          model: modelPath,
-          voices: voicesDir.path,
-          espeakData: resolvedEspeakPath,
-        );
+        modelPath = mPath;
+        voicesPath = vDir.path;
         break;
       case EngineId.piper:
-        if (_piper != null) return;
         final downloader = ref.read(modelDownloaderProvider);
         final ttsDir = await downloader.getTtsDir();
-        final modelPath = '${ttsDir.path}/piper/model.onnx';
-        if (!await File(modelPath).exists()) {
-          throw StateError('Piper model file not found.');
+        final piperDir = '${ttsDir.path}/piper';
+        if (!await Directory(piperDir).exists()) {
+          throw StateError('Piper models directory not found.');
         }
-        _piper = MeoPiper(model: modelPath, espeakData: resolvedEspeakPath);
+        modelPath = piperDir;
         break;
       default:
-        break;
+        return;
     }
+
+    _initCompleter = Completer<void>();
+    _workerSendPort!.send(
+      TtsInitRequest(
+        engineId: engineId,
+        modelPath: modelPath,
+        voicesPath: voicesPath,
+        espeakPath: resolvedEspeakPath,
+      ),
+    );
+
+    await _initCompleter!.future;
+    _currentEngine = engineId;
+    _isWorkerInitializing = false;
   }
 
-  Future<void> speak(String text) async {
+  Future<void> speak(String text, {EngineId? engineId, String? voiceId}) async {
     if (text.trim().isEmpty) return;
 
+    _isStopping = false;
     if (state.isSpeaking) {
       await stop();
+      // Wait a bit for the player to fully stop
+      await Future.delayed(const Duration(milliseconds: 100));
+      _isStopping = false;
     }
 
     final settings = ref.read(settingsProvider);
-    final engineId = settings.ttsEngine;
+    engineId ??= settings.ttsEngine;
 
     if (engineId == EngineId.system) {
       _flutterTts ??= FlutterTts();
@@ -219,13 +385,17 @@ class TtsNotifier extends Notifier<TtsState> {
         );
         rethrow;
       } finally {
-        state = state.copyWith(
-          isSpeaking: false,
-          playingContent: null,
-        );
+        state = state.copyWith(isSpeaking: false, playingContent: null);
       }
       return;
     }
+
+    _chunks = _splitText(text);
+    _currentChunkIndex = 0;
+    _currentVoice = voiceId;
+    _synthesizedChunks.clear();
+    _lastEnqueuedChunk = -1;
+    _currentSessionId++;
 
     state = state.copyWith(
       isSpeaking: true,
@@ -238,32 +408,7 @@ class TtsNotifier extends Notifier<TtsState> {
     try {
       await _initEngine(engineId);
       state = state.copyWith(isInitializing: false);
-
-      final voiceId = settings.ttsVoiceId ?? 'Luna';
-      final speaker = Speaker(voice: voiceId, speed: settings.ttsSpeed);
-
-      Float32List? pcm;
-      int sampleRate = 22050;
-
-      if (engineId == EngineId.kitten) {
-        pcm = await _kitten?.speak(text, speaker: speaker);
-        sampleRate = 24000; // Kitten default
-      } else if (engineId == EngineId.kokoro) {
-        pcm = await _kokoro?.speak(text, speaker: speaker);
-        sampleRate = 24000; // Kokoro default
-      } else if (engineId == EngineId.piper) {
-        pcm = await _piper?.speak(text, speaker: speaker);
-        sampleRate = 22050; // Piper default often 22050
-      }
-
-      if (pcm != null) {
-        final wavBytes = _createWav(pcm, sampleRate);
-        try {
-          await _player.play(BytesSource(wavBytes));
-        } catch (e) {
-          Log.error('AudioPlayer play error: $e');
-        }
-      }
+      await _playNextChunk();
     } catch (e, st) {
       if (_isPlayerDisposed) return;
       Log.error('TTS speak error: $e\n$st');
@@ -276,10 +421,70 @@ class TtsNotifier extends Notifier<TtsState> {
     }
   }
 
+  Future<void> _playNextChunk() async {
+    if (_isStopping || _currentChunkIndex >= _chunks.length) return;
+
+    // Start synthesizing more chunks
+    _enqueueNextChunks();
+
+    // Check if current chunk is synthesized
+    if (!_synthesizedChunks.containsKey(_currentChunkIndex)) {
+      Log.debug('Waiting for chunk $_currentChunkIndex to be synthesized...');
+      return;
+    }
+
+    final wavBytes = _synthesizedChunks[_currentChunkIndex]!;
+    _synthesizedChunks.remove(_currentChunkIndex); // Clear memory
+
+    try {
+      Log.debug(
+        'Playing chunk ${_currentChunkIndex + 1}/${_chunks.length}: "${_chunks[_currentChunkIndex]}"',
+      );
+
+      await _player.stop();
+      await _player.setSource(BytesSource(wavBytes));
+      await _player.resume();
+    } catch (e) {
+      Log.error('Error playing chunk $_currentChunkIndex: $e');
+      _onChunkFinished();
+    }
+  }
+
+  void _enqueueNextChunks() {
+    if (_workerSendPort == null || _currentEngine == null) return;
+
+    final settings = ref.read(settingsProvider);
+    final availableVoices = voicesForEngine(_currentEngine!);
+    final voiceId =
+        _currentVoice ??
+        settings.ttsVoiceId ??
+        (availableVoices.isNotEmpty ? availableVoices.first.id : 'Luna');
+
+    while (_lastEnqueuedChunk < _chunks.length - 1 &&
+        _lastEnqueuedChunk < _currentChunkIndex + _lookAheadCount) {
+      _lastEnqueuedChunk++;
+      final chunkIndex = _lastEnqueuedChunk;
+      final text = _chunks[chunkIndex];
+
+      Log.debug('Enqueuing synthesis for chunk $chunkIndex');
+      _workerSendPort!.send(
+        TtsSynthesizeRequest(
+          text: text,
+          voiceId: voiceId,
+          speed: settings.ttsSpeed,
+          chunkIndex: chunkIndex,
+          sessionId: _currentSessionId,
+        ),
+      );
+    }
+  }
+
   Future<void> stop() async {
+    _isStopping = true;
     if (_isPlayerDisposed) return;
     try {
       await _player.stop();
+      // Don't release here, as it makes restarting slower and can cause state issues
     } catch (_) {}
     await _flutterTts?.stop();
     state = state.copyWith(
@@ -289,58 +494,8 @@ class TtsNotifier extends Notifier<TtsState> {
     );
   }
 
-  Uint8List _createWav(Float32List samples, int sampleRate) {
-    // Simple WAV header creation
-    final int byteCount = samples.length * 2;
-    final int totalSize = 36 + byteCount;
-    final Uint8List wav = Uint8List(44 + byteCount);
-    final ByteData data = ByteData.view(wav.buffer);
-
-    data.setUint8(0, 0x52); // R
-    data.setUint8(1, 0x49); // I
-    data.setUint8(2, 0x46); // F
-    data.setUint8(3, 0x46); // F
-    data.setUint32(4, totalSize, Endian.little);
-    data.setUint8(8, 0x57); // W
-    data.setUint8(9, 0x41); // A
-    data.setUint8(10, 0x56); // V
-    data.setUint8(11, 0x45); // E
-    data.setUint8(12, 0x66); // f
-    data.setUint8(13, 0x6d); // m
-    data.setUint8(14, 0x74); // t
-    data.setUint8(15, 0x20); // space
-    data.setUint32(16, 16, Endian.little);
-    data.setUint16(20, 1, Endian.little); // PCM
-    data.setUint16(22, 1, Endian.little); // Mono
-    data.setUint32(24, sampleRate, Endian.little);
-    data.setUint32(28, sampleRate * 2, Endian.little);
-    data.setUint16(32, 2, Endian.little);
-    data.setUint16(34, 16, Endian.little); // 16-bit
-    data.setUint8(36, 0x64); // d
-    data.setUint8(37, 0x61); // a
-    data.setUint8(38, 0x74); // t
-    data.setUint8(39, 0x61); // a
-    data.setUint32(40, byteCount, Endian.little);
-
-    for (int i = 0; i < samples.length; i++) {
-      final int sample = (samples[i] * 32767).clamp(-32768, 32767).toInt();
-      data.setInt16(44 + (i * 2), sample, Endian.little);
-    }
-
-    return wav;
-  }
-
   Future<void> previewVoice(Voice voice) async {
-    final settings = ref.read(settingsProvider);
-    final previousEngine = settings.ttsEngine;
-    final previousVoiceId = settings.ttsVoiceId;
-    ref.read(settingsProvider.notifier).setTtsEngine(voice.engine);
-    ref.read(settingsProvider.notifier).setTtsVoiceId(voice.id);
-    await speak(ttsPreviewSample);
-    ref.read(settingsProvider.notifier).setTtsEngine(previousEngine);
-    if (previousVoiceId != null) {
-      ref.read(settingsProvider.notifier).setTtsVoiceId(previousVoiceId);
-    }
+    await speak(ttsPreviewSample, engineId: voice.engine, voiceId: voice.id);
   }
 }
 

@@ -24,6 +24,7 @@ import 'package:localmind/features/conversations/providers/conversation_provider
 import 'package:localmind/features/models/screens/model_picker_sheet.dart';
 import 'package:localmind/features/personas/providers/personas_providers.dart';
 import 'package:localmind/features/servers/providers/server_providers.dart';
+import 'package:localmind/features/tts/views/components/tts_player_bar.dart';
 
 class ChatScreen extends ConsumerStatefulWidget {
   const ChatScreen({super.key});
@@ -212,6 +213,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           ),
         ),
         const NotificationPermissionBanner(),
+        const TtsPlayerBar(
+          margin: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        ),
         if (connectionStatus == ConnectionStatus.disconnected ||
             connectionStatus == ConnectionStatus.error)
           _ConnectionBanner(status: connectionStatus),
@@ -282,31 +286,31 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                       !chatState.isStreaming &&
                       ref.read(smartRepliesProvider).isNotEmpty,
                 ),
-              if (!chatState.isStreaming)
-                Positioned(
-                  bottom: 90,
-                  left: 0,
-                  right: 0,
-                  child: _SmartReplyChips(
-                    onSend: (message) {
-                      ref.read(chatProvider.notifier).sendMessage(message);
-                    },
-                  ),
-                ),
+
               Positioned(
                 bottom: 0,
                 left: 0,
                 right: 0,
-                child: ChatInputBar(
-                  isStreaming: chatState.isStreaming,
-                  onSend: (message, {attachments}) {
-                    ref
-                        .read(chatProvider.notifier)
-                        .sendMessage(message, attachments: attachments);
-                  },
-                  onStop: () {
-                    ref.read(chatProvider.notifier).cancelStream();
-                  },
+                child: Stack(
+                  children: [
+                    if (!chatState.isStreaming)
+                      _SmartReplyChips(
+                        onSend: (message) {
+                          ref.read(chatProvider.notifier).sendMessage(message);
+                        },
+                      ),
+                    ChatInputBar(
+                      isStreaming: chatState.isStreaming,
+                      onSend: (message, {attachments}) {
+                        ref
+                            .read(chatProvider.notifier)
+                            .sendMessage(message, attachments: attachments);
+                      },
+                      onStop: () {
+                        ref.read(chatProvider.notifier).cancelStream();
+                      },
+                    ),
+                  ],
                 ),
               ),
             ],

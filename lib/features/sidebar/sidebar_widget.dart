@@ -4,11 +4,12 @@ import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
-import '../../core/routes/app_routes.dart';
 import '../../core/providers/app_providers.dart';
+import '../../core/routes/app_routes.dart';
 import '../../core/theme/app_theme.dart';
 import '../chat/providers/chat_providers.dart';
 import '../tts/providers/tts_providers.dart' as tts;
+import '../tts/views/components/tts_player_bar.dart';
 import 'components/active_server_indicator.dart';
 import 'components/conversation_drawer_header.dart';
 import 'components/drawer_nav_item.dart';
@@ -102,8 +103,8 @@ class SidebarWidget extends ConsumerWidget {
                         context.go(AppRoutes.onDeviceModels);
                       },
                     ),
-                    _SidebarNavItem(
-                      icon: const Icon(Icons.record_voice_over, size: 20),
+                    DrawerNavItem(
+                      iconData: HugeIcons.strokeRoundedVoice,
                       label: 'TTS Models',
                       isSelected: isTtsModels,
                       onTap: () {
@@ -157,7 +158,7 @@ class SidebarWidget extends ConsumerWidget {
             ),
 
             // TTS Mini Player (only visible when TTS is active)
-            const _TtsPlayerBar(),
+            const TtsPlayerBar(),
             const SizedBox(height: 4),
 
             // Bottom Section
@@ -195,226 +196,5 @@ class SidebarWidget extends ConsumerWidget {
       case AppThemeType.claude:
         return 'Claude';
     }
-  }
-}
-
-/// Mini TTS player bar shown in the sidebar when speech is playing or
-/// initializing. Displays a waveform icon, a content preview, and a stop button.
-class _TtsPlayerBar extends ConsumerWidget {
-  const _TtsPlayerBar();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final ttsState = ref.watch(tts.ttsProvider);
-    ref.listen(tts.ttsProvider, (prev, next) {
-      if (next.error != null && prev?.error != next.error) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(next.error!),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 3),
-          ),
-        );
-      }
-    });
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
-    if (!ttsState.isSpeaking && !ttsState.isInitializing) {
-      return const SizedBox.shrink();
-    }
-
-    final preview = _truncateContent(ttsState.playingContent);
-
-    return AnimatedSize(
-      duration: const Duration(milliseconds: 200),
-      curve: Curves.easeInOut,
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-        decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF1E293B) : const Color(0xFFEFF6FF),
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(
-            color: isDark ? const Color(0xFF334155) : const Color(0xFFBFDBFE),
-          ),
-        ),
-        child: Row(
-          children: [
-            _AnimatedWaveIndicator(isActive: ttsState.isSpeaking),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    preview ??
-                        (ttsState.isInitializing ? 'Loading...' : 'Playing'),
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                      color: isDark ? Colors.white70 : Colors.black87,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  if (ttsState.isInitializing)
-                    Text(
-                      'Initializing TTS...',
-                      style: TextStyle(
-                        fontSize: 10,
-                        color: isDark ? Colors.white38 : Colors.black45,
-                      ),
-                    ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 8),
-            GestureDetector(
-              onTap: () => ref.read(tts.ttsProvider.notifier).stop(),
-              child: Tooltip(
-                message: 'Stop',
-                child: Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: BoxDecoration(
-                    color: Colors.red.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Icon(
-                    Icons.stop_circle,
-                    size: 20,
-                    color: isDark ? Colors.red[300] : Colors.red[600],
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  String? _truncateContent(String? content) {
-    if (content == null || content.isEmpty) return null;
-    if (content.length <= 50) return content;
-    return '${content.substring(0, 47)}...';
-  }
-}
-
-/// An animated audio wave indicator with a subtle bounce effect.
-class _AnimatedWaveIndicator extends StatefulWidget {
-  final bool isActive;
-  const _AnimatedWaveIndicator({required this.isActive});
-
-  @override
-  State<_AnimatedWaveIndicator> createState() => _AnimatedWaveIndicatorState();
-}
-
-class _AnimatedWaveIndicatorState extends State<_AnimatedWaveIndicator>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: 800),
-      vsync: this,
-    );
-    if (widget.isActive) {
-      _controller.repeat(reverse: true);
-    }
-  }
-
-  @override
-  void didUpdateWidget(_AnimatedWaveIndicator oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.isActive && !_controller.isAnimating) {
-      _controller.repeat(reverse: true);
-    } else if (!widget.isActive && _controller.isAnimating) {
-      _controller.stop();
-    }
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (context, child) {
-        final scale = widget.isActive ? 1.0 + _controller.value * 0.15 : 1.0;
-        return Transform.scale(
-          scale: scale,
-          child: Icon(
-            Icons.graphic_eq,
-            size: 18,
-            color: widget.isActive ? const Color(0xFF3B82F6) : Colors.grey,
-          ),
-        );
-      },
-    );
-  }
-}
-
-/// A sidebar navigation item that accepts any Widget as an icon.
-/// Used when HugeIcons doesn't have a suitable icon.
-class _SidebarNavItem extends StatelessWidget {
-  const _SidebarNavItem({
-    required this.icon,
-    required this.label,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  final Widget icon;
-  final String label;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          decoration: BoxDecoration(
-            color: isSelected
-                ? (isDark
-                      ? theme.colorScheme.primary.withAlpha(30)
-                      : theme.colorScheme.primary.withAlpha(20))
-                : Colors.transparent,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Row(
-            children: [
-              icon,
-              const SizedBox(width: 16),
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                  color: isSelected
-                      ? (isDark ? Colors.white : theme.colorScheme.primary)
-                      : (isDark ? Colors.white70 : Colors.black87),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
   }
 }

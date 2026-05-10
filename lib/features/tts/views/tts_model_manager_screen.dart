@@ -10,6 +10,7 @@ import '../../settings/data/models/app_settings.dart';
 import '../../sidebar/sidebar_widget.dart';
 import '../data/kitten_tts_model.dart';
 import '../data/kokoro_tts_model.dart';
+import '../data/piper_tts_model.dart';
 import '../providers/tts_model_providers.dart';
 import '../providers/tts_providers.dart' as tts;
 
@@ -24,7 +25,8 @@ final installedEnginesProvider = FutureProvider<Set<EngineId>>((ref) async {
   if (downloadedVariants.isNotEmpty) {
     result.add(EngineId.kitten);
   }
-  final downloadedKokoroVariants = await kokoroDownloader.getDownloadedVariants();
+  final downloadedKokoroVariants = await kokoroDownloader
+      .getDownloadedVariants();
   if (downloadedKokoroVariants.isNotEmpty) {
     result.add(EngineId.kokoro);
   }
@@ -150,7 +152,7 @@ class _KittenEngineCard extends ConsumerWidget {
           : isDownloading
           ? 'Downloading...'
           : 'Not installed',
-      trailing: _buildAction(ref, isInstalled, isDownloading, model),
+      trailing: _buildAction(context, ref, isInstalled, isDownloading, model),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -179,6 +181,7 @@ class _KittenEngineCard extends ConsumerWidget {
   }
 
   Widget _buildAction(
+    BuildContext context,
     WidgetRef ref,
     bool isInstalled,
     bool isDownloading,
@@ -193,18 +196,65 @@ class _KittenEngineCard extends ConsumerWidget {
       );
     }
     if (isInstalled) {
-      if (isSelected) return const SizedBox.shrink();
-      return ShadButton.outline(
-        size: ShadButtonSize.sm,
-        onPressed: () =>
-            ref.read(settingsProvider.notifier).setTtsEngine(EngineId.kitten),
-        child: const Text('Select'),
+      return Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (!isSelected)
+            ShadButton.outline(
+              size: ShadButtonSize.sm,
+              onPressed: () => ref
+                  .read(settingsProvider.notifier)
+                  .setTtsEngine(EngineId.kitten),
+              child: const Text('Select'),
+            ),
+          const SizedBox(width: 8),
+          ShadIconButton.ghost(
+            padding: EdgeInsets.zero,
+            icon: const Icon(Icons.delete_outline, color: Colors.red, size: 20),
+            onPressed: () => _confirmDelete(context, ref, model),
+          ),
+        ],
       );
     }
     return ShadButton.outline(
       size: ShadButtonSize.sm,
       onPressed: () => notifier.startDownload(model),
       child: const Text('Install'),
+    );
+  }
+
+  void _confirmDelete(
+    BuildContext context,
+    WidgetRef ref,
+    KittenTtsModel model,
+  ) {
+    showShadDialog(
+      context: context,
+      builder: (context) => ShadDialog(
+        title: const Text('Delete Model'),
+        description: Text(
+          'Are you sure you want to delete ${model.displayName}? This will free up approximately ${_formatSize(model.totalSizeBytes)} of space.',
+        ),
+        actions: [
+          ShadButton.outline(
+            child: const Text('Cancel'),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+          ShadButton.destructive(
+            child: const Text('Delete'),
+            onPressed: () {
+              ref
+                  .read(ttsDownloadProgressProvider.notifier)
+                  .deleteVariant(model.variant);
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+        child: const Padding(
+          padding: EdgeInsets.symmetric(vertical: 20),
+          child: Text('You can download this model again later if needed.'),
+        ),
+      ),
     );
   }
 
@@ -289,7 +339,7 @@ class _KokoroEngineCard extends ConsumerWidget {
           : isDownloading
           ? 'Downloading...'
           : 'Not installed',
-      trailing: _buildAction(ref, isInstalled, isDownloading, model),
+      trailing: _buildAction(context, ref, isInstalled, isDownloading, model),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -299,21 +349,15 @@ class _KokoroEngineCard extends ConsumerWidget {
               'Kokoro 82M parameter model with 22 expressive voices.\n'
               'Requires ${_formatSize(model.totalSizeBytes)} download.',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context)
-                        .colorScheme
-                        .onSurface
-                        .withValues(alpha: 0.6),
-                  ),
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.6),
+              ),
             ),
           ),
           if (isDownloading) ...[
             const SizedBox(height: 12),
-            _buildVariantDownloadProgress(
-              context,
-              ref,
-              model,
-              variantProgress,
-            ),
+            _buildVariantDownloadProgress(context, ref, model, variantProgress),
           ],
           if (isInstalled) ...[
             _VoiceChips(voices: kokoroVoices, engine: EngineId.kokoro),
@@ -324,6 +368,7 @@ class _KokoroEngineCard extends ConsumerWidget {
   }
 
   Widget _buildAction(
+    BuildContext context,
     WidgetRef ref,
     bool isInstalled,
     bool isDownloading,
@@ -338,18 +383,65 @@ class _KokoroEngineCard extends ConsumerWidget {
       );
     }
     if (isInstalled) {
-      if (isSelected) return const SizedBox.shrink();
-      return ShadButton.outline(
-        size: ShadButtonSize.sm,
-        onPressed: () =>
-            ref.read(settingsProvider.notifier).setTtsEngine(EngineId.kokoro),
-        child: const Text('Select'),
+      return Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (!isSelected)
+            ShadButton.outline(
+              size: ShadButtonSize.sm,
+              onPressed: () => ref
+                  .read(settingsProvider.notifier)
+                  .setTtsEngine(EngineId.kokoro),
+              child: const Text('Select'),
+            ),
+          const SizedBox(width: 8),
+          ShadIconButton.ghost(
+            padding: EdgeInsets.zero,
+            icon: const Icon(Icons.delete_outline, color: Colors.red, size: 20),
+            onPressed: () => _confirmDelete(context, ref, model),
+          ),
+        ],
       );
     }
     return ShadButton.outline(
       size: ShadButtonSize.sm,
       onPressed: () => notifier.startDownload(model.variant),
       child: const Text('Install'),
+    );
+  }
+
+  void _confirmDelete(
+    BuildContext context,
+    WidgetRef ref,
+    KokoroTtsModel model,
+  ) {
+    showShadDialog(
+      context: context,
+      builder: (context) => ShadDialog(
+        title: const Text('Delete Model'),
+        description: Text(
+          'Are you sure you want to delete ${model.displayName}? This will free up approximately ${_formatSize(model.totalSizeBytes)} of space.',
+        ),
+        actions: [
+          ShadButton.outline(
+            child: const Text('Cancel'),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+          ShadButton.destructive(
+            child: const Text('Delete'),
+            onPressed: () {
+              ref
+                  .read(kokoroTtsDownloadProgressProvider.notifier)
+                  .deleteVariant(model.variant);
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+        child: const Padding(
+          padding: EdgeInsets.symmetric(vertical: 20),
+          child: Text('You can download this model again later if needed.'),
+        ),
+      ),
     );
   }
 
@@ -405,49 +497,179 @@ class _PiperEngineCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final meta = EngineMeta(
-      name: 'Piper TTS',
-      tagline: 'Open-source neural voices',
-      sizeMb: 50,
-      ramMb: 100,
-      voiceCount: 100,
-      accentColor: 0xFF4CAF50,
-    );
-    final installedAsync = ref.watch(installedEnginesProvider);
-    final isInstalled = installedAsync.when(
-      data: (set) => set.contains(EngineId.piper),
+    final meta = EngineMeta.piper;
+    final downloadedAsync = ref.watch(downloadedPiperTtsVariantsProvider);
+    final downloadProgress = ref.watch(piperTtsDownloadProgressProvider);
+
+    // For now we just download all variants (or a default one).
+    // Let's just track the first one for simplicity of the UI install button,
+    // or we can download the first variant as the "install" action.
+    final variant = PiperTtsModelVariant.enUsLessacMedium;
+    final variantProgress = downloadProgress[variant];
+
+    final isInstalled = downloadedAsync.when(
+      data: (set) => set.contains(variant),
       loading: () => false,
       error: (_, _) => false,
     );
+    final notifier = ref.read(piperTtsDownloadProgressProvider.notifier);
+    final isDownloading = notifier.isDownloading(variant);
 
     return _EngineCard(
       isSelected: isSelected,
       meta: meta,
       engine: EngineId.piper,
       installed: isInstalled,
-      statusText: isInstalled ? 'Installed' : 'Not installed',
-      trailing: isInstalled && !isSelected
-          ? ShadButton.outline(
+      statusText: isInstalled
+          ? 'Installed'
+          : isDownloading
+          ? 'Downloading...'
+          : 'Not installed',
+      trailing: _buildAction(context, ref, isInstalled, isDownloading, variant),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 12),
+            child: Text(
+              'One ONNX model per voice. 30+ languages, hundreds of voices.\n'
+              'Requires ~${meta.sizeMb} MB download for the default voice.',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.6),
+              ),
+            ),
+          ),
+          if (isDownloading) ...[
+            const SizedBox(height: 12),
+            _buildVariantDownloadProgress(
+              context,
+              ref,
+              variant,
+              variantProgress,
+            ),
+          ],
+          if (isInstalled) ...[
+            _VoiceChips(voices: piperVoices, engine: EngineId.piper),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAction(
+    BuildContext context,
+    WidgetRef ref,
+    bool isInstalled,
+    bool isDownloading,
+    PiperTtsModelVariant variant,
+  ) {
+    final notifier = ref.read(piperTtsDownloadProgressProvider.notifier);
+    if (isDownloading) {
+      return ShadButton.outline(
+        size: ShadButtonSize.sm,
+        onPressed: () => notifier.cancelDownload(variant),
+        child: const Text('Cancel'),
+      );
+    }
+    if (isInstalled) {
+      return Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (!isSelected)
+            ShadButton.outline(
               size: ShadButtonSize.sm,
               onPressed: () => ref
                   .read(settingsProvider.notifier)
                   .setTtsEngine(EngineId.piper),
               child: const Text('Select'),
-            )
-          : null,
-      child: Padding(
-        padding: const EdgeInsets.only(top: 12),
-        child: Text(
-          'One ONNX model per voice. 30+ languages, hundreds of voices.\n'
-          'Place model files in the tts_models/piper directory.',
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context)
-                    .colorScheme
-                    .onSurface
-                    .withValues(alpha: 0.6),
-              ),
+            ),
+          const SizedBox(width: 8),
+          ShadIconButton.ghost(
+            padding: EdgeInsets.zero,
+            icon: const Icon(Icons.delete_outline, color: Colors.red, size: 20),
+            onPressed: () => _confirmDelete(context, ref, variant),
+          ),
+        ],
+      );
+    }
+    return ShadButton.outline(
+      size: ShadButtonSize.sm,
+      onPressed: () => notifier.startDownload(variant),
+      child: const Text('Install'),
+    );
+  }
+
+  void _confirmDelete(
+    BuildContext context,
+    WidgetRef ref,
+    PiperTtsModelVariant variant,
+  ) {
+    showShadDialog(
+      context: context,
+      builder: (context) => ShadDialog(
+        title: const Text('Delete Model'),
+        description: Text(
+          'Are you sure you want to delete ${variant.displayName}? This will free up storage space on your device.',
+        ),
+        actions: [
+          ShadButton.outline(
+            child: const Text('Cancel'),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+          ShadButton.destructive(
+            child: const Text('Delete'),
+            onPressed: () {
+              ref
+                  .read(piperTtsDownloadProgressProvider.notifier)
+                  .deleteVariant(variant);
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+        child: const Padding(
+          padding: EdgeInsets.symmetric(vertical: 20),
+          child: Text('You can download this model again later if needed.'),
         ),
       ),
+    );
+  }
+
+  Widget _buildVariantDownloadProgress(
+    BuildContext context,
+    WidgetRef ref,
+    PiperTtsModelVariant variant,
+    Map<String, PiperTtsFileProgress>? progress,
+  ) {
+    final fraction = ref
+        .read(piperTtsDownloadProgressProvider.notifier)
+        .getOverallFraction(variant);
+    return Column(
+      children: [
+        LinearProgressIndicator(value: fraction),
+        const SizedBox(height: 4),
+        if (progress != null)
+          ...progress.entries.map(
+            (e) => Padding(
+              padding: const EdgeInsets.only(bottom: 2),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      e.key,
+                      style: Theme.of(context).textTheme.labelSmall,
+                    ),
+                  ),
+                  Text(
+                    '${(e.value.fraction * 100).toStringAsFixed(0)}%',
+                    style: Theme.of(context).textTheme.labelSmall,
+                  ),
+                ],
+              ),
+            ),
+          ),
+      ],
     );
   }
 }
@@ -580,7 +802,6 @@ class _EngineCard extends StatelessWidget {
                     ),
                   ),
                 ),
-              const Spacer(),
               ?trailing,
             ],
           ),
@@ -628,14 +849,20 @@ class _VoiceChipsState extends ConsumerState<_VoiceChips> {
               ),
             ),
             const SizedBox(height: 6),
-            Wrap(
-              spacing: 6,
-              runSpacing: 6,
-              children: females
-                  .map((v) => _voiceChip(v, theme, accent, selectedVoiceId))
-                  .toList(),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: females
+                    .map(
+                      (v) => Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: _voiceChip(v, theme, accent, selectedVoiceId),
+                      ),
+                    )
+                    .toList(),
+              ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
           ],
           if (males.isNotEmpty) ...[
             Text(
@@ -645,12 +872,18 @@ class _VoiceChipsState extends ConsumerState<_VoiceChips> {
               ),
             ),
             const SizedBox(height: 6),
-            Wrap(
-              spacing: 6,
-              runSpacing: 6,
-              children: males
-                  .map((v) => _voiceChip(v, theme, accent, selectedVoiceId))
-                  .toList(),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: males
+                    .map(
+                      (v) => Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: _voiceChip(v, theme, accent, selectedVoiceId),
+                      ),
+                    )
+                    .toList(),
+              ),
             ),
           ],
         ],
@@ -665,54 +898,108 @@ class _VoiceChipsState extends ConsumerState<_VoiceChips> {
     String? selectedVoiceId,
   ) {
     final isPlaying = _playingVoice == voice;
-    final isSelected = voice.id == selectedVoiceId && !isPlaying;
+    final isSelected = voice.id == selectedVoiceId;
 
-    return ActionChip(
-      avatar: Icon(
-        isSelected
-            ? Icons.check_circle
-            : isPlaying
-            ? Icons.stop
-            : Icons.play_arrow,
-        size: 16,
-        color: isSelected
-            ? Colors.green
-            : isPlaying
-            ? accent
-            : theme.colorScheme.onSurface.withValues(alpha: 0.5),
+    return Material(
+      color: Colors.transparent,
+      child: Container(
+        height: 36,
+        decoration: BoxDecoration(
+          color: isSelected
+              ? Colors.green.withValues(alpha: 0.1)
+              : isPlaying
+              ? accent.withValues(alpha: 0.1)
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isSelected
+                ? Colors.green.withValues(alpha: 0.5)
+                : isPlaying
+                ? accent.withValues(alpha: 0.3)
+                : theme.colorScheme.outline.withValues(alpha: 0.2),
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            InkWell(
+              onTap: () => _selectVoice(voice),
+              borderRadius: const BorderRadius.horizontal(
+                left: Radius.circular(20),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.only(
+                  left: 12,
+                  right: 8,
+                  top: 8,
+                  bottom: 8,
+                ),
+                child: Row(
+                  children: [
+                    if (isSelected) ...[
+                      const Icon(
+                        Icons.check_circle,
+                        size: 16,
+                        color: Colors.green,
+                      ),
+                      const SizedBox(width: 6),
+                    ],
+                    Text(
+                      voice.name,
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: isSelected
+                            ? Colors.green
+                            : isPlaying
+                            ? accent
+                            : theme.colorScheme.onSurface,
+                        fontWeight: isSelected || isPlaying
+                            ? FontWeight.bold
+                            : FontWeight.normal,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Container(
+              width: 1,
+              height: 20,
+              color: isSelected
+                  ? Colors.green.withValues(alpha: 0.3)
+                  : isPlaying
+                  ? accent.withValues(alpha: 0.2)
+                  : theme.colorScheme.outline.withValues(alpha: 0.2),
+            ),
+            InkWell(
+              onTap: () => _previewVoice(voice),
+              borderRadius: const BorderRadius.horizontal(
+                right: Radius.circular(20),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 8,
+                ),
+                child: Icon(
+                  isPlaying ? Icons.stop : Icons.play_arrow,
+                  size: 16,
+                  color: isPlaying
+                      ? accent
+                      : theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
-      label: Text(voice.name),
-      labelStyle: theme.textTheme.labelSmall?.copyWith(
-        color: isSelected
-            ? Colors.green
-            : isPlaying
-            ? accent
-            : theme.colorScheme.onSurface,
-        fontWeight: isSelected || isPlaying
-            ? FontWeight.bold
-            : FontWeight.normal,
-      ),
-      backgroundColor: isSelected
-          ? Colors.green.withValues(alpha: 0.1)
-          : isPlaying
-          ? accent.withValues(alpha: 0.1)
-          : Colors.transparent,
-      side: BorderSide(
-        color: isSelected
-            ? Colors.green.withValues(alpha: 0.5)
-            : isPlaying
-            ? accent.withValues(alpha: 0.3)
-            : theme.colorScheme.outline.withValues(alpha: 0.2),
-      ),
-      onPressed: () => _selectAndPreview(voice),
     );
   }
 
-  Future<void> _selectAndPreview(Voice voice) async {
-    // Set as default voice for this engine
+  void _selectVoice(Voice voice) {
     ref.read(settingsProvider.notifier).setTtsVoiceId(voice.id);
+  }
 
-    // Preview the voice
+  Future<void> _previewVoice(Voice voice) async {
     if (_playingVoice == voice) {
       await ref.read(tts.ttsProvider.notifier).stop();
       if (mounted) setState(() => _playingVoice = null);

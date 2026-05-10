@@ -44,12 +44,23 @@ class EngineMeta {
     accentColor: 0xFFE91E63,
   );
 
+  static const piper = EngineMeta(
+    name: 'Piper TTS',
+    tagline: 'Open-source neural voices',
+    sizeMb: 50,
+    ramMb: 100,
+    voiceCount: 2,
+    accentColor: 0xFF4CAF50,
+  );
+
   static EngineMeta forEngine(EngineId engine) {
     switch (engine) {
       case EngineId.kitten:
         return kitten;
       case EngineId.kokoro:
         return kokoro;
+      case EngineId.piper:
+        return piper;
       default:
         return system;
     }
@@ -78,6 +89,8 @@ List<Voice> voicesForEngine(EngineId engine) {
       return kittenVoices;
     case EngineId.kokoro:
       return kokoroVoices;
+    case EngineId.piper:
+      return piperVoices;
     default:
       return [];
   }
@@ -107,6 +120,11 @@ const List<Voice> kokoroVoices = [
   Voice(id: 'bf_alice', name: 'Alice', engine: EngineId.kokoro, language: 'en', gender: 'f'),
   Voice(id: 'bm_george', name: 'George', engine: EngineId.kokoro, language: 'en', gender: 'm'),
   Voice(id: 'bm_lewis', name: 'Lewis', engine: EngineId.kokoro, language: 'en', gender: 'm'),
+];
+
+const List<Voice> piperVoices = [
+  Voice(id: 'en_US-lessac-medium', name: 'Lessac (US)', engine: EngineId.piper, language: 'en', gender: 'f'),
+  Voice(id: 'en_US-ryan-medium', name: 'Ryan (US)', engine: EngineId.piper, language: 'en', gender: 'm'),
 ];
 
 enum ServerType { lmStudio, openAICompatible, ollama, openRouter, onDevice }
