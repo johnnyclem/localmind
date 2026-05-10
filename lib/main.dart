@@ -26,10 +26,5 @@ Future<void> main() async {
   // Initialize services
   await container.read(downloadNotificationServiceProvider).init();
 
-  runApp(
-    UncontrolledProviderScope(
-      container: container,
-      child: const App(),
-    ),
-  );
+  runApp(UncontrolledProviderScope(container: container, child: const App()));
 }

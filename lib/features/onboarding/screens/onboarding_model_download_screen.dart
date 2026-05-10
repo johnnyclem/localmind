@@ -414,7 +414,18 @@ class _ModelCard extends ConsumerWidget {
           else
             ShadButton.outline(
               size: ShadButtonSize.sm,
-              onPressed: () => _startDownload(context, ref),
+              onPressed: (deviceMemory?.isLowRam ?? false)
+                  ? () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            'Downloading local LLMs is restricted on devices with less than 8 GB RAM.',
+                          ),
+                          backgroundColor: Colors.orange,
+                        ),
+                      );
+                    }
+                  : () => _startDownload(context, ref),
               child: const Text('Download'),
             ),
         ],

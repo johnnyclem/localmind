@@ -98,6 +98,28 @@ class OnDeviceModelManagerScreen extends ConsumerWidget {
                 style: const TextStyle(color: Colors.red),
               ),
             ),
+          if (deviceMemoryAsync.value?.isLowRam ?? false)
+            Container(
+              padding: const EdgeInsets.all(12),
+              margin: const EdgeInsets.only(bottom: 16),
+              decoration: BoxDecoration(
+                color: Colors.orange.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.orange),
+              ),
+              child: const Row(
+                children: [
+                  Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 20),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Running or downloading local LLMs is restricted on this device because it has less than 8 GB RAM. This is to ensure device stability.',
+                      style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           Text(
             'Available Models',
             style: theme.textTheme.titleMedium?.copyWith(
@@ -589,7 +611,18 @@ class _ModelCard extends ConsumerWidget {
           else
             ShadButton.outline(
               size: ShadButtonSize.sm,
-              onPressed: () => _loadModel(context, ref),
+              onPressed: (deviceMemory?.isLowRam ?? false)
+                  ? () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            'Loading local LLMs is restricted on devices with less than 8 GB RAM.',
+                          ),
+                          backgroundColor: Colors.orange,
+                        ),
+                      );
+                    }
+                  : () => _loadModel(context, ref),
               child: const Text('Load'),
             ),
           const SizedBox(width: 8),
@@ -700,7 +733,18 @@ class _ModelCard extends ConsumerWidget {
         const Spacer(),
         ShadButton.outline(
           size: ShadButtonSize.sm,
-          onPressed: () => _startDownload(context, ref),
+          onPressed: (deviceMemory?.isLowRam ?? false)
+              ? () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                        'Downloading local LLMs is restricted on devices with less than 8 GB RAM.',
+                      ),
+                      backgroundColor: Colors.orange,
+                    ),
+                  );
+                }
+              : () => _startDownload(context, ref),
           child: const Text('Download'),
         ),
       ],

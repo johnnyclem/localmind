@@ -6,6 +6,7 @@ import 'package:shadcn_ui/shadcn_ui.dart';
 
 import '../../../core/models/enums.dart';
 import '../../../core/providers/app_providers.dart';
+import '../../../core/providers/device_info_providers.dart';
 import '../../../core/routes/app_routes.dart';
 
 class OnboardingServerTypeScreen extends ConsumerStatefulWidget {
@@ -19,6 +20,12 @@ class OnboardingServerTypeScreen extends ConsumerStatefulWidget {
 class _OnboardingServerTypeScreenState
     extends ConsumerState<OnboardingServerTypeScreen> {
   ServerType? _selectedType;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedType = ServerType.lmStudio;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -79,17 +86,48 @@ class _OnboardingServerTypeScreenState
                     ),
                   ),
                   const SizedBox(height: 24),
-                  _buildServerCard(
-                    type: ServerType.onDevice,
-                    title: 'On-Device',
-                    subtitle: 'NO SERVER NEEDED',
-                    iconWidget: Icon(
-                      Icons.phone_android_rounded,
-                      color: _selectedType == ServerType.onDevice
-                          ? theme.colorScheme.primary
-                          : theme.colorScheme.onSurface,
-                    ),
-                    theme: theme,
+                  Consumer(
+                    builder: (context, ref, child) {
+                      final memoryAsync = ref.watch(deviceMemoryProvider);
+                      return memoryAsync.maybeWhen(
+                        data: (memory) {
+                          final isLowRam = memory.isLowRam;
+                          return _buildServerCard(
+                            type: ServerType.onDevice,
+                            title: 'On-Device',
+                            subtitle: isLowRam
+                                ? 'RESTRICTED (LOW RAM)'
+                                : 'NO SERVER NEEDED',
+                            iconWidget: Icon(
+                              Icons.phone_android_rounded,
+                              color: isLowRam
+                                  ? theme.colorScheme.onSurface.withValues(
+                                      alpha: 0.3,
+                                    )
+                                  : (_selectedType == ServerType.onDevice
+                                        ? theme.colorScheme.primary
+                                        : theme.colorScheme.onSurface),
+                            ),
+                            theme: theme,
+                            disabled: isLowRam,
+                            disabledReason:
+                                'Local LLMs require at least 8 GB RAM to run smoothly on your device.',
+                          );
+                        },
+                        orElse: () => _buildServerCard(
+                          type: ServerType.onDevice,
+                          title: 'On-Device',
+                          subtitle: 'NO SERVER NEEDED',
+                          iconWidget: Icon(
+                            Icons.phone_android_rounded,
+                            color: _selectedType == ServerType.onDevice
+                                ? theme.colorScheme.primary
+                                : theme.colorScheme.onSurface,
+                          ),
+                          theme: theme,
+                        ),
+                      );
+                    },
                   ),
                   const SizedBox(height: 16),
                   _buildServerCard(
@@ -208,43 +246,72 @@ class _OnboardingServerTypeScreenState
     required String subtitle,
     required Widget iconWidget,
     required ThemeData theme,
+    bool disabled = false,
+    String? disabledReason,
   }) {
     final isSelected = _selectedType == type;
 
     return GestureDetector(
-      onTap: () {
-        setState(() {
-          _selectedType = type;
-        });
-      },
+      onTap: disabled
+          ? () {
+              if (disabledReason != null) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(disabledReason),
+                    backgroundColor: theme.colorScheme.error,
+                  ),
+                );
+              }
+            }
+          : () {
+              setState(() {
+                _selectedType = type;
+              });
+            },
       child: Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: theme.colorScheme.surface,
+          color: disabled
+              ? theme.colorScheme.surface.withValues(alpha: 0.5)
+              : theme.colorScheme.surface,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isSelected
+            color: isSelected && !disabled
                 ? theme.colorScheme.primary
                 : theme.colorScheme.outline.withValues(alpha: 0.3),
-            width: isSelected ? 2 : 1,
+            width: isSelected && !disabled ? 2 : 1,
           ),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: theme.scaffoldBackgroundColor,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: iconWidget,
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: theme.scaffoldBackgroundColor,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: iconWidget,
+                ),
+                const Spacer(),
+                if (disabled)
+                  const Icon(
+                    Icons.lock_outline_rounded,
+                    size: 20,
+                    color: Colors.orange,
+                  ),
+              ],
             ),
             const SizedBox(height: 16),
             Text(
               title,
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
+                color: disabled
+                    ? theme.colorScheme.onSurface.withValues(alpha: 0.5)
+                    : null,
               ),
             ),
             const SizedBox(height: 4),
@@ -252,7 +319,9 @@ class _OnboardingServerTypeScreenState
               subtitle,
               style: theme.textTheme.labelSmall?.copyWith(
                 letterSpacing: 2,
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                color: disabled
+                    ? Colors.orange.withValues(alpha: 0.7)
+                    : theme.colorScheme.onSurface.withValues(alpha: 0.5),
               ),
             ),
           ],

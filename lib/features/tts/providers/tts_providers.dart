@@ -1,21 +1,17 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:isolate';
-import 'dart:typed_data';
 
 import 'package:archive/archive.dart';
-import 'package:flutter/services.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_tts/flutter_tts.dart';
-import 'package:meomeo/meomeo.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../../../core/logger/app_logger.dart';
 import '../../../core/models/enums.dart';
 import '../../../core/providers/app_providers.dart';
-import '../data/kitten_tts_model.dart';
-import '../data/kokoro_tts_model.dart';
 import 'tts_model_providers.dart';
 import 'tts_worker.dart';
 
@@ -148,15 +144,18 @@ class TtsNotifier extends Notifier<TtsState> {
     if (_workerIsolate != null) return;
 
     Log.info('Spawning TTS worker isolate...');
-    _workerIsolate = await Isolate.spawn(ttsWorkerEntry, _mainReceivePort.sendPort);
-    
+    _workerIsolate = await Isolate.spawn(
+      ttsWorkerEntry,
+      _mainReceivePort.sendPort,
+    );
+
     // Wait for worker to send its SendPort
     int attempts = 0;
     while (_workerSendPort == null && attempts < 200) {
       await Future.delayed(const Duration(milliseconds: 50));
       attempts++;
     }
-    
+
     if (_workerSendPort == null) {
       throw StateError('Failed to establish communication with TTS worker');
     }
@@ -235,7 +234,9 @@ class TtsNotifier extends Notifier<TtsState> {
       }
     }
 
-    Log.info('espeak-data invalid or missing. (Re)extracting espeak-data.zip to $targetPath...');
+    Log.info(
+      'espeak-data invalid or missing. (Re)extracting espeak-data.zip to $targetPath...',
+    );
     if (await dir.exists()) {
       try {
         await dir.delete(recursive: true);
@@ -296,7 +297,10 @@ class TtsNotifier extends Notifier<TtsState> {
       case EngineId.kitten:
         final variant = ref.read(settingsProvider).kittenTtsModelVariant;
         final kittenDl = ref.read(kittenTtsDownloaderProvider);
-        final mPath = await kittenDl.getFilePath(variant, variant.modelFileName);
+        final mPath = await kittenDl.getFilePath(
+          variant,
+          variant.modelFileName,
+        );
         final vPath = await kittenDl.getFilePath(variant, 'voices.npz');
         if (mPath == null || vPath == null) {
           throw StateError(

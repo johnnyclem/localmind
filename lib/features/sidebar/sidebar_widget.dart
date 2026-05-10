@@ -8,7 +8,6 @@ import '../../core/providers/app_providers.dart';
 import '../../core/routes/app_routes.dart';
 import '../../core/theme/app_theme.dart';
 import '../chat/providers/chat_providers.dart';
-import '../tts/providers/tts_providers.dart' as tts;
 import '../tts/views/components/tts_player_bar.dart';
 import 'components/active_server_indicator.dart';
 import 'components/conversation_drawer_header.dart';

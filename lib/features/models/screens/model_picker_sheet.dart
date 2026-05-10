@@ -765,6 +765,17 @@ class _OnDeviceModelTile extends ConsumerWidget {
 
     return InkWell(
       onTap: () {
+        if (deviceMemory?.isLowRam ?? false) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                'On-device models are restricted as your device has less than 8 GB RAM.',
+              ),
+              backgroundColor: Colors.orange,
+            ),
+          );
+          return;
+        }
         if (isLoaded) {
           _selectModel(context, ref);
         } else if (isDownloaded && !isCurrentlyLoading && !isDownloading) {
@@ -933,17 +944,42 @@ class _OnDeviceModelTile extends ConsumerWidget {
                 onPressed: () => ref.read(foregroundDownloadNotifierProvider.notifier).cancelDownload(model.id),
               ),
             ] else ...[
-              Icon(
-                Icons.cloud_download_outlined,
-                size: 18,
-                color: isDark ? const Color(0xFF555555) : const Color(0xFF999999),
+              _IconButton(
+                icon: Icon(
+                  Icons.cloud_download_outlined,
+                  size: 18,
+                  color: (deviceMemory?.isLowRam ?? false)
+                      ? Colors.orange.withValues(alpha: 0.5)
+                      : (isDark ? const Color(0xFF555555) : const Color(0xFF999999)),
+                ),
+                tooltip: (deviceMemory?.isLowRam ?? false)
+                    ? 'Restricted due to low RAM'
+                    : 'Download model',
+                onPressed: (deviceMemory?.isLowRam ?? false)
+                    ? () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'Downloading on-device models is restricted on devices with less than 8 GB RAM.',
+                            ),
+                            backgroundColor: Colors.orange,
+                          ),
+                        );
+                      }
+                    : () {
+                        ref
+                            .read(foregroundDownloadNotifierProvider.notifier)
+                            .startDownload(model.id);
+                      },
               ),
               const SizedBox(width: 4),
               Text(
-                'Not downloaded',
+                (deviceMemory?.isLowRam ?? false) ? 'Restricted' : 'Not downloaded',
                 style: TextStyle(
                   fontSize: 11,
-                  color: isDark ? const Color(0xFF666666) : const Color(0xFF999999),
+                  color: (deviceMemory?.isLowRam ?? false)
+                      ? Colors.orange.withValues(alpha: 0.7)
+                      : (isDark ? const Color(0xFF666666) : const Color(0xFF999999)),
                 ),
               ),
             ],

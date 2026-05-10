@@ -10,6 +10,8 @@ class DeviceMemoryInfo {
     required this.availableMemoryMb,
   });
 
+  bool get isLowRam => totalMemoryMb < 7000; // Threshold for 8GB RAM devices
+
   bool hasEnoughRam(int requiredMb) => availableMemoryMb >= requiredMb;
   bool isOversized(int minRamMb) => totalMemoryMb < minRamMb;
 
@@ -34,7 +36,8 @@ class DeviceMemoryService {
     if (Platform.isAndroid) {
       try {
         final androidInfo = await _deviceInfo.androidInfo;
-        totalMb = androidInfo.physicalRamSize; // In MB
+        // physicalRamSize is in bytes for device_info_plus 4.0.0+
+        totalMb = androidInfo.physicalRamSize ~/ (1024 * 1024);
       } catch (_) {}
 
       try {
