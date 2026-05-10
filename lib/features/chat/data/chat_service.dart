@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'package:dio/dio.dart';
 import '../../servers/data/models/server.dart';
 import 'models/message.dart';
@@ -149,9 +150,11 @@ class LMStudioChatService implements ChatService {
   }) async* {
     _cancelToken = CancelToken();
 
+    final formattedInput = await _formatInputWithImages(messages);
+
     final body = <String, dynamic>{
       'model': modelId,
-      'input': _formatInput(messages),
+      'input': formattedInput,
       'temperature': params.temperature,
       'top_p': params.topP,
       'max_output_tokens': params.maxTokens,
@@ -390,11 +393,34 @@ class LMStudioChatService implements ChatService {
     }
   }
 
-  dynamic _formatInput(List<Message> messages) {
+  Future<dynamic> _formatInputWithImages(List<Message> messages) async {
     final formattedInputs = <Map<String, dynamic>>[];
     for (final m in messages) {
       if (m.role != MessageRole.system) {
-        formattedInputs.add({'type': 'text', 'content': m.content});
+        if (m.attachmentPaths != null && m.attachmentPaths!.isNotEmpty) {
+          formattedInputs.add({'type': 'text', 'content': m.content});
+          for (final path in m.attachmentPaths!) {
+            try {
+              final file = File(path);
+              if (await file.exists()) {
+                final bytes = await file.readAsBytes();
+                final base64Image = base64Encode(bytes);
+                final ext = path.split('.').last.toLowerCase();
+                final mimeType = (ext == 'png')
+                    ? 'image/png'
+                    : (ext == 'webp' ? 'image/webp' : 'image/jpeg');
+                formattedInputs.add({
+                  'type': 'image',
+                  'data_url': 'data:$mimeType;base64,$base64Image',
+                });
+              }
+            } catch (e) {
+              Log.error('Failed to read attachment for LMStudio format: $e');
+            }
+          }
+        } else {
+          formattedInputs.add({'type': 'text', 'content': m.content});
+        }
       }
     }
     return formattedInputs;
