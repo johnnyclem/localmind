@@ -1,9 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:neural_tts/neural_tts.dart';
 
 import '../../features/settings/data/models/app_settings.dart';
 import '../models/enums.dart';
 import '../../features/tts/data/kitten_tts_model.dart';
+import '../../features/tts/data/kokoro_tts_model.dart';
 import 'storage_providers.dart';
 import '../theme/app_theme.dart';
 
@@ -95,13 +95,10 @@ class SettingsNotifier extends Notifier<AppSettings> {
   void setTtsSpeed(double value) => _update(state.copyWith(ttsSpeed: value));
   void setKittenTtsModelVariant(KittenTtsModelVariant value) =>
       _update(state.copyWith(kittenTtsModelVariant: value));
-  void setSupertonicSteps(int value) =>
-      _update(state.copyWith(supertonicSteps: value));
+  void setKokoroTtsModelVariant(KokoroTtsModelVariant value) =>
+      _update(state.copyWith(kokoroTtsModelVariant: value));
   void setAutoSpeakEnabled(bool value) =>
       _update(state.copyWith(autoSpeakEnabled: value));
-  void setUsePhonemizer(bool value) =>
-      _update(state.copyWith(usePhonemizer: value));
-  void setUseEspeak(bool value) => _update(state.copyWith(useEspeak: value));
 
   Future<void> _update(AppSettings updated) async {
     state = updated;

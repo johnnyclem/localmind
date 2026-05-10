@@ -1,10 +1,10 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:neural_tts/neural_tts.dart';
 
 import '../../../../core/models/enums.dart';
 import '../../../../features/tts/data/kitten_tts_model.dart';
+import '../../../../features/tts/data/kokoro_tts_model.dart';
 
 enum SyntaxThemeName { light, dark }
 
@@ -34,10 +34,8 @@ class AppSettings {
   final String? ttsVoiceId;
   final double ttsSpeed;
   final KittenTtsModelVariant kittenTtsModelVariant;
-  final int supertonicSteps;
+  final KokoroTtsModelVariant kokoroTtsModelVariant;
   final bool autoSpeakEnabled;
-  final bool usePhonemizer;
-  final bool useEspeak;
 
   AppSettings({
     this.temperature = 0.7,
@@ -65,10 +63,8 @@ class AppSettings {
     this.ttsVoiceId,
     this.ttsSpeed = 1.0,
     this.kittenTtsModelVariant = KittenTtsModelVariant.nanoInt8,
-    this.supertonicSteps = 5,
+    this.kokoroTtsModelVariant = KokoroTtsModelVariant.int8,
     this.autoSpeakEnabled = false,
-    this.usePhonemizer = true,
-    this.useEspeak = true,
   });
 
   AppSettings copyWith({
@@ -97,10 +93,8 @@ class AppSettings {
     String? ttsVoiceId,
     double? ttsSpeed,
     KittenTtsModelVariant? kittenTtsModelVariant,
-    int? supertonicSteps,
+    KokoroTtsModelVariant? kokoroTtsModelVariant,
     bool? autoSpeakEnabled,
-    bool? usePhonemizer,
-    bool? useEspeak,
   }) {
     return AppSettings(
       temperature: temperature ?? this.temperature,
@@ -132,10 +126,9 @@ class AppSettings {
       ttsSpeed: ttsSpeed ?? this.ttsSpeed,
       kittenTtsModelVariant:
           kittenTtsModelVariant ?? this.kittenTtsModelVariant,
-      supertonicSteps: supertonicSteps ?? this.supertonicSteps,
+      kokoroTtsModelVariant:
+          kokoroTtsModelVariant ?? this.kokoroTtsModelVariant,
       autoSpeakEnabled: autoSpeakEnabled ?? this.autoSpeakEnabled,
-      usePhonemizer: usePhonemizer ?? this.usePhonemizer,
-      useEspeak: useEspeak ?? this.useEspeak,
     );
   }
 
@@ -166,10 +159,8 @@ class AppSettings {
       'ttsVoiceId': ttsVoiceId,
       'ttsSpeed': ttsSpeed,
       'kittenTtsModelVariant': kittenTtsModelVariant.name,
-      'supertonicSteps': supertonicSteps,
+      'kokoroTtsModelVariant': kokoroTtsModelVariant.name,
       'autoSpeakEnabled': autoSpeakEnabled,
-      'usePhonemizer': usePhonemizer,
-      'useEspeak': useEspeak,
     };
   }
 
@@ -199,11 +190,9 @@ class AppSettings {
       ttsEngine: _parseEngine(map['ttsEngine']),
       ttsVoiceId: map['ttsVoiceId'],
       ttsSpeed: map['ttsSpeed']?.toDouble() ?? 1.0,
-      kittenTtsModelVariant: _parseVariant(map['kittenTtsModelVariant']),
-      supertonicSteps: map['supertonicSteps'] ?? 5,
+      kittenTtsModelVariant: _parseKittenVariant(map['kittenTtsModelVariant']),
+      kokoroTtsModelVariant: _parseKokoroVariant(map['kokoroTtsModelVariant']),
       autoSpeakEnabled: map['autoSpeakEnabled'] ?? false,
-      usePhonemizer: map['usePhonemizer'] ?? true,
-      useEspeak: map['useEspeak'] ?? true,
     );
   }
 
@@ -217,13 +206,22 @@ class AppSettings {
     return EngineId.system;
   }
 
-  static KittenTtsModelVariant _parseVariant(dynamic value) {
+  static KittenTtsModelVariant _parseKittenVariant(dynamic value) {
     if (value is String) {
       try {
         return KittenTtsModelVariant.values.byName(value);
       } catch (_) {}
     }
     return KittenTtsModelVariant.nanoInt8;
+  }
+
+  static KokoroTtsModelVariant _parseKokoroVariant(dynamic value) {
+    if (value is String) {
+      try {
+        return KokoroTtsModelVariant.values.byName(value);
+      } catch (_) {}
+    }
+    return KokoroTtsModelVariant.int8;
   }
 
   String toJson() => json.encode(toMap());

@@ -27,38 +27,29 @@ class MessageActionBar extends ConsumerStatefulWidget {
 }
 
 class _MessageActionBarState extends ConsumerState<MessageActionBar> {
-  bool _isSpeaking = false;
-  bool _isInitializing = false;
 
   void _toggleTts() async {
     final ttsNotifier = ref.read(tts.ttsProvider.notifier);
     final ttsState = ref.read(tts.ttsProvider);
+    final isThisPlaying = ttsState.playingContent == widget.content && ttsState.isSpeaking;
 
-    if (_isSpeaking || ttsState.isSpeaking) {
+    if (isThisPlaying) {
       await ttsNotifier.stop();
-      if (mounted) setState(() => _isSpeaking = false);
     } else {
-      setState(() {
-        _isInitializing = true;
-        _isSpeaking = true;
-      });
+      if (ttsState.isSpeaking) {
+        await ttsNotifier.stop();
+      }
       try {
         await ttsNotifier.speak(widget.content);
-      } finally {
-        if (mounted) {
-          setState(() {
-            _isSpeaking = false;
-            _isInitializing = false;
-          });
-        }
-      }
+      } catch (_) {}
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final ttsState = ref.watch(tts.ttsProvider);
-    final isTtsActive = _isSpeaking || ttsState.isSpeaking;
+    final isThisPlaying = ttsState.playingContent == widget.content && ttsState.isSpeaking;
+    final isThisInitializing = ttsState.playingContent == widget.content && ttsState.isInitializing;
 
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -110,13 +101,13 @@ class _MessageActionBarState extends ConsumerState<MessageActionBar> {
         ],
         const SizedBox(width: 4),
         _ActionButton(
-          icon: isTtsActive
+          icon: isThisPlaying
               ? Icons.stop_circle
-              : (_isInitializing ? Icons.hourglass_top : Icons.volume_up),
-          label: isTtsActive
+              : (isThisInitializing ? Icons.hourglass_top : Icons.volume_up),
+          label: isThisPlaying
               ? 'Stop'
-              : (_isInitializing ? 'Loading TTS...' : 'Read Aloud'),
-          onTap: _isInitializing ? null : _toggleTts,
+              : (isThisInitializing ? 'Loading TTS...' : 'Read Aloud'),
+          onTap: isThisInitializing ? null : _toggleTts,
         ),
         const SizedBox(width: 4),
         _ActionButton(
@@ -153,7 +144,7 @@ class _MessageActionBarState extends ConsumerState<MessageActionBar> {
 
   void _showMoreOptions(BuildContext context) {
     final ttsState = ref.read(tts.ttsProvider);
-    final isTtsActive = _isSpeaking || ttsState.isSpeaking;
+    final isThisPlaying = ttsState.playingContent == widget.content && ttsState.isSpeaking;
 
     showShadSheet(
       context: context,
@@ -174,8 +165,8 @@ class _MessageActionBarState extends ConsumerState<MessageActionBar> {
               },
             ),
             ListTile(
-              leading: Icon(isTtsActive ? Icons.stop : Icons.volume_up),
-              title: Text(isTtsActive ? 'Stop Reading' : 'Read Aloud'),
+              leading: Icon(isThisPlaying ? Icons.stop : Icons.volume_up),
+              title: Text(isThisPlaying ? 'Stop Reading' : 'Read Aloud'),
               onTap: () {
                 Navigator.of(context).pop();
                 _toggleTts();

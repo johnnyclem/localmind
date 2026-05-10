@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:localmind/features/sidebar/sidebar_widget.dart';
-import 'package:neural_tts/neural_tts.dart';
 import '../../../core/providers/app_providers.dart';
 import '../../../core/models/enums.dart';
 import '../../../core/routes/app_routes.dart';
@@ -100,21 +99,6 @@ class SettingsViews extends ConsumerWidget {
               isDark: isDark,
               valueFormat: (v) => '${v.toStringAsFixed(2)}x',
             ),
-            if (settings.ttsEngine == EngineId.supertonic)
-              _SliderSetting(
-                label: 'Quality Steps',
-                value: settings.supertonicSteps.toDouble(),
-                min: 1,
-                max: 20,
-                divisions: 5,
-                description:
-                    'Diffusion steps. Higher = better quality, slower.',
-                onChanged: (v) => ref
-                    .read(settingsProvider.notifier)
-                    .setSupertonicSteps(v.round()),
-                isDark: isDark,
-                valueFormat: (v) => v.toStringAsFixed(0),
-              ),
           ],
           const Divider(height: 32),
           _SectionHeader(title: 'Behavior'),
@@ -974,11 +958,6 @@ class _EngineDropdown extends StatelessWidget {
                   _engineItem(
                     EngineId.kokoro,
                     'Kokoro TTS',
-                    Icons.auto_awesome,
-                  ),
-                  _engineItem(
-                    EngineId.supertonic,
-                    'Supertonic TTS',
                     Icons.auto_awesome,
                   ),
                 ],

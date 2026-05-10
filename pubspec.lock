@@ -26,7 +26,7 @@ packages:
     source: hosted
     version: "2.1.2"
   archive:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: archive
       sha256: a96e8b390886ee8abb49b7bd3ac8df6f451c621619f52a26e815fdcf568959ff
@@ -329,8 +329,16 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.2"
-  espeak:
+  dort:
     dependency: transitive
+    description:
+      name: dort
+      sha256: "6fd4d405ef4f6a53b27761a5e5236081a251c0a0340b6a4f15a5926bea3cf307"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.1"
+  espeak:
+    dependency: "direct dev"
     description:
       name: espeak
       sha256: b57d9da4a53e32b8db9a143463075f4510b44b4b5ea34c9ebd1d17a7ea36308a
@@ -467,14 +475,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.7"
-  flutter_onnxruntime:
-    dependency: transitive
-    description:
-      name: flutter_onnxruntime
-      sha256: "72fad60739e01f2278c266f4ec386b392c5ecdfc33d44b4a155c609366f6ece5"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.7.0"
   flutter_plugin_android_lifecycle:
     dependency: transitive
     description:
@@ -781,6 +781,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.13.0"
+  meomeo:
+    dependency: "direct main"
+    description:
+      name: meomeo
+      sha256: "0b5bc652d52328348b794b9a2f6b4309a38e514b99bd39271f94430fa7dcb17b"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.3.2"
   meta:
     dependency: transitive
     description:
@@ -805,14 +813,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.17.6"
-  neural_tts:
-    dependency: "direct main"
+  native_toolchain_rust:
+    dependency: transitive
     description:
-      name: neural_tts
-      sha256: ad55a617d30b6f76e4f97e35c7e16c12fcdc8b64cc87b7ed9caa8e877ce5f6c7
+      name: native_toolchain_rust
+      sha256: "26d4dcae954328af4ebfa8fc56cca0bf74b9ae8b4a6132de5da2071ac3d237b3"
       url: "https://pub.dev"
     source: hosted
-    version: "0.4.0"
+    version: "1.0.4"
   node_preamble:
     dependency: transitive
     description:
@@ -821,14 +829,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.2"
-  number_to_words_english:
-    dependency: transitive
-    description:
-      name: number_to_words_english
-      sha256: "21cd549603a37165caa21c01ab41150421b6378fdb9a533f725055fd2de6ed52"
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.0.4"
   objectbox:
     dependency: "direct main"
     description:
@@ -957,22 +957,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "7.0.2"
-  phonemize:
-    dependency: transitive
-    description:
-      name: phonemize
-      sha256: "793ceb10952d82919002f8599bd6e72781c983cec421c2155283325e7eba93ef"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.0"
-  pinyin:
-    dependency: transitive
-    description:
-      name: pinyin
-      sha256: "240f271a3c71af20c8d2757756b5ee8e9d79a955d37abad4b3568fd406b22411"
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.3.0"
   platform:
     dependency: transitive
     description:
@@ -1299,6 +1283,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.10.1"
+  toml:
+    dependency: transitive
+    description:
+      name: toml
+      sha256: "35a35f782228656a2af31e8c73d1353cc4ef3d683fd68af1111b44631879c05e"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.18.0"
   two_dimensional_scrollables:
     dependency: transitive
     description:

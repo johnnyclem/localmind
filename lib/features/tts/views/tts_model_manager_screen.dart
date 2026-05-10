@@ -1,28 +1,35 @@
 import 'dart:async';
 
-import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:neural_tts/neural_tts.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
+import '../../../core/models/enums.dart';
 import '../../../core/providers/app_providers.dart';
+import '../../settings/data/models/app_settings.dart';
 import '../../sidebar/sidebar_widget.dart';
+import '../data/kitten_tts_model.dart';
+import '../data/kokoro_tts_model.dart';
 import '../providers/tts_model_providers.dart';
 import '../providers/tts_providers.dart' as tts;
 
 /// Async provider for the set of installed engine IDs.
 final installedEnginesProvider = FutureProvider<Set<EngineId>>((ref) async {
   final downloader = ref.read(modelDownloaderProvider);
+  final kittenDownloader = ref.read(kittenTtsDownloaderProvider);
+  final kokoroDownloader = ref.read(kokoroTtsDownloaderProvider);
   final result = <EngineId>{};
-  for (final id in EngineId.values) {
-    if (id == EngineId.system) {
-      result.add(id);
-      continue;
-    }
-    if (await downloader.isEngineDownloaded(id)) {
-      result.add(id);
-    }
+  result.add(EngineId.system);
+  final downloadedVariants = await kittenDownloader.getDownloadedVariants();
+  if (downloadedVariants.isNotEmpty) {
+    result.add(EngineId.kitten);
+  }
+  final downloadedKokoroVariants = await kokoroDownloader.getDownloadedVariants();
+  if (downloadedKokoroVariants.isNotEmpty) {
+    result.add(EngineId.kokoro);
+  }
+  if (await downloader.isEngineDownloaded(EngineId.piper)) {
+    result.add(EngineId.piper);
   }
   return result;
 });
@@ -40,19 +47,13 @@ class TtsModelManagerScreen extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          _PhonemizationSettingsCard(),
-          const SizedBox(height: 16),
           _SystemEngineCard(isSelected: settings.ttsEngine == EngineId.system),
           const SizedBox(height: 16),
-          _KittenEngineCard(
-            isSelected: settings.ttsEngine == EngineId.kitten,
-          ),
+          _KittenEngineCard(isSelected: settings.ttsEngine == EngineId.kitten),
           const SizedBox(height: 16),
           _KokoroEngineCard(isSelected: settings.ttsEngine == EngineId.kokoro),
           const SizedBox(height: 16),
-          _SupertonicEngineCard(
-            isSelected: settings.ttsEngine == EngineId.supertonic,
-          ),
+          _PiperEngineCard(isSelected: settings.ttsEngine == EngineId.piper),
           const SizedBox(height: 24),
         ],
       ),
@@ -101,7 +102,8 @@ class _SystemVoicesList extends ConsumerWidget {
     return Padding(
       padding: const EdgeInsets.only(top: 12),
       child: Text(
-        'Uses your device\'s built-in text-to-speech engine.\nNo downloads required.',
+        'Uses your device\'s built-in text-to-speech engine.\n'
+        'No downloads required. Voice selection uses your device\'s system settings.',
         style: Theme.of(context).textTheme.bodySmall?.copyWith(
           color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
         ),
@@ -117,20 +119,26 @@ class _KittenEngineCard extends ConsumerWidget {
 
   const _KittenEngineCard({required this.isSelected});
 
+  KittenTtsModel _selectedModel(AppSettings settings) {
+    final variant = settings.kittenTtsModelVariant;
+    return KittenTtsModel.allModels.firstWhere((m) => m.variant == variant);
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final settings = ref.watch(settingsProvider);
     final meta = EngineMeta.kitten;
-    final installedAsync = ref.watch(installedEnginesProvider);
-    final downloadProgress = ref.watch(engineDownloadProgressProvider);
-    final isInstalled = installedAsync.when(
-      data: (set) => set.contains(EngineId.kitten),
+    final downloadedAsync = ref.watch(downloadedKittenTtsVariantsProvider);
+    final downloadProgress = ref.watch(ttsDownloadProgressProvider);
+    final model = _selectedModel(settings);
+    final variantProgress = downloadProgress[model.variant];
+    final isInstalled = downloadedAsync.when(
+      data: (set) => set.contains(model.variant),
       loading: () => false,
       error: (_, _) => false,
     );
-    final progress = downloadProgress[EngineId.kitten];
-    final isDownloading = ref
-        .read(engineDownloadProgressProvider.notifier)
-        .isDownloading(EngineId.kitten);
+    final notifier = ref.read(ttsDownloadProgressProvider.notifier);
+    final isDownloading = notifier.isDownloading(model.variant);
 
     return _EngineCard(
       isSelected: isSelected,
@@ -142,7 +150,7 @@ class _KittenEngineCard extends ConsumerWidget {
           : isDownloading
           ? 'Downloading...'
           : 'Not installed',
-      trailing: _buildAction(ref, isInstalled, isDownloading, EngineId.kitten),
+      trailing: _buildAction(ref, isInstalled, isDownloading, model),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -150,7 +158,7 @@ class _KittenEngineCard extends ConsumerWidget {
             padding: const EdgeInsets.only(top: 12),
             child: Text(
               'Lightning-fast neural TTS with 8 expressive voices.\n'
-              'Requires ~57 MB download.',
+              'Requires ${_formatSize(model.totalSizeBytes)} download.',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: Theme.of(
                   context,
@@ -160,7 +168,7 @@ class _KittenEngineCard extends ConsumerWidget {
           ),
           if (isDownloading) ...[
             const SizedBox(height: 12),
-            _buildDownloadProgress(context, ref, EngineId.kitten, progress),
+            _buildVariantDownloadProgress(context, ref, model, variantProgress),
           ],
           if (isInstalled) ...[
             _VoiceChips(voices: kittenVoices, engine: EngineId.kitten),
@@ -174,14 +182,13 @@ class _KittenEngineCard extends ConsumerWidget {
     WidgetRef ref,
     bool isInstalled,
     bool isDownloading,
-    EngineId engine,
+    KittenTtsModel model,
   ) {
+    final notifier = ref.read(ttsDownloadProgressProvider.notifier);
     if (isDownloading) {
       return ShadButton.outline(
         size: ShadButtonSize.sm,
-        onPressed: () => ref
-            .read(engineDownloadProgressProvider.notifier)
-            .cancelDownload(engine),
+        onPressed: () => notifier.cancelDownload(model.variant),
         child: const Text('Cancel'),
       );
     }
@@ -190,28 +197,31 @@ class _KittenEngineCard extends ConsumerWidget {
       return ShadButton.outline(
         size: ShadButtonSize.sm,
         onPressed: () =>
-            ref.read(settingsProvider.notifier).setTtsEngine(engine),
+            ref.read(settingsProvider.notifier).setTtsEngine(EngineId.kitten),
         child: const Text('Select'),
       );
     }
     return ShadButton.outline(
       size: ShadButtonSize.sm,
-      onPressed: () => ref
-          .read(engineDownloadProgressProvider.notifier)
-          .startDownload(engine),
+      onPressed: () => notifier.startDownload(model),
       child: const Text('Install'),
     );
   }
 
-  Widget _buildDownloadProgress(
+  String _formatSize(int bytes) {
+    final mb = bytes / (1024 * 1024);
+    return '${mb.toStringAsFixed(0)} MB';
+  }
+
+  Widget _buildVariantDownloadProgress(
     BuildContext context,
     WidgetRef ref,
-    EngineId engine,
-    Map<String, FileProgress>? progress,
+    KittenTtsModel model,
+    Map<String, KittenTtsFileProgress>? progress,
   ) {
     final fraction = ref
-        .read(engineDownloadProgressProvider.notifier)
-        .getOverallFraction(engine);
+        .read(ttsDownloadProgressProvider.notifier)
+        .getOverallFraction(model.variant);
     return Column(
       children: [
         LinearProgressIndicator(value: fraction),
@@ -248,20 +258,26 @@ class _KokoroEngineCard extends ConsumerWidget {
 
   const _KokoroEngineCard({required this.isSelected});
 
+  KokoroTtsModel _selectedModel(AppSettings settings) {
+    final variant = settings.kokoroTtsModelVariant;
+    return KokoroTtsModel.forVariant(variant);
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final settings = ref.watch(settingsProvider);
     final meta = EngineMeta.kokoro;
-    final installedAsync = ref.watch(installedEnginesProvider);
-    final downloadProgress = ref.watch(engineDownloadProgressProvider);
-    final isInstalled = installedAsync.when(
-      data: (set) => set.contains(EngineId.kokoro),
+    final downloadedAsync = ref.watch(downloadedKokoroTtsVariantsProvider);
+    final downloadProgress = ref.watch(kokoroTtsDownloadProgressProvider);
+    final model = _selectedModel(settings);
+    final variantProgress = downloadProgress[model.variant];
+    final isInstalled = downloadedAsync.when(
+      data: (set) => set.contains(model.variant),
       loading: () => false,
       error: (_, _) => false,
     );
-    final progress = downloadProgress[EngineId.kokoro];
-    final isDownloading = ref
-        .read(engineDownloadProgressProvider.notifier)
-        .isDownloading(EngineId.kokoro);
+    final notifier = ref.read(kokoroTtsDownloadProgressProvider.notifier);
+    final isDownloading = notifier.isDownloading(model.variant);
 
     return _EngineCard(
       isSelected: isSelected,
@@ -273,7 +289,7 @@ class _KokoroEngineCard extends ConsumerWidget {
           : isDownloading
           ? 'Downloading...'
           : 'Not installed',
-      trailing: _buildAction(ref, isInstalled, isDownloading, EngineId.kokoro),
+      trailing: _buildAction(ref, isInstalled, isDownloading, model),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -281,17 +297,23 @@ class _KokoroEngineCard extends ConsumerWidget {
             padding: const EdgeInsets.only(top: 12),
             child: Text(
               'Kokoro 82M parameter model with 22 expressive voices.\n'
-              'Requires ~170 MB download.',
+              'Requires ${_formatSize(model.totalSizeBytes)} download.',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(
-                  context,
-                ).colorScheme.onSurface.withValues(alpha: 0.6),
-              ),
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onSurface
+                        .withValues(alpha: 0.6),
+                  ),
             ),
           ),
           if (isDownloading) ...[
             const SizedBox(height: 12),
-            _buildDownloadProgress(context, ref, EngineId.kokoro, progress),
+            _buildVariantDownloadProgress(
+              context,
+              ref,
+              model,
+              variantProgress,
+            ),
           ],
           if (isInstalled) ...[
             _VoiceChips(voices: kokoroVoices, engine: EngineId.kokoro),
@@ -305,14 +327,13 @@ class _KokoroEngineCard extends ConsumerWidget {
     WidgetRef ref,
     bool isInstalled,
     bool isDownloading,
-    EngineId engine,
+    KokoroTtsModel model,
   ) {
+    final notifier = ref.read(kokoroTtsDownloadProgressProvider.notifier);
     if (isDownloading) {
       return ShadButton.outline(
         size: ShadButtonSize.sm,
-        onPressed: () => ref
-            .read(engineDownloadProgressProvider.notifier)
-            .cancelDownload(engine),
+        onPressed: () => notifier.cancelDownload(model.variant),
         child: const Text('Cancel'),
       );
     }
@@ -321,28 +342,31 @@ class _KokoroEngineCard extends ConsumerWidget {
       return ShadButton.outline(
         size: ShadButtonSize.sm,
         onPressed: () =>
-            ref.read(settingsProvider.notifier).setTtsEngine(engine),
+            ref.read(settingsProvider.notifier).setTtsEngine(EngineId.kokoro),
         child: const Text('Select'),
       );
     }
     return ShadButton.outline(
       size: ShadButtonSize.sm,
-      onPressed: () => ref
-          .read(engineDownloadProgressProvider.notifier)
-          .startDownload(engine),
+      onPressed: () => notifier.startDownload(model.variant),
       child: const Text('Install'),
     );
   }
 
-  Widget _buildDownloadProgress(
+  String _formatSize(int bytes) {
+    final mb = bytes / (1024 * 1024);
+    return '${mb.toStringAsFixed(0)} MB';
+  }
+
+  Widget _buildVariantDownloadProgress(
     BuildContext context,
     WidgetRef ref,
-    EngineId engine,
-    Map<String, FileProgress>? progress,
+    KokoroTtsModel model,
+    Map<String, KokoroTtsFileProgress>? progress,
   ) {
     final fraction = ref
-        .read(engineDownloadProgressProvider.notifier)
-        .getOverallFraction(engine);
+        .read(kokoroTtsDownloadProgressProvider.notifier)
+        .getOverallFraction(model.variant);
     return Column(
       children: [
         LinearProgressIndicator(value: fraction),
@@ -372,138 +396,58 @@ class _KokoroEngineCard extends ConsumerWidget {
   }
 }
 
-// ── Supertonic Engine ──
+// ── Piper Engine ──
 
-class _SupertonicEngineCard extends ConsumerWidget {
+class _PiperEngineCard extends ConsumerWidget {
   final bool isSelected;
 
-  const _SupertonicEngineCard({required this.isSelected});
+  const _PiperEngineCard({required this.isSelected});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final meta = EngineMeta.supertonic;
+    final meta = EngineMeta(
+      name: 'Piper TTS',
+      tagline: 'Open-source neural voices',
+      sizeMb: 50,
+      ramMb: 100,
+      voiceCount: 100,
+      accentColor: 0xFF4CAF50,
+    );
     final installedAsync = ref.watch(installedEnginesProvider);
-    final downloadProgress = ref.watch(engineDownloadProgressProvider);
     final isInstalled = installedAsync.when(
-      data: (set) => set.contains(EngineId.supertonic),
+      data: (set) => set.contains(EngineId.piper),
       loading: () => false,
       error: (_, _) => false,
     );
-    final progress = downloadProgress[EngineId.supertonic];
-    final isDownloading = ref
-        .read(engineDownloadProgressProvider.notifier)
-        .isDownloading(EngineId.supertonic);
 
     return _EngineCard(
       isSelected: isSelected,
       meta: meta,
-      engine: EngineId.supertonic,
+      engine: EngineId.piper,
       installed: isInstalled,
-      statusText: isInstalled
-          ? 'Installed'
-          : isDownloading
-          ? 'Downloading...'
-          : 'Not installed',
-      trailing: _buildAction(
-        ref,
-        isInstalled,
-        isDownloading,
-        EngineId.supertonic,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(top: 12),
-            child: Text(
-              'Studio-quality multilingual TTS with 10 voices.\n'
-              'Supports EN, KO, ES, PT, FR. Requires ~265 MB download.',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(
-                  context,
-                ).colorScheme.onSurface.withValues(alpha: 0.6),
+      statusText: isInstalled ? 'Installed' : 'Not installed',
+      trailing: isInstalled && !isSelected
+          ? ShadButton.outline(
+              size: ShadButtonSize.sm,
+              onPressed: () => ref
+                  .read(settingsProvider.notifier)
+                  .setTtsEngine(EngineId.piper),
+              child: const Text('Select'),
+            )
+          : null,
+      child: Padding(
+        padding: const EdgeInsets.only(top: 12),
+        child: Text(
+          'One ONNX model per voice. 30+ languages, hundreds of voices.\n'
+          'Place model files in the tts_models/piper directory.',
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context)
+                    .colorScheme
+                    .onSurface
+                    .withValues(alpha: 0.6),
               ),
-            ),
-          ),
-          if (isDownloading) ...[
-            const SizedBox(height: 12),
-            _buildDownloadProgress(context, ref, EngineId.supertonic, progress),
-          ],
-          if (isInstalled) ...[
-            _VoiceChips(voices: supertonicVoices, engine: EngineId.supertonic),
-          ],
-        ],
+        ),
       ),
-    );
-  }
-
-  Widget _buildAction(
-    WidgetRef ref,
-    bool isInstalled,
-    bool isDownloading,
-    EngineId engine,
-  ) {
-    if (isDownloading) {
-      return ShadButton.outline(
-        size: ShadButtonSize.sm,
-        onPressed: () => ref
-            .read(engineDownloadProgressProvider.notifier)
-            .cancelDownload(engine),
-        child: const Text('Cancel'),
-      );
-    }
-    if (isInstalled) {
-      if (isSelected) return const SizedBox.shrink();
-      return ShadButton.outline(
-        size: ShadButtonSize.sm,
-        onPressed: () =>
-            ref.read(settingsProvider.notifier).setTtsEngine(engine),
-        child: const Text('Select'),
-      );
-    }
-    return ShadButton.outline(
-      size: ShadButtonSize.sm,
-      onPressed: () => ref
-          .read(engineDownloadProgressProvider.notifier)
-          .startDownload(engine),
-      child: const Text('Install'),
-    );
-  }
-
-  Widget _buildDownloadProgress(
-    BuildContext context,
-    WidgetRef ref,
-    EngineId engine,
-    Map<String, FileProgress>? progress,
-  ) {
-    final fraction = ref
-        .read(engineDownloadProgressProvider.notifier)
-        .getOverallFraction(engine);
-    return Column(
-      children: [
-        LinearProgressIndicator(value: fraction),
-        const SizedBox(height: 4),
-        if (progress != null)
-          ...progress.entries.map(
-            (e) => Padding(
-              padding: const EdgeInsets.only(bottom: 2),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      e.key,
-                      style: Theme.of(context).textTheme.labelSmall,
-                    ),
-                  ),
-                  Text(
-                    '${(e.value.fraction * 100).toStringAsFixed(0)}%',
-                    style: Theme.of(context).textTheme.labelSmall,
-                  ),
-                ],
-              ),
-            ),
-          ),
-      ],
     );
   }
 }
@@ -637,10 +581,10 @@ class _EngineCard extends StatelessWidget {
                   ),
                 ),
               const Spacer(),
-              if (trailing != null) trailing!,
+              ?trailing,
             ],
           ),
-          if (child != null) child!,
+          ?child,
         ],
       ),
     );
@@ -658,18 +602,15 @@ class _VoiceChips extends ConsumerStatefulWidget {
 }
 
 class _VoiceChipsState extends ConsumerState<_VoiceChips> {
-  final AudioPlayer _player = AudioPlayer();
   Voice? _playingVoice;
-
-  @override
-  void dispose() {
-    _player.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final settings = ref.watch(settingsProvider);
+    final selectedVoiceId = widget.engine == settings.ttsEngine
+        ? settings.ttsVoiceId
+        : null;
     final females = widget.voices.where((v) => v.gender == 'f').toList();
     final males = widget.voices.where((v) => v.gender == 'm').toList();
     final accent = Color(EngineMeta.forEngine(widget.engine).accentColor);
@@ -691,7 +632,7 @@ class _VoiceChipsState extends ConsumerState<_VoiceChips> {
               spacing: 6,
               runSpacing: 6,
               children: females
-                  .map((v) => _voiceChip(v, theme, accent))
+                  .map((v) => _voiceChip(v, theme, accent, selectedVoiceId))
                   .toList(),
             ),
             const SizedBox(height: 8),
@@ -707,7 +648,9 @@ class _VoiceChipsState extends ConsumerState<_VoiceChips> {
             Wrap(
               spacing: 6,
               runSpacing: 6,
-              children: males.map((v) => _voiceChip(v, theme, accent)).toList(),
+              children: males
+                  .map((v) => _voiceChip(v, theme, accent, selectedVoiceId))
+                  .toList(),
             ),
           ],
         ],
@@ -715,42 +658,69 @@ class _VoiceChipsState extends ConsumerState<_VoiceChips> {
     );
   }
 
-  Widget _voiceChip(Voice voice, ThemeData theme, Color accent) {
+  Widget _voiceChip(
+    Voice voice,
+    ThemeData theme,
+    Color accent,
+    String? selectedVoiceId,
+  ) {
     final isPlaying = _playingVoice == voice;
+    final isSelected = voice.id == selectedVoiceId && !isPlaying;
+
     return ActionChip(
       avatar: Icon(
-        isPlaying ? Icons.stop : Icons.play_arrow,
+        isSelected
+            ? Icons.check_circle
+            : isPlaying
+            ? Icons.stop
+            : Icons.play_arrow,
         size: 16,
-        color: isPlaying
+        color: isSelected
+            ? Colors.green
+            : isPlaying
             ? accent
             : theme.colorScheme.onSurface.withValues(alpha: 0.5),
       ),
       label: Text(voice.name),
       labelStyle: theme.textTheme.labelSmall?.copyWith(
-        color: isPlaying ? accent : theme.colorScheme.onSurface,
-        fontWeight: isPlaying ? FontWeight.bold : FontWeight.normal,
+        color: isSelected
+            ? Colors.green
+            : isPlaying
+            ? accent
+            : theme.colorScheme.onSurface,
+        fontWeight: isSelected || isPlaying
+            ? FontWeight.bold
+            : FontWeight.normal,
       ),
-      backgroundColor: isPlaying
+      backgroundColor: isSelected
+          ? Colors.green.withValues(alpha: 0.1)
+          : isPlaying
           ? accent.withValues(alpha: 0.1)
           : Colors.transparent,
       side: BorderSide(
-        color: isPlaying
+        color: isSelected
+            ? Colors.green.withValues(alpha: 0.5)
+            : isPlaying
             ? accent.withValues(alpha: 0.3)
             : theme.colorScheme.outline.withValues(alpha: 0.2),
       ),
-      onPressed: () => _togglePreview(voice),
+      onPressed: () => _selectAndPreview(voice),
     );
   }
 
-  Future<void> _togglePreview(Voice voice) async {
+  Future<void> _selectAndPreview(Voice voice) async {
+    // Set as default voice for this engine
+    ref.read(settingsProvider.notifier).setTtsVoiceId(voice.id);
+
+    // Preview the voice
     if (_playingVoice == voice) {
-      await _player.stop();
-      setState(() => _playingVoice = null);
+      await ref.read(tts.ttsProvider.notifier).stop();
+      if (mounted) setState(() => _playingVoice = null);
       return;
     }
     try {
       await ref.read(tts.ttsProvider.notifier).previewVoice(voice);
-      setState(() => _playingVoice = voice);
+      if (mounted) setState(() => _playingVoice = voice);
       Future.delayed(const Duration(seconds: 2), () {
         if (mounted) setState(() => _playingVoice = null);
       });
@@ -761,48 +731,5 @@ class _VoiceChipsState extends ConsumerState<_VoiceChips> {
         ).showSnackBar(SnackBar(content: Text('Preview failed: $e')));
       }
     }
-  }
-}
-
-class _PhonemizationSettingsCard extends ConsumerWidget {
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final settings = ref.watch(settingsProvider);
-
-    return ShadCard(
-      title: const Text('Phonemization Settings'),
-      description: const Text('Improve pronunciation using IPA phonemes.'),
-      child: Column(
-        children: [
-          ShadSwitch(
-            value: settings.usePhonemizer && settings.useEspeak,
-            onChanged: (v) {
-              if (v) {
-                ref.read(settingsProvider.notifier).setUsePhonemizer(true);
-                ref.read(settingsProvider.notifier).setUseEspeak(true);
-              } else {
-                ref.read(settingsProvider.notifier).setUsePhonemizer(false);
-              }
-            },
-            label: const Text('Use Espeak-NG (Recommended)'),
-            sublabel: const Text('High-fidelity IPA phonemization'),
-          ),
-          const SizedBox(height: 12),
-          ShadSwitch(
-            value: settings.usePhonemizer && !settings.useEspeak,
-            onChanged: (v) {
-              if (v) {
-                ref.read(settingsProvider.notifier).setUsePhonemizer(true);
-                ref.read(settingsProvider.notifier).setUseEspeak(false);
-              } else {
-                ref.read(settingsProvider.notifier).setUsePhonemizer(false);
-              }
-            },
-            label: const Text('Use Rule-based (Legacy)'),
-            sublabel: const Text('Lightweight but less accurate'),
-          ),
-        ],
-      ),
-    );
   }
 }

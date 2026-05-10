@@ -2,13 +2,20 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:neural_tts/neural_tts.dart';
+import '../data/model_downloader.dart';
 import '../data/kitten_tts_model.dart';
 import '../data/kitten_tts_downloader.dart';
+import '../data/kokoro_tts_model.dart';
+import '../data/kokoro_tts_downloader.dart';
 
 /// Provider for the KittenTTS downloader instance.
 final kittenTtsDownloaderProvider = Provider<KittenTtsDownloader>((ref) {
   return KittenTtsDownloader();
+});
+
+/// Provider for the Kokoro TTS downloader instance.
+final kokoroTtsDownloaderProvider = Provider<KokoroTtsDownloader>((ref) {
+  return KokoroTtsDownloader();
 });
 
 final modelDownloaderProvider = Provider<ModelDownloader>((ref) {
@@ -20,12 +27,26 @@ final kittenTtsModelsProvider = Provider<List<KittenTtsModel>>((ref) {
   return KittenTtsModel.allModels;
 });
 
-/// Async provider for the set of downloaded variants.
+/// Static list of all available Kokoro TTS models.
+final kokoroTtsModelsProvider = Provider<List<KokoroTtsModel>>((ref) {
+  return KokoroTtsModel.allModels;
+});
+
+/// Async provider for the set of downloaded KittenTTS variants.
 final downloadedKittenTtsVariantsProvider =
     FutureProvider<Set<KittenTtsModelVariant>>((ref) async {
       final downloader = ref.read(kittenTtsDownloaderProvider);
       return downloader.getDownloadedVariants();
     });
+
+/// Async provider for the set of downloaded Kokoro variants.
+final downloadedKokoroTtsVariantsProvider =
+    FutureProvider<Set<KokoroTtsModelVariant>>((ref) async {
+      final downloader = ref.read(kokoroTtsDownloaderProvider);
+      return downloader.getDownloadedVariants();
+    });
+
+// ── KittenTTS Download Progress ──
 
 /// Notifier that tracks per-file download progress for KittenTTS models.
 final ttsDownloadProgressProvider =
@@ -81,7 +102,7 @@ class TtsDownloadNotifier
             ref.invalidate(downloadedKittenTtsVariantsProvider);
           },
           onError: (e) {
-            Log.error(
+            _ModelLog.error(
               'KittenTTS download error for ${variant.displayName}: $e',
             );
             _subscriptions.remove(variant);
@@ -136,19 +157,25 @@ class TtsDownloadNotifier
   }
 }
 
-/// Notifier that tracks per-file download progress for any TTS engine.
-final engineDownloadProgressProvider =
-    NotifierProvider<
-      EngineDownloadNotifier,
-      Map<EngineId, Map<String, FileProgress>>
-    >(() => EngineDownloadNotifier());
+// ── Kokoro TTS Download Progress ──
 
-class EngineDownloadNotifier
-    extends Notifier<Map<EngineId, Map<String, FileProgress>>> {
-  final Map<EngineId, StreamSubscription<FileProgress>> _subscriptions = {};
+/// Notifier that tracks per-file download progress for Kokoro TTS models.
+final kokoroTtsDownloadProgressProvider =
+    NotifierProvider<
+      KokoroTtsDownloadNotifier,
+      Map<KokoroTtsModelVariant, Map<String, KokoroTtsFileProgress>>
+    >(() => KokoroTtsDownloadNotifier());
+
+class KokoroTtsDownloadNotifier
+    extends
+        Notifier<
+          Map<KokoroTtsModelVariant, Map<String, KokoroTtsFileProgress>>
+        > {
+  final Map<KokoroTtsModelVariant, StreamSubscription<KokoroTtsFileProgress>>
+  _subscriptions = {};
 
   @override
-  Map<EngineId, Map<String, FileProgress>> build() {
+  Map<KokoroTtsModelVariant, Map<String, KokoroTtsFileProgress>> build() {
     ref.onDispose(() {
       for (final sub in _subscriptions.values) {
         sub.cancel();
@@ -158,62 +185,84 @@ class EngineDownloadNotifier
     return {};
   }
 
-  Future<void> startDownload(EngineId engine) async {
-    final currentProgress = Map<String, FileProgress>.from(state[engine] ?? {});
-    state = {...state, engine: currentProgress};
+  Future<void> startDownload(KokoroTtsModelVariant variant) async {
+    final currentVariantProgress = Map<String, KokoroTtsFileProgress>.from(
+      state[variant] ?? {},
+    );
 
-    final downloader = ref.read(modelDownloaderProvider);
-    _subscriptions[engine]?.cancel();
-    _subscriptions[engine] = downloader
-        .downloadEngineFiles(engine)
+    state = {...state, variant: currentVariantProgress};
+
+    final downloader = ref.read(kokoroTtsDownloaderProvider);
+
+    _subscriptions[variant]?.cancel();
+    _subscriptions[variant] = downloader
+        .downloadModel(variant)
         .listen(
           (progress) {
-            final engineMap = Map<String, FileProgress>.from(
-              state[engine] ?? {},
+            final variantMap = Map<String, KokoroTtsFileProgress>.from(
+              state[variant] ?? {},
             );
-            engineMap[progress.fileName] = progress;
-            state = {...state, engine: engineMap};
+            variantMap[progress.fileName] = progress;
+            state = {...state, variant: variantMap};
           },
           onDone: () {
-            _subscriptions.remove(engine);
-            // Refresh whatever is needed
+            _subscriptions.remove(variant);
+            ref.invalidate(downloadedKokoroTtsVariantsProvider);
           },
           onError: (e) {
-            Log.error('Engine $engine download error: $e');
-            _subscriptions.remove(engine);
+            _ModelLog.error(
+              'Kokoro TTS download error for ${variant.displayName}: $e',
+            );
+            _subscriptions.remove(variant);
           },
         );
   }
 
-  void cancelDownload(EngineId engine) {
-    ref.read(modelDownloaderProvider).cancelDownload(engine);
-    _subscriptions[engine]?.cancel();
-    _subscriptions.remove(engine);
-    final newState = Map<EngineId, Map<String, FileProgress>>.from(state);
-    newState.remove(engine);
+  void cancelDownload(KokoroTtsModelVariant variant) {
+    ref.read(kokoroTtsDownloaderProvider).cancelDownload(variant);
+    _subscriptions[variant]?.cancel();
+    _subscriptions.remove(variant);
+
+    final newState =
+        Map<KokoroTtsModelVariant, Map<String, KokoroTtsFileProgress>>.from(
+          state,
+        );
+    newState.remove(variant);
     state = newState;
   }
 
-  bool isDownloading(EngineId engine) {
-    final progress = state[engine];
-    if (progress == null || progress.isEmpty) return false;
-    return !progress.values.every((f) => f.isComplete);
+  Future<void> deleteVariant(KokoroTtsModelVariant variant) async {
+    cancelDownload(variant);
+    await ref.read(kokoroTtsDownloaderProvider).deleteVariant(variant);
+
+    final newState =
+        Map<KokoroTtsModelVariant, Map<String, KokoroTtsFileProgress>>.from(
+          state,
+        );
+    newState.remove(variant);
+    state = newState;
+
+    ref.invalidate(downloadedKokoroTtsVariantsProvider);
   }
 
-  double getOverallFraction(EngineId engine) {
-    final progress = state[engine];
-    if (progress == null || progress.isEmpty) return 0.0;
-    final total = progress.values
+  bool isDownloading(KokoroTtsModelVariant variant) {
+    final variantProgress = state[variant];
+    if (variantProgress == null || variantProgress.isEmpty) return false;
+    return !variantProgress.values.every((f) => f.isComplete);
+  }
+
+  double getOverallFraction(KokoroTtsModelVariant variant) {
+    final variantProgress = state[variant];
+    if (variantProgress == null || variantProgress.isEmpty) return 0.0;
+    final total = variantProgress.values
         .map((f) => f.fraction)
         .fold<double>(0.0, (a, b) => a + b);
-    return total / progress.length;
+    return total / variantProgress.length;
   }
 }
 
-/// Simple log helper within this file.
-class Log {
+class _ModelLog {
   static void error(String message) {
-    // ignore: avoid_print
-    print('[TtsDownloadNotifier] ERROR: $message');
+    print('[TtsModel] ERROR: $message');
   }
 }
