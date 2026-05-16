@@ -4,11 +4,12 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/models/enums.dart';
 import '../../../../features/tts/data/kitten_tts_model.dart';
-import '../../../../features/tts/data/kokoro_tts_model.dart';
 
 enum SyntaxThemeName { light, dark }
 
 class AppSettings {
+  static const Object _unset = Object();
+
   final double temperature;
   final double topP;
   final int maxTokens;
@@ -34,7 +35,6 @@ class AppSettings {
   final String? ttsVoiceId;
   final double ttsSpeed;
   final KittenTtsModelVariant kittenTtsModelVariant;
-  final KokoroTtsModelVariant kokoroTtsModelVariant;
   final bool autoSpeakEnabled;
 
   AppSettings({
@@ -63,7 +63,6 @@ class AppSettings {
     this.ttsVoiceId,
     this.ttsSpeed = 1.0,
     this.kittenTtsModelVariant = KittenTtsModelVariant.nanoInt8,
-    this.kokoroTtsModelVariant = KokoroTtsModelVariant.int8,
     this.autoSpeakEnabled = false,
   });
 
@@ -90,10 +89,9 @@ class AppSettings {
     SyntaxThemeName? codeThemeLight,
     LiteLmBackendType? preferredBackend,
     EngineId? ttsEngine,
-    String? ttsVoiceId,
+    Object? ttsVoiceId = _unset,
     double? ttsSpeed,
     KittenTtsModelVariant? kittenTtsModelVariant,
-    KokoroTtsModelVariant? kokoroTtsModelVariant,
     bool? autoSpeakEnabled,
   }) {
     return AppSettings(
@@ -122,12 +120,12 @@ class AppSettings {
       codeThemeLight: codeThemeLight ?? this.codeThemeLight,
       preferredBackend: preferredBackend ?? this.preferredBackend,
       ttsEngine: ttsEngine ?? this.ttsEngine,
-      ttsVoiceId: ttsVoiceId ?? this.ttsVoiceId,
+      ttsVoiceId: identical(ttsVoiceId, _unset)
+          ? this.ttsVoiceId
+          : ttsVoiceId as String?,
       ttsSpeed: ttsSpeed ?? this.ttsSpeed,
       kittenTtsModelVariant:
           kittenTtsModelVariant ?? this.kittenTtsModelVariant,
-      kokoroTtsModelVariant:
-          kokoroTtsModelVariant ?? this.kokoroTtsModelVariant,
       autoSpeakEnabled: autoSpeakEnabled ?? this.autoSpeakEnabled,
     );
   }
@@ -159,7 +157,6 @@ class AppSettings {
       'ttsVoiceId': ttsVoiceId,
       'ttsSpeed': ttsSpeed,
       'kittenTtsModelVariant': kittenTtsModelVariant.name,
-      'kokoroTtsModelVariant': kokoroTtsModelVariant.name,
       'autoSpeakEnabled': autoSpeakEnabled,
     };
   }
@@ -191,7 +188,6 @@ class AppSettings {
       ttsVoiceId: map['ttsVoiceId'],
       ttsSpeed: map['ttsSpeed']?.toDouble() ?? 1.0,
       kittenTtsModelVariant: _parseKittenVariant(map['kittenTtsModelVariant']),
-      kokoroTtsModelVariant: _parseKokoroVariant(map['kokoroTtsModelVariant']),
       autoSpeakEnabled: map['autoSpeakEnabled'] ?? false,
     );
   }
@@ -213,15 +209,6 @@ class AppSettings {
       } catch (_) {}
     }
     return KittenTtsModelVariant.nanoInt8;
-  }
-
-  static KokoroTtsModelVariant _parseKokoroVariant(dynamic value) {
-    if (value is String) {
-      try {
-        return KokoroTtsModelVariant.values.byName(value);
-      } catch (_) {}
-    }
-    return KokoroTtsModelVariant.int8;
   }
 
   String toJson() => json.encode(toMap());

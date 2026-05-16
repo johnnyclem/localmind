@@ -7,178 +7,132 @@ import 'package:wakelock_plus/wakelock_plus.dart';
 
 import '../../../core/logger/app_logger.dart';
 import 'kitten_tts_model.dart';
+import 'sherpa_bundle_downloader.dart';
 
-/// Downloads KittenTTS model files (config.json, model.onnx, voices.npz)
-/// from HuggingFace with resume support and per-file progress reporting.
+/// Downloads sherpa-onnx Kitten TTS bundles.
 class KittenTtsDownloader {
   final Dio _dio = Dio();
   final Map<String, CancelToken> _activeDownloads = {};
 
-  /// Returns the storage directory for a given variant.
-  Future<Directory> _getVariantDir(KittenTtsModelVariant variant) async {
+  Future<Directory> _getEngineDir() async {
     final supportDir = await getApplicationSupportDirectory();
-    final dir = Directory('${supportDir.path}/kitten_tts/${variant.dirName}');
+    final dir = Directory('${supportDir.path}/tts_models/kitten');
     if (!await dir.exists()) {
       await dir.create(recursive: true);
     }
     return dir;
   }
 
-  /// Check whether all files for a variant have been downloaded.
+  Future<Directory> _getVariantDir(KittenTtsModelVariant variant) async {
+    final engineDir = await _getEngineDir();
+    return Directory('${engineDir.path}/${variant.bundleDirName}');
+  }
+
   Future<bool> isVariantDownloaded(KittenTtsModelVariant variant) async {
     final dir = await _getVariantDir(variant);
-    for (final file in variant.files) {
-      final path = '${dir.path}/${file.fileName}';
-      if (!await File(path).exists()) {
-        return false;
-      }
-    }
-    return true;
+    return await File('${dir.path}/${variant.modelFileName}').exists() &&
+        await File('${dir.path}/${variant.voicesFileName}').exists() &&
+        await File('${dir.path}/${variant.tokensFileName}').exists() &&
+        await Directory('${dir.path}/${variant.dataDirName}').exists();
   }
 
-  /// Get total downloaded bytes for a variant.
-  Future<int> getDownloadedBytes(KittenTtsModelVariant variant) async {
-    final dir = await _getVariantDir(variant);
-    int total = 0;
-    for (final file in variant.files) {
-      final path = '${dir.path}/${file.fileName}';
-      final f = File(path);
-      if (await f.exists()) {
-        total += await f.length();
-      }
-    }
-    return total;
-  }
+  Stream<KittenTtsFileProgress> downloadModel(KittenTtsModel model) {
+    final variant = model.variant;
+    final variantKey = variant.name;
 
-  /// Download all files for [model], emitting per-file progress.
-  Stream<KittenTtsFileProgress> downloadModel(KittenTtsModel model) async* {
-    final variantId = model.variant.name;
-    final dir = await _getVariantDir(model.variant);
+    return Stream<KittenTtsFileProgress>.multi((controller) async {
+      final engineDir = await _getEngineDir();
+      final variantDir = await _getVariantDir(variant);
+      await variantDir.parent.create(recursive: true);
 
-    await WakelockPlus.enable();
+      await WakelockPlus.enable();
 
-    try {
-      for (final file in model.files) {
+      try {
         final cancelToken = CancelToken();
-        _activeDownloads[variantId] = cancelToken;
+        _activeDownloads[variantKey] = cancelToken;
 
-        final filePath = '${dir.path}/${file.fileName}';
-        final partialPath = '$filePath.part';
-        final partialFile = File(partialPath);
+        final tempDir = await getTemporaryDirectory();
+        final archivePath = '${tempDir.path}/${variant.bundleDirName}.tar.bz2';
+        final archiveFile = File(archivePath);
+        final fileName = '${variant.bundleDirName}.tar.bz2';
 
-        int receivedBytes = 0;
+        controller.add(
+          KittenTtsFileProgress(
+            fileName: fileName,
+            variant: variant,
+            receivedBytes: 0,
+            totalBytes: model.totalSizeBytes,
+            isComplete: false,
+          ),
+        );
 
-        if (await partialFile.exists()) {
-          receivedBytes = await partialFile.length();
-          Log.info(
-            'Resuming KittenTTS ${model.variant.displayName} ${file.fileName} from $receivedBytes bytes',
-          );
-        }
-
-        DateTime lastProgressUpdate = DateTime.now();
-
-        try {
-          final response = await _resolveWithRedirects(
-            url: file.downloadUrl,
-            startByte: receivedBytes,
-            cancelToken: cancelToken,
-          );
-
-          final totalBytes = (response.headers.value(Headers.contentLengthHeader) != null)
-              ? int.parse(response.headers.value(Headers.contentLengthHeader)!) + receivedBytes
-              : file.sizeBytes;
-
-          final IOSink sink = partialFile.openWrite(mode: FileMode.append);
-          final stream = response.data?.stream;
-
-          if (stream == null) {
-            await sink.close();
-            throw DioException(
-              requestOptions: response.requestOptions,
-              error: 'Response data stream is null',
-            );
-          }
-
-          await for (final List<int> chunk in stream) {
-            if (cancelToken.isCancelled) break;
-            sink.add(chunk);
-            receivedBytes += chunk.length;
-
-            final now = DateTime.now();
-            final elapsedSinceLastUpdate = now.difference(lastProgressUpdate);
-
-            if (elapsedSinceLastUpdate.inMilliseconds >= 500) {
-              yield KittenTtsFileProgress(
-                fileName: file.fileName,
-                variant: model.variant,
-                receivedBytes: receivedBytes,
+        await _dio.download(
+          variant.tarballUrl,
+          archiveFile.path,
+          cancelToken: cancelToken,
+          onReceiveProgress: (received, total) {
+            final totalBytes = total > 0 ? total : model.totalSizeBytes;
+            controller.add(
+              KittenTtsFileProgress(
+                fileName: fileName,
+                variant: variant,
+                receivedBytes: received,
                 totalBytes: totalBytes,
-              );
+                isComplete: false,
+              ),
+            );
+          },
+        );
 
-              lastProgressUpdate = now;
-            }
-          }
-
-          await sink.flush();
-          await sink.close();
-
-          await partialFile.rename(filePath);
-          Log.info(
-            'KittenTTS ${model.variant.displayName} ${file.fileName} downloaded',
-          );
-
-          yield KittenTtsFileProgress(
-            fileName: file.fileName,
-            variant: model.variant,
-            receivedBytes: receivedBytes,
-            totalBytes: receivedBytes,
-            isComplete: true,
-          );
-        } catch (e) {
-          if (e is DioException && CancelToken.isCancel(e)) {
-            Log.info('KittenTTS download cancelled for $variantId');
-            return;
-          }
-          rethrow;
+        if (cancelToken.isCancelled) {
+          return;
         }
+
+        await extractTarBz2(
+          archivePath: archiveFile.path,
+          targetDir: engineDir,
+        );
+
+        if (await archiveFile.exists()) {
+          await archiveFile.delete();
+        }
+
+        controller.add(
+          KittenTtsFileProgress(
+            fileName: fileName,
+            variant: variant,
+            receivedBytes: model.totalSizeBytes,
+            totalBytes: model.totalSizeBytes,
+            isComplete: true,
+          ),
+        );
+        Log.info('Kitten ${variant.displayName} downloaded');
+      } catch (e, st) {
+        if (e is DioException && CancelToken.isCancel(e)) {
+          Log.info('Kitten download cancelled for $variantKey');
+        } else {
+          controller.addError(e, st);
+        }
+      } finally {
+        _activeDownloads.remove(variantKey);
+        if (_activeDownloads.isEmpty) {
+          await WakelockPlus.disable();
+        }
+        await controller.close();
       }
-    } finally {
-      _activeDownloads.remove(variantId);
-      if (_activeDownloads.isEmpty) {
-        await WakelockPlus.disable();
-      }
-    }
+    });
   }
 
-  /// Cancel an in-flight download for [variantId].
   void cancelDownload(KittenTtsModelVariant variant) {
     _activeDownloads[variant.name]?.cancel();
   }
 
-  /// Delete all files for a variant from disk.
   Future<void> deleteVariant(KittenTtsModelVariant variant) async {
     final dir = await _getVariantDir(variant);
-    for (final file in variant.files) {
-      final path = '${dir.path}/${file.fileName}';
-      final f = File(path);
-      if (await f.exists()) {
-        await f.delete();
-      }
-      final partFile = File('$path.part');
-      if (await partFile.exists()) {
-        await partFile.delete();
-      }
-    }
-    if (await dir.exists()) {
-      final entities = await dir.list().toList();
-      if (entities.isEmpty) {
-        await dir.delete();
-      }
-    }
+    await deleteDirectoryIfExists(dir);
     Log.info('KittenTTS variant ${variant.displayName} deleted');
   }
 
-  /// Get list of downloaded variants.
   Future<Set<KittenTtsModelVariant>> getDownloadedVariants() async {
     final result = <KittenTtsModelVariant>{};
     for (final variant in KittenTtsModelVariant.values) {
@@ -189,75 +143,28 @@ class KittenTtsDownloader {
     return result;
   }
 
-  /// Get the absolute file path for a variant's file.
-  Future<String?> getFilePath(
-    KittenTtsModelVariant variant,
-    String fileName,
-  ) async {
+  Future<String?> getModelPath(KittenTtsModelVariant variant) async {
     final dir = await _getVariantDir(variant);
-    final file = File('${dir.path}/$fileName');
-    if (await file.exists()) {
-      return file.path;
-    }
+    final file = File('${dir.path}/${variant.modelFileName}');
+    if (await file.exists()) return file.path;
     return null;
   }
 
-  /// Manually follows redirects to ensure Authorization header safety.
-  Future<Response<ResponseBody>> _resolveWithRedirects({
-    required String url,
-    required int startByte,
-    required CancelToken cancelToken,
-  }) async {
-    String currentUrl = url;
-    final Uri originalUri = Uri.parse(url);
+  Future<String?> getVoicesPath(KittenTtsModelVariant variant) async {
+    final dir = await _getVariantDir(variant);
+    final file = File('${dir.path}/${variant.voicesFileName}');
+    if (await file.exists()) return file.path;
+    return null;
+  }
 
-    for (int hop = 0; hop < 5; hop++) {
-      final options = Options(
-        responseType: ResponseType.stream,
-        followRedirects: false,
-        validateStatus: (status) => status != null && status < 500,
-        headers: {
-          if (startByte > 0) 'Range': 'bytes=$startByte-',
-        },
-      );
+  Future<String?> getTokensPath(KittenTtsModelVariant variant) async {
+    final dir = await _getVariantDir(variant);
+    final file = File('${dir.path}/${variant.tokensFileName}');
+    if (await file.exists()) return file.path;
+    return null;
+  }
 
-      final currentUri = Uri.parse(currentUrl);
-      if (currentUri.host != originalUri.host) {
-        options.headers?.remove('Authorization');
-      }
-
-      final response = await _dio.get<ResponseBody>(
-        currentUrl,
-        options: options,
-        cancelToken: cancelToken,
-      );
-
-      if (response.statusCode == 200 || response.statusCode == 206) {
-        return response;
-      }
-
-      if (response.statusCode! >= 300 && response.statusCode! < 400) {
-        final location = response.headers.value('location');
-        if (location == null) {
-          throw DioException(
-            requestOptions: response.requestOptions,
-            error: 'Redirect without location header',
-          );
-        }
-        currentUrl = Uri.parse(currentUrl).resolve(location).toString();
-        continue;
-      }
-
-      throw DioException(
-        requestOptions: response.requestOptions,
-        response: response,
-        error: 'Server returned ${response.statusCode}',
-      );
-    }
-
-    throw DioException(
-      requestOptions: RequestOptions(path: url),
-      error: 'Too many redirects',
-    );
+  Future<Directory> getDataDir(KittenTtsModelVariant variant) async {
+    return Directory('${(await _getVariantDir(variant)).path}/${variant.dataDirName}');
   }
 }

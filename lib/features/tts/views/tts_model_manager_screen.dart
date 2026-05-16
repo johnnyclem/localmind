@@ -9,32 +9,9 @@ import '../../../core/providers/app_providers.dart';
 import '../../settings/data/models/app_settings.dart';
 import '../../sidebar/sidebar_widget.dart';
 import '../data/kitten_tts_model.dart';
-import '../data/kokoro_tts_model.dart';
 import '../data/piper_tts_model.dart';
 import '../providers/tts_model_providers.dart';
 import '../providers/tts_providers.dart' as tts;
-
-/// Async provider for the set of installed engine IDs.
-final installedEnginesProvider = FutureProvider<Set<EngineId>>((ref) async {
-  final downloader = ref.read(modelDownloaderProvider);
-  final kittenDownloader = ref.read(kittenTtsDownloaderProvider);
-  final kokoroDownloader = ref.read(kokoroTtsDownloaderProvider);
-  final result = <EngineId>{};
-  result.add(EngineId.system);
-  final downloadedVariants = await kittenDownloader.getDownloadedVariants();
-  if (downloadedVariants.isNotEmpty) {
-    result.add(EngineId.kitten);
-  }
-  final downloadedKokoroVariants = await kokoroDownloader
-      .getDownloadedVariants();
-  if (downloadedKokoroVariants.isNotEmpty) {
-    result.add(EngineId.kokoro);
-  }
-  if (await downloader.isEngineDownloaded(EngineId.piper)) {
-    result.add(EngineId.piper);
-  }
-  return result;
-});
 
 class TtsModelManagerScreen extends ConsumerWidget {
   const TtsModelManagerScreen({super.key});
@@ -52,8 +29,6 @@ class TtsModelManagerScreen extends ConsumerWidget {
           _SystemEngineCard(isSelected: settings.ttsEngine == EngineId.system),
           const SizedBox(height: 16),
           _KittenEngineCard(isSelected: settings.ttsEngine == EngineId.kitten),
-          const SizedBox(height: 16),
-          _KokoroEngineCard(isSelected: settings.ttsEngine == EngineId.kokoro),
           const SizedBox(height: 16),
           _PiperEngineCard(isSelected: settings.ttsEngine == EngineId.piper),
           const SizedBox(height: 24),
@@ -274,194 +249,15 @@ class _KittenEngineCard extends ConsumerWidget {
         .getOverallFraction(model.variant);
     return Column(
       children: [
-        LinearProgressIndicator(value: fraction),
-        const SizedBox(height: 4),
-        if (progress != null)
-          ...progress.entries.map(
-            (e) => Padding(
-              padding: const EdgeInsets.only(bottom: 2),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      e.key,
-                      style: Theme.of(context).textTheme.labelSmall,
-                    ),
-                  ),
-                  Text(
-                    '${(e.value.fraction * 100).toStringAsFixed(0)}%',
-                    style: Theme.of(context).textTheme.labelSmall,
-                  ),
-                ],
-              ),
-            ),
+        LinearProgressIndicator(
+          value: fraction,
+          valueColor: AlwaysStoppedAnimation<Color>(
+            Color(EngineMeta.kitten.accentColor),
           ),
-      ],
-    );
-  }
-}
-
-// ── Kokoro Engine ──
-
-class _KokoroEngineCard extends ConsumerWidget {
-  final bool isSelected;
-
-  const _KokoroEngineCard({required this.isSelected});
-
-  KokoroTtsModel _selectedModel(AppSettings settings) {
-    final variant = settings.kokoroTtsModelVariant;
-    return KokoroTtsModel.forVariant(variant);
-  }
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final settings = ref.watch(settingsProvider);
-    final meta = EngineMeta.kokoro;
-    final downloadedAsync = ref.watch(downloadedKokoroTtsVariantsProvider);
-    final downloadProgress = ref.watch(kokoroTtsDownloadProgressProvider);
-    final model = _selectedModel(settings);
-    final variantProgress = downloadProgress[model.variant];
-    final isInstalled = downloadedAsync.when(
-      data: (set) => set.contains(model.variant),
-      loading: () => false,
-      error: (_, _) => false,
-    );
-    final notifier = ref.read(kokoroTtsDownloadProgressProvider.notifier);
-    final isDownloading = notifier.isDownloading(model.variant);
-
-    return _EngineCard(
-      isSelected: isSelected,
-      meta: meta,
-      engine: EngineId.kokoro,
-      installed: isInstalled,
-      statusText: isInstalled
-          ? 'Installed'
-          : isDownloading
-          ? 'Downloading...'
-          : 'Not installed',
-      trailing: _buildAction(context, ref, isInstalled, isDownloading, model),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(top: 12),
-            child: Text(
-              'Kokoro 82M parameter model with 22 expressive voices.\n'
-              'Requires ${_formatSize(model.totalSizeBytes)} download.',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(
-                  context,
-                ).colorScheme.onSurface.withValues(alpha: 0.6),
-              ),
-            ),
-          ),
-          if (isDownloading) ...[
-            const SizedBox(height: 12),
-            _buildVariantDownloadProgress(context, ref, model, variantProgress),
-          ],
-          if (isInstalled) ...[
-            _VoiceChips(voices: kokoroVoices, engine: EngineId.kokoro),
-          ],
-        ],
-      ),
-    );
-  }
-
-  Widget _buildAction(
-    BuildContext context,
-    WidgetRef ref,
-    bool isInstalled,
-    bool isDownloading,
-    KokoroTtsModel model,
-  ) {
-    final notifier = ref.read(kokoroTtsDownloadProgressProvider.notifier);
-    if (isDownloading) {
-      return ShadButton.outline(
-        size: ShadButtonSize.sm,
-        onPressed: () => notifier.cancelDownload(model.variant),
-        child: const Text('Cancel'),
-      );
-    }
-    if (isInstalled) {
-      return Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (!isSelected)
-            ShadButton.outline(
-              size: ShadButtonSize.sm,
-              onPressed: () => ref
-                  .read(settingsProvider.notifier)
-                  .setTtsEngine(EngineId.kokoro),
-              child: const Text('Select'),
-            ),
-          const SizedBox(width: 8),
-          ShadIconButton.ghost(
-            padding: EdgeInsets.zero,
-            icon: const Icon(Icons.delete_outline, color: Colors.red, size: 20),
-            onPressed: () => _confirmDelete(context, ref, model),
-          ),
-        ],
-      );
-    }
-    return ShadButton.outline(
-      size: ShadButtonSize.sm,
-      onPressed: () => notifier.startDownload(model.variant),
-      child: const Text('Install'),
-    );
-  }
-
-  void _confirmDelete(
-    BuildContext context,
-    WidgetRef ref,
-    KokoroTtsModel model,
-  ) {
-    showShadDialog(
-      context: context,
-      builder: (context) => ShadDialog(
-        title: const Text('Delete Model'),
-        description: Text(
-          'Are you sure you want to delete ${model.displayName}? This will free up approximately ${_formatSize(model.totalSizeBytes)} of space.',
+          backgroundColor: Color(
+            EngineMeta.kitten.accentColor,
+          ).withValues(alpha: 0.15),
         ),
-        actions: [
-          ShadButton.outline(
-            child: const Text('Cancel'),
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-          ShadButton.destructive(
-            child: const Text('Delete'),
-            onPressed: () {
-              ref
-                  .read(kokoroTtsDownloadProgressProvider.notifier)
-                  .deleteVariant(model.variant);
-              Navigator.of(context).pop();
-            },
-          ),
-        ],
-        child: const Padding(
-          padding: EdgeInsets.symmetric(vertical: 20),
-          child: Text('You can download this model again later if needed.'),
-        ),
-      ),
-    );
-  }
-
-  String _formatSize(int bytes) {
-    final mb = bytes / (1024 * 1024);
-    return '${mb.toStringAsFixed(0)} MB';
-  }
-
-  Widget _buildVariantDownloadProgress(
-    BuildContext context,
-    WidgetRef ref,
-    KokoroTtsModel model,
-    Map<String, KokoroTtsFileProgress>? progress,
-  ) {
-    final fraction = ref
-        .read(kokoroTtsDownloadProgressProvider.notifier)
-        .getOverallFraction(model.variant);
-    return Column(
-      children: [
-        LinearProgressIndicator(value: fraction),
         const SizedBox(height: 4),
         if (progress != null)
           ...progress.entries.map(
@@ -495,45 +291,68 @@ class _PiperEngineCard extends ConsumerWidget {
 
   const _PiperEngineCard({required this.isSelected});
 
+  PiperTtsModelVariant _selectedVariant(AppSettings settings) {
+    final voiceId =
+        voiceFromSettings(settings.ttsVoiceId, EngineId.piper)?.id ??
+        piperVoices.first.id;
+    return PiperTtsModelVariant.values.firstWhere(
+      (variant) => variant.id == voiceId,
+      orElse: () => PiperTtsModelVariant.enUsLessacMedium,
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final settings = ref.watch(settingsProvider);
     final meta = EngineMeta.piper;
     final downloadedAsync = ref.watch(downloadedPiperTtsVariantsProvider);
     final downloadProgress = ref.watch(piperTtsDownloadProgressProvider);
-
-    // For now we just download all variants (or a default one).
-    // Let's just track the first one for simplicity of the UI install button,
-    // or we can download the first variant as the "install" action.
-    final variant = PiperTtsModelVariant.enUsLessacMedium;
-    final variantProgress = downloadProgress[variant];
-
-    final isInstalled = downloadedAsync.when(
-      data: (set) => set.contains(variant),
-      loading: () => false,
-      error: (_, _) => false,
-    );
     final notifier = ref.read(piperTtsDownloadProgressProvider.notifier);
-    final isDownloading = notifier.isDownloading(variant);
+    final selectedVariant = _selectedVariant(settings);
+    final selectedVoice = piperVoices.firstWhere(
+      (voice) => voice.id == selectedVariant.id,
+      orElse: () => piperVoices.first,
+    );
+    final downloadedSet = downloadedAsync.when(
+      data: (set) => set,
+      loading: () => <PiperTtsModelVariant>{},
+      error: (_, _) => <PiperTtsModelVariant>{},
+    );
+    final installedVoices = piperVoices
+        .where(
+          (voice) => downloadedSet.any((variant) => variant.id == voice.id),
+        )
+        .toList();
+    final variantProgress = downloadProgress[selectedVariant];
+    final isInstalled = downloadedSet.contains(selectedVariant);
+    final isDownloading = notifier.isDownloading(selectedVariant);
 
     return _EngineCard(
       isSelected: isSelected,
       meta: meta,
       engine: EngineId.piper,
-      installed: isInstalled,
+      installed: installedVoices.isNotEmpty,
       statusText: isInstalled
           ? 'Installed'
           : isDownloading
           ? 'Downloading...'
           : 'Not installed',
-      trailing: _buildAction(context, ref, isInstalled, isDownloading, variant),
+      trailing: _buildAction(
+        context,
+        ref,
+        selectedVariant,
+        selectedVoice,
+        isInstalled,
+        isDownloading,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
             padding: const EdgeInsets.only(top: 12),
             child: Text(
-              'One ONNX model per voice. 30+ languages, hundreds of voices.\n'
-              'Requires ~${meta.sizeMb} MB download for the default voice.',
+              'Fast offline Piper voices with 2 expressive voices.\n'
+              'Requires ${_formatSize(selectedVariant.totalSizeBytes)} download per voice.',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: Theme.of(
                   context,
@@ -541,17 +360,38 @@ class _PiperEngineCard extends ConsumerWidget {
               ),
             ),
           ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+              children: PiperTtsModelVariant.values
+                  .map(
+                    (variant) => _PiperVariantChip(
+                      variant: variant,
+                      voice: piperVoices.firstWhere(
+                        (voice) => voice.id == variant.id,
+                        orElse: () => selectedVoice,
+                      ),
+                      selected: selectedVariant == variant,
+                      installed: downloadedSet.contains(variant),
+                      onTap: () => ref
+                        .read(settingsProvider.notifier)
+                        .setTtsVoiceId(variant.id),
+                  ),
+                )
+                .toList(),
+          ),
           if (isDownloading) ...[
             const SizedBox(height: 12),
             _buildVariantDownloadProgress(
               context,
               ref,
-              variant,
+              selectedVariant,
               variantProgress,
             ),
           ],
-          if (isInstalled) ...[
-            _VoiceChips(voices: piperVoices, engine: EngineId.piper),
+          if (installedVoices.isNotEmpty) ...[
+            _VoiceChips(voices: installedVoices, engine: EngineId.piper),
           ],
         ],
       ),
@@ -561,9 +401,10 @@ class _PiperEngineCard extends ConsumerWidget {
   Widget _buildAction(
     BuildContext context,
     WidgetRef ref,
+    PiperTtsModelVariant variant,
+    Voice voice,
     bool isInstalled,
     bool isDownloading,
-    PiperTtsModelVariant variant,
   ) {
     final notifier = ref.read(piperTtsDownloadProgressProvider.notifier);
     if (isDownloading) {
@@ -580,9 +421,12 @@ class _PiperEngineCard extends ConsumerWidget {
           if (!isSelected)
             ShadButton.outline(
               size: ShadButtonSize.sm,
-              onPressed: () => ref
-                  .read(settingsProvider.notifier)
-                  .setTtsEngine(EngineId.piper),
+              onPressed: () {
+                ref.read(settingsProvider.notifier).setTtsVoiceId(voice.id);
+                ref
+                    .read(settingsProvider.notifier)
+                    .setTtsEngine(EngineId.piper);
+              },
               child: const Text('Select'),
             ),
           const SizedBox(width: 8),
@@ -609,9 +453,9 @@ class _PiperEngineCard extends ConsumerWidget {
     showShadDialog(
       context: context,
       builder: (context) => ShadDialog(
-        title: const Text('Delete Model'),
+        title: const Text('Delete Voice'),
         description: Text(
-          'Are you sure you want to delete ${variant.displayName}? This will free up storage space on your device.',
+          'Are you sure you want to delete ${variant.displayName}? This will free up approximately ${_formatSize(variant.totalSizeBytes)} of space.',
         ),
         actions: [
           ShadButton.outline(
@@ -630,10 +474,15 @@ class _PiperEngineCard extends ConsumerWidget {
         ],
         child: const Padding(
           padding: EdgeInsets.symmetric(vertical: 20),
-          child: Text('You can download this model again later if needed.'),
+          child: Text('You can download this voice again later if needed.'),
         ),
       ),
     );
+  }
+
+  String _formatSize(int bytes) {
+    final mb = bytes / (1024 * 1024);
+    return '${mb.toStringAsFixed(0)} MB';
   }
 
   Widget _buildVariantDownloadProgress(
@@ -647,7 +496,15 @@ class _PiperEngineCard extends ConsumerWidget {
         .getOverallFraction(variant);
     return Column(
       children: [
-        LinearProgressIndicator(value: fraction),
+        LinearProgressIndicator(
+          value: fraction,
+          valueColor: AlwaysStoppedAnimation<Color>(
+            Color(EngineMeta.piper.accentColor),
+          ),
+          backgroundColor: Color(
+            EngineMeta.piper.accentColor,
+          ).withValues(alpha: 0.15),
+        ),
         const SizedBox(height: 4),
         if (progress != null)
           ...progress.entries.map(
@@ -670,6 +527,75 @@ class _PiperEngineCard extends ConsumerWidget {
             ),
           ),
       ],
+    );
+  }
+}
+
+class _PiperVariantChip extends StatelessWidget {
+  final PiperTtsModelVariant variant;
+  final Voice voice;
+  final bool selected;
+  final bool installed;
+  final VoidCallback onTap;
+
+  const _PiperVariantChip({
+    required this.variant,
+    required this.voice,
+    required this.selected,
+    required this.installed,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final accent = Color(EngineMeta.piper.accentColor);
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(999),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: selected
+              ? accent.withValues(alpha: 0.12)
+              : theme.colorScheme.surfaceContainerHighest.withValues(
+                  alpha: 0.2,
+                ),
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(
+            color: selected
+                ? accent.withValues(alpha: 0.45)
+                : installed
+                ? Colors.green.withValues(alpha: 0.35)
+                : theme.colorScheme.outline.withValues(alpha: 0.2),
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              voice.name,
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: selected ? accent : theme.colorScheme.onSurface,
+                fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+              ),
+            ),
+            const SizedBox(width: 6),
+            Text(
+              variant.id.contains('ryan') ? 'Male' : 'Female',
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            if (installed) ...[
+              const SizedBox(width: 6),
+              const Icon(Icons.check_circle, size: 14, color: Colors.green),
+            ],
+          ],
+        ),
+      ),
     );
   }
 }
@@ -841,29 +767,6 @@ class _VoiceChipsState extends ConsumerState<_VoiceChips> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (females.isNotEmpty) ...[
-            Text(
-              'Female',
-              style: theme.textTheme.labelSmall?.copyWith(
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
-              ),
-            ),
-            const SizedBox(height: 6),
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: females
-                    .map(
-                      (v) => Padding(
-                        padding: const EdgeInsets.only(right: 8),
-                        child: _voiceChip(v, theme, accent, selectedVoiceId),
-                      ),
-                    )
-                    .toList(),
-              ),
-            ),
-            const SizedBox(height: 12),
-          ],
           if (males.isNotEmpty) ...[
             Text(
               'Male',
@@ -876,6 +779,29 @@ class _VoiceChipsState extends ConsumerState<_VoiceChips> {
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: males
+                    .map(
+                      (v) => Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: _voiceChip(v, theme, accent, selectedVoiceId),
+                      ),
+                    )
+                    .toList(),
+              ),
+            ),
+            const SizedBox(height: 12),
+          ],
+          if (females.isNotEmpty) ...[
+            Text(
+              'Female',
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+              ),
+            ),
+            const SizedBox(height: 6),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: females
                     .map(
                       (v) => Padding(
                         padding: const EdgeInsets.only(right: 8),

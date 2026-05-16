@@ -2,9 +2,12 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 
 import 'model_downloader.dart';
 import 'piper_tts_model.dart';
+import 'sherpa_bundle_downloader.dart';
 
 class PiperTtsDownloader {
   final Dio _dio;
@@ -15,7 +18,7 @@ class PiperTtsDownloader {
       : _dio = Dio(),
         _baseDownloader = ModelDownloader();
 
-  Future<Directory> _getVariantDir(PiperTtsModelVariant variant) async {
+  Future<Directory> _getEngineDir() async {
     final ttsDir = await _baseDownloader.getTtsDir();
     final dir = Directory('${ttsDir.path}/piper');
     if (!await dir.exists()) {
@@ -24,109 +27,106 @@ class PiperTtsDownloader {
     return dir;
   }
 
+  Future<Directory> _getVariantDir(PiperTtsModelVariant variant) async {
+    final engineDir = await _getEngineDir();
+    return Directory('${engineDir.path}/${variant.bundleDirName}');
+  }
+
   Future<Set<PiperTtsModelVariant>> getDownloadedVariants() async {
     final downloaded = <PiperTtsModelVariant>{};
     for (final variant in PiperTtsModelVariant.values) {
       final dir = await _getVariantDir(variant);
       final modelFile = File('${dir.path}/${variant.modelFileName}');
-      final configFile = File('${dir.path}/${variant.configFileName}');
-      if (await modelFile.exists() && await configFile.exists()) {
+      final tokensFile = File('${dir.path}/${variant.tokensFileName}');
+      final dataDir = Directory('${dir.path}/${variant.dataDirName}');
+      if (await modelFile.exists() && await tokensFile.exists() && await dataDir.exists()) {
         downloaded.add(variant);
       }
     }
     return downloaded;
   }
 
-  Stream<PiperTtsFileProgress> downloadModel(
-    PiperTtsModelVariant variant,
-  ) async* {
-    final cancelToken = CancelToken();
-    _cancelTokens[variant] = cancelToken;
-
-    try {
-      final dir = await _getVariantDir(variant);
-
-      // Download .onnx
-      yield* _downloadFile(
-        variant.modelUrl,
-        '${dir.path}/${variant.modelFileName}',
-        variant.modelFileName,
-        cancelToken,
-      );
-
-      // Download .onnx.json
-      yield* _downloadFile(
-        variant.configUrl,
-        '${dir.path}/${variant.configFileName}',
-        variant.configFileName,
-        cancelToken,
-      );
-    } finally {
-      _cancelTokens.remove(variant);
-    }
+  Future<bool> isVariantDownloaded(PiperTtsModelVariant variant) async {
+    final dir = await _getVariantDir(variant);
+    return await File('${dir.path}/${variant.modelFileName}').exists() &&
+        await File('${dir.path}/${variant.tokensFileName}').exists() &&
+        await Directory('${dir.path}/${variant.dataDirName}').exists();
   }
 
-  Stream<PiperTtsFileProgress> _downloadFile(
-    String url,
-    String savePath,
-    String fileName,
-    CancelToken cancelToken,
-  ) async* {
-    // Optional: if it already exists and has size > 0, we could skip it.
-    // For simplicity, we just redownload to ensure it's complete,
-    // or you could check file size. We'll do a simple redownload.
+  Stream<PiperTtsFileProgress> downloadModel(PiperTtsModelVariant variant) {
+    return Stream<PiperTtsFileProgress>.multi((controller) async {
+      final cancelToken = CancelToken();
+      _cancelTokens[variant] = cancelToken;
+      final engineDir = await _getEngineDir();
+      await WakelockPlus.enable();
 
-    int totalBytes = 1; // dummy initial
-    int receivedBytes = 0;
+      try {
+        final tempDir = await getTemporaryDirectory();
+        final archivePath = '${tempDir.path}/${variant.bundleDirName}.tar.bz2';
+        final archiveFile = File(archivePath);
+        final fileName = '${variant.bundleDirName}.tar.bz2';
 
-    final controller = StreamController<PiperTtsFileProgress>();
+        controller.add(
+          PiperTtsFileProgress(
+            fileName: fileName,
+            receivedBytes: 0,
+            totalBytes: variant.totalSizeBytes,
+            isComplete: false,
+          ),
+        );
 
-    try {
-      await _dio.download(
-        url,
-        savePath,
-        cancelToken: cancelToken,
-        onReceiveProgress: (received, total) {
-          if (total != -1) {
-            totalBytes = total;
-          } else if (totalBytes == 1) {
-            // Give it some arbitrary size if server doesn't report
-            totalBytes = 10 * 1024 * 1024;
-          }
-          receivedBytes = received;
-
-          if (!controller.isClosed) {
+        await _dio.download(
+          variant.tarballUrl,
+          archiveFile.path,
+          cancelToken: cancelToken,
+          onReceiveProgress: (received, total) {
+            final totalBytes = total > 0 ? total : variant.totalSizeBytes;
             controller.add(
               PiperTtsFileProgress(
                 fileName: fileName,
-                receivedBytes: receivedBytes,
+                receivedBytes: received,
                 totalBytes: totalBytes,
                 isComplete: false,
               ),
             );
-          }
-        },
-      );
+          },
+        );
 
-      if (!controller.isClosed) {
+        if (cancelToken.isCancelled) {
+          return;
+        }
+
+        await extractTarBz2(
+          archivePath: archiveFile.path,
+          targetDir: engineDir,
+        );
+
+        if (await archiveFile.exists()) {
+          await archiveFile.delete();
+        }
+
         controller.add(
           PiperTtsFileProgress(
             fileName: fileName,
-            receivedBytes: receivedBytes,
-            totalBytes: totalBytes,
+            receivedBytes: variant.totalSizeBytes,
+            totalBytes: variant.totalSizeBytes,
             isComplete: true,
           ),
         );
+      } catch (e, st) {
+        if (e is DioException && CancelToken.isCancel(e)) {
+          // Ignore user cancellations.
+        } else {
+          controller.addError(e, st);
+        }
+      } finally {
+        _cancelTokens.remove(variant);
+        if (_cancelTokens.isEmpty) {
+          await WakelockPlus.disable();
+        }
+        await controller.close();
       }
-    } catch (e) {
-      if (e is! DioException || !CancelToken.isCancel(e)) {
-        rethrow;
-      }
-    } finally {
-      await controller.close();
-    }
-
-    yield* controller.stream;
+    });
   }
 
   void cancelDownload(PiperTtsModelVariant variant) {
@@ -136,9 +136,24 @@ class PiperTtsDownloader {
 
   Future<void> deleteVariant(PiperTtsModelVariant variant) async {
     final dir = await _getVariantDir(variant);
-    final modelFile = File('${dir.path}/${variant.modelFileName}');
-    final configFile = File('${dir.path}/${variant.configFileName}');
-    if (await modelFile.exists()) await modelFile.delete();
-    if (await configFile.exists()) await configFile.delete();
+    await deleteDirectoryIfExists(dir);
+  }
+
+  Future<String?> getModelPath(PiperTtsModelVariant variant) async {
+    final dir = await _getVariantDir(variant);
+    final file = File('${dir.path}/${variant.modelFileName}');
+    if (await file.exists()) return file.path;
+    return null;
+  }
+
+  Future<String?> getTokensPath(PiperTtsModelVariant variant) async {
+    final dir = await _getVariantDir(variant);
+    final file = File('${dir.path}/${variant.tokensFileName}');
+    if (await file.exists()) return file.path;
+    return null;
+  }
+
+  Future<Directory> getDataDir(PiperTtsModelVariant variant) async {
+    return Directory('${(await _getVariantDir(variant)).path}/${variant.dataDirName}');
   }
 }

@@ -88,7 +88,7 @@ enum KittenTtsModelVariant {
   }
 
   /// The ONNX model file name inside the HF repo.
-  String get modelFileName {
+  String get sourceModelFileName {
     switch (this) {
       case KittenTtsModelVariant.nano:
         return 'kitten_tts_nano_v0_8.onnx';
@@ -101,19 +101,50 @@ enum KittenTtsModelVariant {
     }
   }
 
+  /// sherpa-onnx bundle directory for this variant.
+  String get bundleDirName {
+    switch (this) {
+      case KittenTtsModelVariant.nano:
+        return 'kitten-nano-en-v0_1-fp16';
+      case KittenTtsModelVariant.nanoInt8:
+        return 'kitten-nano-en-v0_1-fp16';
+      case KittenTtsModelVariant.micro:
+        return 'kitten-nano-en-v0_2-fp16';
+      case KittenTtsModelVariant.mini:
+        return 'kitten-mini-en-v0_1-fp16';
+    }
+  }
+
+  String get tarballUrl {
+    switch (this) {
+      case KittenTtsModelVariant.nano:
+      case KittenTtsModelVariant.nanoInt8:
+        return 'https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models/kitten-nano-en-v0_1-fp16.tar.bz2';
+      case KittenTtsModelVariant.micro:
+        return 'https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models/kitten-nano-en-v0_2-fp16.tar.bz2';
+      case KittenTtsModelVariant.mini:
+        return 'https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models/kitten-mini-en-v0_1-fp16.tar.bz2';
+    }
+  }
+
+  String get modelFileName => 'model.fp16.onnx';
+  String get voicesFileName => 'voices.bin';
+  String get tokensFileName => 'tokens.txt';
+  String get dataDirName => 'espeak-ng-data';
+
   /// The 3 files required for this variant.
   List<KittenTtsModelFile> get files {
     return [
       KittenTtsModelFile(
-        fileName: 'config.json',
+      fileName: 'config.json',
+      downloadUrl:
+          'https://huggingface.co/$huggingFaceRepoId/resolve/main/config.json',
+      sizeBytes: 2 * 1024,
+    ),
+    KittenTtsModelFile(
+        fileName: sourceModelFileName,
         downloadUrl:
-            'https://huggingface.co/$huggingFaceRepoId/resolve/main/config.json',
-        sizeBytes: 2 * 1024,
-      ),
-      KittenTtsModelFile(
-        fileName: modelFileName,
-        downloadUrl:
-            'https://huggingface.co/$huggingFaceRepoId/resolve/main/$modelFileName',
+            'https://huggingface.co/$huggingFaceRepoId/resolve/main/$sourceModelFileName',
         sizeBytes: _modelFileSizeBytes,
       ),
       KittenTtsModelFile(
@@ -220,28 +251,4 @@ class KittenTtsFileProgress {
 
   double get fraction =>
       totalBytes > 0 ? (receivedBytes / totalBytes).clamp(0.0, 1.0) : 0.0;
-}
-
-/// Overall download progress for a variant (all 3 files).
-@immutable
-class KittenTtsVariantProgress {
-  final KittenTtsModelVariant variant;
-  final Map<String, KittenTtsFileProgress> fileProgress;
-
-  const KittenTtsVariantProgress({
-    required this.variant,
-    this.fileProgress = const {},
-  });
-
-  double get overallFraction {
-    if (fileProgress.isEmpty) return 0.0;
-    final total = fileProgress.values
-        .map((f) => f.fraction)
-        .fold<double>(0.0, (a, b) => a + b);
-    return total / fileProgress.length;
-  }
-
-  bool get isComplete =>
-      fileProgress.isNotEmpty &&
-      fileProgress.values.every((f) => f.isComplete);
 }

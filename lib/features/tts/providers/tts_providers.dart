@@ -1,18 +1,17 @@
 import 'dart:async';
-import 'dart:io';
 import 'dart:isolate';
+import 'dart:typed_data';
 
-import 'package:archive/archive.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_tts/flutter_tts.dart';
-import 'package:path_provider/path_provider.dart';
 
 import '../../../core/logger/app_logger.dart';
 import '../../../core/models/enums.dart';
 import '../../../core/providers/app_providers.dart';
 import 'tts_model_providers.dart';
+import '../data/piper_tts_model.dart';
 import 'tts_worker.dart';
 
 final ttsProvider = NotifierProvider<TtsNotifier, TtsState>(() {
@@ -60,6 +59,11 @@ class TtsNotifier extends Notifier<TtsState> {
   int _currentChunkIndex = 0;
   EngineId? _currentEngine;
   String? _currentVoice;
+  String? _currentModelPath;
+  String? _currentVoicesPath;
+  String? _currentTokensPath;
+  String? _currentDataDir;
+  String? _currentLexicon;
 
   // Isolate worker fields
   Isolate? _workerIsolate;
@@ -221,134 +225,104 @@ class TtsNotifier extends Notifier<TtsState> {
     return chunks;
   }
 
-  Future<void> _ensureEspeakData(String targetPath) async {
-    final dir = Directory(targetPath);
-    final espeakNgDataDir = Directory('$targetPath/espeak-ng-data');
-    final voicesDir = Directory('$targetPath/espeak-ng-data/voices');
-    Log.info('Checking espeak-data at $targetPath');
-    if (await espeakNgDataDir.exists() && await voicesDir.exists()) {
-      final entities = await espeakNgDataDir.list().toList();
-      if (entities.length > 5) {
-        Log.info('espeak-data looks valid with ${entities.length} entities.');
-        return;
-      }
-    }
-
-    Log.info(
-      'espeak-data invalid or missing. (Re)extracting espeak-data.zip to $targetPath...',
-    );
-    if (await dir.exists()) {
-      try {
-        await dir.delete(recursive: true);
-      } catch (e) {
-        Log.error('Failed to clear old espeak-data: $e');
-      }
-    }
-    await dir.create(recursive: true);
-    try {
-      final data = await rootBundle.load('assets/espeak-data.zip');
-      final bytes = data.buffer.asUint8List();
-
-      await Isolate.run(() async {
-        final archive = ZipDecoder().decodeBytes(bytes);
-
-        for (final file in archive) {
-          String filename = file.name;
-          if (filename.startsWith('espeak-data/')) {
-            filename = filename.substring('espeak-data/'.length);
-          }
-          if (filename.isEmpty) continue;
-
-          if (file.isFile) {
-            final fileData = file.content as List<int>;
-            final f = File('$targetPath/$filename');
-            await f.create(recursive: true);
-            await f.writeAsBytes(fileData);
-          } else {
-            await Directory('$targetPath/$filename').create(recursive: true);
-          }
-        }
-      });
-      Log.info('espeak-data extraction complete.');
-    } catch (e) {
-      Log.error('Failed to extract espeak-data: $e');
-      rethrow;
-    }
-  }
-
-  Future<void> _initEngine(EngineId engineId) async {
-    final supportDir = await getApplicationSupportDirectory();
-    final resolvedEspeakPath = '${supportDir.path}/espeak-data';
-
-    // Ensure espeak-data is available for neural engines
-    if (engineId != EngineId.system) {
-      await _ensureEspeakData(resolvedEspeakPath);
-    }
-
+  Future<void> _initEngine(EngineId engineId, {String? voiceId}) async {
     await _ensureWorker();
 
-    if (_currentEngine == engineId && !_isWorkerInitializing) return;
-    _isWorkerInitializing = true;
+    if (_isWorkerInitializing && _initCompleter != null) {
+      await _initCompleter!.future;
+    }
 
     String modelPath = '';
     String voicesPath = '';
+    String tokensPath = '';
+    String dataDir = '';
+    String lexicon = '';
 
     switch (engineId) {
       case EngineId.kitten:
         final variant = ref.read(settingsProvider).kittenTtsModelVariant;
         final kittenDl = ref.read(kittenTtsDownloaderProvider);
-        final mPath = await kittenDl.getFilePath(
-          variant,
-          variant.modelFileName,
-        );
-        final vPath = await kittenDl.getFilePath(variant, 'voices.npz');
-        if (mPath == null || vPath == null) {
+        final mPath = await kittenDl.getModelPath(variant);
+        final vPath = await kittenDl.getVoicesPath(variant);
+        final tPath = await kittenDl.getTokensPath(variant);
+        final dDir = await kittenDl.getDataDir(variant);
+        if (mPath == null || vPath == null || tPath == null) {
           throw StateError(
             'Kitten model files not found for ${variant.name}. Please download them in the Model Manager.',
           );
         }
         modelPath = mPath;
         voicesPath = vPath;
+        tokensPath = tPath;
+        dataDir = dDir.path;
         break;
-      case EngineId.kokoro:
-        final variant = ref.read(settingsProvider).kokoroTtsModelVariant;
-        final kokoroDl = ref.read(kokoroTtsDownloaderProvider);
-        final mPath = await kokoroDl.getModelPath(variant);
-        final vDir = await kokoroDl.getVoicesDir(variant);
-        if (mPath == null) {
+      case EngineId.piper:
+        final selectedVoiceId =
+            voiceId ??
+            ref.read(settingsProvider).ttsVoiceId ??
+            piperVoices.first.id;
+        final requestedVariant = PiperTtsModelVariant.values.firstWhere(
+          (v) => v.id == selectedVoiceId,
+          orElse: () => PiperTtsModelVariant.enUsLessacMedium,
+        );
+        final downloader = ref.read(piperTtsDownloaderProvider);
+        final downloadedVariants = await downloader.getDownloadedVariants();
+        final variant = downloadedVariants.contains(requestedVariant)
+            ? requestedVariant
+            : downloadedVariants.isNotEmpty
+            ? downloadedVariants.first
+            : requestedVariant;
+        final mPath = await downloader.getModelPath(variant);
+        final tPath = await downloader.getTokensPath(variant);
+        final dDir = await downloader.getDataDir(variant);
+        if (mPath == null || tPath == null) {
           throw StateError(
-            'Kokoro model files not found for ${variant.name}. Please download them in the Model Manager.',
+            'Piper voice files not found for ${variant.displayName}. Please download them in the Model Manager.',
           );
         }
         modelPath = mPath;
-        voicesPath = vDir.path;
-        break;
-      case EngineId.piper:
-        final downloader = ref.read(modelDownloaderProvider);
-        final ttsDir = await downloader.getTtsDir();
-        final piperDir = '${ttsDir.path}/piper';
-        if (!await Directory(piperDir).exists()) {
-          throw StateError('Piper models directory not found.');
-        }
-        modelPath = piperDir;
+        tokensPath = tPath;
+        dataDir = dDir.path;
         break;
       default:
         return;
     }
 
-    _initCompleter = Completer<void>();
-    _workerSendPort!.send(
-      TtsInitRequest(
-        engineId: engineId,
-        modelPath: modelPath,
-        voicesPath: voicesPath,
-        espeakPath: resolvedEspeakPath,
-      ),
-    );
+    if (_currentEngine == engineId &&
+        !_isWorkerInitializing &&
+        _currentModelPath == modelPath &&
+        _currentVoicesPath == voicesPath &&
+        _currentTokensPath == tokensPath &&
+        _currentDataDir == dataDir &&
+        _currentLexicon == lexicon) {
+      return;
+    }
 
-    await _initCompleter!.future;
-    _currentEngine = engineId;
-    _isWorkerInitializing = false;
+    _isWorkerInitializing = true;
+
+    try {
+      _initCompleter = Completer<void>();
+      _workerSendPort!.send(
+        TtsInitRequest(
+          engineId: engineId,
+          modelPath: modelPath,
+          voicesPath: voicesPath,
+          tokensPath: tokensPath,
+          dataDir: dataDir,
+          lexicon: lexicon,
+        ),
+      );
+
+      await _initCompleter!.future;
+      _currentEngine = engineId;
+      _currentModelPath = modelPath;
+      _currentVoicesPath = voicesPath;
+      _currentTokensPath = tokensPath;
+      _currentDataDir = dataDir;
+      _currentLexicon = lexicon;
+    } finally {
+      _isWorkerInitializing = false;
+    }
   }
 
   Future<void> speak(String text, {EngineId? engineId, String? voiceId}) async {
@@ -364,6 +338,12 @@ class TtsNotifier extends Notifier<TtsState> {
 
     final settings = ref.read(settingsProvider);
     engineId ??= settings.ttsEngine;
+
+    final availableVoices = voicesForEngine(engineId);
+    final resolvedVoiceId =
+        voiceId ??
+        settings.ttsVoiceId ??
+        (availableVoices.isNotEmpty ? availableVoices.first.id : null);
 
     if (engineId == EngineId.system) {
       _flutterTts ??= FlutterTts();
@@ -396,7 +376,7 @@ class TtsNotifier extends Notifier<TtsState> {
 
     _chunks = _splitText(text);
     _currentChunkIndex = 0;
-    _currentVoice = voiceId;
+    _currentVoice = resolvedVoiceId;
     _synthesizedChunks.clear();
     _lastEnqueuedChunk = -1;
     _currentSessionId++;
@@ -410,7 +390,7 @@ class TtsNotifier extends Notifier<TtsState> {
     );
 
     try {
-      await _initEngine(engineId);
+      await _initEngine(engineId, voiceId: resolvedVoiceId);
       state = state.copyWith(isInitializing: false);
       await _playNextChunk();
     } catch (e, st) {
@@ -462,7 +442,7 @@ class TtsNotifier extends Notifier<TtsState> {
     final voiceId =
         _currentVoice ??
         settings.ttsVoiceId ??
-        (availableVoices.isNotEmpty ? availableVoices.first.id : 'Luna');
+        (availableVoices.isNotEmpty ? availableVoices.first.id : '');
 
     while (_lastEnqueuedChunk < _chunks.length - 1 &&
         _lastEnqueuedChunk < _currentChunkIndex + _lookAheadCount) {
@@ -503,4 +483,4 @@ class TtsNotifier extends Notifier<TtsState> {
   }
 }
 
-const ttsPreviewSample = "Hello, this is a preview of the selected voice.";
+const ttsPreviewSample = "Hello, this is a preview of the selected voice";

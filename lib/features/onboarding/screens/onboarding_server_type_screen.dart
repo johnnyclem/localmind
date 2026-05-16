@@ -6,7 +6,6 @@ import 'package:shadcn_ui/shadcn_ui.dart';
 
 import '../../../core/models/enums.dart';
 import '../../../core/providers/app_providers.dart';
-import '../../../core/providers/device_info_providers.dart';
 import '../../../core/routes/app_routes.dart';
 
 class OnboardingServerTypeScreen extends ConsumerStatefulWidget {
@@ -86,48 +85,17 @@ class _OnboardingServerTypeScreenState
                     ),
                   ),
                   const SizedBox(height: 24),
-                  Consumer(
-                    builder: (context, ref, child) {
-                      final memoryAsync = ref.watch(deviceMemoryProvider);
-                      return memoryAsync.maybeWhen(
-                        data: (memory) {
-                          final isLowRam = memory.isLowRam;
-                          return _buildServerCard(
-                            type: ServerType.onDevice,
-                            title: 'On-Device',
-                            subtitle: isLowRam
-                                ? 'RESTRICTED (LOW RAM)'
-                                : 'NO SERVER NEEDED',
-                            iconWidget: Icon(
-                              Icons.phone_android_rounded,
-                              color: isLowRam
-                                  ? theme.colorScheme.onSurface.withValues(
-                                      alpha: 0.3,
-                                    )
-                                  : (_selectedType == ServerType.onDevice
-                                        ? theme.colorScheme.primary
-                                        : theme.colorScheme.onSurface),
-                            ),
-                            theme: theme,
-                            disabled: isLowRam,
-                            disabledReason:
-                                'Local LLMs require at least 8 GB RAM to run smoothly on your device.',
-                          );
-                        },
-                        orElse: () => _buildServerCard(
-                          type: ServerType.onDevice,
-                          title: 'On-Device',
-                          subtitle: 'NO SERVER NEEDED',
-                          iconWidget: Icon(
-                            Icons.phone_android_rounded,
-                            color: _selectedType == ServerType.onDevice
-                                ? theme.colorScheme.primary
-                                : theme.colorScheme.onSurface,
-                          ),
-                          theme: theme,
-                        ),
-                      );
-                    },
+                  _buildServerCard(
+                    type: ServerType.onDevice,
+                    title: 'On-Device',
+                    subtitle: 'NO SERVER NEEDED',
+                    iconWidget: Icon(
+                      Icons.phone_android_rounded,
+                      color: _selectedType == ServerType.onDevice
+                          ? theme.colorScheme.primary
+                          : theme.colorScheme.onSurface,
+                    ),
+                    theme: theme,
                   ),
                   const SizedBox(height: 16),
                   _buildServerCard(

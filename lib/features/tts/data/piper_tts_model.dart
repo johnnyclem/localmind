@@ -1,8 +1,4 @@
-
-enum PiperTtsModelVariant {
-  enUsLessacMedium,
-  enUsRyanMedium,
-}
+enum PiperTtsModelVariant { enUsLessacMedium, enUsRyanMedium }
 
 extension PiperTtsModelVariantExtension on PiperTtsModelVariant {
   String get id {
@@ -25,33 +21,25 @@ extension PiperTtsModelVariantExtension on PiperTtsModelVariant {
 
   String get modelFileName => '$id.onnx';
   String get configFileName => '$id.onnx.json';
-
-  String get modelUrl {
-    switch (this) {
-      case PiperTtsModelVariant.enUsLessacMedium:
-        return 'https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/lessac/medium/en_US-lessac-medium.onnx';
-      case PiperTtsModelVariant.enUsRyanMedium:
-        return 'https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/ryan/medium/en_US-ryan-medium.onnx';
-    }
+  String get bundleDirName {
+    return 'vits-piper-$id';
   }
 
-  String get configUrl {
-    switch (this) {
-      case PiperTtsModelVariant.enUsLessacMedium:
-        return 'https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/lessac/medium/en_US-lessac-medium.onnx.json';
-      case PiperTtsModelVariant.enUsRyanMedium:
-        return 'https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/ryan/medium/en_US-ryan-medium.onnx.json';
-    }
-  }
+  String get tarballUrl =>
+      'https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models/$bundleDirName.tar.bz2';
+
+  String get tokensFileName => 'tokens.txt';
+  String get dataDirName => 'espeak-ng-data';
 
   int get totalSizeBytes {
     switch (this) {
       case PiperTtsModelVariant.enUsLessacMedium:
-        return 48 * 1024 * 1024; // ~48MB
       case PiperTtsModelVariant.enUsRyanMedium:
-        return 48 * 1024 * 1024; // ~48MB
+        return 60 * 1024 * 1024;
     }
   }
+
+  bool get isRecommended => this == PiperTtsModelVariant.enUsLessacMedium;
 }
 
 class PiperTtsFileProgress {

@@ -955,11 +955,6 @@ class _EngineDropdown extends StatelessWidget {
                     'Kitten TTS',
                     Icons.auto_awesome,
                   ),
-                  _engineItem(
-                    EngineId.kokoro,
-                    'Kokoro TTS',
-                    Icons.auto_awesome,
-                  ),
                 ],
                 onChanged: (v) {
                   if (v != null) onChanged(v);
@@ -1013,11 +1008,18 @@ class _VoiceSelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final voices = voicesForEngine(engine);
+    final resolvedCurrentVoiceId = voiceFromSettings(
+      currentVoiceId,
+      engine,
+    )?.id;
 
     if (voices.isEmpty) return const SizedBox.shrink();
 
     final femaleVoices = voices.where((v) => v.gender == 'f').toList();
     final maleVoices = voices.where((v) => v.gender == 'm').toList();
+    final otherVoices = voices
+        .where((v) => v.gender != 'f' && v.gender != 'm')
+        .toList();
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -1047,7 +1049,7 @@ class _VoiceSelector extends StatelessWidget {
             ...femaleVoices.map(
               (v) => _VoiceTile(
                 voice: v,
-                selected: v.id == currentVoiceId,
+                selected: v.id == resolvedCurrentVoiceId,
                 onTap: () => onChanged(v),
                 isDark: isDark,
               ),
@@ -1068,7 +1070,28 @@ class _VoiceSelector extends StatelessWidget {
             ...maleVoices.map(
               (v) => _VoiceTile(
                 voice: v,
-                selected: v.id == currentVoiceId,
+                selected: v.id == resolvedCurrentVoiceId,
+                onTap: () => onChanged(v),
+                isDark: isDark,
+              ),
+            ),
+          ],
+          if (otherVoices.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Text(
+              'Other',
+              style: TextStyle(
+                fontSize: 11,
+                color: isDark
+                    ? const Color(0xFF888888)
+                    : const Color(0xFF999999),
+              ),
+            ),
+            const SizedBox(height: 4),
+            ...otherVoices.map(
+              (v) => _VoiceTile(
+                voice: v,
+                selected: v.id == resolvedCurrentVoiceId,
                 onTap: () => onChanged(v),
                 isDark: isDark,
               ),

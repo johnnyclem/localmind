@@ -6,19 +6,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/model_downloader.dart';
 import '../data/kitten_tts_model.dart';
 import '../data/kitten_tts_downloader.dart';
-import '../data/kokoro_tts_model.dart';
-import '../data/kokoro_tts_downloader.dart';
 import '../data/piper_tts_model.dart';
 import '../data/piper_tts_downloader.dart';
 
 /// Provider for the KittenTTS downloader instance.
 final kittenTtsDownloaderProvider = Provider<KittenTtsDownloader>((ref) {
   return KittenTtsDownloader();
-});
-
-/// Provider for the Kokoro TTS downloader instance.
-final kokoroTtsDownloaderProvider = Provider<KokoroTtsDownloader>((ref) {
-  return KokoroTtsDownloader();
 });
 
 /// Provider for the Piper TTS downloader instance.
@@ -35,22 +28,10 @@ final kittenTtsModelsProvider = Provider<List<KittenTtsModel>>((ref) {
   return KittenTtsModel.allModels;
 });
 
-/// Static list of all available Kokoro TTS models.
-final kokoroTtsModelsProvider = Provider<List<KokoroTtsModel>>((ref) {
-  return KokoroTtsModel.allModels;
-});
-
 /// Async provider for the set of downloaded KittenTTS variants.
 final downloadedKittenTtsVariantsProvider =
     FutureProvider<Set<KittenTtsModelVariant>>((ref) async {
       final downloader = ref.read(kittenTtsDownloaderProvider);
-      return downloader.getDownloadedVariants();
-    });
-
-/// Async provider for the set of downloaded Kokoro variants.
-final downloadedKokoroTtsVariantsProvider =
-    FutureProvider<Set<KokoroTtsModelVariant>>((ref) async {
-      final downloader = ref.read(kokoroTtsDownloaderProvider);
       return downloader.getDownloadedVariants();
     });
 
@@ -92,6 +73,7 @@ class TtsDownloadNotifier
   /// Start downloading a model variant.
   Future<void> startDownload(KittenTtsModel model) async {
     final variant = model.variant;
+    final completer = Completer<void>();
 
     final currentVariantProgress = Map<String, KittenTtsFileProgress>.from(
       state[variant] ?? {},
@@ -115,14 +97,17 @@ class TtsDownloadNotifier
           onDone: () {
             _subscriptions.remove(variant);
             ref.invalidate(downloadedKittenTtsVariantsProvider);
+            if (!completer.isCompleted) completer.complete();
           },
           onError: (e) {
             _ModelLog.error(
               'KittenTTS download error for ${variant.displayName}: $e',
             );
             _subscriptions.remove(variant);
+            if (!completer.isCompleted) completer.complete();
           },
         );
+    return completer.future;
   }
 
   /// Cancel an in-flight download.
@@ -172,123 +157,21 @@ class TtsDownloadNotifier
   }
 }
 
-// ── Kokoro TTS Download Progress ──
-
-/// Notifier that tracks per-file download progress for Kokoro TTS models.
-final kokoroTtsDownloadProgressProvider =
-    NotifierProvider<
-      KokoroTtsDownloadNotifier,
-      Map<KokoroTtsModelVariant, Map<String, KokoroTtsFileProgress>>
-    >(() => KokoroTtsDownloadNotifier());
-
-class KokoroTtsDownloadNotifier
-    extends
-        Notifier<
-          Map<KokoroTtsModelVariant, Map<String, KokoroTtsFileProgress>>
-        > {
-  final Map<KokoroTtsModelVariant, StreamSubscription<KokoroTtsFileProgress>>
-  _subscriptions = {};
-
-  @override
-  Map<KokoroTtsModelVariant, Map<String, KokoroTtsFileProgress>> build() {
-    ref.onDispose(() {
-      for (final sub in _subscriptions.values) {
-        sub.cancel();
-      }
-      _subscriptions.clear();
-    });
-    return {};
-  }
-
-  Future<void> startDownload(KokoroTtsModelVariant variant) async {
-    final currentVariantProgress = Map<String, KokoroTtsFileProgress>.from(
-      state[variant] ?? {},
-    );
-
-    state = {...state, variant: currentVariantProgress};
-
-    final downloader = ref.read(kokoroTtsDownloaderProvider);
-
-    _subscriptions[variant]?.cancel();
-    _subscriptions[variant] = downloader
-        .downloadModel(variant)
-        .listen(
-          (progress) {
-            final variantMap = Map<String, KokoroTtsFileProgress>.from(
-              state[variant] ?? {},
-            );
-            variantMap[progress.fileName] = progress;
-            state = {...state, variant: variantMap};
-          },
-          onDone: () {
-            _subscriptions.remove(variant);
-            ref.invalidate(downloadedKokoroTtsVariantsProvider);
-          },
-          onError: (e) {
-            _ModelLog.error(
-              'Kokoro TTS download error for ${variant.displayName}: $e',
-            );
-            _subscriptions.remove(variant);
-          },
-        );
-  }
-
-  void cancelDownload(KokoroTtsModelVariant variant) {
-    ref.read(kokoroTtsDownloaderProvider).cancelDownload(variant);
-    _subscriptions[variant]?.cancel();
-    _subscriptions.remove(variant);
-
-    final newState =
-        Map<KokoroTtsModelVariant, Map<String, KokoroTtsFileProgress>>.from(
-          state,
-        );
-    newState.remove(variant);
-    state = newState;
-  }
-
-  Future<void> deleteVariant(KokoroTtsModelVariant variant) async {
-    cancelDownload(variant);
-    await ref.read(kokoroTtsDownloaderProvider).deleteVariant(variant);
-
-    final newState =
-        Map<KokoroTtsModelVariant, Map<String, KokoroTtsFileProgress>>.from(
-          state,
-        );
-    newState.remove(variant);
-    state = newState;
-
-    ref.invalidate(downloadedKokoroTtsVariantsProvider);
-  }
-
-  bool isDownloading(KokoroTtsModelVariant variant) {
-    final variantProgress = state[variant];
-    if (variantProgress == null || variantProgress.isEmpty) return false;
-    return !variantProgress.values.every((f) => f.isComplete);
-  }
-
-  double getOverallFraction(KokoroTtsModelVariant variant) {
-    final variantProgress = state[variant];
-    if (variantProgress == null || variantProgress.isEmpty) return 0.0;
-    final total = variantProgress.values
-        .map((f) => f.fraction)
-        .fold<double>(0.0, (a, b) => a + b);
-    return total / variantProgress.length;
-  }
-}
-
 // ── Piper TTS Download Progress ──
 
 /// Notifier that tracks per-file download progress for Piper TTS models.
-final piperTtsDownloadProgressProvider = NotifierProvider<
-  PiperTtsDownloadNotifier,
-  Map<PiperTtsModelVariant, Map<String, PiperTtsFileProgress>>
->(() => PiperTtsDownloadNotifier());
+final piperTtsDownloadProgressProvider =
+    NotifierProvider<
+      PiperTtsDownloadNotifier,
+      Map<PiperTtsModelVariant, Map<String, PiperTtsFileProgress>>
+    >(() => PiperTtsDownloadNotifier());
 
-class PiperTtsDownloadNotifier extends Notifier<
-  Map<PiperTtsModelVariant, Map<String, PiperTtsFileProgress>>
-> {
+class PiperTtsDownloadNotifier
+    extends
+        Notifier<Map<PiperTtsModelVariant, Map<String, PiperTtsFileProgress>>> {
   final Map<PiperTtsModelVariant, StreamSubscription<PiperTtsFileProgress>>
   _subscriptions = {};
+  final Map<PiperTtsModelVariant, Completer<void>> _completers = {};
 
   @override
   Map<PiperTtsModelVariant, Map<String, PiperTtsFileProgress>> build() {
@@ -297,11 +180,14 @@ class PiperTtsDownloadNotifier extends Notifier<
         sub.cancel();
       }
       _subscriptions.clear();
+      _completers.clear();
     });
     return {};
   }
 
   Future<void> startDownload(PiperTtsModelVariant variant) async {
+    final completer = Completer<void>();
+    _completers[variant] = completer;
     final currentVariantProgress = Map<String, PiperTtsFileProgress>.from(
       state[variant] ?? {},
     );
@@ -311,36 +197,47 @@ class PiperTtsDownloadNotifier extends Notifier<
     final downloader = ref.read(piperTtsDownloaderProvider);
 
     _subscriptions[variant]?.cancel();
-    _subscriptions[variant] = downloader.downloadModel(variant).listen(
-      (progress) {
-        final variantMap = Map<String, PiperTtsFileProgress>.from(
-          state[variant] ?? {},
+    _subscriptions[variant] = downloader
+        .downloadModel(variant)
+        .listen(
+          (progress) {
+            final variantMap = Map<String, PiperTtsFileProgress>.from(
+              state[variant] ?? {},
+            );
+            variantMap[progress.fileName] = progress;
+            state = {...state, variant: variantMap};
+          },
+          onDone: () {
+            _subscriptions.remove(variant);
+            _completers.remove(variant);
+            ref.invalidate(downloadedPiperTtsVariantsProvider);
+            if (!completer.isCompleted) completer.complete();
+          },
+          onError: (e) {
+            _ModelLog.error(
+              'Piper TTS download error for ${variant.displayName}: $e',
+            );
+            _subscriptions.remove(variant);
+            _completers.remove(variant);
+            if (!completer.isCompleted) completer.complete();
+          },
         );
-        variantMap[progress.fileName] = progress;
-        state = {...state, variant: variantMap};
-      },
-      onDone: () {
-        _subscriptions.remove(variant);
-        ref.invalidate(downloadedPiperTtsVariantsProvider);
-      },
-      onError: (e) {
-        _ModelLog.error(
-          'Piper TTS download error for ${variant.displayName}: $e',
-        );
-        _subscriptions.remove(variant);
-      },
-    );
+    return completer.future;
   }
 
   void cancelDownload(PiperTtsModelVariant variant) {
     ref.read(piperTtsDownloaderProvider).cancelDownload(variant);
     _subscriptions[variant]?.cancel();
     _subscriptions.remove(variant);
+    final completer = _completers.remove(variant);
+    if (completer != null && !completer.isCompleted) {
+      completer.complete();
+    }
 
     final newState =
         Map<PiperTtsModelVariant, Map<String, PiperTtsFileProgress>>.from(
-      state,
-    );
+          state,
+        );
     newState.remove(variant);
     state = newState;
   }
@@ -351,8 +248,8 @@ class PiperTtsDownloadNotifier extends Notifier<
 
     final newState =
         Map<PiperTtsModelVariant, Map<String, PiperTtsFileProgress>>.from(
-      state,
-    );
+          state,
+        );
     newState.remove(variant);
     state = newState;
 
