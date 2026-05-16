@@ -22,7 +22,7 @@ class TtsModelManagerScreen extends ConsumerWidget {
 
     return Scaffold(
       drawer: const SidebarWidget(),
-      appBar: AppBar(title: const Text('TTS Models')),
+      appBar: AppBar(title: const Text('Text To Speech Models')),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -203,32 +203,31 @@ class _KittenEngineCard extends ConsumerWidget {
     WidgetRef ref,
     KittenTtsModel model,
   ) {
-    showShadDialog(
+    showDialog(
       context: context,
-      builder: (context) => ShadDialog(
+      builder: (context) => AlertDialog(
         title: const Text('Delete Model'),
-        description: Text(
-          'Are you sure you want to delete ${model.displayName}? This will free up approximately ${_formatSize(model.totalSizeBytes)} of space.',
+        content: Text(
+          'Are you sure you want to delete ${model.displayName}? This will '
+          'free up approximately ${_formatSize(model.totalSizeBytes)} of '
+          'space.\n\nYou can download this model again later if needed.',
         ),
         actions: [
-          ShadButton.outline(
-            child: const Text('Cancel'),
+          TextButton(
             onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancel'),
           ),
-          ShadButton.destructive(
-            child: const Text('Delete'),
+          TextButton(
             onPressed: () {
               ref
                   .read(ttsDownloadProgressProvider.notifier)
                   .deleteVariant(model.variant);
               Navigator.of(context).pop();
             },
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Delete'),
           ),
         ],
-        child: const Padding(
-          padding: EdgeInsets.symmetric(vertical: 20),
-          child: Text('You can download this model again later if needed.'),
-        ),
       ),
     );
   }
@@ -364,17 +363,17 @@ class _PiperEngineCard extends ConsumerWidget {
           Wrap(
             spacing: 8,
             runSpacing: 8,
-              children: PiperTtsModelVariant.values
-                  .map(
-                    (variant) => _PiperVariantChip(
-                      variant: variant,
-                      voice: piperVoices.firstWhere(
-                        (voice) => voice.id == variant.id,
-                        orElse: () => selectedVoice,
-                      ),
-                      selected: selectedVariant == variant,
-                      installed: downloadedSet.contains(variant),
-                      onTap: () => ref
+            children: PiperTtsModelVariant.values
+                .map(
+                  (variant) => _PiperVariantChip(
+                    variant: variant,
+                    voice: piperVoices.firstWhere(
+                      (voice) => voice.id == variant.id,
+                      orElse: () => selectedVoice,
+                    ),
+                    selected: selectedVariant == variant,
+                    installed: downloadedSet.contains(variant),
+                    onTap: () => ref
                         .read(settingsProvider.notifier)
                         .setTtsVoiceId(variant.id),
                   ),
@@ -450,32 +449,31 @@ class _PiperEngineCard extends ConsumerWidget {
     WidgetRef ref,
     PiperTtsModelVariant variant,
   ) {
-    showShadDialog(
+    showDialog(
       context: context,
-      builder: (context) => ShadDialog(
+      builder: (context) => AlertDialog(
         title: const Text('Delete Voice'),
-        description: Text(
-          'Are you sure you want to delete ${variant.displayName}? This will free up approximately ${_formatSize(variant.totalSizeBytes)} of space.',
+        content: Text(
+          'Are you sure you want to delete ${variant.displayName}? This will '
+          'free up approximately ${_formatSize(variant.totalSizeBytes)} of '
+          'space.\n\nYou can download this voice again later if needed.',
         ),
         actions: [
-          ShadButton.outline(
-            child: const Text('Cancel'),
+          TextButton(
             onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancel'),
           ),
-          ShadButton.destructive(
-            child: const Text('Delete'),
+          TextButton(
             onPressed: () {
               ref
                   .read(piperTtsDownloadProgressProvider.notifier)
                   .deleteVariant(variant);
               Navigator.of(context).pop();
             },
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Delete'),
           ),
         ],
-        child: const Padding(
-          padding: EdgeInsets.symmetric(vertical: 20),
-          child: Text('You can download this voice again later if needed.'),
-        ),
       ),
     );
   }

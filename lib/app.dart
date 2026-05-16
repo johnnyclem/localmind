@@ -18,7 +18,6 @@ import 'features/onboarding/screens/onboarding_theme_screen.dart';
 import 'features/personas/views/create_persona_screen.dart';
 import 'features/personas/views/persona_list_screen.dart';
 import 'features/servers/data/models/server.dart';
-import 'features/servers/providers/server_providers.dart';
 import 'features/servers/views/add_server_screen.dart';
 import 'features/servers/views/server_list_screen.dart';
 import 'features/tts/views/tts_model_manager_screen.dart';
@@ -153,8 +152,6 @@ class App extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(routerProvider);
     final appThemeType = ref.watch(themeModeProvider);
-
-    ref.watch(ensureOnDeviceServerProvider);
 
     ThemeData theme = AppTheme.lightTheme;
     ThemeData darkTheme = AppTheme.darkTheme;

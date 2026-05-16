@@ -104,7 +104,7 @@ class SidebarWidget extends ConsumerWidget {
                     ),
                     DrawerNavItem(
                       iconData: HugeIcons.strokeRoundedVoice,
-                      label: 'TTS Models',
+                      label: 'Text To Speech',
                       isSelected: isTtsModels,
                       onTap: () {
                         if (Scaffold.maybeOf(context)?.isDrawerOpen ?? false) {
@@ -136,19 +136,6 @@ class SidebarWidget extends ConsumerWidget {
                           Navigator.pop(context);
                         }
                         context.go(AppRoutes.settings);
-                      },
-                    ),
-                    DrawerNavItem(
-                      iconData: _getThemeIcon(themeMode),
-                      label: 'Appearance: ${_getThemeLabel(themeMode)}',
-                      isSelected: false,
-                      onTap: () {
-                        final nextMode =
-                            AppThemeType.values[(themeMode.index + 1) %
-                                AppThemeType.values.length];
-                        ref
-                            .read(themeModeProvider.notifier)
-                            .setThemeMode(nextMode);
                       },
                     ),
                   ],
