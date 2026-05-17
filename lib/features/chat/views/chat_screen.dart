@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:hugeicons/hugeicons.dart';
+import 'package:localmind/l10n/app_localizations.dart';
 import '../../servers/views/components/server_icon_picker.dart';
 import '../../servers/data/models/server.dart';
 import '../../../core/models/enums.dart';
@@ -36,11 +37,11 @@ class ChatScreen extends ConsumerStatefulWidget {
 class _ChatScreenState extends ConsumerState<ChatScreen> {
   final ScrollController _scrollController = ScrollController();
 
-  static const List<String> _quickPrompts = [
-    'Help me write a function',
-    'Explain this code',
-    'Debug this for me',
-    'How do I use async/await?',
+  List<String> _quickPrompts(AppLocalizations l10n) => [
+    l10n.quick_write,
+    l10n.quick_explain,
+    l10n.quick_debug,
+    l10n.quick_async,
   ];
 
   @override
@@ -56,6 +57,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     ref.watch(autoSelectFirstLoadedModelProvider);
 
     final chatState = ref.watch(chatProvider);
@@ -69,9 +71,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         : null;
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-
-    // Autoscroll disabled as per user request
-    // ref.listen(chatProvider, (previous, next) { ... });
 
     return Column(
       children: [
@@ -104,7 +103,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                       const SizedBox(width: 8),
                     ],
                     Text(
-                      activeServer?.name ?? 'LocalMind',
+                      activeServer?.name ?? l10n.chat_title,
                       style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -142,11 +141,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                           context,
                           initialTab: 'parameters',
                         ),
-                        tooltip: 'Chat Parameters',
+                        tooltip: l10n.chat_parameters_tooltip,
                       ),
-                      Positioned(
+                      PositionedDirectional(
                         top: 4,
-                        right: 0,
+                        end: 0,
                         child: Container(
                           padding: const EdgeInsets.all(2),
                           decoration: BoxDecoration(
@@ -168,11 +167,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 icon: const Icon(Icons.more_vert),
                 onSelected: (value) => _handleMenuAction(value, context),
                 itemBuilder: (context) => [
-                  const PopupMenuItem(
+                  PopupMenuItem(
                     value: 'new_chat',
                     child: ListTile(
-                      leading: Icon(Icons.add),
-                      title: Text('New Chat'),
+                      leading: const Icon(Icons.add),
+                      title: Text(l10n.nav_new_chat),
                       contentPadding: EdgeInsets.zero,
                     ),
                   ),
@@ -185,25 +184,25 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                             : Icons.smart_toy_outlined,
                       ),
                       title: Text(
-                        persona != null ? 'Change Persona' : 'Set Persona',
+                        persona != null ? l10n.change_persona : l10n.set_persona,
                       ),
                       contentPadding: EdgeInsets.zero,
                     ),
                   ),
                   if (persona != null)
-                    const PopupMenuItem(
+                    PopupMenuItem(
                       value: 'remove_persona',
                       child: ListTile(
-                        leading: Icon(Icons.person_remove_outlined),
-                        title: Text('Remove Persona'),
+                        leading: const Icon(Icons.person_remove_outlined),
+                        title: Text(l10n.remove_persona),
                         contentPadding: EdgeInsets.zero,
                       ),
                     ),
-                  const PopupMenuItem(
+                  PopupMenuItem(
                     value: 'clear',
                     child: ListTile(
-                      leading: Icon(Icons.delete_outline),
-                      title: Text('Clear Conversation'),
+                      leading: const Icon(Icons.delete_outline),
+                      title: Text(l10n.clear_conversation),
                       contentPadding: EdgeInsets.zero,
                     ),
                   ),
@@ -248,7 +247,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 _EmptyState(
                   onQuickPrompt: (prompt) =>
                       ref.read(chatProvider.notifier).sendMessage(prompt),
-                  quickPrompts: _quickPrompts,
+                  quickPrompts: _quickPrompts(l10n),
                   recentConversations: ref.watch(
                     conv.recentConversationsProvider,
                   ),
@@ -348,25 +347,26 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       case 'clear':
         showDialog(
           context: context,
-          builder: (context) => AlertDialog(
-            title: const Text('Clear conversation?'),
-            content: const Text(
-              'This will delete all messages in this conversation.',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Cancel'),
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  ref.read(chatProvider.notifier).clearConversation();
-                },
-                child: const Text('Clear'),
-              ),
-            ],
-          ),
+          builder: (context) {
+            final dlgL10n = AppLocalizations.of(context)!;
+            return AlertDialog(
+              title: Text(dlgL10n.clear_conversation_title),
+              content: Text(dlgL10n.clear_conversation_body),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text(dlgL10n.cancel),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    ref.read(chatProvider.notifier).clearConversation();
+                  },
+                  child: Text(dlgL10n.clear),
+                ),
+              ],
+            );
+          },
         );
         break;
     }
@@ -383,6 +383,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       context: context,
       isScrollControlled: true,
       builder: (ctx) {
+        final sheetL10n = AppLocalizations.of(context)!;
         return SafeArea(
           child: Container(
             padding: const EdgeInsets.symmetric(vertical: 16),
@@ -401,7 +402,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'Select Persona',
+                  sheetL10n.select_persona,
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -483,6 +484,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       context: context,
       isScrollControlled: true,
       builder: (ctx) {
+        final sheetL10n = AppLocalizations.of(context)!;
         return SafeArea(
           child: Container(
             padding: const EdgeInsets.symmetric(vertical: 16),
@@ -501,7 +503,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'Select Persona',
+                  sheetL10n.select_persona,
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -590,6 +592,7 @@ class _ModelTopBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
@@ -609,7 +612,7 @@ class _ModelTopBar extends StatelessWidget {
               children: [
                 Flexible(
                   child: Text(
-                    selectedModel?.displayName ?? 'Select Model',
+                    selectedModel?.displayName ?? l10n.select_model,
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w500,
@@ -642,6 +645,7 @@ class _ConnectionBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final isError = status == ConnectionStatus.error;
 
     return Container(
@@ -661,8 +665,8 @@ class _ConnectionBanner extends StatelessWidget {
           Expanded(
             child: Text(
               isError
-                  ? 'Connection error. Check your server.'
-                  : 'Disconnected from server.',
+                  ? l10n.connection_error
+                  : l10n.disconnected,
               style: TextStyle(
                 fontSize: 13,
                 color: isError ? Colors.red : Colors.orange[700],
@@ -674,7 +678,7 @@ class _ConnectionBanner extends StatelessWidget {
               context.push(AppRoutes.servers);
             },
             child: Text(
-              'Configure',
+              l10n.configure,
               style: TextStyle(
                 fontSize: 13,
                 color: isError ? Colors.red : Colors.orange[700],
@@ -766,6 +770,7 @@ class _EmptyStateState extends State<_EmptyState>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
@@ -819,7 +824,7 @@ class _EmptyStateState extends State<_EmptyState>
                           Flexible(
                             child: Text(
                               widget.selectedModel?.displayName ??
-                                  'Select Model',
+                                  l10n.select_model,
                               style: TextStyle(
                                 fontSize: 15,
                                 fontWeight: FontWeight.w600,
@@ -886,7 +891,7 @@ class _EmptyStateState extends State<_EmptyState>
                             const SizedBox(width: 8),
                             Flexible(
                               child: Text(
-                                'Select Persona',
+                                l10n.select_persona,
                                 style: TextStyle(
                                   fontSize: 15,
                                   fontWeight: FontWeight.w600,
@@ -919,7 +924,7 @@ class _EmptyStateState extends State<_EmptyState>
                 return Opacity(opacity: value, child: child);
               },
               child: Text(
-                'Start a conversation',
+                l10n.start_conversation,
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
@@ -974,7 +979,7 @@ class _EmptyStateState extends State<_EmptyState>
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    'Recent chats',
+                    l10n.recent_chats,
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
@@ -987,7 +992,7 @@ class _EmptyStateState extends State<_EmptyState>
                   GestureDetector(
                     onTap: widget.onSeeAll,
                     child: Text(
-                      'See all',
+                      l10n.see_all,
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
@@ -1093,7 +1098,9 @@ class _RecentConversationItem extends ConsumerWidget {
               ),
             ),
             Icon(
-              Icons.chevron_right,
+              Directionality.of(context) == TextDirection.rtl
+                  ? Icons.chevron_left
+                  : Icons.chevron_right,
               size: 18,
               color: isDark ? const Color(0xFF666666) : const Color(0xFF999999),
             ),
@@ -1275,7 +1282,7 @@ class _SmartReplyChipsState extends ConsumerState<_SmartReplyChips>
       child: SizedBox(
         height: 40,
         child: ListView.separated(
-          padding: EdgeInsets.only(left: 8),
+          padding: EdgeInsetsDirectional.only(start: 8),
           scrollDirection: Axis.horizontal,
           itemCount: suggestions.length,
           separatorBuilder: (_, _) => const SizedBox(width: 6),
@@ -1349,6 +1356,7 @@ class _PersonaIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
@@ -1396,7 +1404,7 @@ class _PersonaIndicator extends StatelessWidget {
             onPressed: onRemove,
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(),
-            tooltip: 'Remove Persona',
+            tooltip: l10n.remove_persona,
             color: isDark ? Colors.white38 : Colors.black38,
           ),
         ],
@@ -1417,13 +1425,12 @@ class _CorruptedChatState extends ConsumerWidget {
   final VoidCallback onStartNewChat;
 
   void _showDebugInfo(BuildContext context, WidgetRef ref) {
+    final debugL10n = AppLocalizations.of(context)!;
     showShadDialog(
       context: context,
       builder: (context) => ShadDialog(
-        title: const Text('Technical Details'),
-        description: const Text(
-          'Diagnostic information to help identify synchronization issues.',
-        ),
+        title: Text(debugL10n.technical_details),
+        description: Text(debugL10n.debug_dialog_desc),
         actions: [
           ShadButton.outline(
             onPressed: () {
@@ -1436,14 +1443,14 @@ Error: $errorMessage
 ''';
               Clipboard.setData(ClipboardData(text: data));
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Copied to clipboard')),
+                SnackBar(content: Text(debugL10n.copied_to_clipboard)),
               );
             },
-            child: const Text('Copy Info'),
+            child: Text(debugL10n.copy_info),
           ),
           ShadButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Close'),
+            child: Text(debugL10n.close),
           ),
         ],
         child: Container(
@@ -1453,13 +1460,13 @@ Error: $errorMessage
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              _DebugRow(label: 'Conversation ID', value: conversation.id),
+              _DebugRow(label: debugL10n.conversation_id, value: conversation.id),
               _DebugRow(
-                label: 'Created At',
+                label: debugL10n.created_at,
                 value: conversation.createdAt.toIso8601String(),
               ),
               _DebugRow(
-                label: 'Expected Messages',
+                label: debugL10n.expected_messages,
                 value: '${conversation.messageCount}',
               ),
               if (errorMessage != null)
@@ -1468,9 +1475,9 @@ Error: $errorMessage
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Last Error:',
-                        style: TextStyle(
+                      Text(
+                        debugL10n.last_error,
+                        style: const TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.bold,
                           color: Colors.red,
@@ -1503,6 +1510,7 @@ Error: $errorMessage
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
@@ -1526,7 +1534,7 @@ Error: $errorMessage
             ),
             const SizedBox(height: 24),
             Text(
-              'History Missing',
+              l10n.history_missing_title,
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
@@ -1535,7 +1543,7 @@ Error: $errorMessage
             ),
             const SizedBox(height: 12),
             Text(
-              'Either the messages in this chat were deleted or the history record is corrupted.',
+              l10n.history_missing_desc,
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 15,
@@ -1549,12 +1557,12 @@ Error: $errorMessage
                 ShadButton(
                   onPressed: onStartNewChat,
                   leading: const Icon(Icons.add_rounded, size: 20),
-                  child: const Text('Start New Chat'),
+                  child: Text(l10n.start_new_chat),
                 ),
                 const SizedBox(width: 12),
                 ShadButton.outline(
                   onPressed: () => _showDebugInfo(context, ref),
-                  child: const Text('Technical Details'),
+                  child: Text(l10n.technical_details),
                 ),
               ],
             ),

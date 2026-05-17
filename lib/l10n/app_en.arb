@@ -1,0 +1,2765 @@
+{
+  "@@locale": "en",
+
+  "app_name": "LocalMind",
+  "@app_name": {
+    "description": "Application display name"
+  },
+
+  "app_tagline": "Your AI. Your Device. Your Rules.",
+  "@app_tagline": {
+    "description": "Application tagline shown in settings and splash"
+  },
+
+  "app_version": "1.0.0",
+  "@app_version": {
+    "description": "Application version number"
+  },
+
+  "cancel": "Cancel",
+  "@cancel": {
+    "description": "Generic cancel button label"
+  },
+
+  "confirm": "Confirm",
+  "@confirm": {
+    "description": "Generic confirm button label"
+  },
+
+  "delete": "Delete",
+  "@delete": {
+    "description": "Generic delete button label"
+  },
+
+  "save": "Save",
+  "@save": {
+    "description": "Generic save button label"
+  },
+
+  "retry": "Retry",
+  "@retry": {
+    "description": "Generic retry button label"
+  },
+
+  "close": "Close",
+  "@close": {
+    "description": "Generic close button label"
+  },
+
+  "done": "Done",
+  "@done": {
+    "description": "Generic done button label"
+  },
+
+  "continue_action": "Continue",
+  "@continue_action": {
+    "description": "Generic continue button label"
+  },
+
+  "skip": "Skip",
+  "@skip": {
+    "description": "Generic skip button label"
+  },
+
+  "install": "Install",
+  "@install": {
+    "description": "Install action button"
+  },
+
+  "download": "Download",
+  "@download": {
+    "description": "Download action button"
+  },
+
+  "resume": "Resume",
+  "@resume": {
+    "description": "Resume download button"
+  },
+
+  "pause": "Pause",
+  "@pause": {
+    "description": "Pause download button"
+  },
+
+  "stop": "Stop",
+  "@stop": {
+    "description": "Stop action button"
+  },
+
+  "edit": "Edit",
+  "@edit": {
+    "description": "Edit action label"
+  },
+
+  "preview": "Preview",
+  "@preview": {
+    "description": "Preview action label"
+  },
+
+  "unload": "Unload",
+  "@unload": {
+    "description": "Unload model action"
+  },
+
+  "load": "Load",
+  "@load": {
+    "description": "Load model action"
+  },
+
+  "rename": "Rename",
+  "@rename": {
+    "description": "Rename action label"
+  },
+
+  "pin": "Pin",
+  "@pin": {
+    "description": "Pin conversation action"
+  },
+
+  "unpin": "Unpin",
+  "@unpin": {
+    "description": "Unpin conversation action"
+  },
+
+  "share": "Share",
+  "@share": {
+    "description": "Share action label"
+  },
+
+  "copy": "Copy",
+  "@copy": {
+    "description": "Copy action label"
+  },
+
+  "copied": "Copied!",
+  "@copied": {
+    "description": "Copied confirmation text"
+  },
+
+  "copied_to_clipboard": "Copied to clipboard",
+  "@copied_to_clipboard": {
+    "description": "Snackbar message after copy"
+  },
+
+  "select": "Select",
+  "@select": {
+    "description": "Select action button"
+  },
+
+  "active": "Active",
+  "@active": {
+    "description": "Active status badge"
+  },
+
+  "all": "All",
+  "@all": {
+    "description": "All filter label"
+  },
+
+  "none": "None",
+  "@none": {
+    "description": "No selection label"
+  },
+
+  "none_selected": "None selected",
+  "@none_selected": {
+    "description": "Dropdown placeholder when nothing selected"
+  },
+
+  "online": "Online",
+  "@online": {
+    "description": "Connection status online"
+  },
+
+  "offline": "Offline",
+  "@offline": {
+    "description": "Connection status offline"
+  },
+
+  "error": "Error",
+  "@error": {
+    "description": "Error status text"
+  },
+
+  "unknown_error": "Unknown error",
+  "@unknown_error": {
+    "description": "Fallback unknown error message"
+  },
+
+  "not_now": "Not Now",
+  "@not_now": {
+    "description": "Dismiss action for notifications"
+  },
+
+  "enable": "Enable",
+  "@enable": {
+    "description": "Enable action button"
+  },
+
+  "proceed_anyway": "Proceed Anyway",
+  "@proceed_anyway": {
+    "description": "Proceed despite warning"
+  },
+
+  "test_connection": "Test Connection",
+  "@test_connection": {
+    "description": "Button to test server connection"
+  },
+
+  "testing": "Testing...",
+  "@testing": {
+    "description": "Button label while testing connection"
+  },
+
+  "connection_successful": "Connection successful!",
+  "@connection_successful": {
+    "description": "Connection test success message"
+  },
+
+  "connection_failed": "Connection failed. Check your settings.",
+  "@connection_failed": {
+    "description": "Connection test failure message"
+  },
+
+  "save_continue": "Save & Continue",
+  "@save_continue": {
+    "description": "Save and proceed button"
+  },
+
+  "save_changes": "Save Changes",
+  "@save_changes": {
+    "description": "Save changes button"
+  },
+
+  "finish_setup": "Finish Setup",
+  "@finish_setup": {
+    "description": "Complete onboarding button"
+  },
+
+  "start_new_chat": "Start New Chat",
+  "@start_new_chat": {
+    "description": "Button to start a new chat"
+  },
+
+  "cannot_undo": "This action cannot be undone.",
+  "@cannot_undo": {
+    "description": "Warning for destructive actions"
+  },
+
+  "ram_warning": "RAM Warning",
+  "@ram_warning": {
+    "description": "RAM warning dialog title"
+  },
+
+  "recommended": "RECOMMENDED",
+  "@recommended": {
+    "description": "Recommended badge on model cards"
+  },
+
+  "may_be_large": "May be too large for this device",
+  "@may_be_large": {
+    "description": "Warning when model may exceed device RAM"
+  },
+
+  "calculating": "Calculating...",
+  "@calculating": {
+    "description": "ETA placeholder during download"
+  },
+
+  "download_failed": "Download failed",
+  "@download_failed": {
+    "description": "Download failure status"
+  },
+
+  "downloaded": "Downloaded",
+  "@downloaded": {
+    "description": "Download completed status"
+  },
+
+  "not_downloaded": "Not downloaded",
+  "@not_downloaded": {
+    "description": "Model not yet downloaded"
+  },
+
+  "installed": "Installed",
+  "@installed": {
+    "description": "Installed status"
+  },
+
+  "not_installed": "Not installed",
+  "@not_installed": {
+    "description": "Not installed status"
+  },
+
+  "loading": "Loading...",
+  "@loading": {
+    "description": "Generic loading indicator text"
+  },
+
+  "thinking": "Thinking",
+  "@thinking": {
+    "description": "Model thinking indicator"
+  },
+
+  "processing": "Processing...",
+  "@processing": {
+    "description": "Processing indicator text"
+  },
+
+  "initializing": "Initializing...",
+  "@initializing": {
+    "description": "Initializing status"
+  },
+
+  "ready": "Ready",
+  "@ready": {
+    "description": "Ready status text"
+  },
+
+  "preparing_app": "Preparing app...",
+  "@preparing_app": {
+    "description": "Bootstrap stage message"
+  },
+
+  "initializing_services": "Initializing services...",
+  "@initializing_services": {
+    "description": "Bootstrap stage message"
+  },
+
+  "configuring_server": "Configuring server...",
+  "@configuring_server": {
+    "description": "Bootstrap stage message"
+  },
+
+  "startup_failed": "Startup failed",
+  "@startup_failed": {
+    "description": "Bootstrap error message"
+  },
+
+  "something_went_wrong": "Something went wrong",
+  "@something_went_wrong": {
+    "description": "Generic error heading on bootstrap screen"
+  },
+
+  "delete_model_title": "Delete Model",
+  "@delete_model_title": {
+    "description": "Delete model dialog title"
+  },
+
+  "delete_model_body": "Are you sure you want to delete {name}?",
+  "@delete_model_body": {
+    "description": "Delete model confirmation dialog body",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "ModelName"
+      }
+    }
+  },
+
+  "delete_model_body_with_size": "Are you sure you want to delete {name}? This will free up approximately {size} of space.\n\nYou can download this model again later if needed.",
+  "@delete_model_body_with_size": {
+    "description": "Delete model dialog body with size info",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "ModelName"
+      },
+      "size": {
+        "type": "String",
+        "example": "250 MB"
+      }
+    }
+  },
+
+  "delete_voice_title": "Delete Voice",
+  "@delete_voice_title": {
+    "description": "Delete voice confirmation dialog title"
+  },
+
+  "delete_voice_body": "Are you sure you want to delete {name}? This will free up approximately {size} of space.\n\nYou can download this voice again later if needed.",
+  "@delete_voice_body": {
+    "description": "Delete voice confirmation dialog body",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "VoiceName"
+      },
+      "size": {
+        "type": "String",
+        "example": "100 MB"
+      }
+    }
+  },
+
+  "delete_server_title": "Delete Server",
+  "@delete_server_title": {
+    "description": "Delete server confirmation dialog title"
+  },
+
+  "delete_server_body": "Are you sure you want to delete \"{name}\"? This cannot be undone.",
+  "@delete_server_body": {
+    "description": "Delete server confirmation body",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "My Server"
+      }
+    }
+  },
+
+  "delete_conversation_title": "Delete conversation?",
+  "@delete_conversation_title": {
+    "description": "Delete conversation dialog title"
+  },
+
+  "delete_conversation_body": "Are you sure you want to delete \"{title}\"? This cannot be undone.",
+  "@delete_conversation_body": {
+    "description": "Delete conversation dialog body",
+    "placeholders": {
+      "title": {
+        "type": "String",
+        "example": "Chat about Flutter"
+      }
+    }
+  },
+
+  "delete_message_title": "Delete message?",
+  "@delete_message_title": {
+    "description": "Delete message dialog title"
+  },
+
+  "delete_persona_title": "Delete \"{name}\"?",
+  "@delete_persona_title": {
+    "description": "Delete persona dialog title",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "HelperBot"
+      }
+    }
+  },
+
+  "delete_persona_body": "This cannot be undone.",
+  "@delete_persona_body": {
+    "description": "Delete persona dialog body"
+  },
+
+  "clear_conversation_title": "Clear conversation?",
+  "@clear_conversation_title": {
+    "description": "Clear conversation dialog title"
+  },
+
+  "clear_conversation_body": "This will delete all messages in this conversation.",
+  "@clear_conversation_body": {
+    "description": "Clear conversation confirmation body"
+  },
+
+  "clear": "Clear",
+  "@clear": {
+    "description": "Clear action button"
+  },
+
+  "label_completed": "{label} completed",
+  "@label_completed": {
+    "description": "Completion status message",
+    "placeholders": {
+      "label": {
+        "type": "String",
+        "example": "Download"
+      }
+    }
+  },
+
+  "error_with_message": "Error: {error}",
+  "@error_with_message": {
+    "description": "Error display with message",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Connection refused"
+      }
+    }
+  },
+
+  "preview_failed": "Preview failed: {error}",
+  "@preview_failed": {
+    "description": "Audio preview failed message",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Audio error"
+      }
+    }
+  },
+
+  "loading_model": "Loading {modelId}...",
+  "@loading_model": {
+    "description": "Model loading status",
+    "placeholders": {
+      "modelId": {
+        "type": "String",
+        "example": "gpt-4"
+      }
+    }
+  },
+
+  "model_loaded": "Model loaded: {modelId} ({backend})",
+  "@model_loaded": {
+    "description": "Model loaded status in settings",
+    "placeholders": {
+      "modelId": {
+        "type": "String",
+        "example": "qwen-3"
+      },
+      "backend": {
+        "type": "String",
+        "example": "CPU"
+      }
+    }
+  },
+
+  "no_model_loaded": "No model loaded. Tap \"Manage On-Device Models\" to download and load a model.",
+  "@no_model_loaded": {
+    "description": "Status when no on-device model is loaded"
+  },
+
+  "loading_model_error": "Error: {error}",
+  "@loading_model_error": {
+    "description": "Model loading error status",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Out of memory"
+      }
+    }
+  },
+
+  "delete_conversation": "Delete conversation?",
+  "@delete_conversation": {
+    "description": "Delete conversation dialog title"
+  },
+
+  "nav_history": "History",
+  "@nav_history": {
+    "description": "Navigation item for chat history"
+  },
+
+  "nav_servers": "Servers",
+  "@nav_servers": {
+    "description": "Navigation item for servers"
+  },
+
+  "nav_local_models": "Local Models",
+  "@nav_local_models": {
+    "description": "Navigation item for local on-device models"
+  },
+
+  "nav_tts": "Text To Speech",
+  "@nav_tts": {
+    "description": "Navigation item for TTS models"
+  },
+
+  "nav_personas": "Personas",
+  "@nav_personas": {
+    "description": "Navigation item for personas"
+  },
+
+  "nav_settings": "Settings",
+  "@nav_settings": {
+    "description": "Navigation item for settings"
+  },
+
+  "nav_new_chat": "New Chat",
+  "@nav_new_chat": {
+    "description": "Button to start a new chat"
+  },
+
+  "search_hint": "Search conversations...",
+  "@search_hint": {
+    "description": "Search field placeholder for conversations"
+  },
+
+  "no_server_selected": "No server selected",
+  "@no_server_selected": {
+    "description": "Placeholder when no server is selected"
+  },
+
+  "switch_server": "Switch Server",
+  "@switch_server": {
+    "description": "Switch server sheet title"
+  },
+
+  "switch_server_subtitle": "Choose a server to connect to",
+  "@switch_server_subtitle": {
+    "description": "Switch server sheet subtitle"
+  },
+
+  "manage_servers": "Manage Servers",
+  "@manage_servers": {
+    "description": "Button to manage servers list"
+  },
+
+  "open_source": "Open Source",
+  "@open_source": {
+    "description": "GitHub repo card title"
+  },
+
+  "open_source_desc": "LocalMind is open source. Follow our progress or contribute on GitHub.",
+  "@open_source_desc": {
+    "description": "GitHub repo card description"
+  },
+
+  "star_on_github": "Star on GitHub",
+  "@star_on_github": {
+    "description": "Button to star repo on GitHub"
+  },
+
+  "settings_title": "Settings",
+  "@settings_title": {
+    "description": "Settings screen title"
+  },
+
+  "settings_appearance": "Appearance",
+  "@settings_appearance": {
+    "description": "Settings section header for appearance"
+  },
+
+  "settings_language": "Language",
+  "@settings_language": {
+    "description": "Settings section label for language selection"
+  },
+
+  "language_system_default": "System Default",
+  "@language_system_default": {
+    "description": "Option to use the device's system language"
+  },
+
+  "settings_tts": "Text-to-Speech",
+  "@settings_tts": {
+    "description": "Settings section header for TTS"
+  },
+
+  "settings_behavior": "Behavior",
+  "@settings_behavior": {
+    "description": "Settings section header for behavior"
+  },
+
+  "settings_on_device": "On-Device Inference",
+  "@settings_on_device": {
+    "description": "Settings section header for on-device"
+  },
+
+  "settings_default_server": "Default Server",
+  "@settings_default_server": {
+    "description": "Settings section header for default server"
+  },
+
+  "settings_default_persona": "Default Persona",
+  "@settings_default_persona": {
+    "description": "Settings section header for default persona"
+  },
+
+  "settings_privacy": "Privacy",
+  "@settings_privacy": {
+    "description": "Settings section header for privacy"
+  },
+
+  "settings_data_management": "Data Management",
+  "@settings_data_management": {
+    "description": "Settings section header for data management"
+  },
+
+  "settings_about": "About",
+  "@settings_about": {
+    "description": "Settings section header for about"
+  },
+
+  "theme": "Theme",
+  "@theme": {
+    "description": "Theme selection label"
+  },
+
+  "theme_system": "System",
+  "@theme_system": {
+    "description": "System theme option"
+  },
+
+  "theme_light": "Light",
+  "@theme_light": {
+    "description": "Light theme option"
+  },
+
+  "theme_dark": "Dark",
+  "@theme_dark": {
+    "description": "Dark theme option"
+  },
+
+  "theme_claude": "Claude",
+  "@theme_claude": {
+    "description": "Claude theme option"
+  },
+
+  "font_size": "Font Size",
+  "@font_size": {
+    "description": "Font size slider label"
+  },
+
+  "font_size_desc": "Adjust text size in chat.",
+  "@font_size_desc": {
+    "description": "Font size setting description"
+  },
+
+  "font_preview": "The quick brown fox jumps over the lazy dog.",
+  "@font_preview": {
+    "description": "Font preview sample text"
+  },
+
+  "code_theme_dark": "Code Theme (Dark)",
+  "@code_theme_dark": {
+    "description": "Dark code theme dropdown label"
+  },
+
+  "code_theme_light": "Code Theme (Light)",
+  "@code_theme_light": {
+    "description": "Light code theme dropdown label"
+  },
+
+  "code_theme_desc": "Choose syntax highlighting theme for code blocks.",
+  "@code_theme_desc": {
+    "description": "Code theme setting description"
+  },
+
+  "tts_engine": "TTS Engine",
+  "@tts_engine": {
+    "description": "TTS engine dropdown label"
+  },
+
+  "tts_engine_system": "System TTS",
+  "@tts_engine_system": {
+    "description": "System TTS engine option"
+  },
+
+  "tts_engine_kitten": "Kitten TTS",
+  "@tts_engine_kitten": {
+    "description": "Kitten TTS engine option"
+  },
+
+  "voice": "Voice",
+  "@voice": {
+    "description": "Voice selection label"
+  },
+
+  "voice_female": "Female",
+  "@voice_female": {
+    "description": "Female voice gender label"
+  },
+
+  "voice_male": "Male",
+  "@voice_male": {
+    "description": "Male voice gender label"
+  },
+
+  "voice_other": "Other",
+  "@voice_other": {
+    "description": "Other voice gender label"
+  },
+
+  "tts_speed": "TTS Speed",
+  "@tts_speed": {
+    "description": "TTS speed slider label"
+  },
+
+  "tts_speed_desc": "Adjust the playback rate.",
+  "@tts_speed_desc": {
+    "description": "TTS speed setting description"
+  },
+
+  "manage_tts_models": "Manage TTS Models",
+  "@manage_tts_models": {
+    "description": "Button to manage TTS models"
+  },
+
+  "manage_on_device_models": "Manage On-Device Models",
+  "@manage_on_device_models": {
+    "description": "Button to manage on-device models"
+  },
+
+  "streaming_responses": "Streaming Responses",
+  "@streaming_responses": {
+    "description": "Toggle for streaming responses"
+  },
+
+  "auto_generate_titles": "Auto-generate Titles",
+  "@auto_generate_titles": {
+    "description": "Toggle for auto-generating conversation titles"
+  },
+
+  "send_on_enter": "Send on Enter",
+  "@send_on_enter": {
+    "description": "Toggle for send on enter behavior"
+  },
+
+  "show_system_messages": "Show System Messages",
+  "@show_system_messages": {
+    "description": "Toggle for system messages visibility"
+  },
+
+  "haptic_feedback": "Haptic Feedback",
+  "@haptic_feedback": {
+    "description": "Toggle for haptic feedback"
+  },
+
+  "enable_mcp": "Enable MCP",
+  "@enable_mcp": {
+    "description": "Toggle for MCP feature"
+  },
+
+  "new_chat_mcp_default": "New Chat MCP Default",
+  "@new_chat_mcp_default": {
+    "description": "Toggle for MCP default in new chats"
+  },
+
+  "show_data_indicator": "Show Data Indicator",
+  "@show_data_indicator": {
+    "description": "Toggle for data indicator visibility"
+  },
+
+  "privacy_info": "\"LocalMind never sees your data\"",
+  "@privacy_info": {
+    "description": "Privacy information text"
+  },
+
+  "delete_all_conversations": "Delete All Conversations",
+  "@delete_all_conversations": {
+    "description": "Dangerous action button to clear all conversations"
+  },
+
+  "reset_settings_defaults": "Reset Settings to Defaults",
+  "@reset_settings_defaults": {
+    "description": "Button to reset all settings"
+  },
+
+  "chat_title": "LocalMind",
+  "@chat_title": {
+    "description": "Fallback chat screen title"
+  },
+
+  "chat_parameters_tooltip": "Chat Parameters",
+  "@chat_parameters_tooltip": {
+    "description": "Tooltip for chat parameters button"
+  },
+
+  "change_persona": "Change Persona",
+  "@change_persona": {
+    "description": "Menu item to change persona"
+  },
+
+  "set_persona": "Set Persona",
+  "@set_persona": {
+    "description": "Menu item to set persona"
+  },
+
+  "remove_persona": "Remove Persona",
+  "@remove_persona": {
+    "description": "Menu item to remove persona"
+  },
+
+  "clear_conversation": "Clear Conversation",
+  "@clear_conversation": {
+    "description": "Menu item to clear conversation"
+  },
+
+  "connection_error": "Connection error. Check your server.",
+  "@connection_error": {
+    "description": "Connection error banner text"
+  },
+
+  "disconnected": "Disconnected from server.",
+  "@disconnected": {
+    "description": "Disconnected banner text"
+  },
+
+  "configure": "Configure",
+  "@configure": {
+    "description": "Configure action button"
+  },
+
+  "select_model": "Select Model",
+  "@select_model": {
+    "description": "Model selection placeholder"
+  },
+
+  "select_persona": "Select Persona",
+  "@select_persona": {
+    "description": "Persona selection sheet title"
+  },
+
+  "start_conversation": "Start a conversation",
+  "@start_conversation": {
+    "description": "Empty state heading"
+  },
+
+  "recent_chats": "Recent chats",
+  "@recent_chats": {
+    "description": "Recent chats section label"
+  },
+
+  "see_all": "See all",
+  "@see_all": {
+    "description": "See all link text"
+  },
+
+  "quick_write": "Help me write a function",
+  "@quick_write": {
+    "description": "Quick prompt chip text"
+  },
+
+  "quick_explain": "Explain this code",
+  "@quick_explain": {
+    "description": "Quick prompt chip text"
+  },
+
+  "quick_debug": "Debug this for me",
+  "@quick_debug": {
+    "description": "Quick prompt chip text"
+  },
+
+  "quick_async": "How do I use async/await?",
+  "@quick_async": {
+    "description": "Quick prompt chip text"
+  },
+
+  "history_missing_title": "History Missing",
+  "@history_missing_title": {
+    "description": "Corrupted chat error title"
+  },
+
+  "history_missing_desc": "Either the messages in this chat were deleted or the history record is corrupted.",
+  "@history_missing_desc": {
+    "description": "Corrupted chat error description"
+  },
+
+  "technical_details": "Technical Details",
+  "@technical_details": {
+    "description": "Button for debug details"
+  },
+
+  "last_error": "Last Error:",
+  "@last_error": {
+    "description": "Diagnostic label"
+  },
+
+  "copy_info": "Copy Info",
+  "@copy_info": {
+    "description": "Button to copy debug info"
+  },
+
+  "conversation_id": "Conversation ID",
+  "@conversation_id": {
+    "description": "Debug row label"
+  },
+
+  "created_at": "Created At",
+  "@created_at": {
+    "description": "Debug row label"
+  },
+
+  "expected_messages": "Expected Messages",
+  "@expected_messages": {
+    "description": "Debug row label"
+  },
+
+  "debug_dialog_desc": "Diagnostic information to help identify synchronization issues.",
+  "@debug_dialog_desc": {
+    "description": "Debug dialog description"
+  },
+
+  "chat_input_hint": "Ask anything",
+  "@chat_input_hint": {
+    "description": "Chat input field hint"
+  },
+
+  "send_message_tooltip": "Send message",
+  "@send_message_tooltip": {
+    "description": "Tooltip for send button"
+  },
+
+  "stop_generation_tooltip": "Stop generation",
+  "@stop_generation_tooltip": {
+    "description": "Tooltip for stop button"
+  },
+
+  "attach_images_tooltip": "Attach images",
+  "@attach_images_tooltip": {
+    "description": "Tooltip for attach button"
+  },
+
+  "tool_label": "Tool: {toolCallId}",
+  "@tool_label": {
+    "description": "Tool call label in chat bubble",
+    "placeholders": {
+      "toolCallId": {
+        "type": "String",
+        "example": "call_abc123"
+      }
+    }
+  },
+
+  "tool_unknown": "Tool: Unknown",
+  "@tool_unknown": {
+    "description": "Unknown tool call fallback"
+  },
+
+  "message_options": "Message options",
+  "@message_options": {
+    "description": "Message actions sheet title"
+  },
+
+  "copy_markdown": "Copy as Markdown",
+  "@copy_markdown": {
+    "description": "Copy as markdown option"
+  },
+
+  "copied_markdown": "Copied as Markdown",
+  "@copied_markdown": {
+    "description": "Copied as markdown snackbar"
+  },
+
+  "read_aloud": "Read Aloud",
+  "@read_aloud": {
+    "description": "Read aloud action"
+  },
+
+  "stop_reading": "Stop Reading",
+  "@stop_reading": {
+    "description": "Stop reading action"
+  },
+
+  "more": "More",
+  "@more": {
+    "description": "More actions label"
+  },
+
+  "character_count": "{length} characters",
+  "@character_count": {
+    "description": "Character count display",
+    "placeholders": {
+      "length": {
+        "type": "int",
+        "example": "150"
+      }
+    }
+  },
+
+  "edit_message": "Edit message",
+  "@edit_message": {
+    "description": "Edit message dialog title"
+  },
+
+  "edit_message_desc": "Saving will remove the assistant response below and regenerate.",
+  "@edit_message_desc": {
+    "description": "Edit message dialog description"
+  },
+
+  "save_regenerate": "Save & regenerate",
+  "@save_regenerate": {
+    "description": "Save and regenerate button"
+  },
+
+  "chat_settings_title": "Chat Settings",
+  "@chat_settings_title": {
+    "description": "Chat settings sheet title"
+  },
+
+  "reset_defaults": "Reset Defaults",
+  "@reset_defaults": {
+    "description": "Reset to defaults button"
+  },
+
+  "parameters_tab": "Parameters",
+  "@parameters_tab": {
+    "description": "Chat settings parameters tab"
+  },
+
+  "mcp_tab": "MCP",
+  "@mcp_tab": {
+    "description": "Chat settings MCP tab"
+  },
+
+  "temperature": "Temperature",
+  "@temperature": {
+    "description": "Temperature slider label"
+  },
+
+  "temperature_desc": "Controls randomness: Higher = Creative, Lower = Focused",
+  "@temperature_desc": {
+    "description": "Temperature description"
+  },
+
+  "top_p": "Top P",
+  "@top_p": {
+    "description": "Top P slider label"
+  },
+
+  "top_p_desc": "Nucleus sampling threshold",
+  "@top_p_desc": {
+    "description": "Top P description"
+  },
+
+  "max_tokens": "Max Tokens",
+  "@max_tokens": {
+    "description": "Max tokens input label"
+  },
+
+  "max_tokens_desc": "Response limit",
+  "@max_tokens_desc": {
+    "description": "Max tokens description"
+  },
+
+  "context_length": "Context Length",
+  "@context_length": {
+    "description": "Context length input label"
+  },
+
+  "context_length_desc": "History window",
+  "@context_length_desc": {
+    "description": "Context length description"
+  },
+
+  "mcp_disabled_warning": "MCP is disabled globally. Enable it in Settings to use these features.",
+  "@mcp_disabled_warning": {
+    "description": "Warning when MCP is disabled"
+  },
+
+  "mcp_enable_chat": "Enable MCP for this chat",
+  "@mcp_enable_chat": {
+    "description": "Toggle to enable MCP for current chat"
+  },
+
+  "auto_execute_tools": "Auto-execute tools",
+  "@auto_execute_tools": {
+    "description": "Toggle for auto-executing tools"
+  },
+
+  "add_ephemeral_mcp": "Add Ephemeral MCP Server",
+  "@add_ephemeral_mcp": {
+    "description": "Section label for adding temp MCP server"
+  },
+
+  "mcp_label_placeholder": "Label",
+  "@mcp_label_placeholder": {
+    "description": "MCP label field placeholder"
+  },
+
+  "mcp_url_placeholder": "URL (https://...)",
+  "@mcp_url_placeholder": {
+    "description": "MCP URL field placeholder"
+  },
+
+  "active_integrations": "Active Integrations",
+  "@active_integrations": {
+    "description": "Active MCP integrations section"
+  },
+
+  "enable_notifications": "Enable Notifications",
+  "@enable_notifications": {
+    "description": "Notification banner title"
+  },
+
+  "enable_notifications_desc": "Get notified when models finish downloading.",
+  "@enable_notifications_desc": {
+    "description": "Notification banner subtitle"
+  },
+
+  "chat_history_title": "Chat History",
+  "@chat_history_title": {
+    "description": "Chat history screen title"
+  },
+
+  "conversation_just_now": "Just now",
+  "@conversation_just_now": {
+    "description": "Recent conversation timestamp"
+  },
+
+  "conversation_minutes_ago": "{minutes}m ago",
+  "@conversation_minutes_ago": {
+    "description": "Minutes ago timestamp",
+    "placeholders": {
+      "minutes": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
+
+  "conversation_hours_ago": "{hours}h ago",
+  "@conversation_hours_ago": {
+    "description": "Hours ago timestamp",
+    "placeholders": {
+      "hours": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+
+  "conversation_yesterday": "Yesterday",
+  "@conversation_yesterday": {
+    "description": "Yesterday timestamp"
+  },
+
+  "conversation_days_ago": "{days}d ago",
+  "@conversation_days_ago": {
+    "description": "Days ago timestamp",
+    "placeholders": {
+      "days": {
+        "type": "int",
+        "example": "7"
+      }
+    }
+  },
+
+  "conversation_date": "{month}/{day}/{year}",
+  "@conversation_date": {
+    "description": "Full date timestamp",
+    "placeholders": {
+      "month": {
+        "type": "int",
+        "example": "1"
+      },
+      "day": {
+        "type": "int",
+        "example": "15"
+      },
+      "year": {
+        "type": "int",
+        "example": "2025"
+      }
+    }
+  },
+
+  "options_tooltip": "Options",
+  "@options_tooltip": {
+    "description": "Options menu tooltip"
+  },
+
+  "no_results_found": "No results found",
+  "@no_results_found": {
+    "description": "Search empty state"
+  },
+
+  "no_conversations_yet": "No conversations yet",
+  "@no_conversations_yet": {
+    "description": "Empty conversations state"
+  },
+
+  "try_different_search": "Try a different search term",
+  "@try_different_search": {
+    "description": "Search empty state subtitle"
+  },
+
+  "start_new_conversation": "Start a new conversation",
+  "@start_new_conversation": {
+    "description": "Empty state subtitle when no conversations"
+  },
+
+  "rename_conversation": "Rename conversation",
+  "@rename_conversation": {
+    "description": "Rename dialog title"
+  },
+
+  "enter_new_title": "Enter new title",
+  "@enter_new_title": {
+    "description": "Rename text field hint"
+  },
+
+  "pinned_section": "PINNED",
+  "@pinned_section": {
+    "description": "Pinned conversations section header"
+  },
+
+  "today_section": "TODAY",
+  "@today_section": {
+    "description": "Today section header"
+  },
+
+  "yesterday_section": "YESTERDAY",
+  "@yesterday_section": {
+    "description": "Yesterday section header"
+  },
+
+  "previous_7_days": "PREVIOUS 7 DAYS",
+  "@previous_7_days": {
+    "description": "Previous 7 days section header"
+  },
+
+  "previous_30_days": "PREVIOUS 30 DAYS",
+  "@previous_30_days": {
+    "description": "Previous 30 days section header"
+  },
+
+  "older_section": "OLDER",
+  "@older_section": {
+    "description": "Older conversations section header"
+  },
+
+  "onboarding_localmind": "LOCALMIND",
+  "@onboarding_localmind": {
+    "description": "Onboarding screen branding text"
+  },
+
+  "onboarding_connect_server": "Connect Your\nServer",
+  "@onboarding_connect_server": {
+    "description": "Onboarding heading for server connection"
+  },
+
+  "onboarding_connect_desc": "Connect to LM Studio, Ollama, or\nOpenRouter to start your private AI\nexperience.",
+  "@onboarding_connect_desc": {
+    "description": "Onboarding server connection description"
+  },
+
+  "server_type_on_device": "On-Device",
+  "@server_type_on_device": {
+    "description": "On-device server type card title"
+  },
+
+  "server_type_on_device_sub": "NO SERVER NEEDED",
+  "@server_type_on_device_sub": {
+    "description": "On-device server type card subtitle"
+  },
+
+  "server_type_lm_studio": "LM Studio",
+  "@server_type_lm_studio": {
+    "description": "LM Studio server type card title"
+  },
+
+  "server_type_lm_studio_sub": "LOCAL API",
+  "@server_type_lm_studio_sub": {
+    "description": "LM Studio server type card subtitle"
+  },
+
+  "server_type_ollama": "Ollama",
+  "@server_type_ollama": {
+    "description": "Ollama server type card title"
+  },
+
+  "server_type_ollama_sub": "CLI ENGINE",
+  "@server_type_ollama_sub": {
+    "description": "Ollama server type card subtitle"
+  },
+
+  "server_type_openrouter": "OpenRouter",
+  "@server_type_openrouter": {
+    "description": "OpenRouter server type card title"
+  },
+
+  "server_type_openrouter_sub": "UNIFIED CLOUD",
+  "@server_type_openrouter_sub": {
+    "description": "OpenRouter server type card subtitle"
+  },
+
+  "ready_continue": "READY TO CONTINUE",
+  "@ready_continue": {
+    "description": "Onboarding ready status"
+  },
+
+  "waiting_selection": "WAITING FOR SELECTION",
+  "@waiting_selection": {
+    "description": "Onboarding waiting status"
+  },
+
+  "setup_connection": "Setup Connection",
+  "@setup_connection": {
+    "description": "Onboarding setup screen title"
+  },
+
+  "setup_connection_desc": "Configure your {server} server to start chatting.",
+  "@setup_connection_desc": {
+    "description": "Onboarding setup description",
+    "placeholders": {
+      "server": {
+        "type": "String",
+        "example": "LM Studio"
+      }
+    }
+  },
+
+  "server_name": "Server Name",
+  "@server_name": {
+    "description": "Server name field label"
+  },
+
+  "name_required": "Name required",
+  "@name_required": {
+    "description": "Validation: name required"
+  },
+
+  "name_max_50": "Max 50 characters",
+  "@name_max_50": {
+    "description": "Validation: max 50 chars"
+  },
+
+  "host_label": "Host / IP Address",
+  "@host_label": {
+    "description": "Host field label"
+  },
+
+  "host_required": "Host required",
+  "@host_required": {
+    "description": "Validation: host required"
+  },
+
+  "port_label": "Port",
+  "@port_label": {
+    "description": "Port field label"
+  },
+
+  "port_required": "Port required",
+  "@port_required": {
+    "description": "Validation: port required"
+  },
+
+  "port_invalid": "Must be a number",
+  "@port_invalid": {
+    "description": "Validation: invalid port number"
+  },
+
+  "port_range": "Enter a valid port (1-65535)",
+  "@port_range": {
+    "description": "Validation: port range"
+  },
+
+  "api_key_required": "API Key *",
+  "@api_key_required": {
+    "description": "Required API key label"
+  },
+
+  "api_key_optional": "API Key (Optional)",
+  "@api_key_optional": {
+    "description": "Optional API key label"
+  },
+
+  "api_key_required_openrouter": "API Key required for OpenRouter",
+  "@api_key_required_openrouter": {
+    "description": "Validation: API key for OpenRouter"
+  },
+
+  "api_key_format": "OpenRouter API keys start with sk-",
+  "@api_key_format": {
+    "description": "Validation: API key format"
+  },
+
+  "my_server_hint": "My Server",
+  "@my_server_hint": {
+    "description": "Server name field hint"
+  },
+
+  "name_length_validation": "Name must be 50 characters or less",
+  "@name_length_validation": {
+    "description": "Validation: name too long"
+  },
+
+  "host_valid": "Enter a valid hostname or IP address",
+  "@host_valid": {
+    "description": "Validation: invalid host"
+  },
+
+  "api_key_hint_openrouter": "sk-...",
+  "@api_key_hint_openrouter": {
+    "description": "OpenRouter API key hint"
+  },
+
+  "api_key_hint_generic": "For authenticated servers",
+  "@api_key_hint_generic": {
+    "description": "Generic API key hint"
+  },
+
+  "update_server": "Update Server",
+  "@update_server": {
+    "description": "Update server button"
+  },
+
+  "save_server": "Save Server",
+  "@save_server": {
+    "description": "Save server button"
+  },
+
+  "server_updated": "Server updated",
+  "@server_updated": {
+    "description": "Server update snackbar"
+  },
+
+  "server_added": "Server added",
+  "@server_added": {
+    "description": "Server added snackbar"
+  },
+
+  "download_model_title": "Download a Model",
+  "@download_model_title": {
+    "description": "Onboarding download model screen title"
+  },
+
+  "download_model_desc": "Choose a model to download.\nIt will run locally on your device.",
+  "@download_model_desc": {
+    "description": "Onboarding download model description"
+  },
+
+  "on_device_android_only": "On-device inference is currently available on Android only.",
+  "@on_device_android_only": {
+    "description": "Platform limitation notice"
+  },
+
+  "total_ram": "Total RAM",
+  "@total_ram": {
+    "description": "Total RAM label"
+  },
+
+  "available": "Available",
+  "@available": {
+    "description": "Available label"
+  },
+
+  "ram_min_required": "{fileSize} GB RAM min",
+  "@ram_min_required": {
+    "description": "Minimum RAM requirement label",
+    "placeholders": {
+      "fileSize": {
+        "type": "String",
+        "example": "4"
+      }
+    }
+  },
+
+  "download_progress": "{percent}% • {speed}",
+  "@download_progress": {
+    "description": "Download progress display",
+    "placeholders": {
+      "percent": {
+        "type": "String",
+        "example": "45"
+      },
+      "speed": {
+        "type": "String",
+        "example": "2.5 MB/s"
+      }
+    }
+  },
+
+  "eta_label": "ETA: {eta}",
+  "@eta_label": {
+    "description": "Estimated time remaining label",
+    "placeholders": {
+      "eta": {
+        "type": "String",
+        "example": "5 minutes"
+      }
+    }
+  },
+
+  "paused_progress": "Paused - {percent}%",
+  "@paused_progress": {
+    "description": "Paused download status with progress",
+    "placeholders": {
+      "percent": {
+        "type": "String",
+        "example": "45"
+      }
+    }
+  },
+
+  "ram_warning_body_download": "This model requires at least {ram} GB RAM, but your device has {totalMemory}. It may not run correctly or could cause the app to crash.",
+  "@ram_warning_body_download": {
+    "description": "RAM warning during download",
+    "placeholders": {
+      "ram": {
+        "type": "String",
+        "example": "4"
+      },
+      "totalMemory": {
+        "type": "String",
+        "example": "6 GB"
+      }
+    }
+  },
+
+  "ram_warning_body_load": "Your device has {availableRAM} available RAM, but this model recommends at least {ram} GB. Loading it might fail or cause instability.",
+  "@ram_warning_body_load": {
+    "description": "RAM warning during model load",
+    "placeholders": {
+      "availableRAM": {
+        "type": "String",
+        "example": "2 GB"
+      },
+      "ram": {
+        "type": "String",
+        "example": "4"
+      }
+    }
+  },
+
+  "choose_theme": "Choose Theme",
+  "@choose_theme": {
+    "description": "Onboarding theme selection title"
+  },
+
+  "choose_theme_desc": "Personalize the app appearance. You can always change this later in settings.",
+  "@choose_theme_desc": {
+    "description": "Onboarding theme selection description"
+  },
+
+  "theme_card_system": "System",
+  "@theme_card_system": {
+    "description": "System theme card title"
+  },
+
+  "theme_card_system_sub": "Matches your device settings",
+  "@theme_card_system_sub": {
+    "description": "System theme card subtitle"
+  },
+
+  "theme_card_light": "Light",
+  "@theme_card_light": {
+    "description": "Light theme card title"
+  },
+
+  "theme_card_light_sub": "Clean and bright",
+  "@theme_card_light_sub": {
+    "description": "Light theme card subtitle"
+  },
+
+  "theme_card_dark": "Dark",
+  "@theme_card_dark": {
+    "description": "Dark theme card title"
+  },
+
+  "theme_card_dark_sub": "Easy on the eyes",
+  "@theme_card_dark_sub": {
+    "description": "Dark theme card subtitle"
+  },
+
+  "theme_card_claude": "Claude",
+  "@theme_card_claude": {
+    "description": "Claude theme card title"
+  },
+
+  "theme_card_claude_sub": "A warm, peach-tinted theme",
+  "@theme_card_claude_sub": {
+    "description": "Claude theme card subtitle"
+  },
+
+  "stay_updated": "Stay Updated",
+  "@stay_updated": {
+    "description": "Onboarding notification screen heading"
+  },
+
+  "stay_updated_desc": "Get notified when your AI models finish downloading or when long-running tasks complete.",
+  "@stay_updated_desc": {
+    "description": "Onboarding notification screen description"
+  },
+
+  "notification_benefit_downloads": "Model download progress",
+  "@notification_benefit_downloads": {
+    "description": "Notification benefit list item"
+  },
+
+  "notification_benefit_completions": "Generation completions",
+  "@notification_benefit_completions": {
+    "description": "Notification benefit list item"
+  },
+
+  "notification_benefit_background": "Background tasks status",
+  "@notification_benefit_background": {
+    "description": "Notification benefit list item"
+  },
+
+  "allow_notifications": "Allow Notifications",
+  "@allow_notifications": {
+    "description": "Allow notifications button"
+  },
+
+  "servers_title": "Servers",
+  "@servers_title": {
+    "description": "Server list screen title"
+  },
+
+  "no_servers_yet": "No Servers Yet",
+  "@no_servers_yet": {
+    "description": "Empty server list title"
+  },
+
+  "no_servers_desc": "Add your first server to start chatting with AI models.",
+  "@no_servers_desc": {
+    "description": "Empty server list description"
+  },
+
+  "add_server": "Add Server",
+  "@add_server": {
+    "description": "Add server button"
+  },
+
+  "switched_to_server": "Switched to {name}",
+  "@switched_to_server": {
+    "description": "Server switch snackbar",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "My Server"
+      }
+    }
+  },
+
+  "edit_server": "Edit Server",
+  "@edit_server": {
+    "description": "Edit server screen title"
+  },
+
+  "add_server_title": "Add Server",
+  "@add_server_title": {
+    "description": "Add server screen title"
+  },
+
+  "server_type_label": "Server Type",
+  "@server_type_label": {
+    "description": "Server type section label"
+  },
+
+  "server_icon_label": "Server Icon",
+  "@server_icon_label": {
+    "description": "Server icon section label"
+  },
+
+  "default_icon": "Default icon",
+  "@default_icon": {
+    "description": "Default icon fallback text"
+  },
+
+  "server_type_lm_studio_display": "LM Studio",
+  "@server_type_lm_studio_display": {
+    "description": "LM Studio server type display"
+  },
+
+  "server_type_openai_display": "OpenAI Compatible",
+  "@server_type_openai_display": {
+    "description": "OpenAI compatible server type display"
+  },
+
+  "server_type_ollama_display": "Ollama",
+  "@server_type_ollama_display": {
+    "description": "Ollama server type display"
+  },
+
+  "server_type_openrouter_display": "OpenRouter",
+  "@server_type_openrouter_display": {
+    "description": "OpenRouter server type display"
+  },
+
+  "server_type_on_device_display": "On-Device",
+  "@server_type_on_device_display": {
+    "description": "On-device server type display"
+  },
+
+  "server_address_openrouter": "openrouter.ai",
+  "@server_address_openrouter": {
+    "description": "OpenRouter default address"
+  },
+
+  "server_address_on_device": "Local inference",
+  "@server_address_on_device": {
+    "description": "On-device server address"
+  },
+
+  "server_address_format": "{host}:{port}",
+  "@server_address_format": {
+    "description": "Server address display format",
+    "placeholders": {
+      "host": {
+        "type": "String",
+        "example": "192.168.1.1"
+      },
+      "port": {
+        "type": "String",
+        "example": "1234"
+      }
+    }
+  },
+
+  "default_badge": "Default",
+  "@default_badge": {
+    "description": "Default server badge"
+  },
+
+  "set_as_default": "Set as Default",
+  "@set_as_default": {
+    "description": "Set as default menu item"
+  },
+
+  "select_icon": "Select Icon",
+  "@select_icon": {
+    "description": "Icon picker sheet title"
+  },
+
+  "select_icon_desc": "Choose an icon for your server",
+  "@select_icon_desc": {
+    "description": "Icon picker sheet description"
+  },
+
+  "search_icons_hint": "Search icons...",
+  "@search_icons_hint": {
+    "description": "Icon search field placeholder"
+  },
+
+  "server_icon_stack": "Server Stack",
+  "@server_icon_stack": {
+    "description": "Server icon name"
+  },
+
+  "server_icon_stack2": "Server Stack 02",
+  "@server_icon_stack2": {
+    "description": "Server icon name"
+  },
+
+  "server_icon_stack3": "Server Stack 03",
+  "@server_icon_stack3": {
+    "description": "Server icon name"
+  },
+
+  "server_icon_cloud": "Cloud",
+  "@server_icon_cloud": {
+    "description": "Server icon name"
+  },
+
+  "server_icon_cloud_server": "Cloud Server",
+  "@server_icon_cloud_server": {
+    "description": "Server icon name"
+  },
+
+  "server_icon_mcp": "MCP Server",
+  "@server_icon_mcp": {
+    "description": "Server icon name"
+  },
+
+  "server_icon_database": "Database",
+  "@server_icon_database": {
+    "description": "Server icon name"
+  },
+
+  "server_icon_database1": "Database 01",
+  "@server_icon_database1": {
+    "description": "Server icon name"
+  },
+
+  "server_icon_database2": "Database 02",
+  "@server_icon_database2": {
+    "description": "Server icon name"
+  },
+
+  "server_icon_cpu": "CPU",
+  "@server_icon_cpu": {
+    "description": "Server icon name"
+  },
+
+  "server_icon_chip": "Chip",
+  "@server_icon_chip": {
+    "description": "Server icon name"
+  },
+
+  "server_icon_chip2": "Chip 02",
+  "@server_icon_chip2": {
+    "description": "Server icon name"
+  },
+
+  "server_icon_computer": "Computer",
+  "@server_icon_computer": {
+    "description": "Server icon name"
+  },
+
+  "server_icon_laptop": "Laptop",
+  "@server_icon_laptop": {
+    "description": "Server icon name"
+  },
+
+  "server_icon_terminal": "Computer Terminal",
+  "@server_icon_terminal": {
+    "description": "Server icon name"
+  },
+
+  "server_icon_code": "Code",
+  "@server_icon_code": {
+    "description": "Server icon name"
+  },
+
+  "server_icon_ai_brain": "AI Brain",
+  "@server_icon_ai_brain": {
+    "description": "Server icon name"
+  },
+
+  "server_icon_ai_brain2": "AI Brain 02",
+  "@server_icon_ai_brain2": {
+    "description": "Server icon name"
+  },
+
+  "server_icon_ai_cloud": "AI Cloud",
+  "@server_icon_ai_cloud": {
+    "description": "Server icon name"
+  },
+
+  "server_icon_ai_network": "AI Network",
+  "@server_icon_ai_network": {
+    "description": "Server icon name"
+  },
+
+  "server_icon_ai_chat": "AI Chat",
+  "@server_icon_ai_chat": {
+    "description": "Server icon name"
+  },
+
+  "server_icon_cellular": "Cellular Network",
+  "@server_icon_cellular": {
+    "description": "Server icon name"
+  },
+
+  "server_icon_plug1": "Plug 01",
+  "@server_icon_plug1": {
+    "description": "Server icon name"
+  },
+
+  "server_icon_plug2": "Plug 02",
+  "@server_icon_plug2": {
+    "description": "Server icon name"
+  },
+
+  "server_icon_bot": "Bot",
+  "@server_icon_bot": {
+    "description": "Server icon name"
+  },
+
+  "server_icon_bot2": "Bot 02",
+  "@server_icon_bot2": {
+    "description": "Server icon name"
+  },
+
+  "server_icon_robotic": "Robotic",
+  "@server_icon_robotic": {
+    "description": "Server icon name"
+  },
+
+  "server_icon_rocket": "Rocket",
+  "@server_icon_rocket": {
+    "description": "Server icon name"
+  },
+
+  "server_icon_star": "Star",
+  "@server_icon_star": {
+    "description": "Server icon name"
+  },
+
+  "server_icon_settings1": "Settings 01",
+  "@server_icon_settings1": {
+    "description": "Server icon name"
+  },
+
+  "server_icon_settings2": "Settings 02",
+  "@server_icon_settings2": {
+    "description": "Server icon name"
+  },
+
+  "server_icon_home1": "Home 01",
+  "@server_icon_home1": {
+    "description": "Server icon name"
+  },
+
+  "server_icon_home2": "Home 02",
+  "@server_icon_home2": {
+    "description": "Server icon name"
+  },
+
+  "server_icon_folder1": "Folder 01",
+  "@server_icon_folder1": {
+    "description": "Server icon name"
+  },
+
+  "server_icon_folder2": "Folder 02",
+  "@server_icon_folder2": {
+    "description": "Server icon name"
+  },
+
+  "server_icon_file1": "File 01",
+  "@server_icon_file1": {
+    "description": "Server icon name"
+  },
+
+  "server_icon_lock": "Lock",
+  "@server_icon_lock": {
+    "description": "Server icon name"
+  },
+
+  "server_icon_key": "Key 01",
+  "@server_icon_key": {
+    "description": "Server icon name"
+  },
+
+  "server_icon_link": "Link 01",
+  "@server_icon_link": {
+    "description": "Server icon name"
+  },
+
+  "server_icon_globe": "Globe",
+  "@server_icon_globe": {
+    "description": "Server icon name"
+  },
+
+  "server_icon_api": "API",
+  "@server_icon_api": {
+    "description": "Server icon name"
+  },
+
+  "server_icon_arrow_right": "Arrow Right 01",
+  "@server_icon_arrow_right": {
+    "description": "Server icon name"
+  },
+
+  "server_icon_check": "Check Circle",
+  "@server_icon_check": {
+    "description": "Server icon name"
+  },
+
+  "server_icon_alert": "Alert Circle",
+  "@server_icon_alert": {
+    "description": "Server icon name"
+  },
+
+  "server_icon_info": "Info Circle",
+  "@server_icon_info": {
+    "description": "Server icon name"
+  },
+
+  "server_icon_zap": "Zap",
+  "@server_icon_zap": {
+    "description": "Server icon name"
+  },
+
+  "server_icon_cloud_upload": "Cloud Upload",
+  "@server_icon_cloud_upload": {
+    "description": "Server icon name"
+  },
+
+  "server_icon_cloud_download": "Cloud Download",
+  "@server_icon_cloud_download": {
+    "description": "Server icon name"
+  },
+
+  "server_icon_refresh": "Refresh",
+  "@server_icon_refresh": {
+    "description": "Server icon name"
+  },
+
+  "server_icon_hard_drive": "Hard Drive",
+  "@server_icon_hard_drive": {
+    "description": "Server icon name"
+  },
+
+  "server_icon_drive": "Drive",
+  "@server_icon_drive": {
+    "description": "Server icon name"
+  },
+
+  "personas_title": "Personas",
+  "@personas_title": {
+    "description": "Persona list screen title"
+  },
+
+  "persona_category_general": "General",
+  "@persona_category_general": {
+    "description": "General persona category"
+  },
+
+  "persona_category_coding": "Coding",
+  "@persona_category_coding": {
+    "description": "Coding persona category"
+  },
+
+  "persona_category_education": "Education",
+  "@persona_category_education": {
+    "description": "Education persona category"
+  },
+
+  "persona_category_creative": "Creative",
+  "@persona_category_creative": {
+    "description": "Creative persona category"
+  },
+
+  "persona_builtin_section": "BUILT-IN",
+  "@persona_builtin_section": {
+    "description": "Built-in personas section label"
+  },
+
+  "persona_my_section": "MY PERSONAS",
+  "@persona_my_section": {
+    "description": "My personas section label"
+  },
+
+  "clone_edit": "Clone & Edit",
+  "@clone_edit": {
+    "description": "Clone and edit persona action"
+  },
+
+  "builtin_badge": "Built-in",
+  "@builtin_badge": {
+    "description": "Built-in persona badge"
+  },
+
+  "no_personas_found": "No personas found",
+  "@no_personas_found": {
+    "description": "Empty persona list title"
+  },
+
+  "no_personas_desc": "Create your first persona to customize AI behavior.",
+  "@no_personas_desc": {
+    "description": "Empty persona list subtitle"
+  },
+
+  "edit_persona": "Edit Persona",
+  "@edit_persona": {
+    "description": "Edit persona screen title"
+  },
+
+  "create_persona": "Create Persona",
+  "@create_persona": {
+    "description": "Create persona screen title"
+  },
+
+  "create_persona_button": "Create",
+  "@create_persona_button": {
+    "description": "Create persona action button"
+  },
+
+  "emoji_label": "Emoji",
+  "@emoji_label": {
+    "description": "Emoji selection label"
+  },
+
+  "name_label": "Name",
+  "@name_label": {
+    "description": "Name field label"
+  },
+
+  "my_persona_hint": "My Persona",
+  "@my_persona_hint": {
+    "description": "Persona name hint"
+  },
+
+  "category_label": "Category",
+  "@category_label": {
+    "description": "Category field label"
+  },
+
+  "description_optional": "Description (optional)",
+  "@description_optional": {
+    "description": "Optional description label"
+  },
+
+  "description_hint": "What this persona does...",
+  "@description_hint": {
+    "description": "Description field hint"
+  },
+
+  "system_prompt": "System Prompt",
+  "@system_prompt": {
+    "description": "System prompt section label"
+  },
+
+  "character_count_max": "{currentLen}/4000",
+  "@character_count_max": {
+    "description": "Character counter for system prompt",
+    "placeholders": {
+      "currentLen": {
+        "type": "int",
+        "example": "150"
+      }
+    }
+  },
+
+  "no_prompt_placeholder": "No prompt yet...",
+  "@no_prompt_placeholder": {
+    "description": "Preview placeholder when no prompt"
+  },
+
+  "prompt_hint": "You are a helpful assistant...",
+  "@prompt_hint": {
+    "description": "System prompt text field hint"
+  },
+
+  "prompt_required": "System prompt is required",
+  "@prompt_required": {
+    "description": "Validation: prompt required"
+  },
+
+  "prompt_max_chars": "Max 4000 characters",
+  "@prompt_max_chars": {
+    "description": "Validation: prompt max chars"
+  },
+
+  "advanced_settings": "Advanced Settings",
+  "@advanced_settings": {
+    "description": "Expandable advanced settings section"
+  },
+
+  "temperature_label": "Temperature (0.0-2.0)",
+  "@temperature_label": {
+    "description": "Temperature field label in personas"
+  },
+
+  "top_p_label": "Top P (0.0-1.0)",
+  "@top_p_label": {
+    "description": "Top P field label in personas"
+  },
+
+  "temp_hint": "0.7",
+  "@temp_hint": {
+    "description": "Temperature field hint"
+  },
+
+  "top_p_hint": "0.9",
+  "@top_p_hint": {
+    "description": "Top P field hint"
+  },
+
+  "range_0_2": "0.0-2.0",
+  "@range_0_2": {
+    "description": "Range validation error (temperature)"
+  },
+
+  "range_0_1": "0.0-1.0",
+  "@range_0_1": {
+    "description": "Range validation error (top P)"
+  },
+
+  "persona_updated": "Persona updated",
+  "@persona_updated": {
+    "description": "Persona update snackbar"
+  },
+
+  "persona_created": "Persona created",
+  "@persona_created": {
+    "description": "Persona creation snackbar"
+  },
+
+  "tts_models_title": "Text To Speech Models",
+  "@tts_models_title": {
+    "description": "TTS model manager screen title"
+  },
+
+  "always_available": "Always available",
+  "@always_available": {
+    "description": "Always available status"
+  },
+
+  "tts_system_desc": "Uses your device's built-in text-to-speech engine.\nNo downloads required. Voice selection uses your device's system settings.",
+  "@tts_system_desc": {
+    "description": "System TTS engine description"
+  },
+
+  "downloading_status": "Downloading...",
+  "@downloading_status": {
+    "description": "Downloading status text"
+  },
+
+  "tts_kitten_desc": "Lightning-fast neural TTS with 8 expressive voices.\nRequires {size} download.",
+  "@tts_kitten_desc": {
+    "description": "Kitten TTS engine description",
+    "placeholders": {
+      "size": {
+        "type": "String",
+        "example": "250 MB"
+      }
+    }
+  },
+
+  "tts_piper_desc": "Fast offline Piper voices with 2 expressive voices.\nRequires {size} download per voice.",
+  "@tts_piper_desc": {
+    "description": "Piper TTS engine description",
+    "placeholders": {
+      "size": {
+        "type": "String",
+        "example": "50 MB"
+      }
+    }
+  },
+
+  "engine_spec": "{sizeMb} MB · {ramMb} MB RAM · {voiceCount} voices",
+  "@engine_spec": {
+    "description": "Engine specification display",
+    "placeholders": {
+      "sizeMb": {
+        "type": "String",
+        "example": "250"
+      },
+      "ramMb": {
+        "type": "String",
+        "example": "100"
+      },
+      "voiceCount": {
+        "type": "int",
+        "example": "8"
+      }
+    }
+  },
+
+  "on_device_models_title": "On-Device Models",
+  "@on_device_models_title": {
+    "description": "On-device model manager screen title"
+  },
+
+  "available_models": "Available Models",
+  "@available_models": {
+    "description": "Available models section title"
+  },
+
+  "device_memory": "Device Memory",
+  "@device_memory": {
+    "description": "Device memory card title"
+  },
+
+  "ram_usage": "RAM Usage",
+  "@ram_usage": {
+    "description": "RAM usage label"
+  },
+
+  "memory_healthy": "Healthy",
+  "@memory_healthy": {
+    "description": "Memory status healthy"
+  },
+
+  "memory_critical": "Critical",
+  "@memory_critical": {
+    "description": "Memory status critical"
+  },
+
+  "memory_low": "Low",
+  "@memory_low": {
+    "description": "Memory status low"
+  },
+
+  "ram_used": "{percent}% used",
+  "@ram_used": {
+    "description": "RAM usage percentage",
+    "placeholders": {
+      "percent": {
+        "type": "String",
+        "example": "45"
+      }
+    }
+  },
+
+  "available_ram": "Available RAM",
+  "@available_ram": {
+    "description": "Available RAM stat label"
+  },
+
+  "total_capacity": "Total Capacity",
+  "@total_capacity": {
+    "description": "Total capacity stat label"
+  },
+
+  "loaded_status": "Loaded",
+  "@loaded_status": {
+    "description": "Model loaded status"
+  },
+
+  "inference_backend": "Inference Backend",
+  "@inference_backend": {
+    "description": "Backend selector section title"
+  },
+
+  "backend_ios_notice": "Only CPU backend is available on iOS.",
+  "@backend_ios_notice": {
+    "description": "iOS backend limitation notice"
+  },
+
+  "backend_cpu_desc": "Works on all devices. Most compatible.",
+  "@backend_cpu_desc": {
+    "description": "CPU backend description"
+  },
+
+  "backend_gpu_desc": "OpenCL acceleration. Faster on supported devices.",
+  "@backend_gpu_desc": {
+    "description": "GPU backend description"
+  },
+
+  "backend_npu_desc": "Vendor NPU (Qualcomm/MediaTek). Fastest inference.",
+  "@backend_npu_desc": {
+    "description": "NPU backend description"
+  },
+
+  "select_model_title": "Select Model",
+  "@select_model_title": {
+    "description": "Model picker sheet title"
+  },
+
+  "refresh_models": "Refresh models",
+  "@refresh_models": {
+    "description": "Refresh models tooltip"
+  },
+
+  "search_models_hint": "Search models...",
+  "@search_models_hint": {
+    "description": "Model search field hint"
+  },
+
+  "no_server_connected": "No server connected",
+  "@no_server_connected": {
+    "description": "Model picker empty state title"
+  },
+
+  "add_server_first": "Add a server first to see available models.",
+  "@add_server_first": {
+    "description": "Model picker empty state subtitle"
+  },
+
+  "failed_load_models": "Failed to load models",
+  "@failed_load_models": {
+    "description": "Model load error title"
+  },
+
+  "no_models_available": "No models available",
+  "@no_models_available": {
+    "description": "Empty models state"
+  },
+
+  "no_models_match": "No models match \"{searchQuery}\"",
+  "@no_models_match": {
+    "description": "No search results for models",
+    "placeholders": {
+      "searchQuery": {
+        "type": "String",
+        "example": "gpt"
+      }
+    }
+  },
+
+  "model_load_failed": "Failed to load model: {error}",
+  "@model_load_failed": {
+    "description": "Model load failure snackbar",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Out of memory"
+      }
+    }
+  },
+
+  "model_unloaded_ollama": "{name} will be unloaded once the keep-alive time passes",
+  "@model_unloaded_ollama": {
+    "description": "Ollama model unloaded status",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "codellama"
+      }
+    }
+  },
+
+  "model_unloaded_success": "{name} unloaded successfully",
+  "@model_unloaded_success": {
+    "description": "Model unloaded success snackbar",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "codellama"
+      }
+    }
+  },
+
+  "model_unload_failed": "Failed to unload model: {error}",
+  "@model_unload_failed": {
+    "description": "Model unload failure snackbar",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Connection error"
+      }
+    }
+  },
+
+  "unload_from_server": "Unload from server",
+  "@unload_from_server": {
+    "description": "Unload model tooltip"
+  },
+
+  "context_chip": "{ctx} ctx",
+  "@context_chip": {
+    "description": "Context length chip",
+    "placeholders": {
+      "ctx": {
+        "type": "String",
+        "example": "8192"
+      }
+    }
+  },
+
+  "download_notification_title": "Downloading {modelName}...",
+  "@download_notification_title": {
+    "description": "Download notification title",
+    "placeholders": {
+      "modelName": {
+        "type": "String",
+        "example": "Qwen 3"
+      }
+    }
+  },
+
+  "download_complete_notification": "Download complete!",
+  "@download_complete_notification": {
+    "description": "Download complete notification title"
+  },
+
+  "download_complete_body": "{modelName} has been downloaded successfully.",
+  "@download_complete_body": {
+    "description": "Download complete notification body",
+    "placeholders": {
+      "modelName": {
+        "type": "String",
+        "example": "Qwen 3"
+      }
+    }
+  },
+
+  "download_failed_notification": "Download failed: {error}",
+  "@download_failed_notification": {
+    "description": "Download failed notification title",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
+
+  "download_failed_body": "Failed to download {modelName}.",
+  "@download_failed_body": {
+    "description": "Download failed notification body",
+    "placeholders": {
+      "modelName": {
+        "type": "String",
+        "example": "Qwen 3"
+      }
+    }
+  },
+
+  "engine_name_system": "System TTS",
+  "@engine_name_system": {
+    "description": "System TTS engine display name"
+  },
+
+  "engine_tagline_system": "Built-in device engine",
+  "@engine_tagline_system": {
+    "description": "System TTS engine tagline"
+  },
+
+  "engine_name_kitten": "Kitten TTS",
+  "@engine_name_kitten": {
+    "description": "Kitten TTS engine display name"
+  },
+
+  "engine_tagline_kitten": "High-speed neural TTS",
+  "@engine_tagline_kitten": {
+    "description": "Kitten TTS engine tagline"
+  },
+
+  "engine_name_sherpa": "Sherpa ONNX VITS",
+  "@engine_name_sherpa": {
+    "description": "Sherpa ONNX engine display name"
+  },
+
+  "engine_tagline_sherpa": "Offline Piper voices",
+  "@engine_tagline_sherpa": {
+    "description": "Sherpa ONNX engine tagline"
+  },
+
+  "voice_jasper": "Jasper",
+  "@voice_jasper": {
+    "description": "Kitten TTS voice name"
+  },
+
+  "voice_bella": "Bella",
+  "@voice_bella": {
+    "description": "Kitten TTS voice name"
+  },
+
+  "voice_bruno": "Bruno",
+  "@voice_bruno": {
+    "description": "Kitten TTS voice name"
+  },
+
+  "voice_luna": "Luna",
+  "@voice_luna": {
+    "description": "Kitten TTS voice name"
+  },
+
+  "voice_hugo": "Hugo",
+  "@voice_hugo": {
+    "description": "Kitten TTS voice name"
+  },
+
+  "voice_rosie": "Rosie",
+  "@voice_rosie": {
+    "description": "Kitten TTS voice name"
+  },
+
+  "voice_leo": "Leo",
+  "@voice_leo": {
+    "description": "Kitten TTS voice name"
+  },
+
+  "voice_kiki": "Kiki",
+  "@voice_kiki": {
+    "description": "Kitten TTS voice name"
+  },
+
+  "voice_lessac": "Lessac (US)",
+  "@voice_lessac": {
+    "description": "Piper voice name"
+  },
+
+  "voice_ryan": "Ryan (US)",
+  "@voice_ryan": {
+    "description": "Piper voice name"
+  },
+
+  "model_qwen_3": "Qwen 3 0.6B",
+  "@model_qwen_3": {
+    "description": "On-device model name"
+  },
+
+  "model_qwen_3_desc": "Smallest general-purpose chat model. Fast responses, low memory usage.",
+  "@model_qwen_3_desc": {
+    "description": "Qwen 3 model description"
+  },
+
+  "model_license_apache": "Apache-2.0",
+  "@model_license_apache": {
+    "description": "Apache license label"
+  },
+
+  "model_qwen_25": "Qwen 2.5 1.5B Instruct",
+  "@model_qwen_25": {
+    "description": "On-device model name"
+  },
+
+  "model_qwen_25_desc": "Balanced quality and size. Good for general conversation.",
+  "@model_qwen_25_desc": {
+    "description": "Qwen 2.5 model description"
+  },
+
+  "model_deepseek": "DeepSeek R1 Distill Qwen 1.5B",
+  "@model_deepseek": {
+    "description": "On-device model name"
+  },
+
+  "model_deepseek_desc": "Reasoning and chain-of-thought model. Best for logical tasks.",
+  "@model_deepseek_desc": {
+    "description": "DeepSeek model description"
+  },
+
+  "model_license_mit": "MIT",
+  "@model_license_mit": {
+    "description": "MIT license label"
+  },
+
+  "model_gemma": "Gemma 4 E2B Instruct",
+  "@model_gemma": {
+    "description": "On-device model name"
+  },
+
+  "model_gemma_desc": "Google flagship model. Highest quality, requires more RAM.",
+  "@model_gemma_desc": {
+    "description": "Gemma model description"
+  },
+
+  "export_header": "*Exported from LocalMind — {date}*",
+  "@export_header": {
+    "description": "Markdown export header",
+    "placeholders": {
+      "date": {
+        "type": "String",
+        "example": "May 17, 2025"
+      }
+    }
+  },
+
+  "export_role_user": "## 👤 User",
+  "@export_role_user": {
+    "description": "Markdown export user role label"
+  },
+
+  "export_role_assistant": "## 🤖 Assistant",
+  "@export_role_assistant": {
+    "description": "Markdown export assistant role label"
+  },
+
+  "export_role_system": "## ⚙️ System",
+  "@export_role_system": {
+    "description": "Markdown export system role label"
+  },
+
+  "export_role_tool": "## 🔧 Tool",
+  "@export_role_tool": {
+    "description": "Markdown export tool role label"
+  },
+
+  "export_text_user": "[USER]",
+  "@export_text_user": {
+    "description": "Text export user role prefix"
+  },
+
+  "export_text_assistant": "[ASSISTANT]",
+  "@export_text_assistant": {
+    "description": "Text export assistant role prefix"
+  },
+
+  "export_text_system": "[SYSTEM]",
+  "@export_text_system": {
+    "description": "Text export system role prefix"
+  },
+
+  "export_text_tool": "[TOOL]",
+  "@export_text_tool": {
+    "description": "Text export tool role prefix"
+  },
+
+  "export_label_user": "USER",
+  "@export_label_user": {
+    "description": "Export user role label"
+  },
+
+  "export_label_assistant": "ASSISTANT",
+  "@export_label_assistant": {
+    "description": "Export assistant role label"
+  },
+
+  "export_label_system": "SYSTEM",
+  "@export_label_system": {
+    "description": "Export system role label"
+  },
+
+  "export_label_tool": "TOOL",
+  "@export_label_tool": {
+    "description": "Export tool role label"
+  },
+
+  "select_model_hint": "Select a model to start chatting",
+  "@select_model_hint": {
+    "description": "Fallback text when no model is selected"
+  },
+
+  "test_notification_title": "Test notification",
+  "@test_notification_title": {
+    "description": "Test notification title"
+  },
+
+  "test_notification_body": "This is a test notification for model download progress.",
+  "@test_notification_body": {
+    "description": "Test notification body"
+  }
+}

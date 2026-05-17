@@ -7,6 +7,7 @@ import 'package:shadcn_ui/shadcn_ui.dart';
 import '../../../core/models/enums.dart';
 import '../../../core/providers/app_providers.dart';
 import '../../../core/routes/app_routes.dart';
+import '../../../l10n/app_localizations.dart';
 
 class OnboardingServerTypeScreen extends ConsumerStatefulWidget {
   const OnboardingServerTypeScreen({super.key});
@@ -28,6 +29,7 @@ class _OnboardingServerTypeScreenState
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
 
     return Scaffold(
@@ -42,9 +44,9 @@ class _OnboardingServerTypeScreenState
                 height: 24,
               ),
             ),
-            const Text(
-              'LOCALMIND',
-              style: TextStyle(letterSpacing: 2, fontSize: 14),
+            Text(
+              l10n.onboarding_localmind,
+              style: const TextStyle(letterSpacing: 2, fontSize: 14),
             ),
           ],
         ),
@@ -52,7 +54,7 @@ class _OnboardingServerTypeScreenState
         actions: [
           TextButton.icon(
             onPressed: () => _skipOnboarding(),
-            label: const Text('Skip'),
+            label: Text(l10n.skip),
             icon: HugeIcon(icon: HugeIcons.strokeRoundedNext),
           ),
         ],
@@ -68,7 +70,7 @@ class _OnboardingServerTypeScreenState
                 children: [
                   const SizedBox(height: 24),
                   Text(
-                    'Connect Your\nServer',
+                    l10n.onboarding_connect_server,
                     textAlign: TextAlign.center,
                     style: theme.textTheme.headlineLarge?.copyWith(
                       fontWeight: FontWeight.w800,
@@ -77,7 +79,7 @@ class _OnboardingServerTypeScreenState
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'Connect to LM Studio, Ollama, or\nOpenRouter to start your private AI\nexperience.',
+                    l10n.onboarding_connect_desc,
                     textAlign: TextAlign.center,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
@@ -87,8 +89,8 @@ class _OnboardingServerTypeScreenState
                   const SizedBox(height: 24),
                   _buildServerCard(
                     type: ServerType.onDevice,
-                    title: 'On-Device',
-                    subtitle: 'NO SERVER NEEDED',
+                    title: l10n.server_type_on_device,
+                    subtitle: l10n.server_type_on_device_sub,
                     iconWidget: Icon(
                       Icons.phone_android_rounded,
                       color: _selectedType == ServerType.onDevice
@@ -100,8 +102,8 @@ class _OnboardingServerTypeScreenState
                   const SizedBox(height: 16),
                   _buildServerCard(
                     type: ServerType.lmStudio,
-                    title: 'LM Studio',
-                    subtitle: 'LOCAL API',
+                    title: l10n.server_type_lm_studio,
+                    subtitle: l10n.server_type_lm_studio_sub,
                     iconWidget: Icon(
                       Icons.terminal_rounded,
                       color: _selectedType == ServerType.lmStudio
@@ -113,8 +115,8 @@ class _OnboardingServerTypeScreenState
                   const SizedBox(height: 16),
                   _buildServerCard(
                     type: ServerType.ollama,
-                    title: 'Ollama',
-                    subtitle: 'CLI ENGINE',
+                    title: l10n.server_type_ollama,
+                    subtitle: l10n.server_type_ollama_sub,
                     iconWidget: Icon(
                       Icons.smart_toy_rounded,
                       color: _selectedType == ServerType.ollama
@@ -126,8 +128,8 @@ class _OnboardingServerTypeScreenState
                   const SizedBox(height: 16),
                   _buildServerCard(
                     type: ServerType.openRouter,
-                    title: 'OpenRouter',
-                    subtitle: 'UNIFIED CLOUD',
+                    title: l10n.server_type_openrouter,
+                    subtitle: l10n.server_type_openrouter_sub,
                     iconWidget: HugeIcon(
                       icon: HugeIcons.strokeRoundedCloudServer,
                       color: _selectedType == ServerType.openRouter
@@ -164,8 +166,8 @@ class _OnboardingServerTypeScreenState
                     const SizedBox(width: 8),
                     Text(
                       _selectedType != null
-                          ? 'READY TO CONTINUE'
-                          : 'WAITING FOR SELECTION',
+                          ? l10n.ready_continue
+                          : l10n.waiting_selection,
                       style: theme.textTheme.labelSmall?.copyWith(
                         color: theme.colorScheme.onSurface.withValues(
                           alpha: 0.5,
@@ -183,7 +185,7 @@ class _OnboardingServerTypeScreenState
                   onPressed: () {
                     if (_selectedType != null) {
                       if (_selectedType == ServerType.onDevice) {
-                        _completeOnboarding();
+                        context.push(AppRoutes.onboardingModelDownload);
                       } else {
                         context.push(
                           AppRoutes.onboardingSetup,
@@ -192,9 +194,9 @@ class _OnboardingServerTypeScreenState
                       }
                     }
                   },
-                  child: const Text(
-                    'Continue',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                  child: Text(
+                    l10n.continue_action,
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                   ),
                 ),
                 SizedBox(

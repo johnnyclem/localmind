@@ -8,6 +8,7 @@ import 'package:shadcn_ui/shadcn_ui.dart';
 
 import '../../../core/models/enums.dart';
 import '../../../core/routes/app_routes.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../on_device/data/models/on_device_model.dart';
 import '../../on_device/data/models/download_status.dart';
 import '../../on_device/data/models/download_progress_info.dart';
@@ -32,6 +33,7 @@ class _OnboardingModelDownloadScreenState
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final models = ref.watch(onDeviceModelsProvider);
     final downloadedModelsAsync = ref.watch(downloadedModelsProvider);
@@ -40,13 +42,13 @@ class _OnboardingModelDownloadScreenState
     final deviceMemoryAsync = ref.watch(deviceMemoryProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Download a Model')),
+      appBar: AppBar(title: Text(l10n.download_model_title)),
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
           children: [
             Text(
-              'Choose a model to download.\nIt will run locally on your device.',
+              l10n.download_model_desc,
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
               ),
@@ -61,14 +63,14 @@ class _OnboardingModelDownloadScreenState
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(color: Colors.orange),
                 ),
-                child: const Row(
+                child: Row(
                   children: [
-                    Icon(Icons.info_outline, color: Colors.orange, size: 20),
-                    SizedBox(width: 8),
+                    const Icon(Icons.info_outline, color: Colors.orange, size: 20),
+                    const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        'On-device inference is currently available on Android only.',
-                        style: TextStyle(color: Colors.orange),
+                        l10n.on_device_android_only,
+                        style: const TextStyle(color: Colors.orange),
                       ),
                     ),
                   ],
@@ -101,9 +103,9 @@ class _OnboardingModelDownloadScreenState
               ShadButton(
                 width: double.infinity,
                 onPressed: _canContinue() ? _createOnDeviceServer : null,
-                child: const Text(
-                  'Continue',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                child: Text(
+                  l10n.continue_action,
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                 ),
               ),
           ],
@@ -145,7 +147,7 @@ class _OnboardingModelDownloadScreenState
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Error: ${e.toString()}')));
+        ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.error_with_message(e.toString()))));
       }
     } finally {
       if (mounted) {
@@ -159,6 +161,7 @@ class _OnboardingModelDownloadScreenState
     WidgetRef ref,
     AsyncValue<DeviceMemoryInfo> memoryAsync,
   ) {
+    final l10n = AppLocalizations.of(context)!;
     return memoryAsync.when(
       data: (info) {
         if (info.totalMemoryMb == 0) return const SizedBox.shrink();
@@ -174,13 +177,13 @@ class _OnboardingModelDownloadScreenState
           child: Row(
             children: [
               _MemoryStat(
-                label: 'Total RAM',
+                label: l10n.total_ram,
                 value: info.totalMemoryFormatted,
                 icon: Icons.memory,
               ),
               const SizedBox(width: 24),
               _MemoryStat(
-                label: 'Available',
+                label: l10n.available,
                 value: info.availableMemoryFormatted,
                 icon: Icons.event_available,
                 color: info.availableMemoryMb < 1024 ? Colors.orange : null,
@@ -255,6 +258,7 @@ class _ModelCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final isDownloading =
         progressInfo?.status == DownloadStatus.running ||
         progressInfo?.status == DownloadStatus.pending;
@@ -298,7 +302,7 @@ class _ModelCard extends ConsumerWidget {
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
-                    'RECOMMENDED',
+                    l10n.recommended,
                     style: theme.textTheme.labelSmall?.copyWith(
                       color: theme.colorScheme.primary,
                       fontWeight: FontWeight.bold,
@@ -315,7 +319,7 @@ class _ModelCard extends ConsumerWidget {
                   const Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 14),
                   const SizedBox(width: 4),
                   Text(
-                    'May be too large for this device',
+                    l10n.may_be_large,
                     style: theme.textTheme.labelSmall?.copyWith(
                       color: Colors.orange,
                       fontWeight: FontWeight.bold,
@@ -339,7 +343,7 @@ class _ModelCard extends ConsumerWidget {
               Text(model.license, style: theme.textTheme.labelMedium),
               const SizedBox(width: 12),
               Text(
-                '${model.minRamMb ~/ 1024 + 1} GB RAM min',
+                l10n.ram_min_required('${model.minRamMb ~/ 1024 + 1}'),
                 style: theme.textTheme.labelMedium?.copyWith(
                   color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                 ),
@@ -353,7 +357,7 @@ class _ModelCard extends ConsumerWidget {
                 const Icon(Icons.check_circle, color: Colors.green, size: 18),
                 const SizedBox(width: 4),
                 Text(
-                  'Downloaded',
+                  l10n.downloaded,
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: Colors.green,
                     fontWeight: FontWeight.w600,
@@ -374,11 +378,14 @@ class _ModelCard extends ConsumerWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            '${((progressInfo?.progress ?? 0) * 100).toStringAsFixed(0)}% • ${progressInfo?.speedFormatted ?? "0 B/s"}',
+                            l10n.download_progress(
+                              '${((progressInfo?.progress ?? 0) * 100).toStringAsFixed(0)}%',
+                              progressInfo?.speedFormatted ?? '0 B/s',
+                            ),
                             style: theme.textTheme.labelSmall,
                           ),
                           Text(
-                            'ETA: ${progressInfo?.etaFormatted ?? "..."}',
+                            l10n.eta_label(progressInfo?.etaFormatted ?? l10n.calculating),
                             style: theme.textTheme.labelSmall,
                           ),
                         ],
@@ -392,7 +399,7 @@ class _ModelCard extends ConsumerWidget {
                   onPressed: () => ref
                       .read(foregroundDownloadNotifierProvider.notifier)
                       .pauseDownload(model.id),
-                  child: const Text('Pause'),
+                  child: Text(l10n.pause),
                 ),
               ],
             )
@@ -400,14 +407,14 @@ class _ModelCard extends ConsumerWidget {
             Row(
               children: [
                 Text(
-                  'Paused - ${((progressInfo?.progress ?? 0) * 100).toStringAsFixed(0)}%',
+                  l10n.paused_progress('${((progressInfo?.progress ?? 0) * 100).toStringAsFixed(0)}%'),
                   style: theme.textTheme.bodySmall,
                 ),
                 const Spacer(),
                 ShadButton.outline(
                   size: ShadButtonSize.sm,
                   onPressed: () => _startDownload(context, ref),
-                  child: const Text('Resume'),
+                  child: Text(l10n.resume),
                 ),
               ],
             )
@@ -415,7 +422,7 @@ class _ModelCard extends ConsumerWidget {
             ShadButton.outline(
               size: ShadButtonSize.sm,
               onPressed: () => _startDownload(context, ref),
-              child: const Text('Download'),
+              child: Text(l10n.download),
             ),
         ],
       ),
@@ -438,29 +445,35 @@ class _ModelCard extends ConsumerWidget {
   Future<bool> _showRamWarning(BuildContext context) async {
     final result = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Row(
-          children: [
-            Icon(Icons.warning_amber_rounded, color: Colors.orange),
-            SizedBox(width: 8),
-            Text('RAM Warning'),
+      builder: (ctx) {
+        final dialogL10n = AppLocalizations.of(ctx)!;
+        return AlertDialog(
+          title: Row(
+            children: [
+              const Icon(Icons.warning_amber_rounded, color: Colors.orange),
+              const SizedBox(width: 8),
+              Text(dialogL10n.ram_warning),
+            ],
+          ),
+          content: Text(
+            dialogL10n.ram_warning_body_download(
+              '${model.minRamMb ~/ 1024 + 1}',
+              deviceMemory!.totalMemoryFormatted,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: Text(dialogL10n.cancel),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              style: TextButton.styleFrom(foregroundColor: Colors.orange),
+              child: Text(dialogL10n.proceed_anyway),
+            ),
           ],
-        ),
-        content: Text(
-          'This model requires at least ${model.minRamMb ~/ 1024 + 1} GB RAM, but your device has ${deviceMemory!.totalMemoryFormatted}. It may not run correctly or could cause the app to crash.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            style: TextButton.styleFrom(foregroundColor: Colors.orange),
-            child: const Text('Proceed Anyway'),
-          ),
-        ],
-      ),
+        );
+      },
     );
     return result ?? false;
   }

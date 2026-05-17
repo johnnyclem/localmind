@@ -122,7 +122,7 @@ class _StreamingIndicatorState extends State<StreamingIndicator>
           child: Container(
             width: 2,
             height: 18,
-            margin: const EdgeInsets.only(left: 2),
+            margin: const EdgeInsetsDirectional.only(start: 2),
             color: cursorColor,
           ),
         );

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:hugeicons/hugeicons.dart';
+import 'package:localmind/l10n/app_localizations.dart';
 import '../../../../core/providers/app_providers.dart';
 import '../../../conversations/providers/conversation_providers.dart' as conv;
 import '../../providers/chat_mcp_providers.dart';
@@ -28,10 +29,10 @@ class _ChatSettingsSheetState extends ConsumerState<ChatSettingsSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final settings = ref.watch(settingsProvider);
     final activeConv = ref.watch(conv.activeConversationProvider);
     final mcpConfig = ref.watch(chatMcpConfigProvider);
-    // final theme = ShadTheme.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     // Parameters
@@ -81,7 +82,7 @@ class _ChatSettingsSheetState extends ConsumerState<ChatSettingsSheet> {
             Row(
               children: [
                 Text(
-                  'Chat Settings',
+                  l10n.chat_settings_title,
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -93,7 +94,7 @@ class _ChatSettingsSheetState extends ConsumerState<ChatSettingsSheet> {
                   ShadButton.ghost(
                     onPressed: () => _resetToDefaults(ref, activeConv?.id),
                     leading: const Icon(Icons.restore, size: 16),
-                    child: const Text('Reset Defaults'),
+                    child: Text(l10n.reset_defaults),
                   ),
               ],
             ),
@@ -105,6 +106,7 @@ class _ChatSettingsSheetState extends ConsumerState<ChatSettingsSheet> {
                   value: 'parameters',
                   content: _buildParametersTab(
                     context,
+                    l10n,
                     temperature,
                     topP,
                     maxTokens,
@@ -112,11 +114,11 @@ class _ChatSettingsSheetState extends ConsumerState<ChatSettingsSheet> {
                     activeConv?.id,
                     isDark,
                   ),
-                  child: const Row(
+                  child: Row(
                     children: [
-                      HugeIcon(icon: HugeIcons.strokeRoundedSlidersHorizontal, size: 16),
-                      SizedBox(width: 8),
-                      Text('Parameters'),
+                      const HugeIcon(icon: HugeIcons.strokeRoundedSlidersHorizontal, size: 16),
+                      const SizedBox(width: 8),
+                      Text(l10n.parameters_tab),
                     ],
                   ),
                 ),
@@ -124,15 +126,16 @@ class _ChatSettingsSheetState extends ConsumerState<ChatSettingsSheet> {
                   value: 'mcp',
                   content: _buildMcpTab(
                     context,
+                    l10n,
                     mcpConfig,
                     isGloballyEnabled,
                     isDark,
                   ),
-                  child: const Row(
+                  child: Row(
                     children: [
-                      HugeIcon(icon: HugeIcons.strokeRoundedPuzzle, size: 16),
-                      SizedBox(width: 8),
-                      Text('MCP'),
+                      const HugeIcon(icon: HugeIcons.strokeRoundedPuzzle, size: 16),
+                      const SizedBox(width: 8),
+                      Text(l10n.mcp_tab),
                     ],
                   ),
                 ),
@@ -146,6 +149,7 @@ class _ChatSettingsSheetState extends ConsumerState<ChatSettingsSheet> {
 
   Widget _buildParametersTab(
     BuildContext context,
+    AppLocalizations l10n,
     double temperature,
     double topP,
     int maxTokens,
@@ -158,23 +162,23 @@ class _ChatSettingsSheetState extends ConsumerState<ChatSettingsSheet> {
       child: Column(
         children: [
           _ParamSlider(
-            label: 'Temperature',
+            label: l10n.temperature,
             value: temperature,
             min: 0,
             max: 2,
             divisions: 20,
-            description: 'Controls randomness: Higher = Creative, Lower = Focused',
+            description: l10n.temperature_desc,
             onChanged: (v) => _updateParam(ref, conversationId, temperature: v),
             isDark: isDark,
           ),
           const SizedBox(height: 24),
           _ParamSlider(
-            label: 'Top P',
+            label: l10n.top_p,
             value: topP,
             min: 0,
             max: 1,
             divisions: 10,
-            description: 'Nucleus sampling threshold',
+            description: l10n.top_p_desc,
             onChanged: (v) => _updateParam(ref, conversationId, topP: v),
             isDark: isDark,
           ),
@@ -183,9 +187,9 @@ class _ChatSettingsSheetState extends ConsumerState<ChatSettingsSheet> {
             children: [
               Expanded(
                 child: _ParamInput(
-                  label: 'Max Tokens',
+                  label: l10n.max_tokens,
                   value: maxTokens,
-                  description: 'Response limit',
+                  description: l10n.max_tokens_desc,
                   onChanged: (v) => _updateParam(ref, conversationId, maxTokens: v),
                   isDark: isDark,
                 ),
@@ -193,9 +197,9 @@ class _ChatSettingsSheetState extends ConsumerState<ChatSettingsSheet> {
               const SizedBox(width: 16),
               Expanded(
                 child: _ParamInput(
-                  label: 'Context Length',
+                  label: l10n.context_length,
                   value: contextLength,
-                  description: 'History window',
+                  description: l10n.context_length_desc,
                   onChanged: (v) => _updateParam(ref, conversationId, contextLength: v),
                   isDark: isDark,
                 ),
@@ -209,6 +213,7 @@ class _ChatSettingsSheetState extends ConsumerState<ChatSettingsSheet> {
 
   Widget _buildMcpTab(
     BuildContext context,
+    AppLocalizations l10n,
     ChatMcpConfig mcpConfig,
     bool isGloballyEnabled,
     bool isDark,
@@ -232,10 +237,10 @@ class _ChatSettingsSheetState extends ConsumerState<ChatSettingsSheet> {
                 children: [
                   const Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 20),
                   const SizedBox(width: 12),
-                  const Expanded(
+                  Expanded(
                     child: Text(
-                      'MCP is disabled globally. Enable it in Settings to use these features.',
-                      style: TextStyle(fontSize: 13, color: Colors.orange),
+                      l10n.mcp_disabled_warning,
+                      style: const TextStyle(fontSize: 13, color: Colors.orange),
                     ),
                   ),
                 ],
@@ -255,7 +260,7 @@ class _ChatSettingsSheetState extends ConsumerState<ChatSettingsSheet> {
                     }
                   }
                 : null,
-            label: const Text('Enable MCP for this chat'),
+            label: Text(l10n.mcp_enable_chat),
           ),
           const SizedBox(height: 16),
           if (mcpConfig.enabled && isGloballyEnabled) ...[
@@ -263,11 +268,11 @@ class _ChatSettingsSheetState extends ConsumerState<ChatSettingsSheet> {
               value: mcpConfig.autoExecuteTools,
               onChanged: (v) =>
                   ref.read(chatMcpConfigProvider.notifier).toggleAutoExecute(),
-              label: const Text('Auto-execute tools'),
+              label: Text(l10n.auto_execute_tools),
             ),
             const SizedBox(height: 24),
             Text(
-              'Add Ephemeral MCP Server',
+              l10n.add_ephemeral_mcp,
               style: theme.textTheme.list,
             ),
             const SizedBox(height: 12),
@@ -276,7 +281,7 @@ class _ChatSettingsSheetState extends ConsumerState<ChatSettingsSheet> {
                 Expanded(
                   child: ShadInput(
                     controller: _serverLabelController,
-                    placeholder: const Text('Label'),
+                    placeholder: Text(l10n.mcp_label_placeholder),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -284,7 +289,7 @@ class _ChatSettingsSheetState extends ConsumerState<ChatSettingsSheet> {
                   flex: 2,
                   child: ShadInput(
                     controller: _serverUrlController,
-                    placeholder: const Text('URL (https://...)'),
+                    placeholder: Text(l10n.mcp_url_placeholder),
                     keyboardType: TextInputType.url,
                   ),
                 ),
@@ -298,7 +303,7 @@ class _ChatSettingsSheetState extends ConsumerState<ChatSettingsSheet> {
             const SizedBox(height: 24),
             if (mcpConfig.integrations.isNotEmpty) ...[
               Text(
-                'Active Integrations',
+                l10n.active_integrations,
                 style: theme.textTheme.list,
               ),
               const SizedBox(height: 12),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
+import 'package:localmind/l10n/app_localizations.dart';
 
 class EditMessageDialog extends StatefulWidget {
   const EditMessageDialog({super.key, required this.initialContent});
@@ -55,6 +56,7 @@ class _EditMessageDialogState extends State<EditMessageDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final hintColor = isDark
         ? const Color(0xFF888888)
@@ -99,7 +101,7 @@ class _EditMessageDialogState extends State<EditMessageDialog> {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'Edit message',
+                  l10n.edit_message,
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -120,7 +122,7 @@ class _EditMessageDialogState extends State<EditMessageDialog> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Saving will remove the assistant response below and regenerate.',
+                  l10n.edit_message_desc,
                   style: TextStyle(fontSize: 12, color: hintColor),
                 ),
                 const SizedBox(height: 16),
@@ -129,12 +131,12 @@ class _EditMessageDialogState extends State<EditMessageDialog> {
                   children: [
                     ShadButton.outline(
                       onPressed: () => Navigator.of(context).pop(),
-                      child: const Text('Cancel'),
+                      child: Text(l10n.cancel),
                     ),
                     const SizedBox(width: 8),
                     ShadButton(
                       onPressed: _save,
-                      child: const Text('Save & regenerate'),
+                      child: Text(l10n.save_regenerate),
                     ),
                   ],
                 ),

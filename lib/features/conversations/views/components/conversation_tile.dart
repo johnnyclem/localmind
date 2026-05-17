@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
+import 'package:localmind/l10n/app_localizations.dart';
 import '../../data/models/conversation.dart';
 
 class ConversationTile extends StatelessWidget {
@@ -20,27 +21,28 @@ class ConversationTile extends StatelessWidget {
   final VoidCallback onTogglePin;
   final VoidCallback onDelete;
 
-  String _formatTimestamp(DateTime dateTime) {
+  String _formatTimestamp(AppLocalizations l10n, DateTime dateTime) {
     final now = DateTime.now();
     final diff = now.difference(dateTime);
 
     if (diff.inMinutes < 1) {
-      return 'Just now';
+      return l10n.conversation_just_now;
     } else if (diff.inHours < 1) {
-      return '${diff.inMinutes}m ago';
+      return l10n.conversation_minutes_ago(diff.inMinutes);
     } else if (diff.inHours < 24) {
-      return '${diff.inHours}h ago';
+      return l10n.conversation_hours_ago(diff.inHours);
     } else if (diff.inDays == 1) {
-      return 'Yesterday';
+      return l10n.conversation_yesterday;
     } else if (diff.inDays < 7) {
-      return '${diff.inDays}d ago';
+      return l10n.conversation_days_ago(diff.inDays);
     } else {
-      return '${dateTime.month}/${dateTime.day}/${dateTime.year}';
+      return l10n.conversation_date(dateTime.month, dateTime.day, dateTime.year);
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
@@ -48,8 +50,8 @@ class ConversationTile extends StatelessWidget {
       key: Key(conversation.id),
       direction: DismissDirection.endToStart,
       background: Container(
-        alignment: Alignment.centerRight,
-        padding: const EdgeInsets.only(right: 16),
+        alignment: AlignmentDirectional.centerEnd,
+        padding: const EdgeInsetsDirectional.only(end: 16),
         color: Colors.red,
         child: const Icon(Icons.delete, color: Colors.white),
       ),
@@ -65,7 +67,7 @@ class ConversationTile extends StatelessWidget {
             : Colors.transparent,
         child: InkWell(
           onTap: onTap,
-          onLongPress: () => _showContextMenu(context, isDark),
+          onLongPress: () => _showContextMenu(context, l10n, isDark),
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Row(
@@ -119,7 +121,7 @@ class ConversationTile extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  _formatTimestamp(conversation.updatedAt),
+                  _formatTimestamp(l10n, conversation.updatedAt),
                   style: TextStyle(
                     fontSize: 12,
                     color: isDark
@@ -129,7 +131,7 @@ class ConversationTile extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 IconButton(
-                  onPressed: () => _showContextMenu(context, isDark),
+                  onPressed: () => _showContextMenu(context, l10n, isDark),
                   icon: HugeIcon(
                     icon: HugeIcons.strokeRoundedMoreVertical,
                     size: 18,
@@ -140,7 +142,7 @@ class ConversationTile extends StatelessWidget {
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(),
                   visualDensity: VisualDensity.compact,
-                  tooltip: 'Options',
+                  tooltip: l10n.options_tooltip,
                 ),
               ],
             ),
@@ -150,7 +152,7 @@ class ConversationTile extends StatelessWidget {
     );
   }
 
-  void _showContextMenu(BuildContext context, bool isDark) {
+  void _showContextMenu(BuildContext context, AppLocalizations l10n, bool isDark) {
     showModalBottomSheet(
       context: context,
       builder: (ctx) {
@@ -164,7 +166,7 @@ class ConversationTile extends StatelessWidget {
                       ? Icons.push_pin_outlined
                       : Icons.push_pin,
                 ),
-                title: Text(conversation.isPinned ? 'Unpin' : 'Pin'),
+                title: Text(conversation.isPinned ? l10n.unpin : l10n.pin),
                 onTap: () {
                   Navigator.pop(ctx);
                   onTogglePin();
@@ -172,7 +174,7 @@ class ConversationTile extends StatelessWidget {
               ),
               ListTile(
                 leading: const Icon(Icons.edit_outlined),
-                title: const Text('Rename'),
+                title: Text(l10n.rename),
                 onTap: () {
                   Navigator.pop(ctx);
                   onRename();
@@ -180,9 +182,9 @@ class ConversationTile extends StatelessWidget {
               ),
               ListTile(
                 leading: const Icon(Icons.delete_outline, color: Colors.red),
-                title: const Text(
-                  'Delete',
-                  style: TextStyle(color: Colors.red),
+                title: Text(
+                  l10n.delete,
+                  style: const TextStyle(color: Colors.red),
                 ),
                 onTap: () {
                   Navigator.pop(ctx);

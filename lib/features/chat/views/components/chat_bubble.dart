@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
+import 'package:localmind/l10n/app_localizations.dart';
 import '../../../../core/models/enums.dart';
 import '../../data/models/message.dart';
 import 'code_block.dart';
@@ -36,7 +37,7 @@ class ChatBubble extends StatelessWidget {
     switch (message.role) {
       case MessageRole.user:
         return _AnimatedBubble(
-          alignment: Alignment.centerRight,
+          alignment: AlignmentDirectional.centerEnd,
           child: _UserBubble(
             message: message,
             onCopy: onCopy,
@@ -46,7 +47,7 @@ class ChatBubble extends StatelessWidget {
         );
       case MessageRole.assistant:
         return _AnimatedBubble(
-          alignment: Alignment.centerLeft,
+          alignment: AlignmentDirectional.centerStart,
           child: _AssistantBubble(
             message: message,
             onCopy: onCopy,
@@ -57,12 +58,12 @@ class ChatBubble extends StatelessWidget {
         );
       case MessageRole.system:
         return _AnimatedBubble(
-          alignment: Alignment.center,
+          alignment: AlignmentDirectional.center,
           child: _SystemBubble(message: message),
         );
       case MessageRole.tool:
         return _AnimatedBubble(
-          alignment: Alignment.centerLeft,
+          alignment: AlignmentDirectional.centerStart,
           child: _ToolBubble(message: message),
         );
     }
@@ -73,13 +74,14 @@ class _AnimatedBubble extends StatelessWidget {
   const _AnimatedBubble({required this.child, required this.alignment});
 
   final Widget child;
-  final Alignment alignment;
+  final AlignmentDirectional alignment;
 
   @override
   Widget build(BuildContext context) {
-    final offset = alignment == Alignment.centerRight
+    final resolvedAlignment = alignment.resolve(Directionality.of(context));
+    final offset = resolvedAlignment == Alignment.centerRight
         ? const Offset(0.15, 0.0)
-        : alignment == Alignment.centerLeft
+        : resolvedAlignment == Alignment.centerLeft
         ? const Offset(-0.15, 0.0)
         : const Offset(0.0, 0.1);
 
@@ -123,7 +125,7 @@ class _UserBubble extends StatelessWidget {
     final isDark = theme.brightness == Brightness.dark;
 
     return Align(
-      alignment: Alignment.centerRight,
+      alignment: AlignmentDirectional.centerEnd,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
@@ -131,13 +133,16 @@ class _UserBubble extends StatelessWidget {
             constraints: BoxConstraints(
               maxWidth: MediaQuery.of(context).size.width * 0.75,
             ),
-            margin: const EdgeInsets.only(left: 48, right: 8, top: 4, bottom: 2),
+            margin: const EdgeInsetsDirectional.only(start: 48, end: 8, top: 4, bottom: 2),
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
               color: isDark ? const Color(0xFF3B82F6) : const Color(0xFF2563EB),
-              borderRadius: BorderRadius.circular(
-                18,
-              ).copyWith(bottomRight: const Radius.circular(4)),
+              borderRadius: BorderRadiusDirectional.only(
+                topStart: Radius.circular(18),
+                topEnd: Radius.circular(18),
+                bottomStart: Radius.circular(18),
+                bottomEnd: const Radius.circular(4),
+              ),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.end,
@@ -163,7 +168,7 @@ class _UserBubble extends StatelessWidget {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.only(right: 12, bottom: 4),
+            padding: const EdgeInsetsDirectional.only(end: 12, bottom: 4),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -357,7 +362,7 @@ class _MarkdownContent extends StatelessWidget {
             ),
           ),
         ),
-        blockquotePadding: const EdgeInsets.only(left: 16),
+        blockquotePadding: EdgeInsetsDirectional.only(start: 16).resolve(Directionality.of(context)),
         listBullet: TextStyle(color: isDark ? Colors.white : Colors.black),
         tableHead: TextStyle(
           color: isDark ? Colors.white : Colors.black,
@@ -442,16 +447,17 @@ class _ToolBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
     return Align(
-      alignment: Alignment.centerLeft,
+      alignment: AlignmentDirectional.centerStart,
       child: Container(
         constraints: BoxConstraints(
           maxWidth: MediaQuery.of(context).size.width * 0.8,
         ),
-        margin: const EdgeInsets.only(left: 8, right: 48, top: 4, bottom: 4),
+        margin: const EdgeInsetsDirectional.only(start: 8, end: 48, top: 4, bottom: 4),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: isDark ? const Color(0xFF1F2937) : const Color(0xFFEEF2FF),
@@ -474,7 +480,9 @@ class _ToolBubble extends StatelessWidget {
                 ),
                 const SizedBox(width: 4),
                 Text(
-                  'Tool: ${message.toolCallId ?? "Unknown"}',
+                  message.toolCallId != null
+                      ? l10n.tool_label(message.toolCallId!)
+                      : l10n.tool_unknown,
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w500,

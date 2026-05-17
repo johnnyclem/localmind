@@ -6,6 +6,7 @@ import 'package:shadcn_ui/shadcn_ui.dart';
 
 import '../../../core/providers/app_providers.dart';
 import '../../../core/routes/app_routes.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../on_device/providers/on_device_providers.dart';
 
 class OnboardingNotificationPermissionScreen extends ConsumerStatefulWidget {
@@ -51,6 +52,7 @@ class _OnboardingNotificationPermissionScreenState
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
 
     return Scaffold(
@@ -78,7 +80,7 @@ class _OnboardingNotificationPermissionScreenState
               ),
               const SizedBox(height: 48),
               Text(
-                'Stay Updated',
+                l10n.stay_updated,
                 style: theme.textTheme.displaySmall?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -86,7 +88,7 @@ class _OnboardingNotificationPermissionScreenState
               ),
               const SizedBox(height: 16),
               Text(
-                'Get notified when your AI models finish downloading or when long-running tasks complete.',
+                l10n.stay_updated_desc,
                 style: theme.textTheme.titleMedium?.copyWith(
                   color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                 ),
@@ -97,19 +99,19 @@ class _OnboardingNotificationPermissionScreenState
               _buildBenefitRow(
                 context,
                 HugeIcons.strokeRoundedDownload01,
-                'Model download progress',
+                l10n.notification_benefit_downloads,
               ),
               const SizedBox(height: 16),
               _buildBenefitRow(
                 context,
                 HugeIcons.strokeRoundedAiChat01,
-                'Generation completions',
+                l10n.notification_benefit_completions,
               ),
               const SizedBox(height: 16),
               _buildBenefitRow(
                 context,
                 HugeIcons.strokeRoundedClock01,
-                'Background tasks status',
+                l10n.notification_benefit_background,
               ),
               const Spacer(),
               const SizedBox(height: 32),
@@ -127,9 +129,9 @@ class _OnboardingNotificationPermissionScreenState
                               valueColor: AlwaysStoppedAnimation(Colors.white),
                             ),
                           )
-                        : const Text(
-                            'Allow Notifications',
-                            style: TextStyle(
+                        : Text(
+                            l10n.allow_notifications,
+                            style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
                             ),
@@ -139,7 +141,7 @@ class _OnboardingNotificationPermissionScreenState
                   ShadButton.ghost(
                     onPressed: _isProcessing ? null : _completeOnboarding,
                     child: Text(
-                      'Not Now',
+                      l10n.not_now,
                       style: TextStyle(
                         color: theme.colorScheme.onSurface.withValues(
                           alpha: 0.6,

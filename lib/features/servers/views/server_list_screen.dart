@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-
+import 'package:localmind/l10n/app_localizations.dart';
 import '../../../core/models/enums.dart';
 import '../../../core/providers/service_providers.dart';
 import '../../../core/routes/app_routes.dart';
@@ -13,6 +13,7 @@ class ServerListScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final servers = ref.watch(serversProvider);
     final activeServer = ref.watch(activeServerProvider);
     final theme = Theme.of(context);
@@ -47,7 +48,7 @@ class ServerListScreen extends ConsumerWidget {
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      'Servers',
+                      l10n.servers_title,
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
@@ -61,7 +62,7 @@ class ServerListScreen extends ConsumerWidget {
               Expanded(
                 child: servers.when(
                   data: (serverList) => serverList.isEmpty
-                      ? _buildEmptyState(context, isDark, theme)
+                      ? _buildEmptyState(context, l10n, theme)
                       : RefreshIndicator(
                           onRefresh: () async {
                             for (final server in serverList) {
@@ -92,7 +93,7 @@ class ServerListScreen extends ConsumerWidget {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
                                         content: Text(
-                                          'Switched to ${server.name}',
+                                          l10n.switched_to_server(server.name),
                                         ),
                                         duration: const Duration(seconds: 2),
                                       ),
@@ -100,18 +101,10 @@ class ServerListScreen extends ConsumerWidget {
                                   },
                                   onEdit: isOnDevice
                                       ? null
-                                      : () => _showEditDialog(
-                                          context,
-                                          ref,
-                                          server,
-                                        ),
+                                      : () => _showEditDialog(context, ref, server),
                                   onDelete: isOnDevice
                                       ? null
-                                      : () => _showDeleteConfirmation(
-                                          context,
-                                          ref,
-                                          server,
-                                        ),
+                                      : () => _showDeleteConfirmation(context, ref, l10n, server),
                                   onSetDefault: () {
                                     ref
                                         .read(serversProvider.notifier)
@@ -134,10 +127,10 @@ class ServerListScreen extends ConsumerWidget {
                           size: 48,
                         ),
                         const SizedBox(height: 16),
-                        Text('Error loading servers: $err'),
+                        Text(l10n.error_with_message(err.toString())),
                         TextButton(
                           onPressed: () => ref.invalidate(serversProvider),
-                          child: const Text('Retry'),
+                          child: Text(l10n.retry),
                         ),
                       ],
                     ),
@@ -146,9 +139,9 @@ class ServerListScreen extends ConsumerWidget {
               ),
             ],
           ),
-          Positioned(
+          PositionedDirectional(
             bottom: 24,
-            right: 24,
+            end: 24,
             child: FloatingActionButton(
               onPressed: () => context.push(AppRoutes.addServer),
               child: const Icon(Icons.add),
@@ -159,7 +152,7 @@ class ServerListScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildEmptyState(BuildContext context, bool isDark, ThemeData theme) {
+  Widget _buildEmptyState(BuildContext context, AppLocalizations l10n, ThemeData theme) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -168,10 +161,10 @@ class ServerListScreen extends ConsumerWidget {
           children: [
             Icon(Icons.computer, size: 80, color: theme.colorScheme.outline),
             const SizedBox(height: 24),
-            Text('No Servers Yet', style: theme.textTheme.headlineSmall),
+            Text(l10n.no_servers_yet, style: theme.textTheme.headlineSmall),
             const SizedBox(height: 8),
             Text(
-              'Add your first server to start chatting with AI models.',
+              l10n.no_servers_desc,
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.colorScheme.outline,
               ),
@@ -181,7 +174,7 @@ class ServerListScreen extends ConsumerWidget {
             ElevatedButton.icon(
               onPressed: () => context.push(AppRoutes.addServer),
               icon: const Icon(Icons.add),
-              label: const Text('Add Server'),
+              label: Text(l10n.add_server),
             ),
           ],
         ),
@@ -196,30 +189,32 @@ class ServerListScreen extends ConsumerWidget {
   void _showDeleteConfirmation(
     BuildContext context,
     WidgetRef ref,
+    AppLocalizations l10n,
     dynamic server,
   ) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Delete Server'),
-        content: Text(
-          'Are you sure you want to delete "${server.name}"? This cannot be undone.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              ref.read(serversProvider.notifier).deleteServer(server.id);
-              Navigator.pop(context);
-            },
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
+      builder: (context) {
+        final dlgL10n = AppLocalizations.of(context)!;
+        return AlertDialog(
+          title: Text(dlgL10n.delete_server_title),
+          content: Text(dlgL10n.delete_server_body(server.name)),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(dlgL10n.cancel),
+            ),
+            TextButton(
+              onPressed: () {
+                ref.read(serversProvider.notifier).deleteServer(server.id);
+                Navigator.pop(context);
+              },
+              style: TextButton.styleFrom(foregroundColor: Colors.red),
+              child: Text(dlgL10n.delete),
+            ),
+          ],
+        );
+      },
     );
   }
 }

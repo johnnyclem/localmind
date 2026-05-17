@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
+import 'package:localmind/l10n/app_localizations.dart';
 
 import '../../../../core/providers/app_providers.dart';
 import '../../../on_device/providers/on_device_providers.dart';
@@ -34,7 +35,6 @@ class _NotificationPermissionBannerState
     if (!granted) {
       setState(() => _isVisible = true);
     } else {
-      // If already granted somehow, mark as asked
       await ref
           .read(settingsProvider.notifier)
           .updateSettings(settings.copyWith(hasAskedForNotifications: true));
@@ -57,6 +57,7 @@ class _NotificationPermissionBannerState
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     if (!_isVisible) return const SizedBox.shrink();
 
     final theme = Theme.of(context);
@@ -92,13 +93,13 @@ class _NotificationPermissionBannerState
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Enable Notifications',
+                  l10n.enable_notifications,
                   style: theme.textTheme.labelLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 Text(
-                  'Get notified when models finish downloading.',
+                  l10n.enable_notifications_desc,
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                   ),
@@ -110,13 +111,13 @@ class _NotificationPermissionBannerState
           ShadButton.outline(
             size: ShadButtonSize.sm,
             onPressed: () => _dismiss(true),
-            child: const Text('Not Now'),
+            child: Text(l10n.not_now),
           ),
           const SizedBox(width: 8),
           ShadButton(
             size: ShadButtonSize.sm,
             onPressed: _requestPermission,
-            child: const Text('Enable'),
+            child: Text(l10n.enable),
           ),
         ],
       ),

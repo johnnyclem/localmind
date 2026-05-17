@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:localmind/l10n/app_localizations.dart';
 import '../../chat/providers/chat_providers.dart';
 import '../data/models/model_info.dart';
 import '../../servers/providers/server_providers.dart';
@@ -30,6 +31,7 @@ class ModelPickerSheet extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final activeServer = ref.watch(activeServerProvider);
@@ -68,7 +70,7 @@ class ModelPickerSheet extends ConsumerWidget {
                     Row(
                       children: [
                         Text(
-                          'Select Model',
+                          l10n.select_model_title,
                           style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
@@ -88,7 +90,7 @@ class ModelPickerSheet extends ConsumerWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Loading ${modelLoading.modelId ?? "model"}...',
+                              l10n.loading_model(modelLoading.modelId ?? 'model'),
                               style: TextStyle(
                                 fontSize: 12,
                                 color: isDark
@@ -116,7 +118,7 @@ class ModelPickerSheet extends ConsumerWidget {
                     ref.invalidate(availableModelsProvider(activeServer.id));
                     ref.invalidate(loadedModelsProvider(activeServer));
                   },
-                  tooltip: 'Refresh models',
+                  tooltip: l10n.refresh_models,
                 ),
             ],
           ),
@@ -136,7 +138,7 @@ class ModelPickerSheet extends ConsumerWidget {
           const SizedBox(height: 12),
           TextField(
             decoration: InputDecoration(
-              hintText: 'Search models...',
+              hintText: l10n.search_models_hint,
               prefixIcon: const Icon(Icons.search, size: 20),
               isDense: true,
               contentPadding: const EdgeInsets.symmetric(
@@ -180,6 +182,7 @@ class _NoServerState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -191,7 +194,7 @@ class _NoServerState extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            'No server connected',
+            l10n.no_server_connected,
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w500,
@@ -200,7 +203,7 @@ class _NoServerState extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            'Add a server first to see available models.',
+            l10n.add_server_first,
             style: TextStyle(
               fontSize: 13,
               color: isDark ? const Color(0xFF888888) : const Color(0xFF999999),
@@ -227,6 +230,7 @@ class _ModelList extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final serversAsync = ref.watch(serversProvider);
     final servers = serversAsync.value ?? [];
     final currentServer = servers.where((s) => s.id == serverId).firstOrNull;
@@ -249,7 +253,7 @@ class _ModelList extends ConsumerWidget {
             Icon(Icons.error_outline, size: 48, color: Colors.red[400]),
             const SizedBox(height: 16),
             Text(
-              'Failed to load models',
+              l10n.failed_load_models,
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
@@ -272,7 +276,7 @@ class _ModelList extends ConsumerWidget {
               onPressed: () =>
                   ref.invalidate(availableModelsProvider(serverId)),
               icon: const Icon(Icons.refresh),
-              label: const Text('Retry'),
+              label: Text(l10n.retry),
             ),
           ],
         ),
@@ -307,8 +311,8 @@ class _ModelList extends ConsumerWidget {
           return Center(
             child: Text(
               searchQuery.isEmpty
-                  ? 'No models available'
-                  : 'No models match "$searchQuery"',
+                  ? l10n.no_models_available
+                  : l10n.no_models_match(searchQuery),
               style: TextStyle(
                 fontSize: 14,
                 color: isDark
@@ -352,7 +356,7 @@ class _ModelList extends ConsumerWidget {
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text('Failed to load model: $e'),
+                          content: Text(l10n.model_load_failed(e.toString())),
                           backgroundColor: Colors.red,
                         ),
                       );
@@ -383,8 +387,8 @@ class _ModelList extends ConsumerWidget {
 
                   if (context.mounted) {
                     final message = activeServer.type == ServerType.ollama
-                        ? '${model.name} will be unloaded once the keep-alive time passes'
-                        : '${model.name} unloaded successfully';
+                        ? l10n.model_unloaded_ollama(model.name)
+                        : l10n.model_unloaded_success(model.name);
                     ScaffoldMessenger.of(
                       context,
                     ).showSnackBar(SnackBar(content: Text(message)));
@@ -393,7 +397,7 @@ class _ModelList extends ConsumerWidget {
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text('Failed to unload model: $e'),
+                        content: Text(l10n.model_unload_failed(e.toString())),
                         backgroundColor: Colors.red,
                       ),
                     );
@@ -427,6 +431,7 @@ class _ModelTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final accent = isDark ? const Color(0xFF3B82F6) : const Color(0xFF2563EB);
 
     return InkWell(
@@ -490,7 +495,7 @@ class _ModelTile extends StatelessWidget {
                         ),
                       if (model.contextLength != null)
                         _MetadataChip(
-                          label: '${model.contextLength} ctx',
+                          label: l10n.context_chip(model.contextLength.toString()),
                           isDark: isDark,
                         ),
                     ],
@@ -518,7 +523,7 @@ class _ModelTile extends StatelessWidget {
                 onPressed: onUnload,
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),
-                tooltip: 'Unload from server',
+                tooltip: l10n.unload_from_server,
               ),
               const SizedBox(width: 8),
             ],
@@ -568,6 +573,7 @@ class _ThinkingIndicatorState extends State<_ThinkingIndicator>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -596,7 +602,7 @@ class _ThinkingIndicatorState extends State<_ThinkingIndicator>
         ),
         const SizedBox(width: 4),
         Text(
-          'Thinking',
+          l10n.thinking,
           style: TextStyle(
             fontSize: 12,
             color: widget.isDark
@@ -647,6 +653,7 @@ class _OnDeviceModelList extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final curatedModels = ref.watch(onDeviceModelsProvider);
     final downloadedAsync = ref.watch(downloadedModelsProvider);
     final engineState = ref.watch(onDeviceEngineProvider);
@@ -662,7 +669,7 @@ class _OnDeviceModelList extends ConsumerWidget {
             Icon(Icons.error_outline, size: 48, color: Colors.red[400]),
             const SizedBox(height: 16),
             Text(
-              'Error loading models',
+              l10n.failed_load_models,
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
@@ -673,7 +680,7 @@ class _OnDeviceModelList extends ConsumerWidget {
             OutlinedButton.icon(
               onPressed: () => ref.invalidate(downloadedModelsProvider),
               icon: const Icon(Icons.refresh),
-              label: const Text('Retry'),
+              label: Text(l10n.retry),
             ),
           ],
         ),
@@ -693,8 +700,8 @@ class _OnDeviceModelList extends ConsumerWidget {
           return Center(
             child: Text(
               searchQuery.isEmpty
-                  ? 'No models available'
-                  : 'No models match "$searchQuery"',
+                  ? l10n.no_models_available
+                  : l10n.no_models_match(searchQuery),
               style: TextStyle(
                 fontSize: 14,
                 color: isDark
@@ -753,6 +760,7 @@ class _OnDeviceModelTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final accent = isDark ? const Color(0xFF3B82F6) : const Color(0xFF2563EB);
     final downloadProgress = ref.watch(
       foregroundDownloadNotifierProvider,
@@ -813,7 +821,7 @@ class _OnDeviceModelTile extends ConsumerWidget {
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(
-                            'REC',
+                            l10n.recommended,
                             style: TextStyle(
                               fontSize: 9,
                               fontWeight: FontWeight.bold,
@@ -831,7 +839,7 @@ class _OnDeviceModelTile extends ConsumerWidget {
                           const Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 12),
                           const SizedBox(width: 4),
                           Text(
-                            'May be too large',
+                            l10n.may_be_large,
                             style: TextStyle(
                               fontSize: 10,
                               color: Colors.orange,
@@ -854,8 +862,8 @@ class _OnDeviceModelTile extends ConsumerWidget {
                           const SizedBox(height: 2),
                           Text(
                             isPaused
-                                ? 'Paused - ${((downloadProgress?.progress ?? 0) * 100).toStringAsFixed(0)}%'
-                                : 'Downloading - ${((downloadProgress?.progress ?? 0) * 100).toStringAsFixed(0)}%',
+                                ? l10n.paused_progress(((downloadProgress?.progress ?? 0) * 100).toStringAsFixed(0))
+                                : '${l10n.downloading_status} ${((downloadProgress?.progress ?? 0) * 100).toStringAsFixed(0)}%',
                             style: TextStyle(
                               fontSize: 10,
                               color: isDark ? const Color(0xFF888888) : const Color(0xFF999999),
@@ -903,13 +911,13 @@ class _OnDeviceModelTile extends ConsumerWidget {
                   size: 18,
                   color: Colors.red[400],
                 ),
-                tooltip: 'Unload model',
+                tooltip: l10n.unload,
                 onPressed: () => _unloadModel(context, ref),
               ),
             ] else if (isDownloaded) ...[
               _IconButton(
                 icon: Icon(Icons.play_arrow, size: 20, color: accent),
-                tooltip: 'Load model',
+                tooltip: l10n.load,
                 onPressed: () => _loadModel(context, ref),
               ),
               const SizedBox(width: 4),
@@ -919,7 +927,7 @@ class _OnDeviceModelTile extends ConsumerWidget {
                   size: 18,
                   color: isDark ? const Color(0xFF666666) : const Color(0xFF999999),
                 ),
-                tooltip: 'Delete model',
+                tooltip: l10n.delete,
                 onPressed: () => _deleteModel(context, ref),
               ),
             ] else if (isDownloading) ...[
@@ -929,7 +937,7 @@ class _OnDeviceModelTile extends ConsumerWidget {
                   size: 16,
                   color: isDark ? const Color(0xFF666666) : const Color(0xFF999999),
                 ),
-                tooltip: 'Cancel download',
+                tooltip: l10n.cancel,
                 onPressed: () => ref.read(foregroundDownloadNotifierProvider.notifier).cancelDownload(model.id),
               ),
             ] else ...[
@@ -939,7 +947,7 @@ class _OnDeviceModelTile extends ConsumerWidget {
                   size: 18,
                   color: isDark ? const Color(0xFF555555) : const Color(0xFF999999),
                 ),
-                tooltip: 'Download model',
+                tooltip: l10n.download,
                 onPressed: () {
                   ref
                       .read(foregroundDownloadNotifierProvider.notifier)
@@ -948,7 +956,7 @@ class _OnDeviceModelTile extends ConsumerWidget {
               ),
               const SizedBox(width: 4),
               Text(
-                'Not downloaded',
+                l10n.not_downloaded,
                 style: TextStyle(
                   fontSize: 11,
                   color: isDark ? const Color(0xFF666666) : const Color(0xFF999999),
@@ -999,28 +1007,32 @@ class _OnDeviceModelTile extends ConsumerWidget {
   }
 
   Future<bool> _showRamWarning(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
     final result = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Row(
+        title: Row(
           children: [
-            Icon(Icons.warning_amber_rounded, color: Colors.orange),
-            SizedBox(width: 8),
-            Text('RAM Warning'),
+            const Icon(Icons.warning_amber_rounded, color: Colors.orange),
+            const SizedBox(width: 8),
+            Text(l10n.ram_warning),
           ],
         ),
         content: Text(
-          'Your device has ${deviceMemory!.availableMemoryFormatted} available RAM, but this model recommends at least ${model.minRamMb ~/ 1024 + 1} GB. Loading it might fail or cause instability.',
+          l10n.ram_warning_body_load(
+            deviceMemory!.availableMemoryFormatted,
+            '${model.minRamMb ~/ 1024 + 1}',
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: TextButton.styleFrom(foregroundColor: Colors.orange),
-            child: const Text('Proceed Anyway'),
+            child: Text(l10n.proceed_anyway),
           ),
         ],
       ),
@@ -1055,19 +1067,20 @@ class _OnDeviceModelTile extends ConsumerWidget {
   }
 
   void _deleteModel(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context)!;
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Delete Model'),
-        content: Text('Are you sure you want to delete ${model.name}?'),
+        title: Text(l10n.delete_model_title),
+        content: Text(l10n.delete_model_body(model.name)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Delete'),
+            child: Text(l10n.delete),
           ),
         ],
       ),

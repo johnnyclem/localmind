@@ -96,6 +96,8 @@ class SettingsNotifier extends Notifier<AppSettings> {
       _update(state.copyWith(kittenTtsModelVariant: value));
   void setAutoSpeakEnabled(bool value) =>
       _update(state.copyWith(autoSpeakEnabled: value));
+  void setLocaleCode(String? value) =>
+      _update(state.copyWith(localeCode: value));
 
   Future<void> _update(AppSettings updated) async {
     state = updated;

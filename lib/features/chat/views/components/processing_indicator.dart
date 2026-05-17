@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:localmind/l10n/app_localizations.dart';
 
 class ProcessingIndicator extends StatelessWidget {
   const ProcessingIndicator({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Row(
@@ -22,7 +24,7 @@ class ProcessingIndicator extends StatelessWidget {
         ),
         const SizedBox(width: 8),
         Text(
-          'Processing...',
+          l10n.processing,
           style: TextStyle(
             color: isDark ? Colors.grey[400] : Colors.grey[600],
             fontSize: 14,

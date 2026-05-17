@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -23,6 +25,7 @@ class BootstrapHost extends StatefulWidget {
 class _BootstrapHostState extends State<BootstrapHost> {
   BootstrapState _state = const BootstrapState();
   ProviderContainer? _container;
+  Locale? _savedLocale;
 
   @override
   void initState() {
@@ -44,6 +47,15 @@ class _BootstrapHostState extends State<BootstrapHost> {
       final database = results[2] as ObjectBoxStore;
 
       _updateStage(BootstrapStage.preparingApp, 'Preparing app...');
+
+      try {
+        final settingsJson = prefs.getString('appSettings');
+        if (settingsJson != null) {
+          final settings = json.decode(settingsJson) as Map<String, dynamic>;
+          final code = settings['localeCode'] as String?;
+          if (code != null) _savedLocale = Locale(code);
+        }
+      } catch (_) {}
 
       final container = ProviderContainer(
         overrides: [
@@ -110,6 +122,7 @@ class _BootstrapHostState extends State<BootstrapHost> {
 
     return BootstrapScreen(
       state: _state,
+      locale: _savedLocale,
       onRetry: _state.stage == BootstrapStage.error ? _runBootstrap : null,
     );
   }

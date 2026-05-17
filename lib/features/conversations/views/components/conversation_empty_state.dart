@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:localmind/l10n/app_localizations.dart';
 
 class ConversationEmptyState extends StatelessWidget {
   const ConversationEmptyState({
@@ -10,6 +11,7 @@ class ConversationEmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
@@ -26,7 +28,7 @@ class ConversationEmptyState extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              isSearching ? 'No results found' : 'No conversations yet',
+              isSearching ? l10n.no_results_found : l10n.no_conversations_yet,
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
@@ -36,8 +38,8 @@ class ConversationEmptyState extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               isSearching
-                  ? 'Try a different search term'
-                  : 'Start a new conversation',
+                  ? l10n.try_different_search
+                  : l10n.start_new_conversation,
               style: TextStyle(
                 fontSize: 14,
                 color: isDark

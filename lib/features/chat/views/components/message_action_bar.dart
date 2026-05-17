@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
+import 'package:localmind/l10n/app_localizations.dart';
 import '../../../tts/providers/tts_providers.dart' as tts;
 
 class MessageActionBar extends ConsumerStatefulWidget {
@@ -47,6 +48,7 @@ class _MessageActionBarState extends ConsumerState<MessageActionBar> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final ttsState = ref.watch(tts.ttsProvider);
     final isThisPlaying = ttsState.playingContent == widget.content && ttsState.isSpeaking;
     final isThisInitializing = ttsState.playingContent == widget.content && ttsState.isInitializing;
@@ -56,15 +58,15 @@ class _MessageActionBarState extends ConsumerState<MessageActionBar> {
       children: [
         _ActionButton(
           icon: Icons.copy,
-          label: 'Copy',
+          label: l10n.copy,
           onTap: () async {
             await Clipboard.setData(ClipboardData(text: widget.content));
             widget.onCopy?.call();
             if (context.mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Copied to clipboard'),
-                  duration: Duration(seconds: 2),
+                SnackBar(
+                  content: Text(l10n.copied_to_clipboard),
+                  duration: const Duration(seconds: 2),
                 ),
               );
             }
@@ -74,19 +76,19 @@ class _MessageActionBarState extends ConsumerState<MessageActionBar> {
           const SizedBox(width: 4),
           _ActionButton(
             icon: Icons.refresh,
-            label: 'Retry',
+            label: l10n.retry,
             onTap: widget.onRetry,
           ),
         ],
         if (widget.onEdit != null) ...[
           const SizedBox(width: 4),
-          _ActionButton(icon: Icons.edit, label: 'Edit', onTap: widget.onEdit),
+          _ActionButton(icon: Icons.edit, label: l10n.edit, onTap: widget.onEdit),
         ],
         if (widget.onDelete != null) ...[
           const SizedBox(width: 4),
           _ActionButton(
             icon: Icons.delete_outline,
-            label: 'Delete',
+            label: l10n.delete,
             onTap: () => _showDeleteConfirmation(context),
             isDestructive: true,
           ),
@@ -95,7 +97,7 @@ class _MessageActionBarState extends ConsumerState<MessageActionBar> {
           const SizedBox(width: 4),
           _ActionButton(
             icon: Icons.ios_share,
-            label: 'Share',
+            label: l10n.share,
             onTap: widget.onShare,
           ),
         ],
@@ -105,14 +107,14 @@ class _MessageActionBarState extends ConsumerState<MessageActionBar> {
               ? Icons.stop_circle
               : (isThisInitializing ? Icons.hourglass_top : Icons.volume_up),
           label: isThisPlaying
-              ? 'Stop'
-              : (isThisInitializing ? 'Loading TTS...' : 'Read Aloud'),
+              ? l10n.stop
+              : (isThisInitializing ? l10n.initializing : l10n.read_aloud),
           onTap: isThisInitializing ? null : _toggleTts,
         ),
         const SizedBox(width: 4),
         _ActionButton(
           icon: Icons.more_horiz,
-          label: 'More',
+          label: l10n.more,
           onTap: () => _showMoreOptions(context),
         ),
       ],
@@ -120,18 +122,19 @@ class _MessageActionBarState extends ConsumerState<MessageActionBar> {
   }
 
   void _showDeleteConfirmation(BuildContext context) {
+    final dlgL10n = AppLocalizations.of(context)!;
     showShadDialog(
       context: context,
       builder: (context) => ShadDialog(
-        title: const Text('Delete message?'),
-        description: const Text('This action cannot be undone.'),
+        title: Text(dlgL10n.delete_message_title),
+        description: Text(dlgL10n.cannot_undo),
         actions: [
           ShadButton(
-            child: const Text('Cancel'),
+            child: Text(dlgL10n.cancel),
             onPressed: () => Navigator.of(context).pop(),
           ),
           ShadButton(
-            child: const Text('Delete'),
+            child: Text(dlgL10n.delete),
             onPressed: () {
               Navigator.of(context).pop();
               widget.onDelete?.call();
@@ -143,30 +146,31 @@ class _MessageActionBarState extends ConsumerState<MessageActionBar> {
   }
 
   void _showMoreOptions(BuildContext context) {
+    final sheetL10n = AppLocalizations.of(context)!;
     final ttsState = ref.read(tts.ttsProvider);
     final isThisPlaying = ttsState.playingContent == widget.content && ttsState.isSpeaking;
 
     showShadSheet(
       context: context,
       builder: (context) => ShadSheet(
-        title: const Text('Message options'),
+        title: Text(sheetL10n.message_options),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
               leading: const Icon(Icons.code),
-              title: const Text('Copy as Markdown'),
+              title: Text(sheetL10n.copy_markdown),
               onTap: () {
                 Navigator.of(context).pop();
                 Clipboard.setData(ClipboardData(text: widget.content));
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Copied as Markdown')),
+                  SnackBar(content: Text(sheetL10n.copied_markdown)),
                 );
               },
             ),
             ListTile(
               leading: Icon(isThisPlaying ? Icons.stop : Icons.volume_up),
-              title: Text(isThisPlaying ? 'Stop Reading' : 'Read Aloud'),
+              title: Text(isThisPlaying ? sheetL10n.stop_reading : sheetL10n.read_aloud),
               onTap: () {
                 Navigator.of(context).pop();
                 _toggleTts();
@@ -175,7 +179,7 @@ class _MessageActionBarState extends ConsumerState<MessageActionBar> {
             if (widget.onShare != null)
               ListTile(
                 leading: const Icon(Icons.ios_share),
-                title: const Text('Share'),
+                title: Text(sheetL10n.share),
                 onTap: () {
                   Navigator.of(context).pop();
                   widget.onShare?.call();
@@ -183,7 +187,7 @@ class _MessageActionBarState extends ConsumerState<MessageActionBar> {
               ),
             ListTile(
               leading: const Icon(Icons.text_fields),
-              title: Text('${widget.content.length} characters'),
+              title: Text(sheetL10n.character_count(widget.content.length)),
               enabled: false,
             ),
           ],

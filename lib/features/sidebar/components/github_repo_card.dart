@@ -3,6 +3,8 @@ import 'package:hugeicons/hugeicons.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../l10n/app_localizations.dart';
+
 class GitHubRepoCard extends StatelessWidget {
   const GitHubRepoCard({super.key});
 
@@ -17,6 +19,7 @@ class GitHubRepoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     
@@ -41,7 +44,7 @@ class GitHubRepoCard extends StatelessWidget {
             ),
             const SizedBox(width: 8),
             Text(
-              'Open Source',
+              l10n.open_source,
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
@@ -53,7 +56,7 @@ class GitHubRepoCard extends StatelessWidget {
         description: Padding(
           padding: const EdgeInsets.only(top: 4),
           child: Text(
-            'LocalMind is open source. Follow our progress or contribute on GitHub.',
+            l10n.open_source_desc,
             style: TextStyle(
               fontSize: 12,
               color: isDark ? const Color(0xFFA0A0A0) : const Color(0xFF666666),
@@ -71,7 +74,7 @@ class GitHubRepoCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  'Star on GitHub',
+                  l10n.star_on_github,
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,

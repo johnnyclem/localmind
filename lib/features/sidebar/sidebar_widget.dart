@@ -4,9 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
-import '../../core/providers/app_providers.dart';
 import '../../core/routes/app_routes.dart';
-import '../../core/theme/app_theme.dart';
+import '../../l10n/app_localizations.dart';
 import '../chat/providers/chat_providers.dart';
 import '../tts/views/components/tts_player_bar.dart';
 import 'components/active_server_indicator.dart';
@@ -20,13 +19,13 @@ class SidebarWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final location = GoRouterState.of(context).uri.toString();
 
     final isHistory = location.startsWith(AppRoutes.chatHistory);
     final isServers = location.startsWith(AppRoutes.servers);
     final isPersonas = location.startsWith(AppRoutes.personas);
-    final themeMode = ref.watch(themeModeProvider);
     final isLocalModels = location.startsWith(AppRoutes.onDeviceModels);
     final isTtsModels = location.startsWith(AppRoutes.ttsModels);
     final isSettings = location.startsWith(AppRoutes.settings);
@@ -35,7 +34,9 @@ class SidebarWidget extends ConsumerWidget {
       width: 300,
       decoration: BoxDecoration(
         color: theme.scaffoldBackgroundColor,
-        border: Border(right: BorderSide(color: theme.colorScheme.outline)),
+        border: Directionality.of(context) == TextDirection.rtl
+            ? Border(left: BorderSide(color: theme.colorScheme.outline))
+            : Border(right: BorderSide(color: theme.colorScheme.outline)),
       ),
       child: SafeArea(
         child: Column(
@@ -55,7 +56,7 @@ class SidebarWidget extends ConsumerWidget {
                     Navigator.pop(context);
                   }
                 },
-                child: const Text('New Chat'),
+                child: Text(l10n.nav_new_chat),
               ),
             ),
 
@@ -71,7 +72,7 @@ class SidebarWidget extends ConsumerWidget {
                   children: [
                     DrawerNavItem(
                       iconData: HugeIcons.strokeRoundedChatting01,
-                      label: 'History',
+                      label: l10n.nav_history,
                       isSelected: isHistory,
                       onTap: () {
                         if (Scaffold.maybeOf(context)?.isDrawerOpen ?? false) {
@@ -82,7 +83,7 @@ class SidebarWidget extends ConsumerWidget {
                     ),
                     DrawerNavItem(
                       iconData: HugeIcons.strokeRoundedServerStack01,
-                      label: 'Servers',
+                      label: l10n.nav_servers,
                       isSelected: isServers,
                       onTap: () {
                         if (Scaffold.maybeOf(context)?.isDrawerOpen ?? false) {
@@ -93,7 +94,7 @@ class SidebarWidget extends ConsumerWidget {
                     ),
                     DrawerNavItem(
                       iconData: HugeIcons.strokeRoundedSmartPhone01,
-                      label: 'Local Models',
+                      label: l10n.nav_local_models,
                       isSelected: isLocalModels,
                       onTap: () {
                         if (Scaffold.maybeOf(context)?.isDrawerOpen ?? false) {
@@ -104,7 +105,7 @@ class SidebarWidget extends ConsumerWidget {
                     ),
                     DrawerNavItem(
                       iconData: HugeIcons.strokeRoundedVoice,
-                      label: 'Text To Speech',
+                      label: l10n.nav_tts,
                       isSelected: isTtsModels,
                       onTap: () {
                         if (Scaffold.maybeOf(context)?.isDrawerOpen ?? false) {
@@ -115,7 +116,7 @@ class SidebarWidget extends ConsumerWidget {
                     ),
                     DrawerNavItem(
                       iconData: HugeIcons.strokeRoundedCompass01,
-                      label: 'Personas',
+                      label: l10n.nav_personas,
                       isSelected: isPersonas,
                       onTap: () {
                         if (Scaffold.maybeOf(context)?.isDrawerOpen ?? false) {
@@ -129,7 +130,7 @@ class SidebarWidget extends ConsumerWidget {
                     const SizedBox(height: 8),
                     DrawerNavItem(
                       iconData: HugeIcons.strokeRoundedSettings01,
-                      label: 'Settings',
+                      label: l10n.nav_settings,
                       isSelected: isSettings,
                       onTap: () {
                         if (Scaffold.maybeOf(context)?.isDrawerOpen ?? false) {
@@ -156,31 +157,5 @@ class SidebarWidget extends ConsumerWidget {
         ),
       ),
     );
-  }
-
-  List<List<dynamic>> _getThemeIcon(AppThemeType mode) {
-    switch (mode) {
-      case AppThemeType.system:
-        return HugeIcons.strokeRoundedSettings01;
-      case AppThemeType.light:
-        return HugeIcons.strokeRoundedSun01;
-      case AppThemeType.dark:
-        return HugeIcons.strokeRoundedMoon02;
-      case AppThemeType.claude:
-        return HugeIcons.strokeRoundedPaintBrush02;
-    }
-  }
-
-  String _getThemeLabel(AppThemeType mode) {
-    switch (mode) {
-      case AppThemeType.system:
-        return 'System';
-      case AppThemeType.light:
-        return 'Light';
-      case AppThemeType.dark:
-        return 'Dark';
-      case AppThemeType.claude:
-        return 'Claude';
-    }
   }
 }

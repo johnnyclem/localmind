@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
+import 'l10n/app_localizations.dart';
 
 import 'core/models/enums.dart';
 import 'core/providers/app_providers.dart';
@@ -152,6 +154,7 @@ class App extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(routerProvider);
     final appThemeType = ref.watch(themeModeProvider);
+    final localeCode = ref.watch(settingsProvider.select((s) => s.localeCode));
 
     ThemeData theme = AppTheme.lightTheme;
     ThemeData darkTheme = AppTheme.darkTheme;
@@ -195,6 +198,31 @@ class App extends ConsumerWidget {
           darkTheme: darkTheme,
           themeMode: themeMode,
           routerConfig: router,
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: const [
+            Locale('en'),
+            Locale('ar'),
+            Locale('bn'),
+            Locale('zh'),
+            Locale('es'),
+            Locale('hi'),
+          ],
+          locale: localeCode != null ? Locale(localeCode) : null,
+          localeResolutionCallback: (locale, supportedLocales) {
+            if (localeCode != null) {
+              final langLocale = Locale(localeCode);
+              if (supportedLocales.contains(langLocale)) return langLocale;
+            }
+            for (final l in supportedLocales) {
+              if (l.languageCode == locale?.languageCode) return l;
+            }
+            return const Locale('en');
+          },
           builder: (context, child) {
             return ShadAppBuilder(child: child!);
           },

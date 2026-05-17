@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:localmind/l10n/app_localizations.dart';
 import '../../../../core/routes/app_routes.dart';
 import '../../../chat/providers/chat_providers.dart';
 import '../../data/models/conversation.dart';
@@ -20,13 +21,14 @@ class ConversationList extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final sectionOrder = [
-      'PINNED',
-      'TODAY',
-      'YESTERDAY',
-      'PREVIOUS 7 DAYS',
-      'PREVIOUS 30 DAYS',
-      'OLDER',
+      l10n.pinned_section,
+      l10n.today_section,
+      l10n.yesterday_section,
+      l10n.previous_7_days,
+      l10n.previous_30_days,
+      l10n.older_section,
     ];
     final sortedSections = groupedConversations.keys.toList()
       ..sort((a, b) {
@@ -42,7 +44,7 @@ class ConversationList extends ConsumerWidget {
         final section = sortedSections[sectionIndex];
         final conversations = groupedConversations[section]!;
 
-        if (section == 'PINNED' && conversations.isEmpty) {
+        if (section == l10n.pinned_section && conversations.isEmpty) {
           return const SizedBox.shrink();
         }
 
@@ -59,12 +61,12 @@ class ConversationList extends ConsumerWidget {
                       .read(chatProvider.notifier)
                       .loadConversation(conversation);
                   if (Scaffold.maybeOf(context)?.isDrawerOpen ?? false) {
-                    Navigator.pop(context); // Close drawer if it was a drawer
+                    Navigator.pop(context);
                   }
                   context.go(AppRoutes.home);
                 },
                 onRename: () {
-                  _showRenameDialog(context, ref, conversation);
+                  _showRenameDialog(context, ref, l10n, conversation);
                 },
                 onTogglePin: () {
                   ref
@@ -72,7 +74,7 @@ class ConversationList extends ConsumerWidget {
                       .togglePin(conversation.id);
                 },
                 onDelete: () {
-                  _showDeleteConfirmation(context, ref, conversation);
+                  _showDeleteConfirmation(context, ref, l10n, conversation);
                 },
               );
             }),
@@ -85,6 +87,7 @@ class ConversationList extends ConsumerWidget {
   void _showRenameDialog(
     BuildContext context,
     WidgetRef ref,
+    AppLocalizations l10n,
     Conversation conversation,
   ) {
     final controller = TextEditingController(text: conversation.title);
@@ -93,19 +96,19 @@ class ConversationList extends ConsumerWidget {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Rename conversation'),
+          title: Text(l10n.rename_conversation),
           content: TextField(
             controller: controller,
             autofocus: true,
-            decoration: const InputDecoration(
-              hintText: 'Enter new title',
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              hintText: l10n.enter_new_title,
+              border: const OutlineInputBorder(),
             ),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
+              child: Text(l10n.cancel),
             ),
             TextButton(
               onPressed: () {
@@ -117,7 +120,7 @@ class ConversationList extends ConsumerWidget {
                 }
                 Navigator.pop(context);
               },
-              child: const Text('Rename'),
+              child: Text(l10n.rename),
             ),
           ],
         );
@@ -128,20 +131,19 @@ class ConversationList extends ConsumerWidget {
   void _showDeleteConfirmation(
     BuildContext context,
     WidgetRef ref,
+    AppLocalizations l10n,
     Conversation conversation,
   ) {
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Delete conversation?'),
-          content: Text(
-            'Are you sure you want to delete "${conversation.title}"? This cannot be undone.',
-          ),
+          title: Text(l10n.delete_conversation_title),
+          content: Text(l10n.delete_conversation_body(conversation.title)),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
+              child: Text(l10n.cancel),
             ),
             TextButton(
               onPressed: () {
@@ -151,7 +153,7 @@ class ConversationList extends ConsumerWidget {
                 Navigator.pop(context);
               },
               style: TextButton.styleFrom(foregroundColor: Colors.red),
-              child: const Text('Delete'),
+              child: Text(l10n.delete),
             ),
           ],
         );

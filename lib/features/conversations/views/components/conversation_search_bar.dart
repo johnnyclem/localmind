@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:localmind/l10n/app_localizations.dart';
 import '../../providers/conversation_providers.dart';
 
 class ConversationSearchBar extends ConsumerStatefulWidget {
@@ -21,6 +22,7 @@ class _ConversationSearchBarState extends ConsumerState<ConversationSearchBar> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
@@ -43,7 +45,7 @@ class _ConversationSearchBarState extends ConsumerState<ConversationSearchBar> {
           color: isDark ? Colors.white : Colors.black,
         ),
         decoration: InputDecoration(
-          hintText: 'Search conversations...',
+          hintText: l10n.search_hint,
           hintStyle: TextStyle(
             fontSize: 14,
             color: isDark ? const Color(0xFF666666) : const Color(0xFF999999),

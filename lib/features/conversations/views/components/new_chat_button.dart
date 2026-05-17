@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:localmind/l10n/app_localizations.dart';
 
 import '../../../../core/routes/app_routes.dart';
 import '../../../chat/providers/chat_providers.dart';
@@ -10,6 +11,7 @@ class NewChatButton extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: SizedBox(
@@ -23,7 +25,7 @@ class NewChatButton extends ConsumerWidget {
             }
           },
           icon: const Icon(Icons.add, size: 18),
-          label: const Text('New Chat'),
+          label: Text(l10n.nav_new_chat),
         ),
       ),
     );

@@ -48,7 +48,9 @@ app.*.map.json
 .fvm/
 playstore_keys
 .agent/
+.agents/
 .claude/
 .dart_skills/
 private/
 plans/
+skills-lock.json

@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:localmind/l10n/app_localizations.dart';
 import '../../sidebar/sidebar_widget.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
@@ -20,6 +21,7 @@ class OnDeviceModelManagerScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final models = ref.watch(onDeviceModelsProvider);
     final downloadedAsync = ref.watch(downloadedModelsProvider);
@@ -30,7 +32,7 @@ class OnDeviceModelManagerScreen extends ConsumerWidget {
 
     return Scaffold(
       drawer: const SidebarWidget(),
-      appBar: AppBar(title: const Text('On-Device Models')),
+      appBar: AppBar(title: Text(l10n.on_device_models_title)),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -43,14 +45,14 @@ class OnDeviceModelManagerScreen extends ConsumerWidget {
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(color: Colors.orange),
               ),
-              child: const Row(
+              child: Row(
                 children: [
-                  Icon(Icons.info_outline, color: Colors.orange, size: 20),
-                  SizedBox(width: 8),
+                  const Icon(Icons.info_outline, color: Colors.orange, size: 20),
+                  const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      'On-device inference is available on Android only.',
-                      style: TextStyle(color: Colors.orange),
+                      l10n.on_device_android_only,
+                      style: const TextStyle(color: Colors.orange),
                     ),
                   ),
                 ],
@@ -72,7 +74,7 @@ class OnDeviceModelManagerScreen extends ConsumerWidget {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      'Model loaded: ${engineState.loadedModelId ?? "Unknown"} (${engineState.backend?.name ?? "CPU"})',
+                      l10n.model_loaded(engineState.loadedModelId ?? 'Unknown', engineState.backend?.name ?? 'CPU'),
                       style: const TextStyle(color: Colors.green),
                     ),
                   ),
@@ -94,12 +96,12 @@ class OnDeviceModelManagerScreen extends ConsumerWidget {
                 border: Border.all(color: Colors.red),
               ),
               child: Text(
-                engineState.error ?? 'Engine error',
+                engineState.error ?? l10n.unknown_error,
                 style: const TextStyle(color: Colors.red),
               ),
             ),
           Text(
-            'Available Models',
+            l10n.available_models,
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.bold,
             ),
@@ -126,6 +128,7 @@ class OnDeviceModelManagerScreen extends ConsumerWidget {
     WidgetRef ref,
     AsyncValue<DeviceMemoryInfo> memoryAsync,
   ) {
+    final l10n = AppLocalizations.of(context)!;
     return memoryAsync.when(
       data: (info) {
         if (info.totalMemoryMb == 0) return const SizedBox.shrink();
@@ -135,13 +138,13 @@ class OnDeviceModelManagerScreen extends ConsumerWidget {
         
         // Memory health logic
         Color statusColor = Colors.green;
-        String statusText = 'Healthy';
+        String statusText = l10n.memory_healthy;
         if (info.availableMemoryMb < 1024) {
           statusColor = Colors.red;
-          statusText = 'Critical';
+          statusText = l10n.memory_critical;
         } else if (info.availableMemoryMb < 2048) {
           statusColor = Colors.orange;
-          statusText = 'Low';
+          statusText = l10n.memory_low;
         }
 
         return Container(
@@ -170,7 +173,7 @@ class OnDeviceModelManagerScreen extends ConsumerWidget {
           child: Column(
             children: [
               Padding(
-                padding: const EdgeInsets.fromLTRB(20, 16, 12, 8),
+                padding: const EdgeInsetsDirectional.only(start: 20, top: 16, end: 12, bottom: 8),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -183,7 +186,7 @@ class OnDeviceModelManagerScreen extends ConsumerWidget {
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          'Device Memory',
+                          l10n.device_memory,
                           style: theme.textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                             letterSpacing: -0.5,
@@ -207,7 +210,7 @@ class OnDeviceModelManagerScreen extends ConsumerWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          'RAM Usage',
+                          l10n.ram_usage,
                           style: theme.textTheme.labelMedium?.copyWith(
                             color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                           ),
@@ -268,7 +271,7 @@ class OnDeviceModelManagerScreen extends ConsumerWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          '${(usagePercent * 100).toStringAsFixed(0)}% used',
+                          l10n.ram_used((usagePercent * 100).toStringAsFixed(0)),
                           style: theme.textTheme.labelSmall?.copyWith(
                             fontWeight: FontWeight.w600,
                           ),
@@ -292,7 +295,7 @@ class OnDeviceModelManagerScreen extends ConsumerWidget {
                   children: [
                     Expanded(
                       child: _MemoryStat(
-                        label: 'Available RAM',
+                        label: l10n.available_ram,
                         value: info.availableMemoryFormatted,
                         icon: Icons.speed_rounded,
                         color: statusColor,
@@ -306,7 +309,7 @@ class OnDeviceModelManagerScreen extends ConsumerWidget {
                     ),
                     Expanded(
                       child: _MemoryStat(
-                        label: 'Total Capacity',
+                        label: l10n.total_capacity,
                         value: info.totalMemoryFormatted,
                         icon: Icons.storage_rounded,
                         alignment: CrossAxisAlignment.end,
@@ -415,6 +418,7 @@ class _ModelCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final isDownloaded = downloadedAsync.when(
       data: (set) => set.contains(model.id),
       loading: () => false,
@@ -472,7 +476,7 @@ class _ModelCard extends ConsumerWidget {
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Text(
-                      'RECOMMENDED',
+                      l10n.recommended,
                       style: theme.textTheme.labelSmall?.copyWith(
                         color: theme.colorScheme.primary,
                         fontWeight: FontWeight.bold,
@@ -497,7 +501,7 @@ class _ModelCard extends ConsumerWidget {
                       const Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 14),
                       const SizedBox(width: 6),
                       Text(
-                        'May be too large for this device',
+                        l10n.may_be_large,
                         style: theme.textTheme.labelSmall?.copyWith(
                           color: Colors.orange,
                           fontWeight: FontWeight.bold,
@@ -525,7 +529,7 @@ class _ModelCard extends ConsumerWidget {
                 Text(model.license, style: theme.textTheme.labelMedium),
                 const SizedBox(width: 12),
                 Text(
-                  '${model.minRamMb ~/ 1024 + 1} GB RAM min',
+                  l10n.ram_min_required('${model.minRamMb ~/ 1024 + 1}'),
                   style: theme.textTheme.labelMedium?.copyWith(
                     color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                   ),
@@ -555,6 +559,7 @@ class _ModelCard extends ConsumerWidget {
     bool isDownloading,
     bool isPaused,
   ) {
+    final l10n = AppLocalizations.of(context)!;
     final isLoaded = engineState.loadedModelId == model.id;
 
     if (isDownloaded) {
@@ -567,7 +572,7 @@ class _ModelCard extends ConsumerWidget {
           ),
           const SizedBox(width: 4),
           Text(
-            isLoaded ? 'Loaded' : 'Downloaded',
+            isLoaded ? l10n.loaded_status : l10n.downloaded,
             style: theme.textTheme.bodySmall?.copyWith(
               color: isLoaded ? Colors.green : Colors.grey,
               fontWeight: FontWeight.w600,
@@ -584,19 +589,19 @@ class _ModelCard extends ConsumerWidget {
             ShadButton.outline(
               size: ShadButtonSize.sm,
               onPressed: () => _unloadModel(ref),
-              child: const Text('Unload'),
+              child: Text(l10n.unload),
             )
           else
             ShadButton.outline(
               size: ShadButtonSize.sm,
               onPressed: () => _loadModel(context, ref),
-              child: const Text('Load'),
+              child: Text(l10n.load),
             ),
           const SizedBox(width: 8),
           ShadButton.outline(
             size: ShadButtonSize.sm,
             onPressed: () => _deleteModel(context, ref),
-            child: const Text('Delete'),
+            child: Text(l10n.delete),
           ),
         ],
       );
@@ -621,13 +626,16 @@ class _ModelCard extends ConsumerWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          '${((downloadProgress?.progress ?? 0) * 100).toStringAsFixed(1)}% • ${downloadProgress?.speedFormatted ?? '0 B/s'}',
+                          l10n.download_progress(
+                            ((downloadProgress?.progress ?? 0) * 100).toStringAsFixed(1),
+                            downloadProgress?.speedFormatted ?? '0 B/s',
+                          ),
                           style: theme.textTheme.labelSmall?.copyWith(
                             fontWeight: FontWeight.w600,
                           ),
                         ),
                         Text(
-                          'ETA: ${downloadProgress?.etaFormatted ?? 'Calculating...'}',
+                          l10n.eta_label(downloadProgress?.etaFormatted ?? l10n.calculating),
                           style: theme.textTheme.labelSmall,
                         ),
                       ],
@@ -649,7 +657,7 @@ class _ModelCard extends ConsumerWidget {
                 onPressed: () => ref
                     .read(foregroundDownloadNotifierProvider.notifier)
                     .pauseDownload(model.id),
-                child: const Text('Pause'),
+                child: Text(l10n.pause),
               ),
             ],
           ),
@@ -662,7 +670,7 @@ class _ModelCard extends ConsumerWidget {
         children: [
           Expanded(
             child: Text(
-              downloadProgress?.error ?? 'Download failed',
+              downloadProgress?.error ?? l10n.download_failed,
               style: theme.textTheme.bodySmall?.copyWith(color: Colors.red),
             ),
           ),
@@ -672,7 +680,7 @@ class _ModelCard extends ConsumerWidget {
             onPressed: () => ref
                 .read(foregroundDownloadNotifierProvider.notifier)
                 .retryDownload(model.id),
-            child: const Text('Retry'),
+            child: Text(l10n.retry),
           ),
         ],
       );
@@ -682,14 +690,14 @@ class _ModelCard extends ConsumerWidget {
       return Row(
         children: [
           Text(
-            'Paused - ${((downloadProgress?.progress ?? 0) * 100).toStringAsFixed(0)}%',
+            l10n.paused_progress(((downloadProgress?.progress ?? 0) * 100).toStringAsFixed(0)),
             style: theme.textTheme.bodySmall,
           ),
           const Spacer(),
           ShadButton.outline(
             size: ShadButtonSize.sm,
             onPressed: () => _startDownload(context, ref),
-            child: const Text('Resume'),
+            child: Text(l10n.resume),
           ),
         ],
       );
@@ -701,18 +709,22 @@ class _ModelCard extends ConsumerWidget {
         ShadButton.outline(
           size: ShadButtonSize.sm,
           onPressed: () => _startDownload(context, ref),
-          child: const Text('Download'),
+          child: Text(l10n.download),
         ),
       ],
     );
   }
 
   Future<void> _startDownload(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context)!;
     if (deviceMemory != null) {
       if (deviceMemory!.isOversized(model.minRamMb)) {
         final proceed = await _showRamWarning(
           context,
-          'This model requires at least ${model.minRamMb ~/ 1024 + 1} GB RAM, but your device has ${deviceMemory!.totalMemoryFormatted}. It may not run correctly or could cause the app to crash.',
+          l10n.ram_warning_body_download(
+            '${model.minRamMb ~/ 1024 + 1}',
+            deviceMemory!.totalMemoryFormatted,
+          ),
         );
         if (!proceed) return;
       }
@@ -724,11 +736,15 @@ class _ModelCard extends ConsumerWidget {
   }
 
   Future<void> _loadModel(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context)!;
     if (deviceMemory != null) {
       if (!deviceMemory!.hasEnoughRam(model.minRamMb)) {
         final proceed = await _showRamWarning(
           context,
-          'Your device has ${deviceMemory!.availableMemoryFormatted} available RAM, but this model recommends at least ${model.minRamMb ~/ 1024 + 1} GB. Loading it might fail or cause instability.',
+          l10n.ram_warning_body_load(
+            deviceMemory!.availableMemoryFormatted,
+            '${model.minRamMb ~/ 1024 + 1}',
+          ),
         );
         if (!proceed) return;
       }
@@ -740,26 +756,27 @@ class _ModelCard extends ConsumerWidget {
   }
 
   Future<bool> _showRamWarning(BuildContext context, String message) async {
+    final l10n = AppLocalizations.of(context)!;
     final result = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Row(
+        title: Row(
           children: [
-            Icon(Icons.warning_amber_rounded, color: Colors.orange),
-            SizedBox(width: 8),
-            Text('RAM Warning'),
+            const Icon(Icons.warning_amber_rounded, color: Colors.orange),
+            const SizedBox(width: 8),
+            Text(l10n.ram_warning),
           ],
         ),
         content: Text(message),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: TextButton.styleFrom(foregroundColor: Colors.orange),
-            child: const Text('Proceed Anyway'),
+            child: Text(l10n.proceed_anyway),
           ),
         ],
       ),
@@ -772,19 +789,20 @@ class _ModelCard extends ConsumerWidget {
   }
 
   Future<void> _deleteModel(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context)!;
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Delete Model'),
-        content: Text('Are you sure you want to delete ${model.name}?'),
+        title: Text(l10n.delete_model_title),
+        content: Text(l10n.delete_model_body(model.name)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Delete'),
+            child: Text(l10n.delete),
           ),
         ],
       ),

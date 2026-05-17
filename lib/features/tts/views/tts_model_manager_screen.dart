@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:localmind/l10n/app_localizations.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
 import '../../../core/models/enums.dart';
@@ -18,11 +19,12 @@ class TtsModelManagerScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final settings = ref.watch(settingsProvider);
 
     return Scaffold(
       drawer: const SidebarWidget(),
-      appBar: AppBar(title: const Text('Text To Speech Models')),
+      appBar: AppBar(title: Text(l10n.tts_models_title)),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -47,6 +49,7 @@ class _SystemEngineCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final meta = EngineMeta.system;
 
     return _EngineCard(
@@ -54,7 +57,7 @@ class _SystemEngineCard extends ConsumerWidget {
       meta: meta,
       engine: EngineId.system,
       installed: true,
-      statusText: 'Always available',
+      statusText: l10n.always_available,
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -64,7 +67,7 @@ class _SystemEngineCard extends ConsumerWidget {
               onPressed: () => ref
                   .read(settingsProvider.notifier)
                   .setTtsEngine(EngineId.system),
-              child: const Text('Select'),
+              child: Text(l10n.select),
             ),
         ],
       ),
@@ -76,11 +79,11 @@ class _SystemEngineCard extends ConsumerWidget {
 class _SystemVoicesList extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     return Padding(
       padding: const EdgeInsets.only(top: 12),
       child: Text(
-        'Uses your device\'s built-in text-to-speech engine.\n'
-        'No downloads required. Voice selection uses your device\'s system settings.',
+        l10n.tts_system_desc,
         style: Theme.of(context).textTheme.bodySmall?.copyWith(
           color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
         ),
@@ -103,6 +106,7 @@ class _KittenEngineCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final settings = ref.watch(settingsProvider);
     final meta = EngineMeta.kitten;
     final downloadedAsync = ref.watch(downloadedKittenTtsVariantsProvider);
@@ -123,10 +127,10 @@ class _KittenEngineCard extends ConsumerWidget {
       engine: EngineId.kitten,
       installed: isInstalled,
       statusText: isInstalled
-          ? 'Installed'
+          ? l10n.installed
           : isDownloading
-          ? 'Downloading...'
-          : 'Not installed',
+          ? l10n.downloading_status
+          : l10n.not_installed,
       trailing: _buildAction(context, ref, isInstalled, isDownloading, model),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -134,8 +138,7 @@ class _KittenEngineCard extends ConsumerWidget {
           Padding(
             padding: const EdgeInsets.only(top: 12),
             child: Text(
-              'Lightning-fast neural TTS with 8 expressive voices.\n'
-              'Requires ${_formatSize(model.totalSizeBytes)} download.',
+              l10n.tts_kitten_desc(_formatSize(model.totalSizeBytes)),
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: Theme.of(
                   context,
@@ -162,12 +165,13 @@ class _KittenEngineCard extends ConsumerWidget {
     bool isDownloading,
     KittenTtsModel model,
   ) {
+    final l10n = AppLocalizations.of(context)!;
     final notifier = ref.read(ttsDownloadProgressProvider.notifier);
     if (isDownloading) {
       return ShadButton.outline(
         size: ShadButtonSize.sm,
         onPressed: () => notifier.cancelDownload(model.variant),
-        child: const Text('Cancel'),
+        child: Text(l10n.cancel),
       );
     }
     if (isInstalled) {
@@ -180,7 +184,7 @@ class _KittenEngineCard extends ConsumerWidget {
               onPressed: () => ref
                   .read(settingsProvider.notifier)
                   .setTtsEngine(EngineId.kitten),
-              child: const Text('Select'),
+              child: Text(l10n.select),
             ),
           const SizedBox(width: 8),
           ShadIconButton.ghost(
@@ -194,7 +198,7 @@ class _KittenEngineCard extends ConsumerWidget {
     return ShadButton.outline(
       size: ShadButtonSize.sm,
       onPressed: () => notifier.startDownload(model),
-      child: const Text('Install'),
+      child: Text(l10n.install),
     );
   }
 
@@ -203,19 +207,18 @@ class _KittenEngineCard extends ConsumerWidget {
     WidgetRef ref,
     KittenTtsModel model,
   ) {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Model'),
+        title: Text(l10n.delete_model_title),
         content: Text(
-          'Are you sure you want to delete ${model.displayName}? This will '
-          'free up approximately ${_formatSize(model.totalSizeBytes)} of '
-          'space.\n\nYou can download this model again later if needed.',
+          l10n.delete_model_body_with_size(model.displayName, _formatSize(model.totalSizeBytes)),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () {
@@ -225,7 +228,7 @@ class _KittenEngineCard extends ConsumerWidget {
               Navigator.of(context).pop();
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Delete'),
+            child: Text(l10n.delete),
           ),
         ],
       ),
@@ -302,6 +305,7 @@ class _PiperEngineCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final settings = ref.watch(settingsProvider);
     final meta = EngineMeta.piper;
     final downloadedAsync = ref.watch(downloadedPiperTtsVariantsProvider);
@@ -332,10 +336,10 @@ class _PiperEngineCard extends ConsumerWidget {
       engine: EngineId.piper,
       installed: installedVoices.isNotEmpty,
       statusText: isInstalled
-          ? 'Installed'
+          ? l10n.installed
           : isDownloading
-          ? 'Downloading...'
-          : 'Not installed',
+          ? l10n.downloading_status
+          : l10n.not_installed,
       trailing: _buildAction(
         context,
         ref,
@@ -350,8 +354,7 @@ class _PiperEngineCard extends ConsumerWidget {
           Padding(
             padding: const EdgeInsets.only(top: 12),
             child: Text(
-              'Fast offline Piper voices with 2 expressive voices.\n'
-              'Requires ${_formatSize(selectedVariant.totalSizeBytes)} download per voice.',
+              l10n.tts_piper_desc(_formatSize(selectedVariant.totalSizeBytes)),
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: Theme.of(
                   context,
@@ -405,12 +408,13 @@ class _PiperEngineCard extends ConsumerWidget {
     bool isInstalled,
     bool isDownloading,
   ) {
+    final l10n = AppLocalizations.of(context)!;
     final notifier = ref.read(piperTtsDownloadProgressProvider.notifier);
     if (isDownloading) {
       return ShadButton.outline(
         size: ShadButtonSize.sm,
         onPressed: () => notifier.cancelDownload(variant),
-        child: const Text('Cancel'),
+        child: Text(l10n.cancel),
       );
     }
     if (isInstalled) {
@@ -426,7 +430,7 @@ class _PiperEngineCard extends ConsumerWidget {
                     .read(settingsProvider.notifier)
                     .setTtsEngine(EngineId.piper);
               },
-              child: const Text('Select'),
+              child: Text(l10n.select),
             ),
           const SizedBox(width: 8),
           ShadIconButton.ghost(
@@ -440,7 +444,7 @@ class _PiperEngineCard extends ConsumerWidget {
     return ShadButton.outline(
       size: ShadButtonSize.sm,
       onPressed: () => notifier.startDownload(variant),
-      child: const Text('Install'),
+      child: Text(l10n.install),
     );
   }
 
@@ -449,19 +453,18 @@ class _PiperEngineCard extends ConsumerWidget {
     WidgetRef ref,
     PiperTtsModelVariant variant,
   ) {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Voice'),
+        title: Text(l10n.delete_voice_title),
         content: Text(
-          'Are you sure you want to delete ${variant.displayName}? This will '
-          'free up approximately ${_formatSize(variant.totalSizeBytes)} of '
-          'space.\n\nYou can download this voice again later if needed.',
+          l10n.delete_voice_body(variant.displayName, _formatSize(variant.totalSizeBytes)),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () {
@@ -471,7 +474,7 @@ class _PiperEngineCard extends ConsumerWidget {
               Navigator.of(context).pop();
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Delete'),
+            child: Text(l10n.delete),
           ),
         ],
       ),
@@ -546,6 +549,7 @@ class _PiperVariantChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final accent = Color(EngineMeta.piper.accentColor);
 
@@ -581,7 +585,7 @@ class _PiperVariantChip extends StatelessWidget {
             ),
             const SizedBox(width: 6),
             Text(
-              variant.id.contains('ryan') ? 'Male' : 'Female',
+              variant.id.contains('ryan') ? l10n.voice_male : l10n.voice_female,
               style: theme.textTheme.labelSmall?.copyWith(
                 color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                 fontWeight: FontWeight.w500,
@@ -621,6 +625,7 @@ class _EngineCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final accentColor = Color(meta.accentColor);
 
@@ -692,7 +697,7 @@ class _EngineCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    '${meta.sizeMb} MB · ${meta.ramMb} MB RAM · ${meta.voiceCount} voices',
+                    l10n.engine_spec(meta.sizeMb.toString(), meta.ramMb.toString(), meta.voiceCount),
                     style: theme.textTheme.labelSmall?.copyWith(
                       color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
                       fontSize: 10,
@@ -719,7 +724,7 @@ class _EngineCard extends StatelessWidget {
                     ),
                   ),
                   child: Text(
-                    'Active',
+                    l10n.active,
                     style: theme.textTheme.labelSmall?.copyWith(
                       color: accentColor,
                       fontWeight: FontWeight.bold,
@@ -751,6 +756,7 @@ class _VoiceChipsState extends ConsumerState<_VoiceChips> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final settings = ref.watch(settingsProvider);
     final selectedVoiceId = widget.engine == settings.ttsEngine
@@ -767,7 +773,7 @@ class _VoiceChipsState extends ConsumerState<_VoiceChips> {
         children: [
           if (males.isNotEmpty) ...[
             Text(
-              'Male',
+              l10n.voice_male,
               style: theme.textTheme.labelSmall?.copyWith(
                 color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
               ),
@@ -779,8 +785,8 @@ class _VoiceChipsState extends ConsumerState<_VoiceChips> {
                 children: males
                     .map(
                       (v) => Padding(
-                        padding: const EdgeInsets.only(right: 8),
-                        child: _voiceChip(v, theme, accent, selectedVoiceId),
+                        padding: const EdgeInsetsDirectional.only(end: 8),
+                        child: _voiceChip(context, v, theme, accent, selectedVoiceId),
                       ),
                     )
                     .toList(),
@@ -790,7 +796,7 @@ class _VoiceChipsState extends ConsumerState<_VoiceChips> {
           ],
           if (females.isNotEmpty) ...[
             Text(
-              'Female',
+              l10n.voice_female,
               style: theme.textTheme.labelSmall?.copyWith(
                 color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
               ),
@@ -802,8 +808,8 @@ class _VoiceChipsState extends ConsumerState<_VoiceChips> {
                 children: females
                     .map(
                       (v) => Padding(
-                        padding: const EdgeInsets.only(right: 8),
-                        child: _voiceChip(v, theme, accent, selectedVoiceId),
+                        padding: const EdgeInsetsDirectional.only(end: 8),
+                        child: _voiceChip(context, v, theme, accent, selectedVoiceId),
                       ),
                     )
                     .toList(),
@@ -816,6 +822,7 @@ class _VoiceChipsState extends ConsumerState<_VoiceChips> {
   }
 
   Widget _voiceChip(
+    BuildContext context,
     Voice voice,
     ThemeData theme,
     Color accent,
@@ -848,13 +855,13 @@ class _VoiceChipsState extends ConsumerState<_VoiceChips> {
           children: [
             InkWell(
               onTap: () => _selectVoice(voice),
-              borderRadius: const BorderRadius.horizontal(
-                left: Radius.circular(20),
-              ),
+              borderRadius: BorderRadiusDirectional.horizontal(
+                start: const Radius.circular(20),
+              ).resolve(Directionality.of(context)),
               child: Padding(
-                padding: const EdgeInsets.only(
-                  left: 12,
-                  right: 8,
+                padding: const EdgeInsetsDirectional.only(
+                  start: 12,
+                  end: 8,
                   top: 8,
                   bottom: 8,
                 ),
@@ -924,6 +931,7 @@ class _VoiceChipsState extends ConsumerState<_VoiceChips> {
   }
 
   Future<void> _previewVoice(Voice voice) async {
+    final l10n = AppLocalizations.of(context)!;
     if (_playingVoice == voice) {
       await ref.read(tts.ttsProvider.notifier).stop();
       if (mounted) setState(() => _playingVoice = null);
@@ -939,7 +947,7 @@ class _VoiceChipsState extends ConsumerState<_VoiceChips> {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Preview failed: $e')));
+        ).showSnackBar(SnackBar(content: Text(l10n.preview_failed(e.toString()))));
       }
     }
   }

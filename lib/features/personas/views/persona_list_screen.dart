@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-
+import 'package:localmind/l10n/app_localizations.dart';
 import '../../../core/routes/app_routes.dart';
 import '../data/models/persona.dart';
 import '../providers/personas_providers.dart';
@@ -11,6 +11,7 @@ class PersonaListScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final filteredPersonas = ref.watch(filteredPersonasProvider);
     final builtIn = filteredPersonas.where((p) => p.isBuiltIn).toList();
     final userCreated = filteredPersonas.where((p) => !p.isBuiltIn).toList();
@@ -47,7 +48,7 @@ class PersonaListScreen extends ConsumerWidget {
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      'Personas',
+                      l10n.personas_title,
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
@@ -64,14 +65,14 @@ class PersonaListScreen extends ConsumerWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   children:
                       [
-                        'All',
-                        'General',
-                        'Coding',
-                        'Education',
-                        'Creative',
+                        l10n.all,
+                        l10n.persona_category_general,
+                        l10n.persona_category_coding,
+                        l10n.persona_category_education,
+                        l10n.persona_category_creative,
                       ].map((cat) {
                         final isActive =
-                            selectedCategory == (cat == 'All' ? null : cat);
+                            selectedCategory == (cat == l10n.all ? null : cat);
                         return Padding(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 4,
@@ -96,7 +97,7 @@ class PersonaListScreen extends ConsumerWidget {
                             onSelected: (_) {
                               ref
                                   .read(personaCategoryFilterProvider.notifier)
-                                  .setCategory(cat == 'All' ? null : cat);
+                                  .setCategory(cat == l10n.all ? null : cat);
                             },
                             selectedColor: isDark
                                 ? const Color(0xFF3B82F6)
@@ -127,7 +128,7 @@ class PersonaListScreen extends ConsumerWidget {
               ),
               Expanded(
                 child: filteredPersonas.isEmpty
-                    ? _EmptyState(isDark: isDark)
+                    ? _EmptyState(isDark: isDark, l10n: l10n)
                     : ListView(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 16,
@@ -135,11 +136,12 @@ class PersonaListScreen extends ConsumerWidget {
                         ),
                         children: [
                           if (builtIn.isNotEmpty) ...[
-                            _SectionLabel(label: 'BUILT-IN', isDark: isDark),
+                            _SectionLabel(label: l10n.persona_builtin_section, isDark: isDark),
                             ...builtIn.map(
                               (p) => _PersonaCard(
                                 persona: p,
                                 isDark: isDark,
+                                l10n: l10n,
                                 onLongPress: () => _showActions(
                                   context,
                                   ref,
@@ -151,11 +153,12 @@ class PersonaListScreen extends ConsumerWidget {
                             const SizedBox(height: 12),
                           ],
                           if (userCreated.isNotEmpty) ...[
-                            _SectionLabel(label: 'MY PERSONAS', isDark: isDark),
+                            _SectionLabel(label: l10n.persona_my_section, isDark: isDark),
                             ...userCreated.map(
                               (p) => _PersonaCard(
                                 persona: p,
                                 isDark: isDark,
+                                l10n: l10n,
                                 onTap: () => context.push(
                                   AppRoutes.createPersona,
                                   extra: p,
@@ -175,9 +178,9 @@ class PersonaListScreen extends ConsumerWidget {
               ),
             ],
           ),
-          Positioned(
+          PositionedDirectional(
             bottom: 24,
-            right: 24,
+            end: 24,
             child: FloatingActionButton(
               onPressed: () => context.push(AppRoutes.createPersona),
               child: const Icon(Icons.add),
@@ -197,6 +200,7 @@ class PersonaListScreen extends ConsumerWidget {
     showModalBottomSheet(
       context: context,
       builder: (ctx) {
+        final sheetL10n = AppLocalizations.of(ctx)!;
         return SafeArea(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -204,7 +208,7 @@ class PersonaListScreen extends ConsumerWidget {
               if (!isBuiltIn) ...[
                 ListTile(
                   leading: const Icon(Icons.edit),
-                  title: const Text('Edit'),
+                  title: Text(sheetL10n.edit),
                   onTap: () {
                     Navigator.pop(ctx);
                     context.push(AppRoutes.createPersona, extra: persona);
@@ -212,43 +216,46 @@ class PersonaListScreen extends ConsumerWidget {
                 ),
                 ListTile(
                   leading: const Icon(Icons.delete_outline, color: Colors.red),
-                  title: const Text(
-                    'Delete',
-                    style: TextStyle(color: Colors.red),
+                  title: Text(
+                    sheetL10n.delete,
+                    style: const TextStyle(color: Colors.red),
                   ),
                   onTap: () {
                     Navigator.pop(ctx);
                     showDialog(
                       context: context,
-                      builder: (dCtx) => AlertDialog(
-                        title: Text('Delete "${persona.name}"?'),
-                        content: const Text('This cannot be undone.'),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.pop(dCtx),
-                            child: const Text('Cancel'),
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              ref
-                                  .read(personasNotifierProvider.notifier)
-                                  .deletePersona(persona.id);
-                              Navigator.pop(dCtx);
-                            },
-                            style: TextButton.styleFrom(
-                              foregroundColor: Colors.red,
+                      builder: (dCtx) {
+                        final dlgL10n = AppLocalizations.of(dCtx)!;
+                        return AlertDialog(
+                          title: Text(dlgL10n.delete_persona_title(persona.name)),
+                          content: Text(dlgL10n.delete_persona_body),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(dCtx),
+                              child: Text(dlgL10n.cancel),
                             ),
-                            child: const Text('Delete'),
-                          ),
-                        ],
-                      ),
+                            TextButton(
+                              onPressed: () {
+                                ref
+                                    .read(personasNotifierProvider.notifier)
+                                    .deletePersona(persona.id);
+                                Navigator.pop(dCtx);
+                              },
+                              style: TextButton.styleFrom(
+                                foregroundColor: Colors.red,
+                              ),
+                              child: Text(dlgL10n.delete),
+                            ),
+                          ],
+                        );
+                      },
                     );
                   },
                 ),
               ],
               ListTile(
                 leading: const Icon(Icons.copy),
-                title: const Text('Clone & Edit'),
+                title: Text(sheetL10n.clone_edit),
                 onTap: () {
                   Navigator.pop(ctx);
                   final clone = ref
@@ -295,12 +302,14 @@ class _PersonaCard extends StatelessWidget {
   const _PersonaCard({
     required this.persona,
     required this.isDark,
+    required this.l10n,
     this.onTap,
     this.onLongPress,
   });
 
   final Persona persona;
   final bool isDark;
+  final AppLocalizations l10n;
   final VoidCallback? onTap;
   final VoidCallback? onLongPress;
 
@@ -373,7 +382,7 @@ class _PersonaCard extends StatelessWidget {
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(
-                            'Built-in',
+                            l10n.builtin_badge,
                             style: TextStyle(
                               fontSize: 10,
                               fontWeight: FontWeight.w600,
@@ -442,8 +451,9 @@ class _PersonaCard extends StatelessWidget {
 }
 
 class _EmptyState extends StatelessWidget {
-  const _EmptyState({required this.isDark});
+  const _EmptyState({required this.isDark, required this.l10n});
   final bool isDark;
+  final AppLocalizations l10n;
 
   @override
   Widget build(BuildContext context) {
@@ -460,7 +470,7 @@ class _EmptyState extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              'No personas found',
+              l10n.no_personas_found,
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w500,
@@ -469,7 +479,7 @@ class _EmptyState extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'Create your first persona to customize AI behavior.',
+              l10n.no_personas_desc,
               style: TextStyle(
                 fontSize: 14,
                 color: isDark

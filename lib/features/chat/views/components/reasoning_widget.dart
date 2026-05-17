@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:localmind/l10n/app_localizations.dart';
 
 class ReasoningWidget extends StatefulWidget {
   final String? reasoningContent;
@@ -45,6 +46,7 @@ class _ReasoningWidgetState extends State<ReasoningWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final hasContent = widget.reasoningContent?.isNotEmpty == true;
@@ -96,7 +98,7 @@ class _ReasoningWidgetState extends State<ReasoningWidget> {
                   ),
                 const SizedBox(width: 8),
                 Text(
-                  'Thinking',
+                  l10n.thinking,
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w500,

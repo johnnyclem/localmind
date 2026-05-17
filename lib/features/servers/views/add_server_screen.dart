@@ -3,6 +3,7 @@ import 'package:hugeicons/hugeicons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
+import 'package:localmind/l10n/app_localizations.dart';
 import '../../../core/constants/app_constants.dart';
 import '../data/models/server.dart';
 import '../../../core/models/enums.dart';
@@ -93,12 +94,12 @@ class _AddServerScreenState extends ConsumerState<AddServerScreen> {
       final isConnected = await apiService.testConnection(testServer);
       setState(() {
         _testResult = isConnected
-            ? 'Connection successful!'
-            : 'Connection failed. Check your settings.';
+            ? AppLocalizations.of(context)!.connection_successful
+            : AppLocalizations.of(context)!.connection_failed;
       });
     } catch (e) {
       setState(() {
-        _testResult = 'Error: ${e.toString()}';
+        _testResult = AppLocalizations.of(context)!.error_with_message(e.toString());
       });
     } finally {
       setState(() {
@@ -146,10 +147,11 @@ class _AddServerScreenState extends ConsumerState<AddServerScreen> {
       }
 
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         context.pop();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(_isEditing ? 'Server updated' : 'Server added'),
+            content: Text(_isEditing ? l10n.server_updated : l10n.server_added),
             duration: const Duration(seconds: 2),
           ),
         );
@@ -158,7 +160,7 @@ class _AddServerScreenState extends ConsumerState<AddServerScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error: ${e.toString()}'),
+            content: Text(AppLocalizations.of(context)!.error_with_message(e.toString())),
             backgroundColor: Colors.red,
           ),
         );
@@ -173,48 +175,53 @@ class _AddServerScreenState extends ConsumerState<AddServerScreen> {
   }
 
   String? _validateName(String? value) {
+    final context = this.context;
+    final l10n = AppLocalizations.of(context)!;
     if (value == null || value.trim().isEmpty) {
-      return 'Name is required';
+      return l10n.name_required;
     }
     if (value.trim().length > 50) {
-      return 'Name must be 50 characters or less';
+      return l10n.name_length_validation;
     }
     return null;
   }
 
   String? _validateHost(String? value) {
     if (_selectedType == ServerType.openRouter) return null;
+    final l10n = AppLocalizations.of(context)!;
 
     if (value == null || value.trim().isEmpty) {
-      return 'Host is required';
+      return l10n.host_required;
     }
     final hostPattern = RegExp(r'^[a-zA-Z0-9]([a-zA-Z0-9\-\.]*[a-zA-Z0-9])?$');
     if (!hostPattern.hasMatch(value.trim())) {
-      return 'Enter a valid hostname or IP address';
+      return l10n.host_valid;
     }
     return null;
   }
 
   String? _validatePort(String? value) {
     if (_selectedType == ServerType.openRouter) return null;
+    final l10n = AppLocalizations.of(context)!;
 
     if (value == null || value.trim().isEmpty) {
-      return 'Port is required';
+      return l10n.port_required;
     }
     final port = int.tryParse(value.trim());
     if (port == null || port < 1 || port > 65535) {
-      return 'Enter a valid port (1-65535)';
+      return l10n.port_range;
     }
     return null;
   }
 
   String? _validateApiKey(String? value) {
     if (_selectedType == ServerType.openRouter) {
+      final l10n = AppLocalizations.of(context)!;
       if (value == null || value.trim().isEmpty) {
-        return 'API key is required for OpenRouter';
+        return l10n.api_key_required_openrouter;
       }
       if (!value.trim().startsWith('sk-')) {
-        return 'OpenRouter API keys start with sk-';
+        return l10n.api_key_format;
       }
     }
     return null;
@@ -237,11 +244,12 @@ class _AddServerScreenState extends ConsumerState<AddServerScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(_isEditing ? 'Edit Server' : 'Add Server'),
+        title: Text(_isEditing ? l10n.edit_server : l10n.add_server_title),
         leading: IconButton(
           icon: const Icon(Icons.close),
           onPressed: () => context.pop(),
@@ -252,7 +260,7 @@ class _AddServerScreenState extends ConsumerState<AddServerScreen> {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            Text('Server Type', style: theme.textTheme.titleSmall),
+            Text(l10n.server_type_label, style: theme.textTheme.titleSmall),
             const SizedBox(height: 8),
             ServerTypeSelector(
               selectedType: _selectedType,
@@ -260,7 +268,7 @@ class _AddServerScreenState extends ConsumerState<AddServerScreen> {
             ),
             const SizedBox(height: 24),
 
-            Text('Server Icon', style: theme.textTheme.titleSmall),
+            Text(l10n.server_icon_label, style: theme.textTheme.titleSmall),
             const SizedBox(height: 8),
             GestureDetector(
               onTap: _showIconPicker,
@@ -276,7 +284,6 @@ class _AddServerScreenState extends ConsumerState<AddServerScreen> {
                       width: 40,
                       height: 40,
                       decoration: BoxDecoration(
-                        // color: theme.colorScheme.primaryContainer,
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: HugeIcon(
@@ -293,7 +300,7 @@ class _AddServerScreenState extends ConsumerState<AddServerScreen> {
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        _selectedIconName ?? 'Default icon',
+                        _selectedIconName ?? l10n.default_icon,
                         style: theme.textTheme.bodyMedium,
                       ),
                     ),
@@ -310,9 +317,9 @@ class _AddServerScreenState extends ConsumerState<AddServerScreen> {
 
             TextFormField(
               controller: _nameController,
-              decoration: const InputDecoration(
-                labelText: 'Name',
-                hintText: 'My Server',
+              decoration: InputDecoration(
+                labelText: l10n.name_label,
+                hintText: l10n.my_server_hint,
               ),
               validator: _validateName,
               textInputAction: TextInputAction.next,
@@ -322,8 +329,8 @@ class _AddServerScreenState extends ConsumerState<AddServerScreen> {
             if (_selectedType != ServerType.openRouter) ...[
               TextFormField(
                 controller: _hostController,
-                decoration: const InputDecoration(
-                  labelText: 'Host / IP Address',
+                decoration: InputDecoration(
+                  labelText: l10n.host_label,
                   hintText: '192.168.1.100',
                 ),
                 validator: _validateHost,
@@ -335,7 +342,7 @@ class _AddServerScreenState extends ConsumerState<AddServerScreen> {
               TextFormField(
                 controller: _portController,
                 decoration: InputDecoration(
-                  labelText: 'Port',
+                  labelText: l10n.port_label,
                   hintText: _selectedType == ServerType.lmStudio
                       ? AppConstants.lmStudioDefaultPort.toString()
                       : AppConstants.ollamaDefaultPort.toString(),
@@ -351,11 +358,11 @@ class _AddServerScreenState extends ConsumerState<AddServerScreen> {
               controller: _apiKeyController,
               decoration: InputDecoration(
                 labelText: _selectedType == ServerType.openRouter
-                    ? 'API Key *'
-                    : 'API Key (optional)',
+                    ? l10n.api_key_required
+                    : l10n.api_key_optional,
                 hintText: _selectedType == ServerType.openRouter
-                    ? 'sk-...'
-                    : 'For authenticated servers',
+                    ? l10n.api_key_hint_openrouter
+                    : l10n.api_key_hint_generic,
               ),
               validator: _validateApiKey,
               obscureText: true,
@@ -367,12 +374,12 @@ class _AddServerScreenState extends ConsumerState<AddServerScreen> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: _testResult!.contains('successful')
+                  color: _testResult!.contains(l10n.connection_successful.split('!')[0])
                       ? Colors.green.withAlpha(25)
                       : Colors.red.withAlpha(25),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                    color: _testResult!.contains('successful')
+                    color: _testResult!.contains(l10n.connection_successful.split('!')[0])
                         ? Colors.green
                         : Colors.red,
                   ),
@@ -380,10 +387,10 @@ class _AddServerScreenState extends ConsumerState<AddServerScreen> {
                 child: Row(
                   children: [
                     Icon(
-                      _testResult!.contains('successful')
+                      _testResult!.contains(l10n.connection_successful.split('!')[0])
                           ? Icons.check_circle
                           : Icons.error,
-                      color: _testResult!.contains('successful')
+                      color: _testResult!.contains(l10n.connection_successful.split('!')[0])
                           ? Colors.green
                           : Colors.red,
                     ),
@@ -392,7 +399,7 @@ class _AddServerScreenState extends ConsumerState<AddServerScreen> {
                       child: Text(
                         _testResult!,
                         style: TextStyle(
-                          color: _testResult!.contains('successful')
+                          color: _testResult!.contains(l10n.connection_successful.split('!')[0])
                               ? Colors.green
                               : Colors.red,
                         ),
@@ -413,7 +420,7 @@ class _AddServerScreenState extends ConsumerState<AddServerScreen> {
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : const Icon(Icons.network_check),
-              label: Text(_isTesting ? 'Testing...' : 'Test Connection'),
+              label: Text(_isTesting ? l10n.testing : l10n.test_connection),
             ),
             const SizedBox(height: 24),
 
@@ -425,7 +432,7 @@ class _AddServerScreenState extends ConsumerState<AddServerScreen> {
                       height: 20,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : Text(_isEditing ? 'Update Server' : 'Save Server'),
+                  : Text(_isEditing ? l10n.update_server : l10n.save_server),
             ),
           ],
         ),

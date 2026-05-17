@@ -1,0 +1,928 @@
+{
+  "@@locale": "ar",
+
+  "app_name": "LocalMind",
+
+  "app_tagline": "ذكاؤك. جهازك. قواعدك.",
+
+  "app_version": "1.0.0",
+
+  "cancel": "إلغاء",
+
+  "confirm": "تأكيد",
+
+  "delete": "حذف",
+
+  "save": "حفظ",
+
+  "retry": "إعادة المحاولة",
+
+  "close": "إغلاق",
+
+  "done": "تم",
+
+  "continue_action": "متابعة",
+
+  "skip": "تخطي",
+
+  "install": "تثبيت",
+
+  "download": "تنزيل",
+
+  "resume": "استئناف",
+
+  "pause": "إيقاف مؤقت",
+
+  "stop": "إيقاف",
+
+  "edit": "تعديل",
+
+  "preview": "معاينة",
+
+  "unload": "تفريغ",
+
+  "load": "تحميل",
+
+  "rename": "إعادة تسمية",
+
+  "pin": "تثبيت",
+
+  "unpin": "إلغاء التثبيت",
+
+  "share": "مشاركة",
+
+  "copy": "نسخ",
+
+  "copied": "تم النسخ!",
+
+  "copied_to_clipboard": "تم النسخ إلى الحافظة",
+
+  "select": "اختيار",
+
+  "active": "نشط",
+
+  "all": "الكل",
+
+  "none": "لا شيء",
+
+  "none_selected": "لم يتم اختيار شيء",
+
+  "online": "متصل",
+
+  "offline": "غير متصل",
+
+  "error": "خطأ",
+
+  "unknown_error": "خطأ غير معروف",
+
+  "not_now": "ليس الآن",
+
+  "enable": "تفعيل",
+
+  "proceed_anyway": "متابعة على أي حال",
+
+  "test_connection": "اختبار الاتصال",
+
+  "testing": "جارٍ الاختبار...",
+
+  "connection_successful": "تم الاتصال بنجاح!",
+
+  "connection_failed": "فشل الاتصال. تحقق من إعداداتك.",
+
+  "save_continue": "حفظ ومتابعة",
+
+  "save_changes": "حفظ التغييرات",
+
+  "finish_setup": "إنهاء الإعداد",
+
+  "start_new_chat": "بدء محادثة جديدة",
+
+  "cannot_undo": "لا يمكن التراجع عن هذا الإجراء.",
+
+  "ram_warning": "تحذير الذاكرة",
+
+  "recommended": "موصى به",
+
+  "may_be_large": "قد يكون كبيراً جداً لهذا الجهاز",
+
+  "calculating": "جارٍ الحساب...",
+
+  "download_failed": "فشل التنزيل",
+
+  "downloaded": "تم التنزيل",
+
+  "not_downloaded": "لم يتم التنزيل",
+
+  "installed": "مثبت",
+
+  "not_installed": "غير مثبت",
+
+  "loading": "جارٍ التحميل...",
+
+  "thinking": "تفكير",
+
+  "processing": "جارٍ المعالجة...",
+
+  "initializing": "جارٍ التهيئة...",
+
+  "ready": "جاهز",
+
+  "preparing_app": "جارٍ تجهيز التطبيق...",
+
+  "initializing_services": "جارٍ تهيئة الخدمات...",
+
+  "configuring_server": "جارٍ إعداد الخادم...",
+
+  "startup_failed": "فشل بدء التشغيل",
+
+  "something_went_wrong": "حدث خطأ ما",
+
+  "delete_model_title": "حذف النموذج",
+
+  "delete_model_body": "هل أنت متأكد من حذف {name}؟",
+
+  "delete_model_body_with_size": "هل أنت متأكد من حذف {name}؟ سيؤدي ذلك إلى تحرير مساحة تقارب {size}.\n\nيمكنك تنزيل هذا النموذج مرة أخرى لاحقاً إذا احتجت إليه.",
+
+  "delete_voice_title": "حذف الصوت",
+
+  "delete_voice_body": "هل أنت متأكد من حذف {name}؟ سيؤدي ذلك إلى تحرير مساحة تقارب {size}.\n\nيمكنك تنزيل هذا الصوت مرة أخرى لاحقاً إذا احتجت إليه.",
+
+  "delete_server_title": "حذف الخادم",
+
+  "delete_server_body": "هل أنت متأكد من حذف \"{name}\"؟ لا يمكن التراجع عن هذا.",
+
+  "delete_conversation_title": "حذف المحادثة؟",
+
+  "delete_conversation_body": "هل أنت متأكد من حذف \"{title}\"؟ لا يمكن التراجع عن هذا.",
+
+  "delete_message_title": "حذف الرسالة؟",
+
+  "delete_persona_title": "حذف \"{name}\"؟",
+
+  "delete_persona_body": "لا يمكن التراجع عن هذا.",
+
+  "clear_conversation_title": "مسح المحادثة؟",
+
+  "clear_conversation_body": "سيؤدي هذا إلى حذف جميع الرسائل في هذه المحادثة.",
+
+  "clear": "مسح",
+
+  "label_completed": "اكتمل {label}",
+
+  "error_with_message": "خطأ: {error}",
+
+  "preview_failed": "فشلت المعاينة: {error}",
+
+  "loading_model": "جارٍ تحميل {modelId}...",
+
+  "model_loaded": "تم تحميل النموذج: {modelId} ({backend})",
+
+  "no_model_loaded": "لم يتم تحميل أي نموذج. اضغط على \"إدارة النماذج المحلية\" لتنزيل وتحميل نموذج.",
+
+  "loading_model_error": "خطأ: {error}",
+
+  "delete_conversation": "حذف المحادثة؟",
+
+  "nav_history": "السجل",
+
+  "nav_servers": "الخوادم",
+
+  "nav_local_models": "النماذج المحلية",
+
+  "nav_tts": "تحويل النص إلى كلام",
+
+  "nav_personas": "الشخصيات",
+
+  "nav_settings": "الإعدادات",
+
+  "nav_new_chat": "محادثة جديدة",
+
+  "search_hint": "البحث في المحادثات...",
+
+  "no_server_selected": "لم يتم تحديد خادم",
+
+  "switch_server": "تغيير الخادم",
+
+  "switch_server_subtitle": "اختر خادماً للاتصال به",
+
+  "manage_servers": "إدارة الخوادم",
+
+  "open_source": "مفتوح المصدر",
+
+  "open_source_desc": "LocalMind هو تطبيق مفتوح المصدر. تابع تقدمنا أو ساهم على GitHub.",
+
+  "star_on_github": "نجمة على GitHub",
+
+  "settings_title": "الإعدادات",
+
+  "settings_appearance": "المظهر",
+
+  "settings_language": "اللغة",
+
+  "language_system_default": "إعدادات النظام",
+
+  "settings_tts": "تحويل النص إلى كلام",
+
+  "settings_behavior": "السلوك",
+
+  "settings_on_device": "الاستدلال المحلي",
+
+  "settings_default_server": "الخادم الافتراضي",
+
+  "settings_default_persona": "الشخصية الافتراضية",
+
+  "settings_privacy": "الخصوصية",
+
+  "settings_data_management": "إدارة البيانات",
+
+  "settings_about": "حول",
+
+  "theme": "السمة",
+
+  "theme_system": "النظام",
+
+  "theme_light": "فاتح",
+
+  "theme_dark": "داكن",
+
+  "theme_claude": "Claude",
+
+  "font_size": "حجم الخط",
+
+  "font_size_desc": "ضبط حجم النص في المحادثة.",
+
+  "font_preview": "النص التجريبي لمعاينة حجم الخط الجديد.",
+
+  "code_theme_dark": "سمة الكود (داكن)",
+
+  "code_theme_light": "سمة الكود (فاتح)",
+
+  "code_theme_desc": "اختر سمة تمييز الصياغة لكتل الأكواد.",
+
+  "tts_engine": "محرك تحويل النص إلى كلام",
+
+  "tts_engine_system": "محرك النظام",
+
+  "tts_engine_kitten": "Kitten TTS",
+
+  "voice": "الصوت",
+
+  "voice_female": "أنثى",
+
+  "voice_male": "ذكر",
+
+  "voice_other": "آخر",
+
+  "tts_speed": "سرعة القراءة",
+
+  "tts_speed_desc": "ضبط معدل التشغيل.",
+
+  "manage_tts_models": "إدارة نماذج TTS",
+
+  "manage_on_device_models": "إدارة النماذج المحلية",
+
+  "streaming_responses": "الردود المتدفقة",
+
+  "auto_generate_titles": "إنشاء العناوين تلقائياً",
+
+  "send_on_enter": "إرسال عند الضغط على Enter",
+
+  "show_system_messages": "إظهار رسائل النظام",
+
+  "haptic_feedback": "الاستجابة اللمسية",
+
+  "enable_mcp": "تفعيل MCP",
+
+  "new_chat_mcp_default": "تفعيل MCP افتراضياً في المحادثات الجديدة",
+
+  "show_data_indicator": "إظهار مؤشر البيانات",
+
+  "privacy_info": "\"LocalMind لا يطلع على بياناتك أبداً\"",
+
+  "delete_all_conversations": "حذف جميع المحادثات",
+
+  "reset_settings_defaults": "إعادة الإعدادات إلى الوضع الافتراضي",
+
+  "chat_title": "LocalMind",
+
+  "chat_parameters_tooltip": "معلمات المحادثة",
+
+  "change_persona": "تغيير الشخصية",
+
+  "set_persona": "تعيين شخصية",
+
+  "remove_persona": "إزالة الشخصية",
+
+  "clear_conversation": "مسح المحادثة",
+
+  "connection_error": "خطأ في الاتصال. تحقق من الخادم الخاص بك.",
+
+  "disconnected": "تم قطع الاتصال بالخادم.",
+
+  "configure": "إعداد",
+
+  "select_model": "اختيار نموذج",
+
+  "select_persona": "اختيار شخصية",
+
+  "start_conversation": "ابدأ محادثة",
+
+  "recent_chats": "المحادثات الأخيرة",
+
+  "see_all": "عرض الكل",
+
+  "quick_write": "ساعدني في كتابة دالة",
+
+  "quick_explain": "اشرح هذا الكود",
+
+  "quick_debug": "صحح لي هذا الخطأ",
+
+  "quick_async": "كيف أستخدم async/await؟",
+
+  "history_missing_title": "السجل مفقود",
+
+  "history_missing_desc": "إما أن رسائل هذه المحادثة قد حُذفت أو أن سجل المحادثة تالف.",
+
+  "technical_details": "التفاصيل التقنية",
+
+  "last_error": "آخر خطأ:",
+
+  "copy_info": "نسخ المعلومات",
+
+  "conversation_id": "معرف المحادثة",
+
+  "created_at": "تاريخ الإنشاء",
+
+  "expected_messages": "الرسائل المتوقعة",
+
+  "debug_dialog_desc": "معلومات تشخيصية للمساعدة في تحديد مشاكل المزامنة.",
+
+  "chat_input_hint": "اسأل أي شيء",
+
+  "send_message_tooltip": "إرسال الرسالة",
+
+  "stop_generation_tooltip": "إيقاف التوليد",
+
+  "attach_images_tooltip": "إرفاق صور",
+
+  "tool_label": "أداة: {toolCallId}",
+
+  "tool_unknown": "أداة: غير معروفة",
+
+  "message_options": "خيارات الرسالة",
+
+  "copy_markdown": "نسخ كـ Markdown",
+
+  "copied_markdown": "تم النسخ كـ Markdown",
+
+  "read_aloud": "القراءة بصوت عالٍ",
+
+  "stop_reading": "إيقاف القراءة",
+
+  "more": "المزيد",
+
+  "character_count": "{length} حرف",
+
+  "edit_message": "تعديل الرسالة",
+
+  "edit_message_desc": "سيؤدي الحفظ إلى إزالة رد المساعد أدناه وإعادة التوليد.",
+
+  "save_regenerate": "حفظ وإعادة التوليد",
+
+  "chat_settings_title": "إعدادات المحادثة",
+
+  "reset_defaults": "إعادة الإعدادات الافتراضية",
+
+  "parameters_tab": "المعلمات",
+
+  "mcp_tab": "MCP",
+
+  "temperature": "درجة الحرارة",
+
+  "temperature_desc": "التحكم في العشوائية: أعلى = إبداعي، أقل = مركز",
+
+  "top_p": "Top P",
+
+  "top_p_desc": "حد أخذ العينات النووي",
+
+  "max_tokens": "الحد الأقصى للرموز",
+
+  "max_tokens_desc": "حد الاستجابة",
+
+  "context_length": "طول السياق",
+
+  "context_length_desc": "نافذة السجل",
+
+  "mcp_disabled_warning": "MCP معطل عالمياً. فعّله في الإعدادات لاستخدام هذه الميزات.",
+
+  "mcp_enable_chat": "تفعيل MCP لهذه المحادثة",
+
+  "auto_execute_tools": "تشغيل الأدوات تلقائياً",
+
+  "add_ephemeral_mcp": "إضافة خادم MCP مؤقت",
+
+  "mcp_label_placeholder": "التسمية",
+
+  "mcp_url_placeholder": "الرابط (https://...)",
+
+  "active_integrations": "التكاملات النشطة",
+
+  "enable_notifications": "تفعيل الإشعارات",
+
+  "enable_notifications_desc": "احصل على إشعار عند اكتمال تنزيل النماذج.",
+
+  "chat_history_title": "سجل المحادثات",
+
+  "conversation_just_now": "الآن",
+
+  "conversation_minutes_ago": "منذ {minutes} دقيقة",
+
+  "conversation_hours_ago": "منذ {hours} ساعة",
+
+  "conversation_yesterday": "أمس",
+
+  "conversation_days_ago": "منذ {days} يوم",
+
+  "conversation_date": "{year}/{month}/{day}",
+
+  "options_tooltip": "خيارات",
+
+  "no_results_found": "لا توجد نتائج",
+
+  "no_conversations_yet": "لا توجد محادثات بعد",
+
+  "try_different_search": "جرّب مصطلح بحث مختلف",
+
+  "start_new_conversation": "ابدأ محادثة جديدة",
+
+  "rename_conversation": "إعادة تسمية المحادثة",
+
+  "enter_new_title": "أدخل عنواناً جديداً",
+
+  "pinned_section": "مثبت",
+
+  "today_section": "اليوم",
+
+  "yesterday_section": "أمس",
+
+  "previous_7_days": "آخر 7 أيام",
+
+  "previous_30_days": "آخر 30 يوماً",
+
+  "older_section": "الأقدم",
+
+  "onboarding_localmind": "LOCALMIND",
+
+  "onboarding_connect_server": "اتصل\nبخادمك",
+
+  "onboarding_connect_desc": "اتصل بـ LM Studio أو Ollama أو\nOpenRouter لبدء تجربة الذكاء\nالاصطناعي الخاصة بك.",
+
+  "server_type_on_device": "محلي",
+
+  "server_type_on_device_sub": "لا يحتاج خادماً",
+
+  "server_type_lm_studio": "LM Studio",
+
+  "server_type_lm_studio_sub": "API محلي",
+
+  "server_type_ollama": "Ollama",
+
+  "server_type_ollama_sub": "محرك أوامر",
+
+  "server_type_openrouter": "OpenRouter",
+
+  "server_type_openrouter_sub": "سحابة موحدة",
+
+  "ready_continue": "جاهز للمتابعة",
+
+  "waiting_selection": "بانتظار الاختيار",
+
+  "setup_connection": "إعداد الاتصال",
+
+  "setup_connection_desc": "قم بإعداد خادم {server} لبدء المحادثة.",
+
+  "server_name": "اسم الخادم",
+
+  "name_required": "الاسم مطلوب",
+
+  "name_max_50": "الحد الأقصى 50 حرفاً",
+
+  "host_label": "المضيف / عنوان IP",
+
+  "host_required": "المضيف مطلوب",
+
+  "port_label": "المنفذ",
+
+  "port_required": "المنفذ مطلوب",
+
+  "port_invalid": "يجب أن يكون رقماً",
+
+  "port_range": "أدخل منفذاً صالحاً (1-65535)",
+
+  "api_key_required": "مفتاح API *",
+
+  "api_key_optional": "مفتاح API (اختياري)",
+
+  "api_key_required_openrouter": "مفتاح API مطلوب لـ OpenRouter",
+
+  "api_key_format": "مفاتيح OpenRouter API تبدأ بـ sk-",
+
+  "my_server_hint": "خادمي",
+
+  "name_length_validation": "يجب ألا يتجاوز الاسم 50 حرفاً",
+
+  "host_valid": "أدخل اسماً مضيفاً أو عنوان IP صالحاً",
+
+  "api_key_hint_openrouter": "sk-...",
+
+  "api_key_hint_generic": "للخوادم الموثقة",
+
+  "update_server": "تحديث الخادم",
+
+  "save_server": "حفظ الخادم",
+
+  "server_updated": "تم تحديث الخادم",
+
+  "server_added": "تمت إضافة الخادم",
+
+  "download_model_title": "تنزيل نموذج",
+
+  "download_model_desc": "اختر نموذجاً للتنزيل.\nسيتم تشغيله محلياً على جهازك.",
+
+  "on_device_android_only": "الاستدلال المحلي متاح حالياً على Android فقط.",
+
+  "total_ram": "إجمالي الذاكرة",
+
+  "available": "متاح",
+
+  "ram_min_required": "{fileSize} جيجابايت ذاكرة كحد أدنى",
+
+  "download_progress": "{percent}% • {speed}",
+
+  "eta_label": "الوقت المتبقي: {eta}",
+
+  "paused_progress": "متوقف مؤقتاً - {percent}%",
+
+  "ram_warning_body_download": "هذا النموذج يتطلب {ram} جيجابايت ذاكرة على الأقل، ولكن جهازك يحتوي على {totalMemory}. قد لا يعمل بشكل صحيح أو قد يتسبب في تعطل التطبيق.",
+
+  "ram_warning_body_load": "جهازك يحتوي على {availableRAM} ذاكرة متاحة، لكن هذا النموذج يوصي بـ {ram} جيجابايت على الأقل. قد يفشل تحميله أو يسبب عدم استقرار.",
+
+  "choose_theme": "اختر السمة",
+
+  "choose_theme_desc": "خصص مظهر التطبيق. يمكنك دائماً تغيير هذا لاحقاً في الإعدادات.",
+
+  "theme_card_system": "النظام",
+
+  "theme_card_system_sub": "يطابق إعدادات جهازك",
+
+  "theme_card_light": "فاتح",
+
+  "theme_card_light_sub": "نظيف ومشرق",
+
+  "theme_card_dark": "داكن",
+
+  "theme_card_dark_sub": "مريح للعينين",
+
+  "theme_card_claude": "Claude",
+
+  "theme_card_claude_sub": "سمة دافئة بلون الخوخ",
+
+  "stay_updated": "ابق على اطلاع",
+
+  "stay_updated_desc": "احصل على إشعارات عند اكتمال تنزيل نماذج الذكاء الاصطناعي أو عند انتهاء المهام الطويلة.",
+
+  "notification_benefit_downloads": "تقدم تنزيل النماذج",
+
+  "notification_benefit_completions": "اكتمال التوليد",
+
+  "notification_benefit_background": "حالة المهام الخلفية",
+
+  "allow_notifications": "السماح بالإشعارات",
+
+  "servers_title": "الخوادم",
+
+  "no_servers_yet": "لا توجد خوادم بعد",
+
+  "no_servers_desc": "أضف خادمك الأول لبدء المحادثة مع نماذج الذكاء الاصطناعي.",
+
+  "add_server": "إضافة خادم",
+
+  "switched_to_server": "تم التبديل إلى {name}",
+
+  "edit_server": "تعديل الخادم",
+
+  "add_server_title": "إضافة خادم",
+
+  "server_type_label": "نوع الخادم",
+
+  "server_icon_label": "أيقونة الخادم",
+
+  "default_icon": "الأيقونة الافتراضية",
+
+  "server_type_lm_studio_display": "LM Studio",
+
+  "server_type_openai_display": "متوافق مع OpenAI",
+
+  "server_type_ollama_display": "Ollama",
+
+  "server_type_openrouter_display": "OpenRouter",
+
+  "server_type_on_device_display": "محلي",
+
+  "server_address_openrouter": "openrouter.ai",
+
+  "server_address_on_device": "استدلال محلي",
+
+  "server_address_format": "{host}:{port}",
+
+  "default_badge": "افتراضي",
+
+  "set_as_default": "تعيين كافتراضي",
+
+  "select_icon": "اختيار أيقونة",
+
+  "select_icon_desc": "اختر أيقونة لخادمك",
+
+  "search_icons_hint": "البحث في الأيقونات...",
+
+  "server_icon_stack": "Server Stack",
+  "server_icon_stack2": "Server Stack 02",
+  "server_icon_stack3": "Server Stack 03",
+  "server_icon_cloud": "Cloud",
+  "server_icon_cloud_server": "Cloud Server",
+  "server_icon_mcp": "MCP Server",
+  "server_icon_database": "Database",
+  "server_icon_database1": "Database 01",
+  "server_icon_database2": "Database 02",
+  "server_icon_cpu": "CPU",
+  "server_icon_chip": "Chip",
+  "server_icon_chip2": "Chip 02",
+  "server_icon_computer": "Computer",
+  "server_icon_laptop": "Laptop",
+  "server_icon_terminal": "Computer Terminal",
+  "server_icon_code": "Code",
+  "server_icon_ai_brain": "AI Brain",
+  "server_icon_ai_brain2": "AI Brain 02",
+  "server_icon_ai_cloud": "AI Cloud",
+  "server_icon_ai_network": "AI Network",
+  "server_icon_ai_chat": "AI Chat",
+  "server_icon_cellular": "Cellular Network",
+  "server_icon_plug1": "Plug 01",
+  "server_icon_plug2": "Plug 02",
+  "server_icon_bot": "Bot",
+  "server_icon_bot2": "Bot 02",
+  "server_icon_robotic": "Robotic",
+  "server_icon_rocket": "Rocket",
+  "server_icon_star": "Star",
+  "server_icon_settings1": "Settings 01",
+  "server_icon_settings2": "Settings 02",
+  "server_icon_home1": "Home 01",
+  "server_icon_home2": "Home 02",
+  "server_icon_folder1": "Folder 01",
+  "server_icon_folder2": "Folder 02",
+  "server_icon_file1": "File 01",
+  "server_icon_lock": "Lock",
+  "server_icon_key": "Key 01",
+  "server_icon_link": "Link 01",
+  "server_icon_globe": "Globe",
+  "server_icon_api": "API",
+  "server_icon_arrow_right": "Arrow Right 01",
+  "server_icon_check": "Check Circle",
+  "server_icon_alert": "Alert Circle",
+  "server_icon_info": "Info Circle",
+  "server_icon_zap": "Zap",
+  "server_icon_cloud_upload": "Cloud Upload",
+  "server_icon_cloud_download": "Cloud Download",
+  "server_icon_refresh": "Refresh",
+  "server_icon_hard_drive": "Hard Drive",
+  "server_icon_drive": "Drive",
+
+  "personas_title": "الشخصيات",
+
+  "persona_category_general": "عام",
+
+  "persona_category_coding": "برمجة",
+
+  "persona_category_education": "تعليم",
+
+  "persona_category_creative": "إبداعي",
+
+  "persona_builtin_section": "مضمنة",
+
+  "persona_my_section": "شخصياتي",
+
+  "clone_edit": "نسخ وتعديل",
+
+  "builtin_badge": "مضمنة",
+
+  "no_personas_found": "لم يتم العثور على شخصيات",
+
+  "no_personas_desc": "أنشئ شخصيتك الأولى لتخصيص سلوك الذكاء الاصطناعي.",
+
+  "edit_persona": "تعديل الشخصية",
+
+  "create_persona": "إنشاء شخصية",
+
+  "create_persona_button": "إنشاء",
+
+  "emoji_label": "رمز تعبيري",
+
+  "name_label": "الاسم",
+
+  "my_persona_hint": "شخصيتي",
+
+  "category_label": "الفئة",
+
+  "description_optional": "الوصف (اختياري)",
+
+  "description_hint": "ماذا تفعل هذه الشخصية...",
+
+  "system_prompt": "موجه النظام",
+
+  "character_count_max": "{currentLen}/4000",
+
+  "no_prompt_placeholder": "لا يوجد موجه بعد...",
+
+  "prompt_hint": "أنت مساعد مفيد...",
+
+  "prompt_required": "موجه النظام مطلوب",
+
+  "prompt_max_chars": "الحد الأقصى 4000 حرف",
+
+  "advanced_settings": "الإعدادات المتقدمة",
+
+  "temperature_label": "درجة الحرارة (0.0-2.0)",
+
+  "top_p_label": "Top P (0.0-1.0)",
+
+  "temp_hint": "0.7",
+
+  "top_p_hint": "0.9",
+
+  "range_0_2": "0.0-2.0",
+
+  "range_0_1": "0.0-1.0",
+
+  "persona_updated": "تم تحديث الشخصية",
+
+  "persona_created": "تم إنشاء الشخصية",
+
+  "tts_models_title": "نماذج تحويل النص إلى كلام",
+
+  "always_available": "متاح دائماً",
+
+  "tts_system_desc": "يستخدم محرك تحويل النص إلى كلام المدمج في جهازك.\nلا يتطلب أي تنزيلات. اختيار الصوت يستخدم إعدادات نظام جهازك.",
+
+  "downloading_status": "جارٍ التنزيل...",
+
+  "tts_kitten_desc": "TTS عصبي فائق السرعة مع 8 أصوات معبرة.\nيتطلب تنزيل {size}.",
+
+  "tts_piper_desc": "أصوات Piper سريعة دون اتصال مع صوتين معبرين.\nيتطلب تنزيل {size} لكل صوت.",
+
+  "engine_spec": "{sizeMb} ميجابايت · {ramMb} ميجابايت ذاكرة · {voiceCount} أصوات",
+
+  "on_device_models_title": "النماذج المحلية",
+
+  "available_models": "النماذج المتاحة",
+
+  "device_memory": "ذاكرة الجهاز",
+
+  "ram_usage": "استخدام الذاكرة",
+
+  "memory_healthy": "جيد",
+
+  "memory_critical": "حرج",
+
+  "memory_low": "منخفض",
+
+  "ram_used": "{percent}% مستخدم",
+
+  "available_ram": "الذاكرة المتاحة",
+
+  "total_capacity": "السعة الإجمالية",
+
+  "loaded_status": "تم التحميل",
+
+  "inference_backend": "محطة الاستدلال",
+
+  "backend_ios_notice": "محطة CPU فقط متاحة على iOS.",
+
+  "backend_cpu_desc": "يعمل على جميع الأجهزة. الأكثر توافقاً.",
+
+  "backend_gpu_desc": "تسريع OpenCL. أسرع على الأجهزة المدعومة.",
+
+  "backend_npu_desc": "NPU من الشركة المصنعة (Qualcomm/MediaTek). أسرع استدلال.",
+
+  "select_model_title": "اختيار نموذج",
+
+  "refresh_models": "تحديث النماذج",
+
+  "search_models_hint": "البحث في النماذج...",
+
+  "no_server_connected": "لا يوجد خادم متصل",
+
+  "add_server_first": "أضف خادماً أولاً لرؤية النماذج المتاحة.",
+
+  "failed_load_models": "فشل تحميل النماذج",
+
+  "no_models_available": "لا توجد نماذج متاحة",
+
+  "no_models_match": "لا توجد نماذج تطابق \"{searchQuery}\"",
+
+  "model_load_failed": "فشل تحميل النموذج: {error}",
+
+  "model_unloaded_ollama": "سيتم تفريغ {name} بعد انتهاء وقت الاحتفاظ",
+
+  "model_unloaded_success": "تم تفريغ {name} بنجاح",
+
+  "model_unload_failed": "فشل تفريغ النموذج: {error}",
+
+  "unload_from_server": "تفريغ من الخادم",
+
+  "context_chip": "{ctx} سياق",
+
+  "download_notification_title": "جارٍ تنزيل {modelName}...",
+
+  "download_complete_notification": "اكتمل التنزيل!",
+
+  "download_complete_body": "تم تنزيل {modelName} بنجاح.",
+
+  "download_failed_notification": "فشل التنزيل: {error}",
+
+  "download_failed_body": "فشل تنزيل {modelName}.",
+
+  "engine_name_system": "TTS النظام",
+
+  "engine_tagline_system": "محرك الجهاز المدمج",
+
+  "engine_name_kitten": "Kitten TTS",
+
+  "engine_tagline_kitten": "TTS عصبي عالي السرعة",
+
+  "engine_name_sherpa": "Sherpa ONNX VITS",
+
+  "engine_tagline_sherpa": "أصوات Piper دون اتصال",
+
+  "voice_jasper": "Jasper",
+  "voice_bella": "Bella",
+  "voice_bruno": "Bruno",
+  "voice_luna": "Luna",
+  "voice_hugo": "Hugo",
+  "voice_rosie": "Rosie",
+  "voice_leo": "Leo",
+  "voice_kiki": "Kiki",
+  "voice_lessac": "Lessac (أمريكي)",
+  "voice_ryan": "Ryan (أمريكي)",
+
+  "model_qwen_3": "Qwen 3 0.6B",
+
+  "model_qwen_3_desc": "أصغر نموذج محادثة عام. استجابات سريعة، استخدام منخفض للذاكرة.",
+
+  "model_license_apache": "Apache-2.0",
+
+  "model_qwen_25": "Qwen 2.5 1.5B Instruct",
+
+  "model_qwen_25_desc": "جودة وحجم متوازنان. مناسب للمحادثة العامة.",
+
+  "model_deepseek": "DeepSeek R1 Distill Qwen 1.5B",
+
+  "model_deepseek_desc": "نموذج استدلال وسلسلة أفكار. الأفضل للمهام المنطقية.",
+
+  "model_license_mit": "MIT",
+
+  "model_gemma": "Gemma 4 E2B Instruct",
+
+  "model_gemma_desc": "نموذج Google الرائد. أعلى جودة، يتطلب ذاكرة أكبر.",
+
+  "export_header": "*تم التصدير من LocalMind — {date}*",
+
+  "export_role_user": "## 👤 المستخدم",
+
+  "export_role_assistant": "## 🤖 المساعد",
+
+  "export_role_system": "## ⚙️ النظام",
+
+  "export_role_tool": "## 🔧 الأداة",
+
+  "export_text_user": "[المستخدم]",
+
+  "export_text_assistant": "[المساعد]",
+
+  "export_text_system": "[النظام]",
+
+  "export_text_tool": "[الأداة]",
+
+  "export_label_user": "المستخدم",
+
+  "export_label_assistant": "المساعد",
+
+  "export_label_system": "النظام",
+
+  "export_label_tool": "الأداة",
+
+  "select_model_hint": "اختر نموذجاً لبدء المحادثة",
+
+  "test_notification_title": "إشعار تجريبي",
+
+  "test_notification_body": "هذا إشعار تجريبي لتقدم تنزيل النموذج."
+}

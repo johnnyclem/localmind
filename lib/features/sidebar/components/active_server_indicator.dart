@@ -6,6 +6,7 @@ import 'package:shadcn_ui/shadcn_ui.dart';
 
 import '../../../core/models/enums.dart';
 import '../../../core/routes/app_routes.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../servers/providers/server_providers.dart';
 import '../../servers/views/components/server_icon_picker.dart';
 
@@ -25,21 +26,23 @@ class ActiveServerIndicator extends ConsumerWidget {
     }
   }
 
-  String _getStatusText(ConnectionStatus status) {
+  String _getStatusText(BuildContext context, ConnectionStatus status) {
+    final l10n = AppLocalizations.of(context)!;
     switch (status) {
       case ConnectionStatus.connected:
-        return 'Online';
+        return l10n.online;
       case ConnectionStatus.error:
-        return 'Error';
+        return l10n.error;
       case ConnectionStatus.checking:
-        return 'Checking...';
+        return l10n.testing;
       case ConnectionStatus.disconnected:
-        return 'Offline';
+        return l10n.offline;
     }
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final isDark = theme.brightness == Brightness.dark;
@@ -67,7 +70,7 @@ class ActiveServerIndicator extends ConsumerWidget {
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
-                  'No server selected',
+                  l10n.no_server_selected,
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: colorScheme.onSurfaceVariant,
                   ),
@@ -129,14 +132,14 @@ class ActiveServerIndicator extends ConsumerWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Switch Server',
+                                l10n.switch_server,
                                 style: theme.textTheme.titleLarge?.copyWith(
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                'Choose a server to connect to',
+                                l10n.switch_server_subtitle,
                                 style: theme.textTheme.bodyMedium?.copyWith(
                                   color: colorScheme.onSurfaceVariant,
                                 ),
@@ -261,7 +264,7 @@ class ActiveServerIndicator extends ConsumerWidget {
                                               ),
                                               Text(
                                                 isCurrentlyActive
-                                                    ? 'Active'
+                                                    ? l10n.active
                                                     : (server.host.isEmpty
                                                           ? 'Local'
                                                           : server.host),
@@ -310,7 +313,7 @@ class ActiveServerIndicator extends ConsumerWidget {
                                 Navigator.pop(context);
                               }
                             },
-                            child: const Text('Manage Servers'),
+                            child: Text(l10n.manage_servers),
                           ),
                         ],
                       ),
@@ -370,7 +373,7 @@ class ActiveServerIndicator extends ConsumerWidget {
                         ),
                         const SizedBox(width: 6),
                         Text(
-                          _getStatusText(connectionStatus),
+                          _getStatusText(context, connectionStatus),
                           style: theme.textTheme.labelSmall?.copyWith(
                             color: statusColor.withAlpha(200),
                             fontSize: 10,

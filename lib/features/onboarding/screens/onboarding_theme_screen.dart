@@ -7,6 +7,7 @@ import 'package:shadcn_ui/shadcn_ui.dart';
 import '../../../core/providers/app_providers.dart';
 import '../../../core/routes/app_routes.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../l10n/app_localizations.dart';
 
 class OnboardingThemeScreen extends ConsumerStatefulWidget {
   const OnboardingThemeScreen({super.key});
@@ -19,12 +20,13 @@ class OnboardingThemeScreen extends ConsumerStatefulWidget {
 class _OnboardingThemeScreenState extends ConsumerState<OnboardingThemeScreen> {
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final currentTheme = ref.watch(themeModeProvider);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Choose Theme'),
+        title: Text(l10n.choose_theme),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
@@ -39,7 +41,7 @@ class _OnboardingThemeScreenState extends ConsumerState<OnboardingThemeScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                'Personalize the app appearance. You can always change this later in settings.',
+                l10n.choose_theme_desc,
                 style: theme.textTheme.titleMedium?.copyWith(
                   color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                 ),
@@ -51,8 +53,8 @@ class _OnboardingThemeScreenState extends ConsumerState<OnboardingThemeScreen> {
                   children: [
                     _buildThemeCard(
                       type: AppThemeType.system,
-                      title: 'System',
-                      subtitle: 'Matches your device settings',
+                      title: l10n.theme_card_system,
+                      subtitle: l10n.theme_card_system_sub,
                       iconWidget: HugeIcon(
                         icon: HugeIcons.strokeRoundedSettings01,
                         color: currentTheme == AppThemeType.system
@@ -65,8 +67,8 @@ class _OnboardingThemeScreenState extends ConsumerState<OnboardingThemeScreen> {
                     const SizedBox(height: 16),
                     _buildThemeCard(
                       type: AppThemeType.light,
-                      title: 'Light',
-                      subtitle: 'Clean and bright',
+                      title: l10n.theme_card_light,
+                      subtitle: l10n.theme_card_light_sub,
                       iconWidget: HugeIcon(
                         icon: HugeIcons.strokeRoundedSun01,
                         color: currentTheme == AppThemeType.light
@@ -79,8 +81,8 @@ class _OnboardingThemeScreenState extends ConsumerState<OnboardingThemeScreen> {
                     const SizedBox(height: 16),
                     _buildThemeCard(
                       type: AppThemeType.dark,
-                      title: 'Dark',
-                      subtitle: 'Easy on the eyes',
+                      title: l10n.theme_card_dark,
+                      subtitle: l10n.theme_card_dark_sub,
                       iconWidget: HugeIcon(
                         icon: HugeIcons.strokeRoundedMoon02,
                         color: currentTheme == AppThemeType.dark
@@ -93,8 +95,8 @@ class _OnboardingThemeScreenState extends ConsumerState<OnboardingThemeScreen> {
                     const SizedBox(height: 16),
                     _buildThemeCard(
                       type: AppThemeType.claude,
-                      title: 'Claude',
-                      subtitle: 'A warm, peach-tinted theme',
+                      title: l10n.theme_card_claude,
+                      subtitle: l10n.theme_card_claude_sub,
                       iconWidget: HugeIcon(
                         icon: HugeIcons.strokeRoundedPaintBrush02,
                         color: currentTheme == AppThemeType.claude
@@ -116,9 +118,9 @@ class _OnboardingThemeScreenState extends ConsumerState<OnboardingThemeScreen> {
                     context.push(AppRoutes.onboardingNotifications);
                   }
                 },
-                child: const Text(
-                  'Finish Setup',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                child: Text(
+                  l10n.finish_setup,
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                 ),
               ),
             ],

@@ -9,6 +9,7 @@ import '../../../core/constants/app_constants.dart';
 import '../../../core/models/enums.dart';
 import '../../../core/providers/service_providers.dart';
 import '../../../core/routes/app_routes.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../servers/data/models/server.dart';
 import '../../servers/providers/server_providers.dart';
 
@@ -111,6 +112,7 @@ class _OnboardingServerSetupScreenState
       _testSuccess = false;
     });
 
+    final l10n = AppLocalizations.of(context)!;
     final apiService = ref.read(serverApiServiceProvider);
     final testServer = _buildServer();
 
@@ -119,13 +121,13 @@ class _OnboardingServerSetupScreenState
       setState(() {
         _testSuccess = isConnected;
         _testResult = isConnected
-            ? 'Connection successful!'
-            : 'Connection failed. Check your settings.';
+            ? l10n.connection_successful
+            : l10n.connection_failed;
       });
     } catch (e) {
       setState(() {
         _testSuccess = false;
-        _testResult = 'Error: ${e.toString()}';
+        _testResult = l10n.error_with_message(e.toString());
       });
     } finally {
       setState(() {
@@ -154,7 +156,7 @@ class _OnboardingServerSetupScreenState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error: ${e.toString()}'),
+            content: Text(AppLocalizations.of(context)!.error_with_message(e.toString())),
             backgroundColor: Colors.red,
           ),
         );
@@ -170,11 +172,12 @@ class _OnboardingServerSetupScreenState
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final isCloud = widget.selectedType == ServerType.openRouter;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Setup Connection')),
+      appBar: AppBar(title: Text(l10n.setup_connection)),
       body: SafeArea(
         child: Form(
           key: _formKey,
@@ -185,7 +188,7 @@ class _OnboardingServerSetupScreenState
             ),
             children: [
               Text(
-                'Configure your ${widget.selectedType.name} server to start chatting.',
+                l10n.setup_connection_desc(widget.selectedType.name),
                 style: theme.textTheme.titleMedium?.copyWith(
                   color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                 ),
@@ -195,12 +198,12 @@ class _OnboardingServerSetupScreenState
               TextFormField(
                 controller: _nameController,
                 decoration: InputDecoration(
-                  labelText: 'Server Name',
+                  labelText: l10n.server_name,
                   filled: true,
                   fillColor: theme.colorScheme.surface,
                 ),
                 validator: (val) =>
-                    val == null || val.trim().isEmpty ? 'Name required' : null,
+                    val == null || val.trim().isEmpty ? l10n.name_required : null,
               ),
               const SizedBox(height: 16),
 
@@ -208,12 +211,12 @@ class _OnboardingServerSetupScreenState
                 TextFormField(
                   controller: _hostController,
                   decoration: InputDecoration(
-                    labelText: 'Host / IP Address',
+                    labelText: l10n.host_label,
                     filled: true,
                     fillColor: theme.colorScheme.surface,
                   ),
                   validator: (val) => val == null || val.trim().isEmpty
-                      ? 'Host required'
+                      ? l10n.host_required
                       : null,
                 ),
                 const SizedBox(height: 16),
@@ -221,16 +224,16 @@ class _OnboardingServerSetupScreenState
                 TextFormField(
                   controller: _portController,
                   decoration: InputDecoration(
-                    labelText: 'Port',
+                    labelText: l10n.port_label,
                     filled: true,
                     fillColor: theme.colorScheme.surface,
                   ),
                   validator: (val) {
                     if (val == null || val.trim().isEmpty) {
-                      return 'Port required';
+                      return l10n.port_required;
                     } else {
                       if (int.tryParse(val) == null) {
-                        return 'Must be a number';
+                        return l10n.port_invalid;
                       } else {
                         return null;
                       }
@@ -243,13 +246,13 @@ class _OnboardingServerSetupScreenState
               TextFormField(
                 controller: _apiKeyController,
                 decoration: InputDecoration(
-                  labelText: isCloud ? 'API Key *' : 'API Key (Optional)',
+                  labelText: isCloud ? l10n.api_key_required : l10n.api_key_optional,
                   filled: true,
                   fillColor: theme.colorScheme.surface,
                 ),
                 validator: (val) {
                   if (isCloud && (val == null || val.trim().isEmpty)) {
-                    return 'API Key required for OpenRouter';
+                    return l10n.api_key_required_openrouter;
                   }
                   return null;
                 },
@@ -298,7 +301,7 @@ class _OnboardingServerSetupScreenState
                         height: 20,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : const Text('Test Connection'),
+                    : Text(l10n.test_connection),
               ),
               const SizedBox(height: 16),
 
@@ -314,9 +317,9 @@ class _OnboardingServerSetupScreenState
                           color: Colors.white,
                         ),
                       )
-                    : const Text(
-                        'Save & Continue',
-                        style: TextStyle(
+                    : Text(
+                        l10n.save_continue,
+                        style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
                         ),

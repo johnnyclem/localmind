@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
-
+import 'package:localmind/l10n/app_localizations.dart';
 import '../../../../core/models/enums.dart';
 import '../../data/models/server.dart';
 import 'connection_status_indicator.dart';
@@ -31,33 +31,34 @@ class ServerCard extends StatelessWidget {
     return getDefaultServerIcon(server.type.name);
   }
 
-  String get _serverTypeName {
+  String _serverTypeName(AppLocalizations l10n) {
     switch (server.type) {
       case ServerType.lmStudio:
-        return 'LM Studio';
+        return l10n.server_type_lm_studio_display;
       case ServerType.openAICompatible:
-        return 'OpenAI Compatible';
+        return l10n.server_type_openai_display;
       case ServerType.ollama:
-        return 'Ollama';
+        return l10n.server_type_ollama_display;
       case ServerType.openRouter:
-        return 'OpenRouter';
+        return l10n.server_type_openrouter_display;
       case ServerType.onDevice:
-        return 'On-Device';
+        return l10n.server_type_on_device_display;
     }
   }
 
-  String get _serverAddress {
+  String _serverAddress(AppLocalizations l10n) {
     if (server.type == ServerType.openRouter) {
-      return 'openrouter.ai';
+      return l10n.server_address_openrouter;
     }
     if (server.type == ServerType.onDevice) {
-      return 'Local inference';
+      return l10n.server_address_on_device;
     }
-    return '${server.host}:${server.port}';
+    return l10n.server_address_format(server.host, server.port.toString());
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
 
     final activeGreen = const Color(0xFF22C55E);
@@ -81,17 +82,17 @@ class ServerCard extends StatelessWidget {
         child: Stack(
           children: [
             if (isActive)
-              Positioned(
-                left: 0,
+              PositionedDirectional(
+                start: 0,
                 top: 0,
                 bottom: 0,
                 width: 4,
                 child: Container(
                   decoration: BoxDecoration(
                     color: activeGreen,
-                    borderRadius: const BorderRadius.only(
-                      topRight: Radius.circular(4),
-                      bottomRight: Radius.circular(4),
+                    borderRadius: const BorderRadiusDirectional.only(
+                      topEnd: Radius.circular(4),
+                      bottomEnd: Radius.circular(4),
                     ),
                   ),
                 ),
@@ -153,13 +154,13 @@ class ServerCard extends StatelessWidget {
                                   horizontal: 8,
                                   vertical: 2,
                                 ),
-                                margin: const EdgeInsets.only(right: 4),
+                                margin: const EdgeInsetsDirectional.only(end: 4),
                                 decoration: BoxDecoration(
                                   color: activeGreen,
                                   borderRadius: BorderRadius.circular(4),
                                 ),
                                 child: Text(
-                                  'Active',
+                                  l10n.active,
                                   style: theme.textTheme.labelSmall?.copyWith(
                                     color: Colors.white,
                                     fontWeight: FontWeight.bold,
@@ -186,7 +187,7 @@ class ServerCard extends StatelessWidget {
                                   ),
                                 ),
                                 child: Text(
-                                  'Default',
+                                  l10n.default_badge,
                                   style: theme.textTheme.labelSmall?.copyWith(
                                     color: isActive
                                         ? activeGreen
@@ -200,14 +201,14 @@ class ServerCard extends StatelessWidget {
                         Row(
                           children: [
                             Text(
-                              _serverTypeName,
+                              _serverTypeName(l10n),
                               style: theme.textTheme.bodySmall,
                             ),
                             const SizedBox(width: 8),
-                            Text('•', style: theme.textTheme.bodySmall),
+                            Text('\u2022', style: theme.textTheme.bodySmall),
                             const SizedBox(width: 8),
                             Text(
-                              _serverAddress,
+                              _serverAddress(l10n),
                               style: theme.textTheme.bodySmall,
                             ),
                           ],
@@ -232,34 +233,34 @@ class ServerCard extends StatelessWidget {
                       }
                     },
                     itemBuilder: (context) => [
-                      const PopupMenuItem(
+                      PopupMenuItem(
                         value: 'edit',
                         child: Row(
                           children: [
-                            Icon(Icons.edit, size: 18),
-                            SizedBox(width: 8),
-                            Text('Edit'),
+                            const Icon(Icons.edit, size: 18),
+                            const SizedBox(width: 8),
+                            Text(l10n.edit),
                           ],
                         ),
                       ),
                       if (!server.isDefault)
-                        const PopupMenuItem(
+                        PopupMenuItem(
                           value: 'setDefault',
                           child: Row(
                             children: [
-                              Icon(Icons.star, size: 18),
-                              SizedBox(width: 8),
-                              Text('Set as Default'),
+                              const Icon(Icons.star, size: 18),
+                              const SizedBox(width: 8),
+                              Text(l10n.set_as_default),
                             ],
                           ),
                         ),
-                      const PopupMenuItem(
+                      PopupMenuItem(
                         value: 'delete',
                         child: Row(
                           children: [
-                            Icon(Icons.delete, size: 18, color: Colors.red),
-                            SizedBox(width: 8),
-                            Text('Delete', style: TextStyle(color: Colors.red)),
+                            const Icon(Icons.delete, size: 18, color: Colors.red),
+                            const SizedBox(width: 8),
+                            Text(l10n.delete, style: const TextStyle(color: Colors.red)),
                           ],
                         ),
                       ),

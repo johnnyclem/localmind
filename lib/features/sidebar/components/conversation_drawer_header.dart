@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../l10n/app_localizations.dart';
+
 class ConversationDrawerHeader extends ConsumerWidget {
   const ConversationDrawerHeader({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
@@ -24,7 +27,7 @@ class ConversationDrawerHeader extends ConsumerWidget {
           ),
           const SizedBox(width: 12),
           Text(
-            'LocalMind',
+            l10n.app_name,
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,

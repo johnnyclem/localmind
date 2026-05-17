@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
+import 'package:localmind/l10n/app_localizations.dart';
 import '../providers/conversation_providers.dart';
 import 'components/conversation_empty_state.dart';
 import 'components/conversation_list.dart';
@@ -11,6 +11,7 @@ class ChatHistoryScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
@@ -21,7 +22,6 @@ class ChatHistoryScreen extends ConsumerWidget {
     return SafeArea(
       child: Column(
         children: [
-          // Header
           Container(
             padding: const EdgeInsets.only(left: 16, right: 16, bottom: 12),
             decoration: BoxDecoration(
@@ -44,7 +44,7 @@ class ChatHistoryScreen extends ConsumerWidget {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  'Chat History',
+                  l10n.chat_history_title,
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -56,10 +56,8 @@ class ChatHistoryScreen extends ConsumerWidget {
             ),
           ),
 
-          // Search Bar
           const ConversationSearchBar(),
 
-          // List
           Expanded(
             child: groupedConversations.when(
               data: (grouped) => grouped.isEmpty
@@ -73,7 +71,7 @@ class ChatHistoryScreen extends ConsumerWidget {
               ),
               error: (err, stack) => Center(
                 child: Text(
-                  'Error: $err',
+                  l10n.error_with_message(err.toString()),
                   style: TextStyle(color: theme.colorScheme.error),
                 ),
               ),

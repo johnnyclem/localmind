@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:localmind/features/sidebar/sidebar_widget.dart';
+import 'package:localmind/l10n/app_localizations.dart';
 import '../../../core/providers/app_providers.dart';
 import '../../../core/models/enums.dart';
 import '../../../core/routes/app_routes.dart';
@@ -17,47 +18,54 @@ class SettingsViews extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final settings = ref.watch(settingsProvider);
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Settings')),
+      appBar: AppBar(title: Text(l10n.settings_title)),
       drawer: SidebarWidget(),
       body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         children: [
-          _SectionHeader(title: 'Appearance'),
+          _SectionHeader(title: l10n.settings_appearance),
           _ThemeToggle(current: settings.themeMode, ref: ref),
+          _LanguageSetting(
+            current: settings.localeCode,
+            onChanged: (v) =>
+                ref.read(settingsProvider.notifier).setLocaleCode(v),
+            isDark: isDark,
+          ),
           _SliderSetting(
-            label: 'Font Size',
+            label: l10n.font_size,
             value: settings.fontSize,
             min: 12.0,
             max: 24.0,
             divisions: 12,
-            description: 'Adjust text size in chat.',
+            description: l10n.font_size_desc,
             onChanged: (v) =>
                 ref.read(settingsProvider.notifier).setFontSize(v),
             isDark: isDark,
             valueFormat: (v) => v.toStringAsFixed(0),
-            previewText: 'The quick brown fox jumps over the lazy dog.',
+            previewText: l10n.font_preview,
           ),
           _CodeThemeDropdown(
-            label: 'Code Theme (Dark)',
+            label: l10n.code_theme_dark,
             current: settings.codeThemeDark,
             onChanged: (v) =>
                 ref.read(settingsProvider.notifier).setCodeThemeDark(v),
             isDark: isDark,
           ),
           _CodeThemeDropdown(
-            label: 'Code Theme (Light)',
+            label: l10n.code_theme_light,
             current: settings.codeThemeLight,
             onChanged: (v) =>
                 ref.read(settingsProvider.notifier).setCodeThemeLight(v),
             isDark: isDark,
           ),
           const Divider(height: 32),
-          _SectionHeader(title: 'Text-to-Speech'),
+          _SectionHeader(title: l10n.settings_tts),
           _EngineDropdown(
             current: settings.ttsEngine,
             onChanged: (v) =>
@@ -69,7 +77,7 @@ class SettingsViews extends ConsumerWidget {
             child: OutlinedButton.icon(
               onPressed: () => context.push(AppRoutes.ttsModels),
               icon: const Icon(Icons.record_voice_over, size: 18),
-              label: const Text('Manage TTS Models'),
+              label: Text(l10n.manage_tts_models),
               style: OutlinedButton.styleFrom(
                 minimumSize: const Size(double.infinity, 44),
                 shape: RoundedRectangleBorder(
@@ -88,12 +96,12 @@ class SettingsViews extends ConsumerWidget {
               isDark: isDark,
             ),
             _SliderSetting(
-              label: 'TTS Speed',
+              label: l10n.tts_speed,
               value: settings.ttsSpeed,
               min: 0.5,
               max: 2.0,
               divisions: 15,
-              description: 'Adjust the playback rate.',
+              description: l10n.tts_speed_desc,
               onChanged: (v) =>
                   ref.read(settingsProvider.notifier).setTtsSpeed(v),
               isDark: isDark,
@@ -101,44 +109,44 @@ class SettingsViews extends ConsumerWidget {
             ),
           ],
           const Divider(height: 32),
-          _SectionHeader(title: 'Behavior'),
+          _SectionHeader(title: l10n.settings_behavior),
           _ToggleSetting(
-            label: 'Streaming Responses',
+            label: l10n.streaming_responses,
             value: settings.streamingEnabled,
             onChanged: (v) =>
                 ref.read(settingsProvider.notifier).setStreamingEnabled(v),
             isDark: isDark,
           ),
           _ToggleSetting(
-            label: 'Auto-generate Titles',
+            label: l10n.auto_generate_titles,
             value: settings.autoGenerateTitle,
             onChanged: (v) =>
                 ref.read(settingsProvider.notifier).setAutoGenerateTitle(v),
             isDark: isDark,
           ),
           _ToggleSetting(
-            label: 'Send on Enter',
+            label: l10n.send_on_enter,
             value: settings.sendOnEnter,
             onChanged: (v) =>
                 ref.read(settingsProvider.notifier).setSendOnEnter(v),
             isDark: isDark,
           ),
           _ToggleSetting(
-            label: 'Show System Messages',
+            label: l10n.show_system_messages,
             value: settings.showSystemMessages,
             onChanged: (v) =>
                 ref.read(settingsProvider.notifier).setShowSystemMessages(v),
             isDark: isDark,
           ),
           _ToggleSetting(
-            label: 'Haptic Feedback',
+            label: l10n.haptic_feedback,
             value: settings.hapticFeedbackEnabled,
             onChanged: (v) =>
                 ref.read(settingsProvider.notifier).setHapticFeedback(v),
             isDark: isDark,
           ),
           _ToggleSetting(
-            label: 'Enable MCP',
+            label: l10n.enable_mcp,
             value: settings.mcpEnabled,
             onChanged: (v) =>
                 ref.read(settingsProvider.notifier).setMcpEnabled(v),
@@ -146,20 +154,20 @@ class SettingsViews extends ConsumerWidget {
           ),
           if (settings.mcpEnabled)
             _ToggleSetting(
-              label: 'New Chat MCP Default',
+              label: l10n.new_chat_mcp_default,
               value: settings.newChatMcpEnabled,
               onChanged: (v) =>
                   ref.read(settingsProvider.notifier).setNewChatMcpEnabled(v),
               isDark: isDark,
             ),
           const Divider(height: 32),
-          _SectionHeader(title: 'On-Device Inference'),
+          _SectionHeader(title: l10n.settings_on_device),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
             child: OutlinedButton.icon(
               onPressed: () => context.push(AppRoutes.onDeviceModels),
               icon: const Icon(Icons.phone_android, size: 18),
-              label: const Text('Manage On-Device Models'),
+              label: Text(l10n.manage_on_device_models),
               style: OutlinedButton.styleFrom(
                 minimumSize: const Size(double.infinity, 44),
                 shape: RoundedRectangleBorder(
@@ -170,9 +178,9 @@ class SettingsViews extends ConsumerWidget {
           ),
           const _OnDeviceOnDeviceEngineStatus(),
           const Divider(height: 32),
-          _SectionHeader(title: 'Default Server'),
+          _SectionHeader(title: l10n.settings_default_server),
           _DropdownSetting(
-            label: 'Default Server',
+            label: l10n.settings_default_server,
             currentValue: settings.defaultServerId,
             items: (ref.watch(serversProvider).value ?? [])
                 .map((s) => (s.id, s.name))
@@ -183,9 +191,9 @@ class SettingsViews extends ConsumerWidget {
             icon: Icons.computer,
           ),
           const Divider(height: 32),
-          _SectionHeader(title: 'Default Persona'),
+          _SectionHeader(title: l10n.settings_default_persona),
           _DropdownSetting(
-            label: 'Default Persona',
+            label: l10n.settings_default_persona,
             currentValue: settings.defaultPersonaId,
             items: (ref.watch(personasNotifierProvider).value ?? [])
                 .map((p) => (p.id, '${p.emoji} ${p.name}'))
@@ -196,18 +204,18 @@ class SettingsViews extends ConsumerWidget {
             icon: Icons.smart_toy_outlined,
           ),
           const Divider(height: 32),
-          _SectionHeader(title: 'Privacy'),
+          _SectionHeader(title: l10n.settings_privacy),
           _ToggleSetting(
-            label: 'Show Data Indicator',
+            label: l10n.show_data_indicator,
             value: settings.showDataIndicator,
             onChanged: (v) =>
                 ref.read(settingsProvider.notifier).setShowDataIndicator(v),
             isDark: isDark,
           ),
           Padding(
-            padding: const EdgeInsets.only(left: 16, bottom: 8),
+            padding: const EdgeInsetsDirectional.only(start: 16, bottom: 8),
             child: Text(
-              '"LocalMind never sees your data"',
+              l10n.privacy_info,
               style: TextStyle(
                 fontSize: 12,
                 color: isDark
@@ -218,27 +226,27 @@ class SettingsViews extends ConsumerWidget {
             ),
           ),
           const Divider(height: 32),
-          _SectionHeader(title: 'Data Management'),
+          _SectionHeader(title: l10n.settings_data_management),
           _DangerousAction(
-            label: 'Delete All Conversations',
+            label: l10n.delete_all_conversations,
             icon: Icons.delete_outline,
             onConfirm: () =>
                 ref.read(conversationsProvider.notifier).deleteAll(),
             isDark: isDark,
           ),
           _DangerousAction(
-            label: 'Reset Settings to Defaults',
+            label: l10n.reset_settings_defaults,
             icon: Icons.restore,
             onConfirm: () =>
                 ref.read(settingsProvider.notifier).resetToDefaults(),
             isDark: isDark,
           ),
           const Divider(height: 32),
-          _SectionHeader(title: 'About'),
+          _SectionHeader(title: l10n.settings_about),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Text(
-              'LocalMind v1.0.0',
+              '${l10n.app_name} v${l10n.app_version}',
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
@@ -247,9 +255,9 @@ class SettingsViews extends ConsumerWidget {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.only(left: 16, bottom: 8),
+            padding: const EdgeInsetsDirectional.only(start: 16, bottom: 8),
             child: Text(
-              'Your AI. Your Device. Your Rules.',
+              l10n.app_tagline,
               style: TextStyle(
                 fontSize: 13,
                 color: isDark
@@ -282,6 +290,111 @@ class _SectionHeader extends StatelessWidget {
           letterSpacing: 0.8,
           color: isDark ? const Color(0xFF888888) : const Color(0xFF999999),
         ),
+      ),
+    );
+  }
+}
+
+class _LanguageSetting extends StatelessWidget {
+  const _LanguageSetting({
+    required this.current,
+    required this.onChanged,
+    required this.isDark,
+  });
+
+  static const _localeItems = <(String?, String)>[
+    ('en', 'English'),
+    ('ar', 'العربية'),
+    ('bn', 'বাংলা'),
+    ('zh', '中文'),
+    ('es', 'Español'),
+    ('hi', 'हिन्दी'),
+  ];
+
+  final String? current;
+  final ValueChanged<String?> onChanged;
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.settings_language,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: isDark ? Colors.white : Colors.black,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Container(
+            decoration: BoxDecoration(
+              color: isDark ? const Color(0xFF1F1F1F) : const Color(0xFFF5F5F5),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: isDark
+                    ? const Color(0xFF3A3A3A)
+                    : const Color(0xFFE5E5E5),
+              ),
+            ),
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<String?>(
+                value: current,
+                isExpanded: true,
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                borderRadius: BorderRadius.circular(8),
+                dropdownColor:
+                    isDark ? const Color(0xFF1F1F1F) : Colors.white,
+                items: [
+                  DropdownMenuItem(
+                    value: null,
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.settings_suggest,
+                          size: 16,
+                          color: isDark
+                              ? const Color(0xFF888888)
+                              : const Color(0xFF999999),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          l10n.language_system_default,
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: isDark ? Colors.white : Colors.black,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  ..._localeItems.map((item) => DropdownMenuItem(
+                    value: item.$1,
+                    child: Row(
+                      children: [
+                        const Icon(Icons.language, size: 16),
+                        const SizedBox(width: 8),
+                        Text(
+                          item.$2,
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: isDark ? Colors.white : Colors.black,
+                          ),
+                        ),
+                      ],
+                    ),
+                  )),
+                ],
+                onChanged: onChanged,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -529,6 +642,7 @@ class _ThemeToggle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final currentType = ref.watch(themeModeProvider);
 
@@ -538,7 +652,7 @@ class _ThemeToggle extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Theme',
+            l10n.theme,
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w500,
@@ -549,7 +663,7 @@ class _ThemeToggle extends StatelessWidget {
           Row(
             children: [
               _ThemeOption(
-                label: 'System',
+                label: l10n.theme_system,
                 icon: Icons.brightness_auto,
                 isSelected: currentType == AppThemeType.system,
                 onTap: () => ref
@@ -559,7 +673,7 @@ class _ThemeToggle extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               _ThemeOption(
-                label: 'Light',
+                label: l10n.theme_light,
                 icon: Icons.light_mode,
                 isSelected: currentType == AppThemeType.light,
                 onTap: () => ref
@@ -569,7 +683,7 @@ class _ThemeToggle extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               _ThemeOption(
-                label: 'Dark',
+                label: l10n.theme_dark,
                 icon: Icons.dark_mode,
                 isSelected: currentType == AppThemeType.dark,
                 onTap: () => ref
@@ -579,7 +693,7 @@ class _ThemeToggle extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               _ThemeOption(
-                label: 'Claude',
+                label: l10n.theme_claude,
                 icon: Icons.auto_awesome,
                 isSelected: currentType == AppThemeType.claude,
                 onTap: () => ref
@@ -683,6 +797,7 @@ class _DropdownSetting extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       child: Container(
@@ -701,7 +816,7 @@ class _DropdownSetting extends StatelessWidget {
             borderRadius: BorderRadius.circular(8),
             dropdownColor: isDark ? const Color(0xFF1F1F1F) : Colors.white,
             hint: Text(
-              'None selected',
+              l10n.none_selected,
               style: TextStyle(
                 fontSize: 14,
                 color: isDark
@@ -713,7 +828,7 @@ class _DropdownSetting extends StatelessWidget {
               DropdownMenuItem(
                 value: null,
                 child: Text(
-                  'None',
+                  l10n.none,
                   style: TextStyle(
                     fontSize: 14,
                     color: isDark
@@ -768,17 +883,9 @@ class _CodeThemeDropdown extends StatelessWidget {
   final ValueChanged<SyntaxThemeName> onChanged;
   final bool isDark;
 
-  String _getDisplayName(SyntaxThemeName theme) {
-    switch (theme) {
-      case SyntaxThemeName.light:
-        return 'Light';
-      case SyntaxThemeName.dark:
-        return 'Dark';
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       child: Column(
@@ -811,10 +918,14 @@ class _CodeThemeDropdown extends StatelessWidget {
                 borderRadius: BorderRadius.circular(8),
                 dropdownColor: isDark ? const Color(0xFF1F1F1F) : Colors.white,
                 items: SyntaxThemeName.values.map((theme) {
+                  final displayName = switch (theme) {
+                    SyntaxThemeName.light => l10n.theme_light,
+                    SyntaxThemeName.dark => l10n.theme_dark,
+                  };
                   return DropdownMenuItem(
                     value: theme,
                     child: Text(
-                      _getDisplayName(theme),
+                      displayName,
                       style: TextStyle(
                         fontSize: 14,
                         color: isDark ? Colors.white : Colors.black,
@@ -830,7 +941,7 @@ class _CodeThemeDropdown extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            'Choose syntax highlighting theme for code blocks.',
+            l10n.code_theme_desc,
             style: TextStyle(
               fontSize: 12,
               color: isDark ? const Color(0xFF666666) : const Color(0xFF999999),
@@ -857,35 +968,37 @@ class _DangerousAction extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       child: OutlinedButton.icon(
         onPressed: () {
           showDialog(
             context: context,
-            builder: (ctx) => AlertDialog(
-              title: Text(label),
-              content: const Text(
-                'Are you sure? This action cannot be undone.',
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(ctx),
-                  child: const Text('Cancel'),
-                ),
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(ctx);
-                    onConfirm();
-                    ScaffoldMessenger.of(
-                      context,
-                    ).showSnackBar(SnackBar(content: Text('$label completed')));
-                  },
-                  style: TextButton.styleFrom(foregroundColor: Colors.red),
-                  child: const Text('Confirm'),
-                ),
-              ],
-            ),
+            builder: (ctx) {
+              final dlgL10n = AppLocalizations.of(ctx)!;
+              return AlertDialog(
+                title: Text(label),
+                content: Text(dlgL10n.cannot_undo),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(ctx),
+                    child: Text(dlgL10n.cancel),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(ctx);
+                      onConfirm();
+                      ScaffoldMessenger.of(
+                        context,
+                      ).showSnackBar(SnackBar(content: Text(l10n.label_completed(label))));
+                    },
+                    style: TextButton.styleFrom(foregroundColor: Colors.red),
+                    child: Text(dlgL10n.confirm),
+                  ),
+                ],
+              );
+            },
           );
         },
         icon: Icon(icon, color: Colors.red, size: 18),
@@ -913,13 +1026,14 @@ class _EngineDropdown extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'TTS Engine',
+            l10n.tts_engine,
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w500,
@@ -947,12 +1061,12 @@ class _EngineDropdown extends StatelessWidget {
                 items: [
                   _engineItem(
                     EngineId.system,
-                    'System TTS',
+                    l10n.tts_engine_system,
                     Icons.record_voice_over,
                   ),
                   _engineItem(
                     EngineId.kitten,
-                    'Kitten TTS',
+                    l10n.tts_engine_kitten,
                     Icons.auto_awesome,
                   ),
                 ],
@@ -1007,6 +1121,7 @@ class _VoiceSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final voices = voicesForEngine(engine);
     final resolvedCurrentVoiceId = voiceFromSettings(
       currentVoiceId,
@@ -1027,7 +1142,7 @@ class _VoiceSelector extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Voice',
+            l10n.voice,
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w500,
@@ -1037,7 +1152,7 @@ class _VoiceSelector extends StatelessWidget {
           const SizedBox(height: 8),
           if (femaleVoices.isNotEmpty) ...[
             Text(
-              'Female',
+              l10n.voice_female,
               style: TextStyle(
                 fontSize: 11,
                 color: isDark
@@ -1058,7 +1173,7 @@ class _VoiceSelector extends StatelessWidget {
           ],
           if (maleVoices.isNotEmpty) ...[
             Text(
-              'Male',
+              l10n.voice_male,
               style: TextStyle(
                 fontSize: 11,
                 color: isDark
@@ -1079,7 +1194,7 @@ class _VoiceSelector extends StatelessWidget {
           if (otherVoices.isNotEmpty) ...[
             const SizedBox(height: 8),
             Text(
-              'Other',
+              l10n.voice_other,
               style: TextStyle(
                 fontSize: 11,
                 color: isDark
@@ -1195,6 +1310,7 @@ class _OnDeviceOnDeviceEngineStatus extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final engineState = ref.watch(onDeviceEngineProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
@@ -1202,7 +1318,7 @@ class _OnDeviceOnDeviceEngineStatus extends ConsumerWidget {
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
         child: Text(
-          'No model loaded. Tap "Manage On-Device Models" to download and load a model.',
+          l10n.no_model_loaded,
           style: TextStyle(
             fontSize: 12,
             color: isDark ? const Color(0xFF666666) : const Color(0xFF999999),
@@ -1249,10 +1365,10 @@ class _OnDeviceOnDeviceEngineStatus extends ConsumerWidget {
             Expanded(
               child: Text(
                 engineState.status == OnDeviceEngineStatus.loaded
-                    ? 'Loaded: ${engineState.loadedModelId ?? "unknown"} (${engineState.backend?.name ?? "CPU"})'
+                    ? l10n.model_loaded(engineState.loadedModelId ?? "unknown", engineState.backend?.name ?? "CPU")
                     : engineState.status == OnDeviceEngineStatus.loading
-                    ? 'Loading model...'
-                    : 'Error: ${engineState.error ?? "Unknown error"}',
+                    ? l10n.loading
+                    : l10n.error_with_message(engineState.error ?? l10n.unknown_error),
                 style: TextStyle(
                   fontSize: 13,
                   color: engineState.status == OnDeviceEngineStatus.loaded

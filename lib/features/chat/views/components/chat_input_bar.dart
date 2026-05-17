@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:haptic_feedback/haptic_feedback.dart';
 import 'package:hugeicons/hugeicons.dart';
+import 'package:localmind/l10n/app_localizations.dart';
 
 import '../../../../core/models/enums.dart';
 import '../../../servers/providers/server_providers.dart';
@@ -90,7 +91,7 @@ class _ChatInputBarState extends ConsumerState<ChatInputBar>
   }
 
   Widget _buildActionButton(bool canSend, bool isDark) {
-    // Action button theme from image: circular, high contrast (black in light, white in dark)
+    final l10n = AppLocalizations.of(context)!;
     final backgroundColor = isDark ? Colors.white : Colors.black;
     final iconColor = isDark ? Colors.black : Colors.white;
 
@@ -134,7 +135,7 @@ class _ChatInputBarState extends ConsumerState<ChatInputBar>
             onPressed: widget.isStreaming
                 ? _handleStop
                 : (canSend ? _handleSubmit : null),
-            tooltip: widget.isStreaming ? 'Stop generation' : 'Send message',
+            tooltip: widget.isStreaming ? l10n.stop_generation_tooltip : l10n.send_message_tooltip,
           ),
         ),
       ),
@@ -143,6 +144,7 @@ class _ChatInputBarState extends ConsumerState<ChatInputBar>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final connectionStatus = ref.watch(connectionStatusProvider);
@@ -176,7 +178,6 @@ class _ChatInputBarState extends ConsumerState<ChatInputBar>
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Attachment Preview Area
             AnimatedSize(
               duration: const Duration(milliseconds: 200),
               curve: Curves.easeOut,
@@ -218,9 +219,9 @@ class _ChatInputBarState extends ConsumerState<ChatInputBar>
                                   ),
                                 ),
                               ),
-                              Positioned(
+                              PositionedDirectional(
                                 top: -4,
-                                right: -4,
+                                end: -4,
                                 child: GestureDetector(
                                   onTap: () => setState(
                                     () => _attachedFiles.removeAt(index),
@@ -246,10 +247,8 @@ class _ChatInputBarState extends ConsumerState<ChatInputBar>
                       ),
                     ),
             ),
-            // Input Main Bar
             Row(
               children: [
-                // Add Attachment Button
                 IconButton(
                   icon: HugeIcon(
                     icon: HugeIcons.strokeRoundedPlusSign,
@@ -257,10 +256,9 @@ class _ChatInputBarState extends ConsumerState<ChatInputBar>
                     size: 22,
                   ),
                   onPressed: isConnected ? _handleAttach : null,
-                  tooltip: 'Attach images',
+                  tooltip: l10n.attach_images_tooltip,
                 ),
                 const SizedBox(width: 4),
-                // Text Field
                 Expanded(
                   child: TextField(
                     controller: _controller,
@@ -278,7 +276,7 @@ class _ChatInputBarState extends ConsumerState<ChatInputBar>
                       color: isDark ? Colors.white : Colors.black87,
                     ),
                     decoration: InputDecoration(
-                      hintText: 'Ask anything',
+                      hintText: l10n.chat_input_hint,
                       hintStyle: TextStyle(
                         color: isDark ? Colors.white38 : Colors.black38,
                         fontSize: 15,
@@ -291,14 +289,6 @@ class _ChatInputBarState extends ConsumerState<ChatInputBar>
                   ),
                 ),
                 const SizedBox(width: 8),
-                // Mic Icon (Visual only as per image)
-                // HugeIcon(
-                //   icon: HugeIcons.strokeRoundedMic01,
-                //   color: isDark ? Colors.white38 : Colors.black38,
-                //   size: 22,
-                // ),
-                // const SizedBox(width: 8),
-                // Action Button (Send/Stop)
                 _buildActionButton(canSend, isDark),
               ],
             ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:syntax_highlight/syntax_highlight.dart';
+import 'package:localmind/l10n/app_localizations.dart';
 import '../../../../core/providers/highlighter_provider.dart';
 
 class CodeBlock extends ConsumerWidget {
@@ -207,6 +208,7 @@ class _CopyButtonState extends State<_CopyButton> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return GestureDetector(
       onTap: _copyToClipboard,
       child: Row(
@@ -223,7 +225,7 @@ class _CopyButtonState extends State<_CopyButton> {
           ),
           const SizedBox(width: 4),
           Text(
-            _copied ? 'Copied!' : 'Copy',
+            _copied ? l10n.copied : l10n.copy,
             style: TextStyle(
               fontSize: 11,
               color: _copied

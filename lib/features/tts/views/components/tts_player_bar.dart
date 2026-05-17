@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:localmind/l10n/app_localizations.dart';
 import '../../providers/tts_providers.dart' as tts;
 
 /// Mini TTS player bar shown when speech is playing or
@@ -14,6 +15,7 @@ class TtsPlayerBar extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final ttsState = ref.watch(tts.ttsProvider);
     ref.listen(tts.ttsProvider, (prev, next) {
       if (next.error != null && prev?.error != next.error) {
@@ -60,7 +62,7 @@ class TtsPlayerBar extends ConsumerWidget {
                 children: [
                   Text(
                     preview ??
-                        (ttsState.isInitializing ? 'Loading...' : 'Playing'),
+                        (ttsState.isInitializing ? l10n.loading : 'Playing'),
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
@@ -71,7 +73,7 @@ class TtsPlayerBar extends ConsumerWidget {
                   ),
                   if (ttsState.isInitializing)
                     Text(
-                      'Initializing TTS...',
+                      l10n.initializing,
                       style: TextStyle(
                         fontSize: 10,
                         color: isDark ? Colors.white38 : Colors.black45,
@@ -84,7 +86,7 @@ class TtsPlayerBar extends ConsumerWidget {
             GestureDetector(
               onTap: () => ref.read(tts.ttsProvider.notifier).stop(),
               child: Tooltip(
-                message: 'Stop',
+                message: l10n.stop,
                 child: Container(
                   padding: const EdgeInsets.all(4),
                   decoration: BoxDecoration(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
+import 'package:localmind/l10n/app_localizations.dart';
 
 class HugeIconData {
   final String name;
@@ -110,11 +111,12 @@ class _ServerIconPickerState extends State<ServerIconPicker> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
 
     return ShadSheet(
-      title: const Text('Select Icon'),
-      description: const Text('Choose an icon for your server'),
+      title: Text(l10n.select_icon),
+      description: Text(l10n.select_icon_desc),
       child: SizedBox(
         width: double.maxFinite,
         height: MediaQuery.of(context).size.height * 0.6,
@@ -124,9 +126,9 @@ class _ServerIconPickerState extends State<ServerIconPicker> {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: ShadInput(
                 controller: _searchController,
-                placeholder: const Text('Search icons...'),
+                placeholder: Text(l10n.search_icons_hint),
                 leading: const Padding(
-                  padding: EdgeInsets.only(left: 8),
+                  padding: EdgeInsetsDirectional.only(start: 8),
                   child: Icon(Icons.search, size: 18),
                 ),
                 onChanged: _filterIcons,
@@ -197,7 +199,7 @@ class _ServerIconPickerState extends State<ServerIconPicker> {
               padding: const EdgeInsets.all(16),
               child: ShadButton(
                 onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Done'),
+                child: Text(l10n.done),
               ),
             ),
           ],

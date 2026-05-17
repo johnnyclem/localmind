@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
-
+import 'package:localmind/l10n/app_localizations.dart';
 import '../../../../core/models/enums.dart';
 
 class ServerTypeSelector extends StatelessWidget {
@@ -15,13 +15,14 @@ class ServerTypeSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
     final types = [
       (
         ServerType.lmStudio,
-        'LM Studio',
+        l10n.server_type_lm_studio,
         HugeIcons.strokeRoundedAiComputer,
         Colors.blue,
       ),
@@ -33,13 +34,13 @@ class ServerTypeSelector extends StatelessWidget {
       ),
       (
         ServerType.ollama,
-        'Ollama',
+        l10n.server_type_ollama,
         HugeIcons.strokeRoundedPencilEdit02,
         Colors.orange,
       ),
       (
         ServerType.openRouter,
-        'OpenRouter',
+        l10n.server_type_openrouter,
         HugeIcons.strokeRoundedCloud,
         Colors.purple,
       ),

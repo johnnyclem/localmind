@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:localmind/l10n/app_localizations.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
 import '../../../core/models/enums.dart';
@@ -12,6 +13,7 @@ class BackendSelector extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final settings = ref.watch(settingsProvider);
     final currentBackend = settings.preferredBackend;
     final isAndroid = Platform.isAndroid;
@@ -20,7 +22,7 @@ class BackendSelector extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Inference Backend',
+          l10n.inference_backend,
           style: Theme.of(
             context,
           ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
@@ -35,14 +37,14 @@ class BackendSelector extends ConsumerWidget {
               borderRadius: BorderRadius.circular(8),
               border: Border.all(color: Colors.orange),
             ),
-            child: const Row(
+            child: Row(
               children: [
-                Icon(Icons.info_outline, color: Colors.orange, size: 20),
-                SizedBox(width: 8),
+                const Icon(Icons.info_outline, color: Colors.orange, size: 20),
+                const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'Only CPU backend is available on iOS.',
-                    style: TextStyle(color: Colors.orange),
+                    l10n.backend_ios_notice,
+                    style: const TextStyle(color: Colors.orange),
                   ),
                 ),
               ],
@@ -85,7 +87,7 @@ class BackendSelector extends ConsumerWidget {
                             style: const TextStyle(fontWeight: FontWeight.w600),
                           ),
                           Text(
-                            _backendDescription(backend),
+                            _backendDescription(backend, context),
                             style: Theme.of(context).textTheme.bodySmall
                                 ?.copyWith(
                                   color: Theme.of(context).colorScheme.onSurface
@@ -105,14 +107,15 @@ class BackendSelector extends ConsumerWidget {
     );
   }
 
-  String _backendDescription(LiteLmBackendType backend) {
+  String _backendDescription(LiteLmBackendType backend, BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     switch (backend) {
       case LiteLmBackendType.cpu:
-        return 'Works on all devices. Most compatible.';
+        return l10n.backend_cpu_desc;
       case LiteLmBackendType.gpu:
-        return 'OpenCL acceleration. Faster on supported devices.';
+        return l10n.backend_gpu_desc;
       case LiteLmBackendType.npu:
-        return 'Vendor NPU (Qualcomm/MediaTek). Fastest inference.';
+        return l10n.backend_npu_desc;
     }
   }
 }

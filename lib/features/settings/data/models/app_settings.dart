@@ -36,6 +36,7 @@ class AppSettings {
   final double ttsSpeed;
   final KittenTtsModelVariant kittenTtsModelVariant;
   final bool autoSpeakEnabled;
+  final String? localeCode;
 
   AppSettings({
     this.temperature = 0.7,
@@ -64,6 +65,7 @@ class AppSettings {
     this.ttsSpeed = 1.0,
     this.kittenTtsModelVariant = KittenTtsModelVariant.nanoInt8,
     this.autoSpeakEnabled = false,
+    this.localeCode,
   });
 
   AppSettings copyWith({
@@ -93,6 +95,7 @@ class AppSettings {
     double? ttsSpeed,
     KittenTtsModelVariant? kittenTtsModelVariant,
     bool? autoSpeakEnabled,
+    Object? localeCode = _unset,
   }) {
     return AppSettings(
       temperature: temperature ?? this.temperature,
@@ -127,6 +130,9 @@ class AppSettings {
       kittenTtsModelVariant:
           kittenTtsModelVariant ?? this.kittenTtsModelVariant,
       autoSpeakEnabled: autoSpeakEnabled ?? this.autoSpeakEnabled,
+      localeCode: identical(localeCode, _unset)
+          ? this.localeCode
+          : localeCode as String?,
     );
   }
 
@@ -158,6 +164,7 @@ class AppSettings {
       'ttsSpeed': ttsSpeed,
       'kittenTtsModelVariant': kittenTtsModelVariant.name,
       'autoSpeakEnabled': autoSpeakEnabled,
+      'localeCode': localeCode,
     };
   }
 
@@ -189,6 +196,7 @@ class AppSettings {
       ttsSpeed: map['ttsSpeed']?.toDouble() ?? 1.0,
       kittenTtsModelVariant: _parseKittenVariant(map['kittenTtsModelVariant']),
       autoSpeakEnabled: map['autoSpeakEnabled'] ?? false,
+      localeCode: map['localeCode'] as String?,
     );
   }
 

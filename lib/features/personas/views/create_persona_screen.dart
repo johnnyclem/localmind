@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:localmind/l10n/app_localizations.dart';
 import '../data/models/persona.dart';
 import '../providers/personas_providers.dart';
 
@@ -139,17 +140,21 @@ class _CreatePersonaScreenState extends ConsumerState<CreatePersonaScreen> {
       }
 
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         context.pop();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(_isEditing ? 'Persona updated' : 'Persona created'),
+            content: Text(_isEditing ? l10n.persona_updated : l10n.persona_created),
           ),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.error_with_message(e.toString())),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     } finally {
@@ -159,12 +164,13 @@ class _CreatePersonaScreenState extends ConsumerState<CreatePersonaScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(_isEditing ? 'Edit Persona' : 'Create Persona'),
+        title: Text(_isEditing ? l10n.edit_persona : l10n.create_persona),
         leading: IconButton(
           icon: const Icon(Icons.close),
           onPressed: () => context.pop(),
@@ -178,7 +184,7 @@ class _CreatePersonaScreenState extends ConsumerState<CreatePersonaScreen> {
                     height: 16,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : Text(_isEditing ? 'Save' : 'Create'),
+                : Text(_isEditing ? l10n.save : l10n.create_persona_button),
           ),
         ],
       ),
@@ -188,7 +194,7 @@ class _CreatePersonaScreenState extends ConsumerState<CreatePersonaScreen> {
           padding: const EdgeInsets.all(16),
           children: [
             Text(
-              'Emoji',
+              l10n.emoji_label,
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
@@ -248,13 +254,13 @@ class _CreatePersonaScreenState extends ConsumerState<CreatePersonaScreen> {
 
             TextFormField(
               controller: _nameController,
-              decoration: const InputDecoration(
-                labelText: 'Name',
-                hintText: 'My Persona',
+              decoration: InputDecoration(
+                labelText: l10n.name_label,
+                hintText: l10n.my_persona_hint,
               ),
               validator: (v) {
-                if (v == null || v.trim().isEmpty) return 'Name is required';
-                if (v.trim().length > 50) return 'Max 50 characters';
+                if (v == null || v.trim().isEmpty) return l10n.name_required;
+                if (v.trim().length > 50) return l10n.name_max_50;
                 return null;
               },
               textInputAction: TextInputAction.next,
@@ -264,7 +270,7 @@ class _CreatePersonaScreenState extends ConsumerState<CreatePersonaScreen> {
 
             DropdownButtonFormField<String>(
               initialValue: _selectedCategory,
-              decoration: const InputDecoration(labelText: 'Category'),
+              decoration: InputDecoration(labelText: l10n.category_label),
               items: _categories
                   .map((c) => DropdownMenuItem(value: c, child: Text(c)))
                   .toList(),
@@ -274,9 +280,9 @@ class _CreatePersonaScreenState extends ConsumerState<CreatePersonaScreen> {
 
             TextFormField(
               controller: _descriptionController,
-              decoration: const InputDecoration(
-                labelText: 'Description (optional)',
-                hintText: 'What this persona does...',
+              decoration: InputDecoration(
+                labelText: l10n.description_optional,
+                hintText: l10n.description_hint,
               ),
               maxLength: 200,
               textInputAction: TextInputAction.next,
@@ -287,7 +293,7 @@ class _CreatePersonaScreenState extends ConsumerState<CreatePersonaScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'System Prompt',
+                  l10n.system_prompt,
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
@@ -297,7 +303,7 @@ class _CreatePersonaScreenState extends ConsumerState<CreatePersonaScreen> {
                 Row(
                   children: [
                     Text(
-                      '${_promptController.text.length}/4000',
+                      l10n.character_count_max(_promptController.text.length),
                       style: TextStyle(
                         fontSize: 12,
                         color: _promptController.text.length > 4000
@@ -313,7 +319,7 @@ class _CreatePersonaScreenState extends ConsumerState<CreatePersonaScreen> {
                         _showPreview ? Icons.edit : Icons.visibility,
                         size: 18,
                       ),
-                      tooltip: _showPreview ? 'Edit' : 'Preview',
+                      tooltip: _showPreview ? l10n.edit : l10n.preview,
                       onPressed: () =>
                           setState(() => _showPreview = !_showPreview),
                     ),
@@ -339,7 +345,7 @@ class _CreatePersonaScreenState extends ConsumerState<CreatePersonaScreen> {
                 ),
                 child: Text(
                   _promptController.text.isEmpty
-                      ? 'No prompt yet...'
+                      ? l10n.no_prompt_placeholder
                       : _promptController.text,
                   style: TextStyle(
                     fontSize: 14,
@@ -354,8 +360,8 @@ class _CreatePersonaScreenState extends ConsumerState<CreatePersonaScreen> {
             else
               TextFormField(
                 controller: _promptController,
-                decoration: const InputDecoration(
-                  hintText: 'You are a helpful assistant...',
+                decoration: InputDecoration(
+                  hintText: l10n.prompt_hint,
                   alignLabelWithHint: true,
                 ),
                 maxLines: 8,
@@ -363,9 +369,9 @@ class _CreatePersonaScreenState extends ConsumerState<CreatePersonaScreen> {
                 maxLength: 4000,
                 validator: (v) {
                   if (v == null || v.trim().isEmpty) {
-                    return 'System prompt is required';
+                    return l10n.prompt_required;
                   }
-                  if (v.trim().length > 4000) return 'Max 4000 characters';
+                  if (v.trim().length > 4000) return l10n.prompt_max_chars;
                   return null;
                 },
                 onChanged: (_) => setState(() {}),
@@ -384,7 +390,7 @@ class _CreatePersonaScreenState extends ConsumerState<CreatePersonaScreen> {
                   ),
                   const SizedBox(width: 4),
                   Text(
-                    'Advanced Settings',
+                    l10n.advanced_settings,
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
@@ -403,9 +409,9 @@ class _CreatePersonaScreenState extends ConsumerState<CreatePersonaScreen> {
                   Expanded(
                     child: TextFormField(
                       controller: _tempController,
-                      decoration: const InputDecoration(
-                        labelText: 'Temperature (0.0–2.0)',
-                        hintText: '0.7',
+                      decoration: InputDecoration(
+                        labelText: l10n.temperature_label,
+                        hintText: l10n.temp_hint,
                       ),
                       keyboardType: const TextInputType.numberWithOptions(
                         decimal: true,
@@ -413,7 +419,7 @@ class _CreatePersonaScreenState extends ConsumerState<CreatePersonaScreen> {
                       validator: (v) {
                         if (v == null || v.trim().isEmpty) return null;
                         final val = double.tryParse(v.trim());
-                        if (val == null || val < 0 || val > 2) return '0.0–2.0';
+                        if (val == null || val < 0 || val > 2) return l10n.range_0_2;
                         return null;
                       },
                     ),
@@ -422,9 +428,9 @@ class _CreatePersonaScreenState extends ConsumerState<CreatePersonaScreen> {
                   Expanded(
                     child: TextFormField(
                       controller: _topPController,
-                      decoration: const InputDecoration(
-                        labelText: 'Top P (0.0–1.0)',
-                        hintText: '0.9',
+                      decoration: InputDecoration(
+                        labelText: l10n.top_p_label,
+                        hintText: l10n.top_p_hint,
                       ),
                       keyboardType: const TextInputType.numberWithOptions(
                         decimal: true,
@@ -432,7 +438,7 @@ class _CreatePersonaScreenState extends ConsumerState<CreatePersonaScreen> {
                       validator: (v) {
                         if (v == null || v.trim().isEmpty) return null;
                         final val = double.tryParse(v.trim());
-                        if (val == null || val < 0 || val > 1) return '0.0–1.0';
+                        if (val == null || val < 0 || val > 1) return l10n.range_0_1;
                         return null;
                       },
                     ),
@@ -449,7 +455,7 @@ class _CreatePersonaScreenState extends ConsumerState<CreatePersonaScreen> {
                       height: 20,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : Text(_isEditing ? 'Save Changes' : 'Create Persona'),
+                  : Text(_isEditing ? l10n.save_changes : l10n.create_persona_button),
             ),
           ],
         ),
