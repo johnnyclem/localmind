@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -36,6 +38,7 @@ class ChatScreen extends ConsumerStatefulWidget {
 
 class _ChatScreenState extends ConsumerState<ChatScreen> {
   final ScrollController _scrollController = ScrollController();
+  final FocusNode _inputFocusNode = FocusNode();
 
   List<String> _quickPrompts(AppLocalizations l10n) => [
     l10n.quick_write,
@@ -47,11 +50,18 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   @override
   void initState() {
     super.initState();
+    _inputFocusNode.addListener(_onFocusChanged);
+  }
+
+  void _onFocusChanged() {
+    setState(() {});
   }
 
   @override
   void dispose() {
     _scrollController.dispose();
+    _inputFocusNode.removeListener(_onFocusChanged);
+    _inputFocusNode.dispose();
     super.dispose();
   }
 
@@ -184,7 +194,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                             : Icons.smart_toy_outlined,
                       ),
                       title: Text(
-                        persona != null ? l10n.change_persona : l10n.set_persona,
+                        persona != null
+                            ? l10n.change_persona
+                            : l10n.set_persona,
                       ),
                       contentPadding: EdgeInsets.zero,
                     ),
@@ -283,33 +295,60 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                   },
                   hasSmartReplies:
                       !chatState.isStreaming &&
-                      ref.read(smartRepliesProvider).isNotEmpty,
+                      MediaQuery.of(context).viewInsets.bottom == 0 &&
+                      (ref
+                              .watch(smartRepliesProvider)
+                              .asData
+                              ?.value
+                              .isNotEmpty ??
+                          false),
                 ),
 
               Positioned(
                 bottom: 0,
                 left: 0,
                 right: 0,
-                child: Stack(
-                  children: [
-                    if (!chatState.isStreaming)
-                      _SmartReplyChips(
-                        onSend: (message) {
-                          ref.read(chatProvider.notifier).sendMessage(message);
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        theme.scaffoldBackgroundColor.withValues(alpha: 0.1),
+                        theme.scaffoldBackgroundColor.withValues(alpha: 0.8),
+                        theme.scaffoldBackgroundColor,
+                      ],
+                      stops: const [0.0, 0.7, 1.0],
+                    ),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (!chatState.isStreaming &&
+                          MediaQuery.of(context).viewInsets.bottom == 0) ...[
+                        const SizedBox(height: 4),
+                        _SmartReplyChips(
+                          onSend: (message) {
+                            ref
+                                .read(chatProvider.notifier)
+                                .sendMessage(message);
+                          },
+                        ),
+                      ],
+                      ChatInputBar(
+                        focusNode: _inputFocusNode,
+                        isStreaming: chatState.isStreaming,
+                        onSend: (message, {attachments}) {
+                          ref
+                              .read(chatProvider.notifier)
+                              .sendMessage(message, attachments: attachments);
+                        },
+                        onStop: () {
+                          ref.read(chatProvider.notifier).cancelStream();
                         },
                       ),
-                    ChatInputBar(
-                      isStreaming: chatState.isStreaming,
-                      onSend: (message, {attachments}) {
-                        ref
-                            .read(chatProvider.notifier)
-                            .sendMessage(message, attachments: attachments);
-                      },
-                      onStop: () {
-                        ref.read(chatProvider.notifier).cancelStream();
-                      },
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -664,9 +703,7 @@ class _ConnectionBanner extends StatelessWidget {
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              isError
-                  ? l10n.connection_error
-                  : l10n.disconnected,
+              isError ? l10n.connection_error : l10n.disconnected,
               style: TextStyle(
                 fontSize: 13,
                 color: isError ? Colors.red : Colors.orange[700],
@@ -1150,7 +1187,7 @@ class _MessageList extends StatelessWidget {
       cacheExtent: 1000,
       padding: EdgeInsets.only(
         top: 16,
-        bottom: 120 + (hasSmartReplies ? 56 : 0),
+        bottom: 120 + (hasSmartReplies ? 64 : 0),
       ),
       itemCount:
           allMessages.length +
@@ -1264,7 +1301,8 @@ class _SmartReplyChipsState extends ConsumerState<_SmartReplyChips>
 
   @override
   Widget build(BuildContext context) {
-    final suggestions = ref.watch(smartRepliesProvider);
+    final suggestionsAsync = ref.watch(smartRepliesProvider);
+    final suggestions = suggestionsAsync.asData?.value ?? [];
 
     if (suggestions.isEmpty) {
       _previousSuggestions = [];
@@ -1282,7 +1320,8 @@ class _SmartReplyChipsState extends ConsumerState<_SmartReplyChips>
       child: SizedBox(
         height: 40,
         child: ListView.separated(
-          padding: EdgeInsetsDirectional.only(start: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          clipBehavior: Clip.none,
           scrollDirection: Axis.horizontal,
           itemCount: suggestions.length,
           separatorBuilder: (_, _) => const SizedBox(width: 6),
@@ -1306,31 +1345,49 @@ class _SmartReplyChipsState extends ConsumerState<_SmartReplyChips>
                   ),
                 );
               },
-              child: GestureDetector(
-                onTap: () => widget.onSend(label),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: isDark
-                        ? const Color(0xFF2A2A2A)
-                        : const Color(0xFFF0F0F0),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: isDark
-                          ? const Color(0xFF3A3A3A)
-                          : const Color(0xFFE0E0E0),
-                    ),
-                  ),
-                  child: Text(
-                    label,
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: isDark
-                          ? const Color(0xFFCCCCCC)
-                          : const Color(0xFF444444),
+              child: Center(
+                child: GestureDetector(
+                  onTap: () => widget.onSend(label),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(20),
+                    child: BackdropFilter(
+                      filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: isDark
+                                ? [
+                                    Colors.white.withValues(alpha: 0.10),
+                                    Colors.white.withValues(alpha: 0.05),
+                                  ]
+                                : [
+                                    Colors.white.withValues(alpha: 0.70),
+                                    Colors.white.withValues(alpha: 0.40),
+                                  ],
+                          ),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: isDark
+                                ? Colors.white.withValues(alpha: 0.18)
+                                : Colors.white.withValues(alpha: 0.80),
+                            width: 1.0,
+                          ),
+                        ),
+                        child: Text(
+                          label,
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                            color: theme.colorScheme.onSurface,
+                          ),
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -1460,7 +1517,10 @@ Error: $errorMessage
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              _DebugRow(label: debugL10n.conversation_id, value: conversation.id),
+              _DebugRow(
+                label: debugL10n.conversation_id,
+                value: conversation.id,
+              ),
               _DebugRow(
                 label: debugL10n.created_at,
                 value: conversation.createdAt.toIso8601String(),

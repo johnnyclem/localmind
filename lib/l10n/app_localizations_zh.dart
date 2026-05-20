@@ -453,6 +453,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get manage_on_device_models => '管理设备端模型';
 
   @override
+  String get enable_smart_reply => '设备端智能回复';
+
+  @override
   String get streaming_responses => '流式响应';
 
   @override

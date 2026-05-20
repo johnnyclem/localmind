@@ -456,6 +456,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get manage_on_device_models => 'إدارة النماذج المحلية';
 
   @override
+  String get enable_smart_reply => 'الردود الذكية المحلية';
+
+  @override
   String get streaming_responses => 'الردود المتدفقة';
 
   @override

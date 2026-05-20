@@ -15,6 +15,8 @@ class Conversation {
   final int? maxTokens;
   final int? contextLength;
   final bool? mcpEnabled;
+  final List<String>? smartReplies;
+  final String? smartRepliesLastMessageId;
 
   Conversation({
     required this.id,
@@ -33,6 +35,8 @@ class Conversation {
     this.maxTokens,
     this.contextLength,
     this.mcpEnabled,
+    this.smartReplies,
+    this.smartRepliesLastMessageId,
   });
 
   Conversation copyWith({
@@ -59,6 +63,10 @@ class Conversation {
     bool clearContextLength = false,
     bool? mcpEnabled,
     bool clearMcpEnabled = false,
+    List<String>? smartReplies,
+    bool clearSmartReplies = false,
+    String? smartRepliesLastMessageId,
+    bool clearSmartRepliesLastMessageId = false,
   }) {
     return Conversation(
       id: id ?? this.id,
@@ -79,6 +87,10 @@ class Conversation {
       contextLength:
           clearContextLength ? null : (contextLength ?? this.contextLength),
       mcpEnabled: clearMcpEnabled ? null : (mcpEnabled ?? this.mcpEnabled),
+      smartReplies: clearSmartReplies ? null : (smartReplies ?? this.smartReplies),
+      smartRepliesLastMessageId: clearSmartRepliesLastMessageId
+          ? null
+          : (smartRepliesLastMessageId ?? this.smartRepliesLastMessageId),
     );
   }
 

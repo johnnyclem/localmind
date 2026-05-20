@@ -162,6 +162,13 @@ class SettingsViews extends ConsumerWidget {
             ),
           const Divider(height: 32),
           _SectionHeader(title: l10n.settings_on_device),
+          _ToggleSetting(
+            label: l10n.enable_smart_reply,
+            value: settings.smartReplyEnabled,
+            onChanged: (v) =>
+                ref.read(settingsProvider.notifier).setSmartReplyEnabled(v),
+            isDark: isDark,
+          ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
             child: OutlinedButton.icon(

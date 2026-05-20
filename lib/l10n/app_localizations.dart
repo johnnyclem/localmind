@@ -946,6 +946,12 @@ abstract class AppLocalizations {
   /// **'Manage On-Device Models'**
   String get manage_on_device_models;
 
+  /// Toggle for on-device smart reply suggestions
+  ///
+  /// In en, this message translates to:
+  /// **'On-Device Smart Replies'**
+  String get enable_smart_reply;
+
   /// Toggle for streaming responses
   ///
   /// In en, this message translates to:

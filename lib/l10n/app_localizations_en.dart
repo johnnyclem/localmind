@@ -457,6 +457,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get manage_on_device_models => 'Manage On-Device Models';
 
   @override
+  String get enable_smart_reply => 'On-Device Smart Replies';
+
+  @override
   String get streaming_responses => 'Streaming Responses';
 
   @override

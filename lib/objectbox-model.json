@@ -5,7 +5,7 @@
   "entities": [
     {
       "id": "1:6060443518060866028",
-      "lastPropertyId": "17:8783340423572117942",
+      "lastPropertyId": "19:2437473986237603139",
       "name": "ConversationEntity",
       "properties": [
         {
@@ -95,6 +95,16 @@
           "id": "17:8783340423572117942",
           "name": "mcpEnabled",
           "type": 1
+        },
+        {
+          "id": "18:2260684969168742247",
+          "name": "smartRepliesJson",
+          "type": 9
+        },
+        {
+          "id": "19:2437473986237603139",
+          "name": "smartRepliesLastMessageId",
+          "type": 9
         }
       ],
       "relations": []

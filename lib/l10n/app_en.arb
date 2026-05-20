@@ -785,6 +785,11 @@
     "description": "Button to manage on-device models"
   },
 
+  "enable_smart_reply": "On-Device Smart Replies",
+  "@enable_smart_reply": {
+    "description": "Toggle for on-device smart reply suggestions"
+  },
+
   "streaming_responses": "Streaming Responses",
   "@streaming_responses": {
     "description": "Toggle for streaming responses"

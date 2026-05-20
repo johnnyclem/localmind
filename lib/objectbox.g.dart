@@ -22,7 +22,7 @@ final _entities = <obx_int.ModelEntity>[
   obx_int.ModelEntity(
     id: const obx_int.IdUid(1, 6060443518060866028),
     name: 'ConversationEntity',
-    lastPropertyId: const obx_int.IdUid(17, 8783340423572117942),
+    lastPropertyId: const obx_int.IdUid(19, 2437473986237603139),
     flags: 0,
     properties: <obx_int.ModelProperty>[
       obx_int.ModelProperty(
@@ -126,6 +126,18 @@ final _entities = <obx_int.ModelEntity>[
         id: const obx_int.IdUid(17, 8783340423572117942),
         name: 'mcpEnabled',
         type: 1,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(18, 2260684969168742247),
+        name: 'smartRepliesJson',
+        type: 9,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(19, 2437473986237603139),
+        name: 'smartRepliesLastMessageId',
+        type: 9,
         flags: 0,
       ),
     ],
@@ -506,7 +518,14 @@ obx_int.ModelDefinition getObjectBoxModel() {
         final systemPromptOffset = object.systemPrompt == null
             ? null
             : fbb.writeString(object.systemPrompt!);
-        fbb.startTable(18);
+        final smartRepliesJsonOffset = object.smartRepliesJson == null
+            ? null
+            : fbb.writeString(object.smartRepliesJson!);
+        final smartRepliesLastMessageIdOffset =
+            object.smartRepliesLastMessageId == null
+            ? null
+            : fbb.writeString(object.smartRepliesLastMessageId!);
+        fbb.startTable(20);
         fbb.addInt64(0, object.internalId);
         fbb.addOffset(1, idOffset);
         fbb.addOffset(2, titleOffset);
@@ -524,6 +543,8 @@ obx_int.ModelDefinition getObjectBoxModel() {
         fbb.addInt64(14, object.maxTokens);
         fbb.addInt64(15, object.contextLength);
         fbb.addBool(16, object.mcpEnabled);
+        fbb.addOffset(17, smartRepliesJsonOffset);
+        fbb.addOffset(18, smartRepliesLastMessageIdOffset);
         fbb.finish(fbb.endTable());
         return object.internalId;
       },
@@ -600,6 +621,12 @@ obx_int.ModelDefinition getObjectBoxModel() {
           rootOffset,
           36,
         );
+        final smartRepliesJsonParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGetNullable(buffer, rootOffset, 38);
+        final smartRepliesLastMessageIdParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGetNullable(buffer, rootOffset, 40);
         final object = ConversationEntity(
           internalId: internalIdParam,
           id: idParam,
@@ -618,6 +645,8 @@ obx_int.ModelDefinition getObjectBoxModel() {
           maxTokens: maxTokensParam,
           contextLength: contextLengthParam,
           mcpEnabled: mcpEnabledParam,
+          smartRepliesJson: smartRepliesJsonParam,
+          smartRepliesLastMessageId: smartRepliesLastMessageIdParam,
         );
         obx_int.InternalToManyAccess.setRelInfo<ConversationEntity>(
           object.messages,
@@ -1070,6 +1099,15 @@ class ConversationEntity_ {
   static final mcpEnabled = obx.QueryBooleanProperty<ConversationEntity>(
     _entities[0].properties[16],
   );
+
+  /// See [ConversationEntity.smartRepliesJson].
+  static final smartRepliesJson = obx.QueryStringProperty<ConversationEntity>(
+    _entities[0].properties[17],
+  );
+
+  /// See [ConversationEntity.smartRepliesLastMessageId].
+  static final smartRepliesLastMessageId =
+      obx.QueryStringProperty<ConversationEntity>(_entities[0].properties[18]);
 
   /// see [ConversationEntity.messages]
   static final messages =

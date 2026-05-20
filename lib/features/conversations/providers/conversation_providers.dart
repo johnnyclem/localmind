@@ -279,6 +279,37 @@ class ConversationsNotifier extends AsyncNotifier<List<Conversation>> {
     }
   }
 
+  Future<void> updateSmartReplies(
+    String id,
+    List<String> replies,
+    String lastMessageId,
+  ) async {
+    final db = ref.read(databaseProvider);
+    final conversations = state.value ?? [];
+    final existingIndex = conversations.indexWhere((c) => c.id == id);
+    if (existingIndex != -1) {
+      final existing = conversations[existingIndex];
+      final updated = existing.copyWith(
+        smartReplies: replies,
+        smartRepliesLastMessageId: lastMessageId,
+      );
+
+      final query = db.conversationBox
+          .query(ConversationEntity_.id.equals(id))
+          .build();
+      final existingEntity = query.findFirst();
+      query.close();
+
+      final entity = ConversationEntity.fromDomain(updated);
+      if (existingEntity != null) {
+        entity.internalId = existingEntity.internalId;
+      }
+      db.conversationBox.put(entity);
+
+      state = AsyncData(await _loadAll());
+    }
+  }
+
   Future<void> deleteAll() async {
     final db = ref.read(databaseProvider);
     db.messageBox.removeAll();

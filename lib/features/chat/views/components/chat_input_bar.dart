@@ -18,6 +18,7 @@ class ChatInputBar extends ConsumerStatefulWidget {
     this.onAttach,
     this.enabled = true,
     this.isStreaming = false,
+    this.focusNode,
   });
 
   final void Function(String message, {List<File>? attachments}) onSend;
@@ -25,6 +26,7 @@ class ChatInputBar extends ConsumerStatefulWidget {
   final void Function(List<File> attachments)? onAttach;
   final bool enabled;
   final bool isStreaming;
+  final FocusNode? focusNode;
 
   @override
   ConsumerState<ChatInputBar> createState() => _ChatInputBarState();
@@ -33,7 +35,7 @@ class ChatInputBar extends ConsumerStatefulWidget {
 class _ChatInputBarState extends ConsumerState<ChatInputBar>
     with SingleTickerProviderStateMixin {
   final _controller = TextEditingController();
-  final _focusNode = FocusNode();
+  late final FocusNode _focusNode;
   final List<File> _attachedFiles = [];
   late AnimationController _sendButtonAnimController;
   late Animation<double> _sendButtonScale;
@@ -41,6 +43,7 @@ class _ChatInputBarState extends ConsumerState<ChatInputBar>
   @override
   void initState() {
     super.initState();
+    _focusNode = widget.focusNode ?? FocusNode();
     _sendButtonAnimController = AnimationController(
       duration: const Duration(milliseconds: 200),
       vsync: this,
@@ -53,7 +56,9 @@ class _ChatInputBarState extends ConsumerState<ChatInputBar>
   @override
   void dispose() {
     _controller.dispose();
-    _focusNode.dispose();
+    if (widget.focusNode == null) {
+      _focusNode.dispose();
+    }
     _sendButtonAnimController.dispose();
     super.dispose();
   }
@@ -90,10 +95,14 @@ class _ChatInputBarState extends ConsumerState<ChatInputBar>
     widget.onStop();
   }
 
-  Widget _buildActionButton(bool canSend, bool isDark) {
+  Widget _buildActionButton(bool canSend, ThemeData theme) {
     final l10n = AppLocalizations.of(context)!;
-    final backgroundColor = isDark ? Colors.white : Colors.black;
-    final iconColor = isDark ? Colors.black : Colors.white;
+    final backgroundColor = widget.isStreaming
+        ? Colors.red
+        : theme.colorScheme.primary;
+    final iconColor = widget.isStreaming
+        ? Colors.white
+        : theme.colorScheme.onPrimary;
 
     return GestureDetector(
       onTapDown: canSend ? (_) => _sendButtonAnimController.forward() : null,
@@ -157,11 +166,12 @@ class _ChatInputBarState extends ConsumerState<ChatInputBar>
         !widget.isStreaming;
 
     return SafeArea(
+      top: false,
       child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        margin: const EdgeInsets.only(left: 20, right: 20, top: 8, bottom: 16),
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
         decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF1C1C1C) : Colors.white,
+          color: theme.colorScheme.surface,
           borderRadius: BorderRadius.circular(40),
           boxShadow: [
             BoxShadow(
@@ -171,7 +181,7 @@ class _ChatInputBarState extends ConsumerState<ChatInputBar>
             ),
           ],
           border: Border.all(
-            color: isDark ? const Color(0xFF2E2E2E) : const Color(0xFFE5E5E5),
+            color: theme.colorScheme.outline,
             width: 1.2,
           ),
         ),
@@ -252,7 +262,7 @@ class _ChatInputBarState extends ConsumerState<ChatInputBar>
                 IconButton(
                   icon: HugeIcon(
                     icon: HugeIcons.strokeRoundedPlusSign,
-                    color: isDark ? Colors.white70 : Colors.black87,
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                     size: 22,
                   ),
                   onPressed: isConnected ? _handleAttach : null,
@@ -273,23 +283,27 @@ class _ChatInputBarState extends ConsumerState<ChatInputBar>
                     },
                     style: TextStyle(
                       fontSize: 15,
-                      color: isDark ? Colors.white : Colors.black87,
+                      color: theme.colorScheme.onSurface,
                     ),
                     decoration: InputDecoration(
+                      filled: false,
+                      border: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      focusedBorder: InputBorder.none,
+                      disabledBorder: InputBorder.none,
                       hintText: l10n.chat_input_hint,
                       hintStyle: TextStyle(
-                        color: isDark ? Colors.white38 : Colors.black38,
+                        color: theme.colorScheme.onSurface.withValues(alpha: 0.38),
                         fontSize: 15,
                         fontWeight: FontWeight.w400,
                       ),
-                      border: InputBorder.none,
                       isDense: true,
                       contentPadding: const EdgeInsets.symmetric(vertical: 12),
                     ),
                   ),
                 ),
                 const SizedBox(width: 8),
-                _buildActionButton(canSend, isDark),
+                _buildActionButton(canSend, theme),
               ],
             ),
           ],

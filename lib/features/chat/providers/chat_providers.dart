@@ -23,6 +23,7 @@ import '../../conversations/data/models/conversation.dart';
 import '../data/chat_service.dart';
 import '../data/models/chat_parameters.dart';
 import '../data/models/message.dart';
+import '../data/smart_reply_service.dart';
 import '../../../core/providers/chat_background_service_provider.dart';
 
 final selectedModelProvider =
@@ -245,55 +246,66 @@ final chatServiceProvider = Provider<ChatService?>((ref) {
   return ChatService.forServer(server.type, ref.read(dioProvider));
 });
 
-final smartRepliesProvider = Provider<List<String>>((ref) {
+final smartReplyServiceProvider = Provider<SmartReplyService>((ref) {
+  final service = SmartReplyService();
+  ref.onDispose(() => service.dispose());
+  return service;
+});
+
+final smartRepliesProvider = FutureProvider<List<String>>((ref) async {
   final chatState = ref.watch(chatProvider);
   final isStreaming = ref.watch(isStreamingProvider);
+  final settings = ref.watch(settingsProvider);
 
-  if (chatState.messages.length < 2 || isStreaming) return [];
+  if (chatState.messages.isEmpty || isStreaming) return [];
 
-  final lastAssistant = chatState.messages.reversed.firstWhere(
-    (m) =>
-        m.role == MessageRole.assistant && m.status == MessageStatus.complete,
-    orElse: () => chatState.messages.last,
-  );
-  if (lastAssistant.role != MessageRole.assistant) return [];
+  final lastMessage = chatState.messages.last;
+  if (lastMessage.role != MessageRole.assistant ||
+      lastMessage.status != MessageStatus.complete) {
+    return [];
+  }
 
-  final content = lastAssistant.content.toLowerCase();
-  final suggestions = <String>[];
+  // Load saved replies if they exist for the current last message
+  final activeConv = ref.watch(conv.activeConversationProvider);
+  if (activeConv != null &&
+      activeConv.smartRepliesLastMessageId == lastMessage.id &&
+      activeConv.smartReplies != null &&
+      activeConv.smartReplies!.isNotEmpty) {
+    return activeConv.smartReplies!;
+  }
 
-  if (content.contains('```') ||
-      content.contains('function') ||
-      content.contains('class ') ||
-      content.contains('import ')) {
-    suggestions.addAll([
-      'Explain this code',
-      'How can I improve this?',
-      'Add error handling',
-      'Write tests for this',
-    ]);
-  } else if (content.contains('step') ||
-      content.contains('first') ||
-      content.contains('then')) {
-    suggestions.addAll([
-      'Can you elaborate on step 1?',
-      'What if I get stuck?',
-      'Give me a summary',
-    ]);
-  } else if (content.contains('error') ||
-      content.contains('problem') ||
-      content.contains('issue')) {
-    suggestions.addAll([
-      'Show me a fix',
-      'What else could cause this?',
-      'How to prevent this?',
-    ]);
-  } else {
-    suggestions.addAll([
-      'Tell me more',
-      'Give me an example',
-      'Summarize this',
-      'What are the alternatives?',
-    ]);
+  List<String> suggestions = [];
+
+  if (settings.smartReplyEnabled) {
+    final server = ref.watch(activeServerProvider);
+    final selectedModel = ref.watch(selectedModelProvider);
+    final chatParams = ref.watch(chatParamsProvider);
+    final chatService = ref.watch(chatServiceProvider);
+
+    if (server != null && chatService != null && selectedModel != null) {
+      final service = ref.read(smartReplyServiceProvider);
+      suggestions = await service.suggestRepliesWithLLM(
+        chatService: chatService,
+        server: server,
+        modelId: selectedModel.id,
+        messages: chatState.messages,
+        params: chatParams,
+      );
+    }
+  }
+
+  if (suggestions.isEmpty) {
+    final service = ref.read(smartReplyServiceProvider);
+    suggestions = service.getFallbackReplies(lastMessage.content);
+  }
+
+  // Save the replies to the conversation database
+  if (activeConv != null && suggestions.isNotEmpty) {
+    Future.microtask(() {
+      ref
+          .read(conv.conversationsProvider.notifier)
+          .updateSmartReplies(activeConv.id, suggestions, lastMessage.id);
+    });
   }
 
   return suggestions;
@@ -361,6 +373,7 @@ class ChatNotifier extends Notifier<ChatState> {
   Future<void> loadConversation(Conversation conversation) async {
     await cancelStream();
     _currentConversationId = conversation.id;
+    ref.read(smartReplyServiceProvider).reset();
     state = state.copyWith(
       isLoading: true,
       errorMessage: null,
@@ -436,6 +449,7 @@ class ChatNotifier extends Notifier<ChatState> {
   Future<void> startNewConversation() async {
     await cancelStream();
     _currentConversationId = null;
+    ref.read(smartReplyServiceProvider).reset();
     state = const ChatState();
     ref
         .read(conv.activeConversationProvider.notifier)

@@ -180,6 +180,8 @@ class ConversationEntity {
   int? maxTokens;
   int? contextLength;
   bool? mcpEnabled;
+  String? smartRepliesJson;
+  String? smartRepliesLastMessageId;
 
   @Backlink()
   final messages = ToMany<MessageEntity>();
@@ -202,6 +204,8 @@ class ConversationEntity {
     this.maxTokens,
     this.contextLength,
     this.mcpEnabled,
+    this.smartRepliesJson,
+    this.smartRepliesLastMessageId,
   });
 
   factory ConversationEntity.fromDomain(Conversation conversation) {
@@ -222,6 +226,10 @@ class ConversationEntity {
       maxTokens: conversation.maxTokens,
       contextLength: conversation.contextLength,
       mcpEnabled: conversation.mcpEnabled,
+      smartRepliesJson: conversation.smartReplies != null
+          ? jsonEncode(conversation.smartReplies)
+          : null,
+      smartRepliesLastMessageId: conversation.smartRepliesLastMessageId,
     );
   }
 
@@ -243,6 +251,10 @@ class ConversationEntity {
       maxTokens: maxTokens,
       contextLength: contextLength,
       mcpEnabled: mcpEnabled,
+      smartReplies: smartRepliesJson != null
+          ? List<String>.from(jsonDecode(smartRepliesJson!))
+          : null,
+      smartRepliesLastMessageId: smartRepliesLastMessageId,
     );
   }
 

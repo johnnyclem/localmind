@@ -174,6 +174,7 @@
   "loading_model": "Cargando {modelId}...",
   "loading_model_error": "Error: {error}",
   "manage_on_device_models": "Gestionar modelos locales",
+  "enable_smart_reply": "Respuestas inteligentes locales",
   "manage_servers": "Gestionar servidores",
   "manage_tts_models": "Gestionar modelos TTS",
   "max_tokens": "Máximo de tokens",

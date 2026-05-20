@@ -36,6 +36,7 @@ class AppSettings {
   final double ttsSpeed;
   final KittenTtsModelVariant kittenTtsModelVariant;
   final bool autoSpeakEnabled;
+  final bool smartReplyEnabled;
   final String? localeCode;
 
   AppSettings({
@@ -65,6 +66,7 @@ class AppSettings {
     this.ttsSpeed = 1.0,
     this.kittenTtsModelVariant = KittenTtsModelVariant.nanoInt8,
     this.autoSpeakEnabled = false,
+    this.smartReplyEnabled = true,
     this.localeCode,
   });
 
@@ -95,6 +97,7 @@ class AppSettings {
     double? ttsSpeed,
     KittenTtsModelVariant? kittenTtsModelVariant,
     bool? autoSpeakEnabled,
+    bool? smartReplyEnabled,
     Object? localeCode = _unset,
   }) {
     return AppSettings(
@@ -130,6 +133,7 @@ class AppSettings {
       kittenTtsModelVariant:
           kittenTtsModelVariant ?? this.kittenTtsModelVariant,
       autoSpeakEnabled: autoSpeakEnabled ?? this.autoSpeakEnabled,
+      smartReplyEnabled: smartReplyEnabled ?? this.smartReplyEnabled,
       localeCode: identical(localeCode, _unset)
           ? this.localeCode
           : localeCode as String?,
@@ -164,6 +168,7 @@ class AppSettings {
       'ttsSpeed': ttsSpeed,
       'kittenTtsModelVariant': kittenTtsModelVariant.name,
       'autoSpeakEnabled': autoSpeakEnabled,
+      'smartReplyEnabled': smartReplyEnabled,
       'localeCode': localeCode,
     };
   }
@@ -196,6 +201,7 @@ class AppSettings {
       ttsSpeed: map['ttsSpeed']?.toDouble() ?? 1.0,
       kittenTtsModelVariant: _parseKittenVariant(map['kittenTtsModelVariant']),
       autoSpeakEnabled: map['autoSpeakEnabled'] ?? false,
+      smartReplyEnabled: map['smartReplyEnabled'] ?? true,
       localeCode: map['localeCode'] as String?,
     );
   }

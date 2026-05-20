@@ -174,6 +174,7 @@
   "loading_model": "{modelId} লোড করা হচ্ছে...",
   "loading_model_error": "ত্রুটি: {error}",
   "manage_on_device_models": "অন-ডিভাইস মডেল পরিচালনা করুন",
+  "enable_smart_reply": "অন-ডিভাইস স্মার্ট রিপ্লাই",
   "manage_servers": "সার্ভার পরিচালনা করুন",
   "manage_tts_models": "টিটিএস (TTS) মডেল পরিচালনা করুন",
   "max_tokens": "সর্বোচ্চ টোকেন",

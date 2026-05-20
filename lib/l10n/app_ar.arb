@@ -281,6 +281,8 @@
 
   "manage_on_device_models": "إدارة النماذج المحلية",
 
+  "enable_smart_reply": "الردود الذكية المحلية",
+
   "streaming_responses": "الردود المتدفقة",
 
   "auto_generate_titles": "إنشاء العناوين تلقائياً",
