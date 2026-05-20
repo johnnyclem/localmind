@@ -1309,6 +1309,16 @@
     "description": "Older conversations section header"
   },
 
+  "onboarding_choose_language": "Choose Language",
+  "@onboarding_choose_language": {
+    "description": "Onboarding title to select application language"
+  },
+
+  "onboarding_choose_language_desc": "Select your preferred language. You can change this anytime in settings.",
+  "@onboarding_choose_language_desc": {
+    "description": "Onboarding description for language selection"
+  },
+
   "onboarding_localmind": "LOCALMIND",
   "@onboarding_localmind": {
     "description": "Onboarding screen branding text"
@@ -1322,6 +1332,11 @@
   "onboarding_connect_desc": "Connect to LM Studio, Ollama, or\nOpenRouter to start your private AI\nexperience.",
   "@onboarding_connect_desc": {
     "description": "Onboarding server connection description"
+  },
+
+  "onboarding_welcome": "Welcome to LocalMind",
+  "@onboarding_welcome": {
+    "description": "Onboarding welcome message"
   },
 
   "server_type_on_device": "On-Device",

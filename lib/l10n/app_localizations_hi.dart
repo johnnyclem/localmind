@@ -765,6 +765,13 @@ class AppLocalizationsHi extends AppLocalizations {
   String get older_section => 'पुराने';
 
   @override
+  String get onboarding_choose_language => 'भाषा चुनें';
+
+  @override
+  String get onboarding_choose_language_desc =>
+      'अपनी पसंदीदा भाषा चुनें। आप इसे सेटिंग्स में कभी भी बदल सकते हैं।';
+
+  @override
   String get onboarding_localmind => 'LOCALMIND';
 
   @override
@@ -773,6 +780,9 @@ class AppLocalizationsHi extends AppLocalizations {
   @override
   String get onboarding_connect_desc =>
       'अपना निजी AI अनुभव शुरू करने के लिए\nLM Studio, Ollama, या OpenRouter से\nकनेक्ट करें।';
+
+  @override
+  String get onboarding_welcome => 'LocalMind में आपका स्वागत है';
 
   @override
   String get server_type_on_device => 'ऑन-डिवाइस';

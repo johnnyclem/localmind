@@ -1,6 +1,7 @@
 class AppRoutes {
   static const String home = '/';
   static const String onboarding = '/onboarding';
+  static const String onboardingServerType = '/onboarding/server-type';
   static const String onboardingSetup = '/onboarding/setup';
   static const String onboardingModelDownload = '/onboarding/model-download';
   static const String onboardingTheme = '/onboarding/theme';

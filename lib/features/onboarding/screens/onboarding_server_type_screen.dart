@@ -34,6 +34,7 @@ class _OnboardingServerTypeScreenState
 
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: Row(
           children: [
             Padding(
@@ -196,7 +197,10 @@ class _OnboardingServerTypeScreenState
                   },
                   child: Text(
                     l10n.continue_action,
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
                 SizedBox(

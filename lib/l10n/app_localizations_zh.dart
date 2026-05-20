@@ -753,6 +753,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get older_section => '更早';
 
   @override
+  String get onboarding_choose_language => '选择语言';
+
+  @override
+  String get onboarding_choose_language_desc => '选择您首选的语言。您随时可以在设置中更改此项。';
+
+  @override
   String get onboarding_localmind => 'LOCALMIND';
 
   @override
@@ -761,6 +767,9 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String get onboarding_connect_desc =>
       '连接到 LM Studio、Ollama 或\nOpenRouter，开启您的私有 AI\n体验。';
+
+  @override
+  String get onboarding_welcome => '欢迎使用 LocalMind';
 
   @override
   String get server_type_on_device => '设备端';

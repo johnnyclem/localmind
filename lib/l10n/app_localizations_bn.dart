@@ -766,6 +766,13 @@ class AppLocalizationsBn extends AppLocalizations {
   String get older_section => 'পূর্বের';
 
   @override
+  String get onboarding_choose_language => 'ভাষা নির্বাচন করুন';
+
+  @override
+  String get onboarding_choose_language_desc =>
+      'আপনার পছন্দের ভাষা নির্বাচন করুন। আপনি সেটিংস থেকে যেকোনো সময় এটি পরিবর্তন করতে পারবেন।';
+
+  @override
   String get onboarding_localmind => 'LOCALMIND';
 
   @override
@@ -774,6 +781,9 @@ class AppLocalizationsBn extends AppLocalizations {
   @override
   String get onboarding_connect_desc =>
       'আপনার নিজস্ব ব্যক্তিগত এআই অভিজ্ঞতা শুরু করতে\nLM Studio, Ollama, অথবা OpenRouter-এর সাথে\nসংযোগ করুন।';
+
+  @override
+  String get onboarding_welcome => 'LocalMind-এ স্বাগতম';
 
   @override
   String get server_type_on_device => 'অন-ডিভাইস (On-Device)';

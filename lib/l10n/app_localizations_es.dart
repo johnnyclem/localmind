@@ -766,6 +766,13 @@ class AppLocalizationsEs extends AppLocalizations {
   String get older_section => 'MÁS ANTIGUOS';
 
   @override
+  String get onboarding_choose_language => 'Elija el idioma';
+
+  @override
+  String get onboarding_choose_language_desc =>
+      'Seleccione su idioma preferido. Puede cambiar esto en cualquier momento en la configuración.';
+
+  @override
   String get onboarding_localmind => 'LOCALMIND';
 
   @override
@@ -774,6 +781,9 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get onboarding_connect_desc =>
       'Conéctese a LM Studio, Ollama o\nOpenRouter para comenzar su experiencia\nprivada de IA.';
+
+  @override
+  String get onboarding_welcome => 'Bienvenido a LocalMind';
 
   @override
   String get server_type_on_device => 'Local';

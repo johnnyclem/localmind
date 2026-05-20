@@ -156,7 +156,9 @@ class _OnboardingServerSetupScreenState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(AppLocalizations.of(context)!.error_with_message(e.toString())),
+            content: Text(
+              AppLocalizations.of(context)!.error_with_message(e.toString()),
+            ),
             backgroundColor: Colors.red,
           ),
         );
@@ -202,8 +204,9 @@ class _OnboardingServerSetupScreenState
                   filled: true,
                   fillColor: theme.colorScheme.surface,
                 ),
-                validator: (val) =>
-                    val == null || val.trim().isEmpty ? l10n.name_required : null,
+                validator: (val) => val == null || val.trim().isEmpty
+                    ? l10n.name_required
+                    : null,
               ),
               const SizedBox(height: 16),
 
@@ -246,7 +249,9 @@ class _OnboardingServerSetupScreenState
               TextFormField(
                 controller: _apiKeyController,
                 decoration: InputDecoration(
-                  labelText: isCloud ? l10n.api_key_required : l10n.api_key_optional,
+                  labelText: isCloud
+                      ? l10n.api_key_required
+                      : l10n.api_key_optional,
                   filled: true,
                   fillColor: theme.colorScheme.surface,
                 ),

@@ -473,11 +473,17 @@
 
   "older_section": "الأقدم",
 
+  "onboarding_choose_language": "اختر اللغة",
+
+  "onboarding_choose_language_desc": "اختر لغتك المفضلة. يمكنك تغيير هذا في أي وقت من الإعدادات.",
+
   "onboarding_localmind": "LOCALMIND",
 
   "onboarding_connect_server": "اتصل\nبخادمك",
 
   "onboarding_connect_desc": "اتصل بـ LM Studio أو Ollama أو\nOpenRouter لبدء تجربة الذكاء\nالاصطناعي الخاصة بك.",
+
+  "onboarding_welcome": "مرحباً بك في LocalMind",
 
   "server_type_on_device": "محلي",
 

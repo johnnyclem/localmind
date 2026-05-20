@@ -1522,6 +1522,18 @@ abstract class AppLocalizations {
   /// **'OLDER'**
   String get older_section;
 
+  /// Onboarding title to select application language
+  ///
+  /// In en, this message translates to:
+  /// **'Choose Language'**
+  String get onboarding_choose_language;
+
+  /// Onboarding description for language selection
+  ///
+  /// In en, this message translates to:
+  /// **'Select your preferred language. You can change this anytime in settings.'**
+  String get onboarding_choose_language_desc;
+
   /// Onboarding screen branding text
   ///
   /// In en, this message translates to:
@@ -1539,6 +1551,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Connect to LM Studio, Ollama, or\nOpenRouter to start your private AI\nexperience.'**
   String get onboarding_connect_desc;
+
+  /// Onboarding welcome message
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome to LocalMind'**
+  String get onboarding_welcome;
 
   /// On-device server type card title
   ///
