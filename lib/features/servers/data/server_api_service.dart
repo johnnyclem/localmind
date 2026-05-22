@@ -97,6 +97,15 @@ class ServerApiService {
     switch (server.type) {
       case ServerType.lmStudio:
       case ServerType.openAICompatible:
+        try {
+          await _dio.post(
+            server.loadModelEndpoint,
+            data: {'model': modelId},
+            options: Options(headers: _getAuthHeaders(server)),
+          );
+        } catch (_) {
+          // Not all OpenAI-compatible servers support this endpoint
+        }
       case ServerType.ollama:
         await _dio.post(
           server.loadModelEndpoint,
@@ -118,12 +127,16 @@ class ServerApiService {
     switch (server.type) {
       case ServerType.lmStudio:
       case ServerType.openAICompatible:
-        final response = await _dio.post(
-          server.loadModelEndpoint,
-          data: {'model': modelId, 'echo_load_config': true},
-          options: Options(headers: _getAuthHeaders(server)),
-        );
-        return response.data['instance_id'] as String?;
+        try {
+          final response = await _dio.post(
+            server.loadModelEndpoint,
+            data: {'model': modelId, 'echo_load_config': true},
+            options: Options(headers: _getAuthHeaders(server)),
+          );
+          return response.data['instance_id'] as String?;
+        } catch (_) {
+          return null;
+        }
       case ServerType.ollama:
         await _dio.post(
           server.loadModelEndpoint,
@@ -150,11 +163,15 @@ class ServerApiService {
     switch (server.type) {
       case ServerType.lmStudio:
       case ServerType.openAICompatible:
-        await _dio.post(
-          server.unloadModelEndpoint,
-          data: {'instance_id': instanceId ?? modelId},
-          options: Options(headers: _getAuthHeaders(server)),
-        );
+        try {
+          await _dio.post(
+            server.unloadModelEndpoint,
+            data: {'instance_id': instanceId ?? modelId},
+            options: Options(headers: _getAuthHeaders(server)),
+          );
+        } catch (_) {
+          // Not all OpenAI-compatible servers support this endpoint
+        }
       case ServerType.ollama:
         await _dio.post(
           server.unloadModelEndpoint,
@@ -171,9 +188,17 @@ class ServerApiService {
     final runningModels = <String>{};
     if (data['models'] != null) {
       for (final item in data['models']) {
+        final id = item['key'] as String? ??
+            item['name'] as String? ??
+            item['id'] as String? ??
+            '';
         final loadedInstances = item['loaded_instances'] as List?;
         if (loadedInstances != null && loadedInstances.isNotEmpty) {
-          runningModels.add(item['key'] as String? ?? '');
+          runningModels.add(id);
+        } else if (id.isNotEmpty) {
+          // Servers without loaded_instances (e.g. llama.cpp) always have
+          // their model running if it appears in the model list
+          runningModels.add(id);
         }
       }
     }
@@ -199,21 +224,41 @@ class ServerApiService {
 
   List<ModelInfo> _parseLMStudioModels(dynamic data, Server server) {
     final List<ModelInfo> models = [];
+
+    // Build a lookup from the OpenAI-style 'data' array for metadata
+    // that may be missing from the 'models' array (e.g. llama.cpp)
+    final Map<String, Map<String, dynamic>> metaById = {};
+    if (data['data'] != null) {
+      for (final item in data['data']) {
+        final id = item['id'] as String? ?? '';
+        if (id.isNotEmpty) {
+          metaById[id] = (item['meta'] as Map<String, dynamic>?) ?? {};
+        }
+      }
+    }
+
     if (data['models'] != null) {
       for (final item in data['models']) {
-        final id = item['key'] as String? ?? '';
+        final id = item['key'] as String? ??
+            item['name'] as String? ??
+            item['id'] as String? ??
+            '';
         final displayName = item['display_name'] as String?;
         final quantization = item['quantization'];
         final paramsString = item['params_string'] as String?;
+        final meta = metaById[id] ?? {};
 
         models.add(
           ModelInfo(
             id: id,
             name: displayName ?? _formatModelName(id),
             description: item['description'] as String?,
-            parameterCount: _parseParameterString(paramsString),
-            contextLength: item['max_context_length'] as int?,
-            fileSize: item['size_bytes'] as int?,
+            parameterCount: _parseParameterString(paramsString) ??
+                _paramCountFromMeta(meta['n_params']),
+            contextLength: item['max_context_length'] as int? ??
+                meta['n_ctx_train'] as int?,
+            fileSize: item['size_bytes'] as int? ??
+                meta['size'] as int?,
             quantization: quantization?['name'] as String?,
             architecture: item['architecture'] as String?,
             serverType: server.type,
@@ -223,6 +268,12 @@ class ServerApiService {
       }
     }
     return models;
+  }
+
+  int? _paramCountFromMeta(dynamic nParams) {
+    if (nParams == null) return null;
+    if (nParams is int) return nParams ~/ 1000000000;
+    return null;
   }
 
   List<ModelInfo> _parseOllamaModels(dynamic data, Server server) {
