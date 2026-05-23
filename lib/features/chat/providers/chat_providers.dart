@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:math';
 
 import '../../../core/logger/app_logger.dart';
+import '../../../core/services/message_save_service.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/providers/app_providers.dart';
@@ -362,10 +363,16 @@ class ChatNotifier extends Notifier<ChatState> {
   int _lastSavedContentLength = 0;
   int _lastSavedReasoningLength = 0;
 
+  /// Batches checkpoint saves off the UI thread during streaming.
+  MessageSaveService? _saveService;
+
   @override
   ChatState build() {
+    final db = ref.read(databaseProvider);
+    _saveService = MessageSaveService(db);
     ref.onDispose(() {
       _streamSubscription?.cancel();
+      _saveService?.dispose();
     });
     return const ChatState();
   }
@@ -640,7 +647,8 @@ class ChatNotifier extends Notifier<ChatState> {
                     _chunkCount++;
 
                     if (_shouldCheckpointSave(streamingAssistantMessage)) {
-                      await _saveMessage(streamingAssistantMessage);
+                      // Non-blocking enqueue — never stalls the stream listener.
+                      _saveService?.enqueue(streamingAssistantMessage);
                       _updateSavedMetrics(streamingAssistantMessage);
                       _resetCheckpointMetrics();
                     }
@@ -677,7 +685,8 @@ class ChatNotifier extends Notifier<ChatState> {
                     _chunkCount++;
 
                     if (_shouldCheckpointSave(streamingAssistantMessage)) {
-                      await _saveMessage(streamingAssistantMessage);
+                      // Non-blocking enqueue — never stalls the stream listener.
+                      _saveService?.enqueue(streamingAssistantMessage);
                       _updateSavedMetrics(streamingAssistantMessage);
                       _resetCheckpointMetrics();
                     }
@@ -762,6 +771,8 @@ class ChatNotifier extends Notifier<ChatState> {
                 }
               },
               onDone: () async {
+                // Flush batched checkpoint saves before finalising UI state.
+                await _saveService?.flush();
                 ref.read(chatBackgroundServiceProvider).stop();
                 final streamConvId = assistantMessage.conversationId;
                 final isCurrentContext = _currentConversationId == streamConvId;
@@ -858,6 +869,8 @@ class ChatNotifier extends Notifier<ChatState> {
                 _lastCheckpointTime = null;
                 _lastSavedContentLength = 0;
                 _lastSavedReasoningLength = 0;
+                // Flush any batched saves before processing the error state.
+                await _saveService?.flush();
                 final errorMessage = state.streamingMessage?.copyWith(
                   status: MessageStatus.error,
                   errorMessage: error.toString(),
@@ -1022,6 +1035,9 @@ class ChatNotifier extends Notifier<ChatState> {
     _lastCheckpointTime = null;
     _lastSavedContentLength = 0;
     _lastSavedReasoningLength = 0;
+
+    // Flush any in-flight checkpoint saves before writing the final state.
+    await _saveService?.flush();
 
     final streamingMessage = state.streamingMessage;
     if (streamingMessage != null) {

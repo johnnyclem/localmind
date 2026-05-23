@@ -40,17 +40,18 @@ class ModelDownloader {
 
     int receivedBytes = 0;
     bool isResumed = false;
+    int initialReceivedBytes = 0; // captured before download, used for session speed calc
 
     // 3. Check for partial file to resume
     if (await partialFile.exists()) {
       receivedBytes = await partialFile.length();
+      initialReceivedBytes = receivedBytes;
       isResumed = receivedBytes > 0;
       Log.info('Resuming download for ${model.id} from $receivedBytes bytes');
     }
 
     final startTime = DateTime.now();
     DateTime lastProgressUpdate = DateTime.now();
-    int bytesSinceLastUpdate = 0;
 
     try {
       // 4. Resolve redirects manually to handle Auth header safety
@@ -78,7 +79,6 @@ class ModelDownloader {
       await for (final List<int> chunk in stream) {
         sink.add(chunk);
         receivedBytes += chunk.length;
-        bytesSinceLastUpdate += chunk.length;
 
         final now = DateTime.now();
         final elapsedSinceLastUpdate = now.difference(lastProgressUpdate);
@@ -86,9 +86,10 @@ class ModelDownloader {
         // Update progress every 500ms
         if (elapsedSinceLastUpdate.inMilliseconds >= 500) {
           final totalElapsed = now.difference(startTime);
-          final bytesDownloadedInThisSession = receivedBytes - (isResumed ? (await partialFile.length() - bytesSinceLastUpdate) : 0);
-          
           // Use a simple bytes per second based on the current session's progress
+          // Use in-memory initialReceivedBytes instead of calling partialFile.length() (stat syscall)
+          final bytesDownloadedInThisSession =
+              receivedBytes - (isResumed ? initialReceivedBytes : 0);
           final bytesPerSecond = (bytesDownloadedInThisSession / totalElapsed.inMilliseconds * 1000).toInt();
           
           final remainingBytes = totalBytes - receivedBytes;
@@ -113,7 +114,6 @@ class ModelDownloader {
           );
 
           lastProgressUpdate = now;
-          bytesSinceLastUpdate = 0;
         }
       }
 

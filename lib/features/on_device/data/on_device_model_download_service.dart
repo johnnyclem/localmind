@@ -49,7 +49,7 @@ class OnDeviceModelDownloadService {
     }
 
     final List<DownloadedModel> result = [];
-    final entities = dir.listSync();
+    final entities = await dir.list().toList();
     for (final entity in entities) {
       if (entity is File && entity.path.endsWith('.litertlm')) {
         final fileName = entity.path.split('/').last;

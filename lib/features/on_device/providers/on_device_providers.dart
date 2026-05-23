@@ -11,6 +11,7 @@ import '../data/on_device_model_download_service.dart';
 import '../data/foreground_download_service.dart';
 import '../data/model_downloader.dart';
 import '../data/download_notification_service.dart';
+import '../../../core/providers/chat_background_service_provider.dart';
 
 final onDeviceEngineProvider =
     NotifierProvider<OnDeviceEngineNotifier, OnDeviceEngineState>(() {
@@ -108,6 +109,11 @@ class OnDeviceEngineNotifier extends Notifier<OnDeviceEngineState> {
   Future<void> loadModel(String modelId, LiteLmBackendType backend) async {
     state = state.copyWith(status: OnDeviceEngineStatus.loading, error: null);
 
+    // Protect the heavy native model-load (mmap of 1–7 GB) from Android
+    // CPU throttling by keeping a foreground service active for its duration.
+    final bgService = ref.read(chatBackgroundServiceProvider);
+    await bgService.start();
+
     try {
       final modelPath = await OnDeviceEngineService.getModelPath(modelId);
       if (modelPath == null) {
@@ -134,6 +140,9 @@ class OnDeviceEngineNotifier extends Notifier<OnDeviceEngineState> {
         status: OnDeviceEngineStatus.error,
         error: 'Failed to load model: ${e.toString()}',
       );
+    } finally {
+      // Always stop the foreground service — even if load fails.
+      await bgService.stop();
     }
   }
 
