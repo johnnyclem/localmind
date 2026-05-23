@@ -42,6 +42,16 @@ const _languages = [
     gradient: [Color(0xFF6366F1), Color(0xFF4F46E5)],
   ),
   _LanguageOption(
+    code: 'it',
+    nativeName: 'Italiano',
+    englishName: 'Italian',
+    flag: '🇮🇹',
+    flagAsset: 'assets/images/flag_it.png',
+    countryCode: 'IT',
+    shortText: 'It',
+    gradient: [Color(0xFF3B82F6), Color(0xFF1D4ED8)],
+  ),
+  _LanguageOption(
     code: 'es',
     nativeName: 'Español',
     englishName: 'Spanish',
@@ -72,16 +82,6 @@ const _languages = [
     gradient: [Color(0xFF10B981), Color(0xFF059669)],
   ),
   _LanguageOption(
-    code: 'hi',
-    nativeName: 'हिन्दी',
-    englishName: 'Hindi',
-    flag: '🇮🇳',
-    flagAsset: 'assets/images/flag_in.png',
-    countryCode: 'IN',
-    shortText: 'Hi',
-    gradient: [Color(0xFFEC4899), Color(0xFFDB2777)],
-  ),
-  _LanguageOption(
     code: 'bn',
     nativeName: 'বাংলা',
     englishName: 'Bengali',
@@ -90,6 +90,16 @@ const _languages = [
     countryCode: 'BD',
     shortText: 'Bn',
     gradient: [Color(0xFF06B6D4), Color(0xFF0891B2)],
+  ),
+  _LanguageOption(
+    code: 'hi',
+    nativeName: 'हिन्दी',
+    englishName: 'Hindi',
+    flag: '🇮🇳',
+    flagAsset: 'assets/images/flag_in.png',
+    countryCode: 'IN',
+    shortText: 'Hi',
+    gradient: [Color(0xFFEC4899), Color(0xFFDB2777)],
   ),
 ];
 
@@ -121,8 +131,7 @@ class _OnboardingLanguageScreenState
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
-    final screenWidth = MediaQuery.of(context).size.width;
-    final crossAxisCount = screenWidth > 600 ? 3 : 2;
+
 
     return Scaffold(
       appBar: AppBar(
@@ -192,16 +201,11 @@ class _OnboardingLanguageScreenState
                     ),
                   ),
                   const SizedBox(height: 32),
-                  GridView.builder(
+                  ListView.separated(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: crossAxisCount,
-                      crossAxisSpacing: 16,
-                      mainAxisSpacing: 16,
-                      childAspectRatio: 1.05,
-                    ),
                     itemCount: _languages.length,
+                    separatorBuilder: (context, index) => const SizedBox(height: 12),
                     itemBuilder: (context, index) {
                       final lang = _languages[index];
                       final isSelected = _selectedCode == lang.code;
@@ -218,7 +222,10 @@ class _OnboardingLanguageScreenState
                         },
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 200),
-                          padding: const EdgeInsets.all(16),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
                           decoration: BoxDecoration(
                             color: theme.colorScheme.surface,
                             borderRadius: BorderRadius.circular(16),
@@ -226,96 +233,107 @@ class _OnboardingLanguageScreenState
                               color: isSelected
                                   ? theme.colorScheme.primary
                                   : theme.colorScheme.outline
-                                      .withValues(alpha: 0.3),
+                                      .withValues(alpha: 0.15),
                               width: isSelected ? 2 : 1,
                             ),
                             boxShadow: isSelected
                                 ? [
                                     BoxShadow(
                                       color: theme.colorScheme.primary
-                                          .withValues(alpha: 0.15),
-                                      blurRadius: 10,
-                                      offset: const Offset(0, 4),
+                                          .withValues(alpha: 0.1),
+                                      blurRadius: 8,
+                                      offset: const Offset(0, 2),
                                     )
                                   ]
                                 : null,
                           ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          child: Row(
                             children: [
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Container(
-                                    width: 52,
-                                    height: 36,
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(6),
-                                      border: Border.all(
-                                        color: theme.colorScheme.outline
-                                            .withValues(alpha: 0.15),
-                                        width: 1,
-                                      ),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.black.withValues(alpha: 0.05),
-                                          blurRadius: 4,
-                                          offset: const Offset(0, 2),
-                                        ),
-                                      ],
-                                    ),
-                                    alignment: Alignment.center,
-                                    child: ClipRRect(
-                                      borderRadius: BorderRadius.circular(5),
-                                      child: Image.asset(
-                                        lang.flagAsset,
-                                        width: 52,
-                                        height: 36,
-                                        fit: BoxFit.cover,
-                                        errorBuilder: (context, error, stackTrace) {
-                                          return Text(
-                                            lang.flag,
-                                            style: const TextStyle(fontSize: 18),
-                                          );
-                                        },
-                                      ),
-                                    ),
+                              Container(
+                                width: 48,
+                                height: 32,
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(6),
+                                  border: Border.all(
+                                    color: theme.colorScheme.outline
+                                        .withValues(alpha: 0.15),
+                                    width: 1,
                                   ),
-                                  if (isSelected)
-                                    Icon(
-                                      Icons.check_circle_rounded,
-                                      color: theme.colorScheme.primary,
-                                      size: 20,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withValues(alpha: 0.05),
+                                      blurRadius: 4,
+                                      offset: const Offset(0, 2),
                                     ),
-                                ],
+                                  ],
+                                ),
+                                alignment: Alignment.center,
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(5),
+                                  child: Image.asset(
+                                    lang.flagAsset,
+                                    width: 48,
+                                    height: 32,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Text(
+                                        lang.flag,
+                                        style: const TextStyle(fontSize: 18),
+                                      );
+                                    },
+                                  ),
+                                ),
                               ),
-                              const SizedBox(height: 12),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    lang.nativeName,
-                                    style:
-                                        theme.textTheme.titleMedium?.copyWith(
-                                      fontWeight: FontWeight.bold,
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      lang.nativeName,
+                                      style:
+                                          theme.textTheme.titleMedium?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    '${lang.englishName} • ${lang.shortText.toUpperCase()}',
-                                    style: theme.textTheme.labelSmall?.copyWith(
-                                      color: theme.colorScheme.onSurface
-                                          .withValues(alpha: 0.5),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      '${lang.englishName} • ${lang.shortText.toUpperCase()}',
+                                      style: theme.textTheme.labelSmall?.copyWith(
+                                        color: theme.colorScheme.onSurface
+                                            .withValues(alpha: 0.5),
+                                      ),
                                     ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              AnimatedContainer(
+                                duration: const Duration(milliseconds: 200),
+                                width: 22,
+                                height: 22,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: isSelected
+                                      ? theme.colorScheme.primary
+                                      : Colors.transparent,
+                                  border: Border.all(
+                                    color: isSelected
+                                        ? theme.colorScheme.primary
+                                        : theme.colorScheme.outline
+                                            .withValues(alpha: 0.3),
+                                    width: 2,
                                   ),
-                                ],
+                                ),
+                                child: isSelected
+                                    ? const Icon(
+                                        Icons.check,
+                                        color: Colors.white,
+                                        size: 14,
+                                      )
+                                    : null,
                               ),
                             ],
                           ),

@@ -309,13 +309,14 @@ class _LanguageSetting extends StatelessWidget {
     required this.isDark,
   });
 
-  static const _localeItems = <(String?, String)>[
-    ('en', 'English'),
-    ('ar', 'العربية'),
-    ('bn', 'বাংলা'),
-    ('zh', '中文'),
-    ('es', 'Español'),
-    ('hi', 'हिन्दी'),
+  static const _localeItems = <(String, String, String, String)>[
+    ('en', 'English', 'assets/images/flag_us.png', '🇺🇸'),
+    ('it', 'Italiano', 'assets/images/flag_it.png', '🇮🇹'),
+    ('es', 'Español', 'assets/images/flag_es.png', '🇪🇸'),
+    ('zh', '中文', 'assets/images/flag_cn.png', '🇨🇳'),
+    ('ar', 'العربية', 'assets/images/flag_sa.png', '🇸🇦'),
+    ('bn', 'বাংলা', 'assets/images/flag_bd.png', '🇧🇩'),
+    ('hi', 'हिन्दी', 'assets/images/flag_in.png', '🇮🇳'),
   ];
 
   final String? current;
@@ -364,7 +365,7 @@ class _LanguageSetting extends StatelessWidget {
                       children: [
                         Icon(
                           Icons.settings_suggest,
-                          size: 16,
+                          size: 18,
                           color: isDark
                               ? const Color(0xFF888888)
                               : const Color(0xFF999999),
@@ -384,8 +385,35 @@ class _LanguageSetting extends StatelessWidget {
                     value: item.$1,
                     child: Row(
                       children: [
-                        const Icon(Icons.language, size: 16),
-                        const SizedBox(width: 8),
+                        Container(
+                          width: 24,
+                          height: 16,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(2),
+                            border: Border.all(
+                              color: isDark
+                                  ? const Color(0xFF444444)
+                                  : const Color(0xFFDDDDDD),
+                              width: 0.5,
+                            ),
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(2),
+                            child: Image.asset(
+                              item.$3,
+                              width: 24,
+                              height: 16,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Text(
+                                  item.$4,
+                                  style: const TextStyle(fontSize: 12),
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
                         Text(
                           item.$2,
                           style: TextStyle(

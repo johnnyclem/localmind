@@ -217,6 +217,7 @@ class App extends ConsumerWidget {
             Locale('zh'),
             Locale('es'),
             Locale('hi'),
+            Locale('it'),
           ],
           locale: localeCode != null ? Locale(localeCode) : null,
           localeResolutionCallback: (locale, supportedLocales) {
