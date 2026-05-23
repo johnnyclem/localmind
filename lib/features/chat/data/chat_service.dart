@@ -450,11 +450,21 @@ class OpenAICompatibleChatService implements ChatService {
   }) async* {
     _cancelToken = CancelToken();
 
+    final apiMessages = messages
+        .map((m) => {'role': _roleToString(m.role), 'content': m.content})
+        .toList();
+    // Strip trailing empty assistant messages to avoid "prefill incompatible
+    // with enable_thinking" errors from servers running thinking models
+    while (apiMessages.isNotEmpty &&
+        apiMessages.last['role'] == 'assistant' &&
+        (apiMessages.last['content'] == null ||
+            apiMessages.last['content']!.isEmpty)) {
+      apiMessages.removeLast();
+    }
+
     final body = {
       'model': modelId,
-      'messages': messages
-          .map((m) => {'role': _roleToString(m.role), 'content': m.content})
-          .toList(),
+      'messages': apiMessages,
       'temperature': params.temperature,
       'top_p': params.topP,
       'max_tokens': params.maxTokens,
