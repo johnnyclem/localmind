@@ -193,8 +193,10 @@ class _AddServerScreenState extends ConsumerState<AddServerScreen> {
     if (value == null || value.trim().isEmpty) {
       return l10n.host_required;
     }
+    // Clean any protocol prefixes (http:// or https://) for validation
+    final cleaned = value.trim().replaceFirst(RegExp(r'^https?://'), '');
     final hostPattern = RegExp(r'^[a-zA-Z0-9]([a-zA-Z0-9\-\.]*[a-zA-Z0-9])?$');
-    if (!hostPattern.hasMatch(value.trim())) {
+    if (!hostPattern.hasMatch(cleaned)) {
       return l10n.host_valid;
     }
     return null;

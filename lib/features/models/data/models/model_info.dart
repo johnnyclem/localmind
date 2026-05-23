@@ -4,7 +4,7 @@ class ModelInfo {
   final String id;
   final String name;
   final String? description;
-  final int? parameterCount;
+  final double? parameterCount;
   final int? contextLength;
   final int? fileSize;
   final String? quantization;
@@ -42,7 +42,7 @@ class ModelInfo {
   }
 
   String? get formattedSize {
-    if (fileSize == null) return null;
+    if (fileSize == null || fileSize == 0) return null;
     if (fileSize! < 1024 * 1024 * 1024) {
       return '${(fileSize! / (1024 * 1024)).toStringAsFixed(1)} MB';
     }
@@ -51,14 +51,20 @@ class ModelInfo {
 
   String? get parameterCountDisplay {
     if (parameterCount == null) return null;
-    return '${parameterCount}B';
+    final formatted = parameterCount!.toStringAsFixed(2);
+    if (formatted.endsWith('.00')) {
+      return '${parameterCount!.toInt()}B';
+    } else if (formatted.endsWith('0')) {
+      return '${parameterCount!.toStringAsFixed(1)}B';
+    }
+    return '${parameterCount!.toStringAsFixed(2)}B';
   }
 
   ModelInfo copyWith({
     String? id,
     String? name,
     String? description,
-    int? parameterCount,
+    double? parameterCount,
     int? contextLength,
     int? fileSize,
     String? quantization,

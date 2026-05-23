@@ -120,8 +120,8 @@ final availableModelsProvider = FutureProvider.family<List<dynamic>, String>((
             id: m.id,
             name: m.name,
             description: m.description,
-            parameterCount: int.tryParse(
-              m.parameterLabel.replaceAll(RegExp(r'[^0-9]'), ''),
+            parameterCount: double.tryParse(
+              m.parameterLabel.replaceAll(RegExp(r'[^0-9\.]'), ''),
             ),
             serverType: ServerType.onDevice,
             serverId: server.id,

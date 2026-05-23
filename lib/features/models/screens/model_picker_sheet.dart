@@ -478,17 +478,17 @@ class _ModelTile extends StatelessWidget {
                     spacing: 6,
                     runSpacing: 4,
                     children: [
-                      if (model.parameterCountDisplay != null)
+                      if (model.parameterCountDisplay != null && model.parameterCountDisplay!.isNotEmpty)
                         _MetadataChip(
                           label: model.parameterCountDisplay!,
                           isDark: isDark,
                         ),
-                      if (model.quantization != null)
+                      if (model.quantization != null && model.quantization!.isNotEmpty)
                         _MetadataChip(
                           label: model.quantization!,
                           isDark: isDark,
                         ),
-                      if (model.formattedSize != null)
+                      if (model.formattedSize != null && model.formattedSize!.isNotEmpty)
                         _MetadataChip(
                           label: model.formattedSize!,
                           isDark: isDark,
@@ -988,8 +988,8 @@ class _OnDeviceModelTile extends ConsumerWidget {
       id: model.id,
       name: model.name,
       description: model.description,
-      parameterCount: int.tryParse(
-        model.parameterLabel.replaceAll(RegExp(r'[^0-9]'), ''),
+      parameterCount: double.tryParse(
+        model.parameterLabel.replaceAll(RegExp(r'[^0-9\.]'), ''),
       ),
       serverType: ServerType.onDevice,
       serverId: 'on-device',
@@ -1045,8 +1045,8 @@ class _OnDeviceModelTile extends ConsumerWidget {
       id: model.id,
       name: model.name,
       description: model.description,
-      parameterCount: int.tryParse(
-        model.parameterLabel.replaceAll(RegExp(r'[^0-9]'), ''),
+      parameterCount: double.tryParse(
+        model.parameterLabel.replaceAll(RegExp(r'[^0-9\.]'), ''),
       ),
       serverType: ServerType.onDevice,
       serverId: 'on-device',

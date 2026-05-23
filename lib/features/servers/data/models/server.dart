@@ -34,7 +34,12 @@ class Server {
     if (type == ServerType.onDevice) {
       return 'on-device';
     }
-    return 'http://$host:$port';
+    final trimmedHost = host.trim();
+    if (trimmedHost.startsWith('http://') || trimmedHost.startsWith('https://')) {
+      return '$trimmedHost:$port';
+    }
+    final protocol = (port == 443) ? 'https' : 'http';
+    return '$protocol://$trimmedHost:$port';
   }
 
   String get chatEndpoint {

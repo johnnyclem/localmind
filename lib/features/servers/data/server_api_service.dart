@@ -286,15 +286,13 @@ class ServerApiService {
     return models;
   }
 
-  int? _paramCountFromMeta(dynamic nParams) {
+  double? _paramCountFromMeta(dynamic nParams) {
     if (nParams == null) return null;
-    if (nParams is int) return nParams ~/ 1000000000;
-    if (nParams is double) return (nParams / 1000000000).round();
+    if (nParams is int) return nParams / 1000000000;
+    if (nParams is double) return nParams / 1000000000;
     if (nParams is String) {
-      final parsedInt = int.tryParse(nParams);
-      if (parsedInt != null) return parsedInt ~/ 1000000000;
       final parsedDouble = double.tryParse(nParams);
-      if (parsedDouble != null) return (parsedDouble / 1000000000).round();
+      if (parsedDouble != null) return parsedDouble / 1000000000;
     }
     return null;
   }
@@ -358,18 +356,17 @@ class ServerApiService {
         .join(' ');
   }
 
-  int? _parseParameterSize(String size) {
+  double? _parseParameterSize(String size) {
     final cleaned = size.replaceAll('B', '').replaceAll('b', '').trim();
-    return int.tryParse(cleaned);
+    return double.tryParse(cleaned);
   }
 
-  int? _parseParameterString(String? paramsString) {
+  double? _parseParameterString(String? paramsString) {
     if (paramsString == null) return null;
     final regex = RegExp(r'(\d+(?:\.\d+)?)\s*[Bb]');
     final match = regex.firstMatch(paramsString);
     if (match != null) {
-      final value = double.tryParse(match.group(1) ?? '');
-      return value?.toInt();
+      return double.tryParse(match.group(1) ?? '');
     }
     return null;
   }
