@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 
+import '../../../core/logger/app_logger.dart';
 import '../../../core/models/enums.dart';
 import '../../models/data/models/model_info.dart';
 import 'models/server.dart';
@@ -48,7 +49,7 @@ class ServerApiService {
       switch (server.type) {
         case ServerType.lmStudio:
         case ServerType.openAICompatible:
-          return _parseLMStudioModels(response.data, server);
+          return _parseOpenAICompatibleModels(response.data, server);
         case ServerType.ollama:
           return _parseOllamaModels(response.data, server);
         case ServerType.openRouter:
@@ -75,7 +76,7 @@ class ServerApiService {
       switch (server.type) {
         case ServerType.lmStudio:
         case ServerType.openAICompatible:
-          return _parseRunningLMStudioModels(response.data);
+          return _parseRunningOpenAICompatibleModels(response.data);
         case ServerType.ollama:
           return _parseRunningOllamaModels(response.data);
         case ServerType.openRouter:
@@ -106,12 +107,14 @@ class ServerApiService {
         } catch (_) {
           // Not all OpenAI-compatible servers support this endpoint
         }
+        break;
       case ServerType.ollama:
         await _dio.post(
           server.loadModelEndpoint,
           data: {'model': modelId},
           options: Options(headers: _getAuthHeaders(server)),
         );
+        break;
       case ServerType.openRouter:
       case ServerType.onDevice:
         break;
@@ -172,19 +175,21 @@ class ServerApiService {
         } catch (_) {
           // Not all OpenAI-compatible servers support this endpoint
         }
+        break;
       case ServerType.ollama:
         await _dio.post(
           server.unloadModelEndpoint,
           data: {'model': modelId, 'keep_alive': 0},
           options: Options(headers: _getAuthHeaders(server)),
         );
+        break;
       case ServerType.openRouter:
       case ServerType.onDevice:
         break;
     }
   }
 
-  Set<String> _parseRunningLMStudioModels(dynamic data) {
+  Set<String> _parseRunningOpenAICompatibleModels(dynamic data) {
     final runningModels = <String>{};
     if (data['models'] != null) {
       for (final item in data['models']) {
@@ -192,10 +197,14 @@ class ServerApiService {
             item['name'] as String? ??
             item['id'] as String? ??
             '';
+        if (id.isEmpty) continue;
+
         final loadedInstances = item['loaded_instances'] as List?;
-        if (loadedInstances != null && loadedInstances.isNotEmpty) {
-          runningModels.add(id);
-        } else if (id.isNotEmpty) {
+        if (loadedInstances != null) {
+          if (loadedInstances.isNotEmpty) {
+            runningModels.add(id);
+          }
+        } else {
           // Servers without loaded_instances (e.g. llama.cpp) always have
           // their model running if it appears in the model list
           runningModels.add(id);
@@ -222,7 +231,7 @@ class ServerApiService {
     return null;
   }
 
-  List<ModelInfo> _parseLMStudioModels(dynamic data, Server server) {
+  List<ModelInfo> _parseOpenAICompatibleModels(dynamic data, Server server) {
     final List<ModelInfo> models = [];
 
     // Build a lookup from the OpenAI-style 'data' array for metadata
@@ -243,10 +252,17 @@ class ServerApiService {
             item['name'] as String? ??
             item['id'] as String? ??
             '';
+        if (id.isEmpty) continue;
+
         final displayName = item['display_name'] as String?;
         final quantization = item['quantization'];
         final paramsString = item['params_string'] as String?;
-        final meta = metaById[id] ?? {};
+        
+        final meta = metaById[id];
+        if (meta == null && metaById.isNotEmpty) {
+          Log.warning('Metadata join failed for model: $id');
+        }
+        final finalMeta = meta ?? {};
 
         models.add(
           ModelInfo(
@@ -254,11 +270,11 @@ class ServerApiService {
             name: displayName ?? _formatModelName(id),
             description: item['description'] as String?,
             parameterCount: _parseParameterString(paramsString) ??
-                _paramCountFromMeta(meta['n_params']),
+                _paramCountFromMeta(finalMeta['n_params']),
             contextLength: item['max_context_length'] as int? ??
-                meta['n_ctx_train'] as int?,
+                finalMeta['n_ctx_train'] as int?,
             fileSize: item['size_bytes'] as int? ??
-                meta['size'] as int?,
+                finalMeta['size'] as int?,
             quantization: quantization?['name'] as String?,
             architecture: item['architecture'] as String?,
             serverType: server.type,
@@ -273,6 +289,13 @@ class ServerApiService {
   int? _paramCountFromMeta(dynamic nParams) {
     if (nParams == null) return null;
     if (nParams is int) return nParams ~/ 1000000000;
+    if (nParams is double) return (nParams / 1000000000).round();
+    if (nParams is String) {
+      final parsedInt = int.tryParse(nParams);
+      if (parsedInt != null) return parsedInt ~/ 1000000000;
+      final parsedDouble = double.tryParse(nParams);
+      if (parsedDouble != null) return (parsedDouble / 1000000000).round();
+    }
     return null;
   }
 
