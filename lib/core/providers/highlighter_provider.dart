@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:syntax_highlight/syntax_highlight.dart';
 
-const _languages = [
+const supportedHighlighterLanguages = {
   'css',
   'dart',
   'go',
@@ -16,7 +16,7 @@ const _languages = [
   'swift',
   'typescript',
   'yaml',
-];
+};
 
 final highlighterThemesProvider = FutureProvider<HighlighterThemes>((ref) {
   return HighlighterThemes.load();
@@ -36,5 +36,5 @@ class HighlighterThemes {
 }
 
 Future<void> initializeHighlighter() async {
-  await Highlighter.initialize(_languages);
+  await Highlighter.initialize(supportedHighlighterLanguages.toList());
 }

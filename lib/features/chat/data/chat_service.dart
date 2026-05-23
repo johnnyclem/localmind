@@ -678,12 +678,23 @@ class OllamaChatService implements ChatService {
           if (line.isNotEmpty) {
             try {
               final json = jsonDecode(line) as Map<String, dynamic>;
-              final content = json['message']?['content'];
-              if (content != null && content is String) {
-                yield ChatResponse(
-                  type: ChatResponseType.message,
-                  content: content,
-                );
+              final message = json['message'];
+              if (message != null && message is Map<String, dynamic>) {
+                final content = message['content'] as String?;
+                final thinking = message['thinking'] as String?;
+
+                if (thinking != null && thinking.isNotEmpty) {
+                  yield ChatResponse(
+                    type: ChatResponseType.reasoning,
+                    reasoningContent: thinking,
+                  );
+                }
+                if (content != null && content.isNotEmpty) {
+                  yield ChatResponse(
+                    type: ChatResponseType.message,
+                    content: content,
+                  );
+                }
               }
               if (json['done'] == true) {
                 yield const ChatResponse(type: ChatResponseType.done);

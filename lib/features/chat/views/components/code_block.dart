@@ -131,27 +131,44 @@ class CodeBlock extends ConsumerWidget {
           ),
           themes.when(
             data: (themesData) {
-    final loadedTheme = isDark ? themesData.dark : themesData.light;
-    final highlighter = Highlighter(
-      language: languageName.isNotEmpty ? languageName : 'dart',
-      theme: loadedTheme,
-    );
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      padding: const EdgeInsets.all(12),
-      child: SelectableText.rich(
-        TextSpan(
-          style: const TextStyle(
-            fontFamily: 'monospace',
-            fontSize: 13,
-            height: 1.5,
-          ),
-          children: <TextSpan>[
-            highlighter.highlight(code),
-          ],
-        ),
-      ),
-    );
+              final loadedTheme = isDark ? themesData.dark : themesData.light;
+              final effectiveLanguage = languageName.isNotEmpty ? languageName : 'dart';
+
+              if (supportedHighlighterLanguages.contains(effectiveLanguage)) {
+                final highlighter = Highlighter(
+                  language: effectiveLanguage,
+                  theme: loadedTheme,
+                );
+                return SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.all(12),
+                  child: SelectableText.rich(
+                    TextSpan(
+                      style: const TextStyle(
+                        fontFamily: 'monospace',
+                        fontSize: 13,
+                        height: 1.5,
+                      ),
+                      children: <TextSpan>[
+                        highlighter.highlight(code),
+                      ],
+                    ),
+                  ),
+                );
+              } else {
+                return SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.all(12),
+                  child: SelectableText(
+                    code,
+                    style: const TextStyle(
+                      fontFamily: 'monospace',
+                      fontSize: 13,
+                      height: 1.5,
+                    ),
+                  ),
+                );
+              }
             },
             loading: () => SingleChildScrollView(
               scrollDirection: Axis.horizontal,
