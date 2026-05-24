@@ -372,14 +372,22 @@ class _ModelCard extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      LinearProgressIndicator(value: progressInfo?.progress ?? 0),
-                      const SizedBox(height: 4),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(4),
+                        child: LinearProgressIndicator(
+                          value: progressInfo?.progress ?? 0.0,
+                          minHeight: 6,
+                          backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.1),
+                          valueColor: AlwaysStoppedAnimation<Color>(theme.colorScheme.primary),
+                        ),
+                      ),
+                      const SizedBox(height: 6),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
                             l10n.download_progress(
-                              '${((progressInfo?.progress ?? 0) * 100).toStringAsFixed(0)}%',
+                              ((progressInfo?.progress ?? 0) * 100).toStringAsFixed(0),
                               progressInfo?.speedFormatted ?? '0 B/s',
                             ),
                             style: theme.textTheme.labelSmall,
@@ -398,8 +406,8 @@ class _ModelCard extends ConsumerWidget {
                   size: ShadButtonSize.sm,
                   onPressed: () => ref
                       .read(foregroundDownloadNotifierProvider.notifier)
-                      .pauseDownload(model.id),
-                  child: Text(l10n.pause),
+                      .cancelDownload(model.id),
+                  child: Text(l10n.cancel),
                 ),
               ],
             )

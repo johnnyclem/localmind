@@ -9,18 +9,22 @@ import UIKit
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
     ) -> Bool {
-        let controller : FlutterViewController = window?.rootViewController as! FlutterViewController
-        let channel = FlutterMethodChannel(name: "localmind/chat_background", binaryMessenger: controller.binaryMessenger)
+        GeneratedPluginRegistrant.register(with: self)
 
+        let result = super.application(application, didFinishLaunchingWithOptions: launchOptions)
+
+        guard let controller = window?.rootViewController as? FlutterViewController else {
+            return result
+        }
+
+        let channel = FlutterMethodChannel(name: "localmind/chat_background", binaryMessenger: controller.binaryMessenger)
         channel.setMethodCallHandler({
             (call: FlutterMethodCall, result: @escaping FlutterResult) -> Void in
             switch call.method {
             case "startForeground":
-                // On iOS, we start a background task assertion
                 self.startBackgroundTask()
                 result(nil)
             case "stopForeground":
-                // On iOS, we end the background task assertion
                 self.stopBackgroundTask()
                 result(nil)
             default:
@@ -28,8 +32,7 @@ import UIKit
             }
         })
 
-        GeneratedPluginRegistrant.register(with: self)
-        return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+        return result
     }
 
     private func startBackgroundTask() {

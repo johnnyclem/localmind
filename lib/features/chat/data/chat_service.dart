@@ -8,7 +8,7 @@ import 'models/chat_parameters.dart';
 import 'models/mcp_integration.dart';
 import '../../../core/models/enums.dart';
 import '../../../core/logger/app_logger.dart';
-import '../../on_device/data/on_device_engine_service.dart';
+import '../../on_device/data/on_device_gemma_service.dart';
 import '../../on_device/data/on_device_chat_service.dart';
 
 abstract class ChatService {
@@ -26,7 +26,7 @@ abstract class ChatService {
   static ChatService forServer(
     ServerType type,
     Dio dio, {
-    OnDeviceEngineService? onDeviceEngine,
+    OnDeviceGemmaService? onDeviceGemma,
   }) {
     switch (type) {
       case ServerType.lmStudio:
@@ -38,12 +38,12 @@ abstract class ChatService {
       case ServerType.openRouter:
         return OpenRouterChatService(dio);
       case ServerType.onDevice:
-        if (onDeviceEngine == null) {
+        if (onDeviceGemma == null) {
           throw StateError(
-            'OnDeviceEngineService is required for onDevice server type',
+            'OnDeviceGemmaService is required for onDevice server type',
           );
         }
-        return OnDeviceChatService(onDeviceEngine);
+        return OnDeviceChatService(onDeviceGemma);
     }
   }
 }

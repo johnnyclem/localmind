@@ -1093,8 +1093,8 @@ class _OnDeviceModelTile extends ConsumerWidget {
         ref.read(selectedModelProvider.notifier).clear();
       }
 
-      final downloadService = ref.read(onDeviceDownloadServiceProvider);
-      await downloadService.deleteModel(model.id);
+      final gemmaService = ref.read(onDeviceGemmaServiceProvider);
+      await gemmaService.deleteModel(model.id);
       ref.invalidate(downloadedModelsProvider);
     }
   }

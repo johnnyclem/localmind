@@ -212,8 +212,6 @@ enum ModelStatus { unloaded, loading, loaded, preloaded, thinking }
 
 enum OnDeviceEngineStatus { notLoaded, loading, loaded, error }
 
-enum LiteLmBackendType { cpu, gpu, npu }
-
 enum OnDeviceModelState {
   notDownloaded,
   downloading,

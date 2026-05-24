@@ -1,24 +1,25 @@
 import 'dart:async';
 
-import 'package:flutter_litert_lm/flutter_litert_lm.dart';
+import 'package:flutter_gemma/flutter_gemma.dart' as gemma;
 
 import '../../../core/logger/app_logger.dart';
 import '../../../core/models/enums.dart';
+import '../../../core/utils/bpe_decoder.dart';
 import '../../chat/data/chat_service.dart';
 import '../../chat/data/models/chat_parameters.dart';
 import '../../chat/data/models/mcp_integration.dart';
 import '../../chat/data/models/message.dart' hide ToolCallData;
 import '../../servers/data/models/server.dart';
-import 'on_device_engine_service.dart';
+import 'on_device_gemma_service.dart';
 
 class OnDeviceChatService implements ChatService {
-  final OnDeviceEngineService _engineService;
-  StreamSubscription<LiteLmMessage>? _currentSubscription;
+  final OnDeviceGemmaService _gemmaService;
+  StreamSubscription<gemma.ModelResponse>? _currentSubscription;
   StreamController<ChatResponse>? _streamController;
-  LiteLmConversation? _activeConversation;
+  gemma.InferenceChat? _activeChat;
   bool _isCancelled = false;
 
-  OnDeviceChatService(this._engineService);
+  OnDeviceChatService(this._gemmaService);
 
   @override
   Stream<ChatResponse> sendMessage({
@@ -29,26 +30,26 @@ class OnDeviceChatService implements ChatService {
     List<McpIntegration>? integrations,
     String? previousResponseId,
   }) {
-    // Cancel any previous inference before starting a new one
     cancelStream();
     _isCancelled = false;
     _streamController = StreamController<ChatResponse>();
 
-    _startInference(messages, params);
+    _startInference(modelId, messages, params);
 
     return _streamController!.stream;
   }
 
   Future<void> _startInference(
+    String modelId,
     List<Message> messages,
     ChatParameters params,
   ) async {
     try {
-      if (_engineService.engine == null || _isCancelled) {
+      if (!_gemmaService.isLoaded || _isCancelled) {
         _streamController?.add(
           const ChatResponse(
             type: ChatResponseType.error,
-            content: 'Engine not loaded',
+            content: 'Model not loaded',
           ),
         );
         _streamController?.add(const ChatResponse(type: ChatResponseType.done));
@@ -60,92 +61,138 @@ class OnDeviceChatService implements ChatService {
           ? params.systemPrompt
           : null;
 
-      final samplerConfig = LiteLmSamplerConfig(
-        temperature: params.temperature,
-        topK: 40,
-        topP: params.topP,
-      );
-
-      final conversation = await _engineService.createConversation(
+      final chat = await _gemmaService.createChat(
         systemInstruction: systemInstruction,
-        samplerConfig: samplerConfig,
       );
 
-      // Store a reference so cancelStream can dispose it
-      _activeConversation = conversation;
-
-      final liteMessages = _convertMessages(messages);
-
-      if (_isCancelled) {
-        _disposeConversation(conversation);
-        _streamController?.add(const ChatResponse(type: ChatResponseType.done));
-        await _streamController?.close();
-        return;
-      }
-
-      final lastUserMessage = liteMessages
-          .where((m) => m.role == 'user')
-          .lastOrNull;
-      if (lastUserMessage == null) {
+      if (chat == null) {
         _streamController?.add(
           const ChatResponse(
             type: ChatResponseType.error,
-            content: 'No user message found',
+            content: 'Failed to create chat session',
           ),
         );
-        _disposeConversation(conversation);
         _streamController?.add(const ChatResponse(type: ChatResponseType.done));
         await _streamController?.close();
         return;
       }
 
-      final stream = conversation.sendMessageStream(lastUserMessage.text ?? '');
+      _activeChat = chat;
 
-      // Use .listen() instead of `await for` so the subscription can be
-      // cancelled externally without waiting for the next native token.
+      // Convert and add all messages except the last user message to context
+      final gemmaMessages = _convertMessages(messages);
+
+      if (_isCancelled) {
+        _disposeChat(chat);
+        _streamController?.add(const ChatResponse(type: ChatResponseType.done));
+        await _streamController?.close();
+        return;
+      }
+
+      // Add all messages except the last one as context
+      if (gemmaMessages.length > 1) {
+        for (final msg in gemmaMessages.sublist(0, gemmaMessages.length - 1)) {
+          await chat.addQueryChunk(msg);
+        }
+      }
+
+      // Add the last user message
+      final lastMessage = gemmaMessages.last;
+      await chat.addQueryChunk(lastMessage);
+
+      if (_isCancelled) {
+        _disposeChat(chat);
+        _streamController?.add(const ChatResponse(type: ChatResponseType.done));
+        await _streamController?.close();
+        return;
+      }
+
+      // Start streaming response
+      final responseStream = chat.generateChatResponseAsync();
       final completer = Completer<void>();
 
-      _currentSubscription = stream.listen(
-        (delta) {
+      final isBpeModel = modelId.toLowerCase().contains('qwen') ||
+          modelId.toLowerCase().contains('deepseek');
+      final textDecoder = isBpeModel ? BpeDecoder() : null;
+      final reasoningDecoder = isBpeModel ? BpeDecoder() : null;
+
+      _currentSubscription = responseStream.listen(
+        (response) {
           if (_isCancelled) return;
 
-          if (delta.text.isNotEmpty) {
+          if (response is gemma.TextResponse) {
+            if (response.token.isNotEmpty) {
+              final content = textDecoder != null
+                  ? textDecoder.decodeChunk(response.token)
+                  : response.token;
+              if (content.isNotEmpty) {
+                _streamController?.add(
+                  ChatResponse(
+                    type: ChatResponseType.message,
+                    content: content,
+                  ),
+                );
+              }
+            }
+          } else if (response is gemma.FunctionCallResponse) {
             _streamController?.add(
               ChatResponse(
-                type: ChatResponseType.message,
-                content: delta.text,
+                type: ChatResponseType.toolCall,
+                toolCall: ToolCallData(
+                  tool: response.name,
+                  arguments: response.args,
+                ),
               ),
             );
-          }
-
-          if (delta.toolCalls.isNotEmpty) {
-            for (final tc in delta.toolCalls) {
-              _streamController?.add(
-                ChatResponse(
-                  type: ChatResponseType.toolCall,
-                  toolCall:
-                      ToolCallData(tool: tc.name, arguments: tc.arguments),
-                ),
-              );
+          } else if (response is gemma.ThinkingResponse) {
+            if (response.content.isNotEmpty) {
+              final reasoningContent = reasoningDecoder != null
+                  ? reasoningDecoder.decodeChunk(response.content)
+                  : response.content;
+              if (reasoningContent.isNotEmpty) {
+                _streamController?.add(
+                  ChatResponse(
+                    type: ChatResponseType.reasoning,
+                    reasoningContent: reasoningContent,
+                  ),
+                );
+              }
             }
           }
         },
         onDone: () {
           if (!_isCancelled) {
+            final finalToken = textDecoder?.flush() ?? '';
+            final finalReasoning = reasoningDecoder?.flush() ?? '';
+            if (finalToken.isNotEmpty) {
+              _streamController?.add(
+                ChatResponse(
+                  type: ChatResponseType.message,
+                  content: finalToken,
+                ),
+              );
+            }
+            if (finalReasoning.isNotEmpty) {
+              _streamController?.add(
+                ChatResponse(
+                  type: ChatResponseType.reasoning,
+                  reasoningContent: finalReasoning,
+                ),
+              );
+            }
             _streamController?.add(
               const ChatResponse(type: ChatResponseType.done),
             );
-            _disposeConversation(conversation);
+            _disposeChat(chat);
             _streamController?.close();
           }
-          _activeConversation = null;
+          _activeChat = null;
           _currentSubscription = null;
           if (!completer.isCompleted) completer.complete();
         },
         onError: (error) {
           Log.error('OnDevice stream error: $error');
-          if (!_isCancelled &&
-              !(_streamController?.isClosed ?? true)) {
+          if (!_isCancelled && !(_streamController?.isClosed ?? true)) {
             _streamController?.add(
               ChatResponse(
                 type: ChatResponseType.error,
@@ -157,8 +204,8 @@ class OnDeviceChatService implements ChatService {
             );
             _streamController?.close();
           }
-          _disposeConversation(conversation);
-          _activeConversation = null;
+          _disposeChat(chat);
+          _activeChat = null;
           _currentSubscription = null;
           if (!completer.isCompleted) completer.complete();
         },
@@ -181,14 +228,13 @@ class OnDeviceChatService implements ChatService {
     }
   }
 
-  /// Dispose a conversation without blocking — fire and forget.
-  void _disposeConversation(LiteLmConversation conversation) {
-    conversation.dispose().catchError((e) {
-      Log.error('Error disposing conversation: $e');
+  void _disposeChat(gemma.InferenceChat chat) {
+    chat.close().catchError((e) {
+      Log.error('Error disposing chat: $e');
     });
   }
 
-  List<({String role, String? text})> _convertMessages(List<Message> messages) {
+  List<gemma.Message> _convertMessages(List<Message> messages) {
     return messages
         .where(
           (m) =>
@@ -196,7 +242,12 @@ class OnDeviceChatService implements ChatService {
               m.role == MessageRole.assistant ||
               m.role == MessageRole.system,
         )
-        .map((m) => (role: m.role.name, text: m.content))
+        .map(
+          (m) => gemma.Message.text(
+            text: m.content,
+            isUser: m.role == MessageRole.user,
+          ),
+        )
         .toList();
   }
 
@@ -204,17 +255,16 @@ class OnDeviceChatService implements ChatService {
   void cancelStream() {
     _isCancelled = true;
 
-    // Cancel the native stream subscription first — this stops the
-    // EventChannel from delivering more tokens and unblocks the loop.
     _currentSubscription?.cancel();
     _currentSubscription = null;
 
-    // Dispose the active conversation (fire-and-forget to avoid blocking
-    // the UI thread if the native side is mid-inference).
-    final conversation = _activeConversation;
-    _activeConversation = null;
-    if (conversation != null) {
-      _disposeConversation(conversation);
+    final chat = _activeChat;
+    _activeChat = null;
+    if (chat != null) {
+      chat.stopGeneration().then((_) => _disposeChat(chat)).catchError((e) {
+        Log.error('Error stopping generation: $e');
+        _disposeChat(chat);
+      });
     }
 
     if (!(_streamController?.isClosed ?? true)) {

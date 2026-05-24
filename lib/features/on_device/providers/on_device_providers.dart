@@ -1,17 +1,25 @@
-import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter_gemma/flutter_gemma.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/logger/app_logger.dart';
 import '../../../core/models/enums.dart';
-import '../data/models/on_device_model.dart';
-import '../data/on_device_engine_service.dart';
-import '../data/on_device_model_download_service.dart';
-import '../data/foreground_download_service.dart';
-import '../data/model_downloader.dart';
-import '../data/download_notification_service.dart';
 import '../../../core/providers/chat_background_service_provider.dart';
+import '../data/models/on_device_model.dart';
+import '../data/notification_permission_service.dart';
+import '../data/on_device_gemma_service.dart';
+
+final notificationPermissionServiceProvider =
+    Provider<NotificationPermissionService>((ref) {
+  return NotificationPermissionService();
+});
+
+final onDeviceGemmaServiceProvider = Provider<OnDeviceGemmaService>((ref) {
+  final service = OnDeviceGemmaService();
+  ref.onDispose(() => service.dispose());
+  return service;
+});
 
 final onDeviceEngineProvider =
     NotifierProvider<OnDeviceEngineNotifier, OnDeviceEngineState>(() {
@@ -22,35 +30,10 @@ final onDeviceModelsProvider = Provider<List<OnDeviceModel>>((ref) {
   return OnDeviceModel.curatedModels;
 });
 
-final downloadNotificationServiceProvider =
-    Provider<DownloadNotificationService>((ref) {
-  return DownloadNotificationService();
-});
-
-final modelDownloaderProvider = Provider<ModelDownloader>((ref) {
-  final notificationService = ref.read(downloadNotificationServiceProvider);
-  return ModelDownloader(notificationService);
-});
-
-final onDeviceDownloadServiceProvider = Provider<OnDeviceModelDownloadService>((
-  ref,
-) {
-  final downloader = ref.read(modelDownloaderProvider);
-  return OnDeviceModelDownloadService(downloader);
-});
-
-final foregroundDownloadServiceProvider = Provider<ForegroundDownloadService>((
-  ref,
-) {
-  return ForegroundDownloadService(
-    ref.read(onDeviceDownloadServiceProvider),
-  );
-});
-
 final downloadedModelsProvider = FutureProvider<Set<String>>((ref) async {
-  final downloadService = ref.read(onDeviceDownloadServiceProvider);
-  final models = await downloadService.getDownloadedModels();
-  return models.map((m) => m.modelId).toSet();
+  final gemmaService = ref.read(onDeviceGemmaServiceProvider);
+  final installed = await gemmaService.getInstalledModelIds();
+  return installed.toSet();
 });
 
 final onDeviceModelStateProvider =
@@ -64,14 +47,12 @@ final onDeviceModelStateProvider =
 class OnDeviceEngineState {
   final OnDeviceEngineStatus status;
   final String? loadedModelId;
-  final String? loadedModelPath;
-  final LiteLmBackendType? backend;
+  final PreferredBackend? backend;
   final String? error;
 
   const OnDeviceEngineState({
     this.status = OnDeviceEngineStatus.notLoaded,
     this.loadedModelId,
-    this.loadedModelPath,
     this.backend,
     this.error,
   });
@@ -79,14 +60,12 @@ class OnDeviceEngineState {
   OnDeviceEngineState copyWith({
     OnDeviceEngineStatus? status,
     String? loadedModelId,
-    String? loadedModelPath,
-    LiteLmBackendType? backend,
+    PreferredBackend? backend,
     String? error,
   }) {
     return OnDeviceEngineState(
       status: status ?? this.status,
       loadedModelId: loadedModelId ?? this.loadedModelId,
-      loadedModelPath: loadedModelPath ?? this.loadedModelPath,
       backend: backend ?? this.backend,
       error: error ?? this.error,
     );
@@ -94,29 +73,24 @@ class OnDeviceEngineState {
 }
 
 class OnDeviceEngineNotifier extends Notifier<OnDeviceEngineState> {
-  OnDeviceEngineService? _engineService;
-
   @override
   OnDeviceEngineState build() {
     return const OnDeviceEngineState();
   }
 
-  OnDeviceEngineService get engineService {
-    _engineService ??= OnDeviceEngineService();
-    return _engineService!;
-  }
+  OnDeviceGemmaService get _gemmaService =>
+      ref.read(onDeviceGemmaServiceProvider);
 
-  Future<void> loadModel(String modelId, LiteLmBackendType backend) async {
+  Future<void> loadModel(String modelId, PreferredBackend backend) async {
     state = state.copyWith(status: OnDeviceEngineStatus.loading, error: null);
 
-    // Protect the heavy native model-load (mmap of 1–7 GB) from Android
-    // CPU throttling by keeping a foreground service active for its duration.
+    // Protect the heavy native model-load from Android CPU throttling
     final bgService = ref.read(chatBackgroundServiceProvider);
     await bgService.start();
 
     try {
-      final modelPath = await OnDeviceEngineService.getModelPath(modelId);
-      if (modelPath == null) {
+      final isInstalled = await _gemmaService.isModelInstalled(modelId);
+      if (!isInstalled) {
         state = state.copyWith(
           status: OnDeviceEngineStatus.error,
           error: 'Model not found. Please download it first.',
@@ -124,12 +98,11 @@ class OnDeviceEngineNotifier extends Notifier<OnDeviceEngineState> {
         return;
       }
 
-      await engineService.createEngine(modelPath, backend);
+      await _gemmaService.loadModel(modelId, backend);
 
       state = state.copyWith(
         status: OnDeviceEngineStatus.loaded,
         loadedModelId: modelId,
-        loadedModelPath: modelPath,
         backend: backend,
       );
 
@@ -141,20 +114,19 @@ class OnDeviceEngineNotifier extends Notifier<OnDeviceEngineState> {
         error: 'Failed to load model: ${e.toString()}',
       );
     } finally {
-      // Always stop the foreground service — even if load fails.
       await bgService.stop();
     }
   }
 
   Future<void> unloadModel() async {
     try {
-      await engineService.disposeEngine();
+      await _gemmaService.unloadModel();
     } catch (_) {}
     state = const OnDeviceEngineState();
   }
 
-  Future<void> dispose() async {
-    engineService.dispose();
+  Future<void> disposeService() async {
+    _gemmaService.dispose();
     state = const OnDeviceEngineState();
   }
 }
@@ -171,7 +143,7 @@ class OnDeviceModelStateNotifier
     OnDeviceModelState? modelState,
     double? downloadProgress,
     String? error,
-    LiteLmBackendType? backend,
+    PreferredBackend? backend,
     OnDeviceEngineStatus? engineStatus,
   }) {
     final current =
@@ -220,5 +192,5 @@ class OnDeviceModelStateNotifier
 }
 
 final isOnDevicePlatformSupportedProvider = Provider<bool>((ref) {
-  return Platform.isAndroid;
+  return Platform.isAndroid || Platform.isIOS;
 });

@@ -40,7 +40,7 @@ class _OnboardingNotificationPermissionScreenState
   Future<void> _requestPermission() async {
     setState(() => _isProcessing = true);
     try {
-      final notificationService = ref.read(downloadNotificationServiceProvider);
+      final notificationService = ref.read(notificationPermissionServiceProvider);
       await notificationService.requestPermission();
       await _completeOnboarding();
     } finally {

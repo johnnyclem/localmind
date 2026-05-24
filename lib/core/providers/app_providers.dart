@@ -1,3 +1,4 @@
+import 'package:flutter_gemma/flutter_gemma.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../features/settings/data/models/app_settings.dart';
@@ -85,7 +86,7 @@ class SettingsNotifier extends Notifier<AppSettings> {
       _update(state.copyWith(codeThemeDark: value));
   void setCodeThemeLight(SyntaxThemeName value) =>
       _update(state.copyWith(codeThemeLight: value));
-  void setPreferredBackend(LiteLmBackendType value) =>
+  void setPreferredBackend(PreferredBackend value) =>
       _update(state.copyWith(preferredBackend: value));
   void setTtsEngine(EngineId value) =>
       _update(state.copyWith(ttsEngine: value, ttsVoiceId: null));

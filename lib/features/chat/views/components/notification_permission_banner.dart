@@ -29,7 +29,7 @@ class _NotificationPermissionBannerState
     final settings = ref.read(settingsProvider);
     if (settings.hasAskedForNotifications) return;
 
-    final service = ref.read(downloadNotificationServiceProvider);
+    final service = ref.read(notificationPermissionServiceProvider);
     final granted = await service.isPermissionGranted();
 
     if (!granted) {
@@ -42,7 +42,7 @@ class _NotificationPermissionBannerState
   }
 
   Future<void> _requestPermission() async {
-    final service = ref.read(downloadNotificationServiceProvider);
+    final service = ref.read(notificationPermissionServiceProvider);
     await service.requestPermission();
     await _dismiss(true);
   }

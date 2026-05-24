@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:localmind/l10n/app_localizations.dart';
@@ -27,7 +25,6 @@ class OnDeviceModelManagerScreen extends ConsumerWidget {
     final downloadedAsync = ref.watch(downloadedModelsProvider);
     final engineState = ref.watch(onDeviceEngineProvider);
     final downloadProgress = ref.watch(foregroundDownloadNotifierProvider);
-    final isAndroid = Platform.isAndroid;
     final deviceMemoryAsync = ref.watch(deviceMemoryProvider);
 
     return Scaffold(
@@ -36,28 +33,6 @@ class OnDeviceModelManagerScreen extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          if (!isAndroid)
-            Container(
-              padding: const EdgeInsets.all(12),
-              margin: const EdgeInsets.only(bottom: 16),
-              decoration: BoxDecoration(
-                color: Colors.orange.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.orange),
-              ),
-              child: Row(
-                children: [
-                  const Icon(Icons.info_outline, color: Colors.orange, size: 20),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      l10n.on_device_android_only,
-                      style: const TextStyle(color: Colors.orange),
-                    ),
-                  ),
-                ],
-              ),
-            ),
           _buildMemoryInfo(context, ref, deviceMemoryAsync),
           if (engineState.status == OnDeviceEngineStatus.loaded)
             Container(
@@ -617,9 +592,14 @@ class _ModelCard extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    LinearProgressIndicator(
-                      value: downloadProgress?.progress ?? 0.0,
-                      backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.1),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(4),
+                      child: LinearProgressIndicator(
+                        value: downloadProgress?.progress ?? 0.0,
+                        minHeight: 6,
+                        backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.1),
+                        valueColor: AlwaysStoppedAnimation<Color>(theme.colorScheme.primary),
+                      ),
                     ),
                     const SizedBox(height: 6),
                     Row(
@@ -656,8 +636,8 @@ class _ModelCard extends ConsumerWidget {
                 size: ShadButtonSize.sm,
                 onPressed: () => ref
                     .read(foregroundDownloadNotifierProvider.notifier)
-                    .pauseDownload(model.id),
-                child: Text(l10n.pause),
+                    .cancelDownload(model.id),
+                child: Text(l10n.cancel),
               ),
             ],
           ),
@@ -814,8 +794,8 @@ class _ModelCard extends ConsumerWidget {
         await ref.read(onDeviceEngineProvider.notifier).unloadModel();
       }
 
-      final downloadService = ref.read(onDeviceDownloadServiceProvider);
-      await downloadService.deleteModel(model.id);
+      final gemmaService = ref.read(onDeviceGemmaServiceProvider);
+      await gemmaService.deleteModel(model.id);
       ref.invalidate(downloadedModelsProvider);
     }
   }

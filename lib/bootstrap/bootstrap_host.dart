@@ -8,7 +8,7 @@ import '../app.dart';
 import '../core/providers/highlighter_provider.dart';
 import '../core/providers/storage_providers.dart';
 import '../core/storage/objectbox_store.dart';
-import '../features/on_device/providers/on_device_providers.dart';
+import '../features/on_device/data/on_device_gemma_service.dart';
 import '../core/models/enums.dart';
 import '../features/servers/data/models/server.dart';
 import '../features/servers/providers/server_providers.dart';
@@ -65,7 +65,10 @@ class _BootstrapHostState extends State<BootstrapHost> {
       );
 
       _updateStage(BootstrapStage.initializingServices, 'Initializing services...');
-      await container.read(downloadNotificationServiceProvider).init();
+      await OnDeviceGemmaService.initialize();
+
+      // Migrate models from old custom download location
+      await OnDeviceGemmaService.migrateOldModels();
 
       _updateStage(BootstrapStage.configuringServer, 'Configuring server...');
       final servers = await container.read(serversProvider.future);

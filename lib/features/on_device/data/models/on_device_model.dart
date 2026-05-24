@@ -1,3 +1,5 @@
+import 'package:flutter_gemma/flutter_gemma.dart';
+
 import '../../../../core/models/enums.dart';
 
 class OnDeviceModel {
@@ -32,7 +34,22 @@ class OnDeviceModel {
     return '${mb.toStringAsFixed(0)} MB';
   }
 
-  String get fileName => '$id.litertlm';
+  String get fileName => huggingFaceUrl.split('/').last;
+
+  ModelType get flutterGemmaModelType {
+    switch (id) {
+      case 'qwen3-0.6b':
+        return ModelType.qwen3;
+      case 'qwen2.5-1.5b-instruct':
+        return ModelType.qwen;
+      case 'deepseek-r1-distill-qwen-1.5b':
+        return ModelType.deepSeek;
+      case 'gemma4-e2b-instruct':
+        return ModelType.gemma4;
+      default:
+        return ModelType.general;
+    }
+  }
 
   static const List<OnDeviceModel> curatedModels = [
     OnDeviceModel(
@@ -118,7 +135,7 @@ class OnDeviceModelStateInfo {
   final OnDeviceModelState state;
   final double downloadProgress;
   final String? error;
-  final LiteLmBackendType backend;
+  final PreferredBackend backend;
   final OnDeviceEngineStatus engineStatus;
 
   const OnDeviceModelStateInfo({
@@ -126,7 +143,7 @@ class OnDeviceModelStateInfo {
     this.state = OnDeviceModelState.notDownloaded,
     this.downloadProgress = 0.0,
     this.error,
-    this.backend = LiteLmBackendType.cpu,
+    this.backend = PreferredBackend.cpu,
     this.engineStatus = OnDeviceEngineStatus.notLoaded,
   });
 
@@ -135,7 +152,7 @@ class OnDeviceModelStateInfo {
     OnDeviceModelState? state,
     double? downloadProgress,
     String? error,
-    LiteLmBackendType? backend,
+    PreferredBackend? backend,
     OnDeviceEngineStatus? engineStatus,
   }) {
     return OnDeviceModelStateInfo(

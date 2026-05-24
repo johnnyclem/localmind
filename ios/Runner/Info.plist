@@ -79,5 +79,9 @@
 		<string>processing</string>
 		<string>audio</string>
 	</array>
+	<key>UIFileSharingEnabled</key>
+	<true/>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>This app requires local network access for model inference services.</string>
 </dict>
 </plist>

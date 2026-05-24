@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_gemma/flutter_gemma.dart';
 
 import '../../../../core/models/enums.dart';
 import '../../../../features/tts/data/kitten_tts_model.dart';
@@ -30,7 +31,7 @@ class AppSettings {
   final bool newChatMcpEnabled;
   final SyntaxThemeName codeThemeDark;
   final SyntaxThemeName codeThemeLight;
-  final LiteLmBackendType preferredBackend;
+  final PreferredBackend preferredBackend;
   final EngineId ttsEngine;
   final String? ttsVoiceId;
   final double ttsSpeed;
@@ -60,7 +61,7 @@ class AppSettings {
     this.newChatMcpEnabled = true,
     this.codeThemeDark = SyntaxThemeName.dark,
     this.codeThemeLight = SyntaxThemeName.light,
-    this.preferredBackend = LiteLmBackendType.cpu,
+    this.preferredBackend = PreferredBackend.cpu,
     this.ttsEngine = EngineId.system,
     this.ttsVoiceId,
     this.ttsSpeed = 1.0,
@@ -91,7 +92,7 @@ class AppSettings {
     bool? newChatMcpEnabled,
     SyntaxThemeName? codeThemeDark,
     SyntaxThemeName? codeThemeLight,
-    LiteLmBackendType? preferredBackend,
+    PreferredBackend? preferredBackend,
     EngineId? ttsEngine,
     Object? ttsVoiceId = _unset,
     double? ttsSpeed,
@@ -195,7 +196,7 @@ class AppSettings {
       newChatMcpEnabled: map['newChatMcpEnabled'] ?? true,
       codeThemeDark: SyntaxThemeName.values[map['codeThemeDark'] ?? 0],
       codeThemeLight: SyntaxThemeName.values[map['codeThemeLight'] ?? 1],
-      preferredBackend: LiteLmBackendType.values[map['preferredBackend'] ?? 0],
+      preferredBackend: _parsePreferredBackend(map['preferredBackend']),
       ttsEngine: _parseEngine(map['ttsEngine']),
       ttsVoiceId: map['ttsVoiceId'],
       ttsSpeed: map['ttsSpeed']?.toDouble() ?? 1.0,
@@ -204,6 +205,16 @@ class AppSettings {
       smartReplyEnabled: map['smartReplyEnabled'] ?? true,
       localeCode: map['localeCode'] as String?,
     );
+  }
+
+  static PreferredBackend _parsePreferredBackend(dynamic value) {
+    if (value is int && value < PreferredBackend.values.length) {
+      return PreferredBackend.values[value];
+    }
+    // Handle migration from old LiteLmBackendType (had cpu=0, gpu=1, npu=2)
+    // Map npu (2) to gpu since flutter_gemma only has cpu/gpu
+    if (value is int && value == 2) return PreferredBackend.gpu;
+    return PreferredBackend.cpu;
   }
 
   static EngineId _parseEngine(dynamic value) {

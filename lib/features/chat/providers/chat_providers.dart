@@ -237,11 +237,11 @@ final chatServiceProvider = Provider<ChatService?>((ref) {
     return null;
   }
   if (server.type == ServerType.onDevice) {
-    final engineNotifier = ref.read(onDeviceEngineProvider.notifier);
+    final gemmaService = ref.read(onDeviceGemmaServiceProvider);
     return ChatService.forServer(
       server.type,
       ref.read(dioProvider),
-      onDeviceEngine: engineNotifier.engineService,
+      onDeviceGemma: gemmaService,
     );
   }
   return ChatService.forServer(server.type, ref.read(dioProvider));

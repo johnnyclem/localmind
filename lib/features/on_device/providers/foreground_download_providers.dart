@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/logger/app_logger.dart';
 import '../../../core/providers/storage_providers.dart';
 import '../data/models/download_progress_info.dart';
 import '../data/models/download_status.dart';
@@ -18,19 +19,12 @@ final foregroundDownloadNotifierProvider =
 
 class ForegroundDownloadNotifier
     extends Notifier<Map<String, DownloadProgressInfo>> {
-  final Map<String, StreamSubscription<DownloadStatusUpdate>> _subscriptions =
-      {};
+  final Map<String, bool> _activeDownloads = {};
+  final Map<String, DateTime> _downloadStartTimes = {};
   static const _storageKey = 'model_downloads_state';
 
   @override
   Map<String, DownloadProgressInfo> build() {
-    ref.onDispose(() {
-      for (final sub in _subscriptions.values) {
-        sub.cancel();
-      }
-      _subscriptions.clear();
-    });
-
     return _loadState();
   }
 
@@ -42,7 +36,6 @@ class ForegroundDownloadNotifier
         final Map<String, dynamic> data = json.decode(jsonStr);
         return data.map((k, v) {
           final info = DownloadProgressInfo.fromJson(v);
-          // If status was active, mark as paused on app restart
           if (info.status == DownloadStatus.running ||
               info.status == DownloadStatus.pending) {
             return MapEntry(k, info.copyWith(status: DownloadStatus.paused));
@@ -73,110 +66,105 @@ class ForegroundDownloadNotifier
       orElse: () => throw Exception('Model not found: $modelId'),
     );
 
-    // If we have existing progress, preserve it but set status to running
-    final existingInfo = state[modelId];
+    _activeDownloads[modelId] = true;
+    _downloadStartTimes[modelId] = DateTime.now();
+
     state = {
       ...state,
-      modelId:
-          existingInfo?.copyWith(status: DownloadStatus.running) ??
-          DownloadProgressInfo(
-            modelId: modelId,
-            status: DownloadStatus.running,
-            progress: 0.0,
-          ),
+      modelId: DownloadProgressInfo(
+        modelId: modelId,
+        status: DownloadStatus.running,
+        progress: 0.0,
+        totalBytes: model.fileSizeBytes,
+      ),
     };
     _saveState();
 
-    final downloadService = ref.read(foregroundDownloadServiceProvider);
+    final gemmaService = ref.read(onDeviceGemmaServiceProvider);
 
-    // Listen to status updates for this model
-    _subscriptions[modelId]?.cancel();
-    _subscriptions[modelId] = downloadService.getStatusStream(modelId).listen((
-      update,
-    ) {
-      final currentInfo = state[update.modelId];
-      
-      // Merge progress: if update has 0 progress but we have current progress (e.g. from pause),
-      // we might want to keep the current one unless it's a real restart.
-      // Actually, service sends 0 for terminal states like failed/canceled.
-      
-      final info = DownloadProgressInfo(
-        modelId: update.modelId,
-        status: update.status,
-        progress: update.status == DownloadStatus.paused || update.status == DownloadStatus.canceled
-            ? (currentInfo?.progress ?? 0.0)
-            : update.progress / 100.0,
-        taskId: update.taskId,
-        receivedBytes: update.status == DownloadStatus.paused || update.status == DownloadStatus.canceled
-            ? (currentInfo?.receivedBytes ?? 0)
-            : update.receivedBytes,
-        totalBytes: update.status == DownloadStatus.paused || update.status == DownloadStatus.canceled
-            ? (currentInfo?.totalBytes ?? 0)
-            : update.totalBytes,
-        bytesPerSecond: update.bytesPerSecond,
-        etaSeconds: update.etaSeconds,
-        isResumed: update.isResumed,
+    try {
+      await gemmaService.installModel(
+        model,
+        onProgress: (progress) {
+          if (_activeDownloads[modelId] != true) return;
+
+          final startTime = _downloadStartTimes[modelId] ?? DateTime.now();
+          final elapsed = DateTime.now().difference(startTime).inSeconds;
+          final total = model.fileSizeBytes;
+          final received = ((progress / 100.0) * total).round();
+          
+          final bytesPerSecond = elapsed > 0 ? (received / elapsed).round() : 0;
+          final etaSeconds = bytesPerSecond > 0 ? ((total - received) / bytesPerSecond).round() : null;
+
+          state = {
+            ...state,
+            modelId: DownloadProgressInfo(
+              modelId: modelId,
+              status: DownloadStatus.running,
+              progress: progress / 100.0,
+              receivedBytes: received,
+              totalBytes: total,
+              bytesPerSecond: bytesPerSecond,
+              etaSeconds: etaSeconds,
+            ),
+          };
+          _saveState();
+        },
       );
-      
-      state = {...state, update.modelId: info};
-      _saveState();
 
-      if (update.status == DownloadStatus.complete) {
-        ref.invalidate(downloadedModelsProvider);
-        _removeCompletedDownload(update.modelId);
-      } else if (update.status == DownloadStatus.failed ||
-          update.status == DownloadStatus.canceled ||
-          update.status == DownloadStatus.paused) {
+      // Download completed
+      if (_activeDownloads[modelId] == true) {
         state = {
           ...state,
-          update.modelId: info.copyWith(
-            status: update.status,
-            error: update.status == DownloadStatus.failed
-                ? 'Download failed'
-                : null,
+          modelId: DownloadProgressInfo(
+            modelId: modelId,
+            status: DownloadStatus.complete,
+            progress: 1.0,
+            receivedBytes: model.fileSizeBytes,
+            totalBytes: model.fileSizeBytes,
+          ),
+        };
+        _saveState();
+
+        ref.invalidate(downloadedModelsProvider);
+        _removeCompletedDownload(modelId);
+      }
+    } catch (e) {
+      Log.error('Download failed for $modelId: $e');
+      if (_activeDownloads[modelId] == true) {
+        state = {
+          ...state,
+          modelId: DownloadProgressInfo(
+            modelId: modelId,
+            status: DownloadStatus.failed,
+            progress: state[modelId]?.progress ?? 0.0,
+            error: 'Download failed: ${e.toString()}',
           ),
         };
         _saveState();
       }
-    });
-
-    try {
-      await downloadService.downloadModel(model);
-    } catch (e) {
-      // Error handled via stream
+    } finally {
+      _activeDownloads.remove(modelId);
+      _downloadStartTimes.remove(modelId);
     }
   }
 
   void _removeCompletedDownload(String modelId) {
-    // Small delay to let UI show 100%
     Future.delayed(const Duration(seconds: 1), () {
       if (state.containsKey(modelId)) {
         final current = Map<String, DownloadProgressInfo>.from(state);
         current.remove(modelId);
         state = current;
         _saveState();
-        _subscriptions[modelId]?.cancel();
-        _subscriptions.remove(modelId);
       }
     });
   }
 
   Future<void> cancelDownload(String modelId) async {
-    final downloadService = ref.read(foregroundDownloadServiceProvider);
-    await downloadService.cancelDownload(modelId);
+    _activeDownloads.remove(modelId);
+    _downloadStartTimes.remove(modelId);
     state = {...state}..remove(modelId);
     _saveState();
-    _subscriptions[modelId]?.cancel();
-    _subscriptions.remove(modelId);
-  }
-
-  Future<void> pauseDownload(String modelId) async {
-    final downloadService = ref.read(foregroundDownloadServiceProvider);
-    downloadService.pauseDownload(modelId);
-  }
-
-  Future<void> resumeDownload(String modelId) async {
-    await startDownload(modelId);
   }
 
   Future<void> retryDownload(String modelId) async {
