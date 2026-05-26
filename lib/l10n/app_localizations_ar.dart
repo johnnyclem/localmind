@@ -675,6 +675,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get auto_execute_tools => 'تشغيل الأدوات تلقائياً';
 
   @override
+  String get beta_label => 'تجريبي';
+
+  @override
+  String get experimental_label => 'اختباري';
+
+  @override
   String get add_ephemeral_mcp => 'إضافة خادم MCP مؤقت';
 
   @override

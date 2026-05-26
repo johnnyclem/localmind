@@ -1147,6 +1147,16 @@
     "description": "Toggle for auto-executing tools"
   },
 
+  "beta_label": "Beta",
+  "@beta_label": {
+    "description": "Badge label for beta features"
+  },
+
+  "experimental_label": "Experimental",
+  "@experimental_label": {
+    "description": "Badge label for experimental features"
+  },
+
   "add_ephemeral_mcp": "Add Ephemeral MCP Server",
   "@add_ephemeral_mcp": {
     "description": "Section label for adding temp MCP server"

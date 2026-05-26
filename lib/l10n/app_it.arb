@@ -211,6 +211,8 @@
   "mcp_disabled_warning": "MCP è disabilitato a livello globale. Abilitalo nelle Impostazioni per utilizzare queste funzionalità.",
   "mcp_enable_chat": "Abilita MCP per questa chat",
   "auto_execute_tools": "Esecuzione automatica degli strumenti",
+  "beta_label": "Beta",
+  "experimental_label": "Sperimentale",
   "add_ephemeral_mcp": "Aggiungi server MCP effimero",
   "mcp_label_placeholder": "Etichetta",
   "mcp_url_placeholder": "URL (https://...)",

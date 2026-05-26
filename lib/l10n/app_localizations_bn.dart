@@ -678,6 +678,12 @@ class AppLocalizationsBn extends AppLocalizations {
   String get auto_execute_tools => 'স্বয়ংক্রিয়ভাবে টুলস নির্বাহ করুন';
 
   @override
+  String get beta_label => 'বেটা';
+
+  @override
+  String get experimental_label => 'পরীক্ষামূলক';
+
+  @override
   String get add_ephemeral_mcp => 'সাময়িক MCP সার্ভার যুক্ত করুন';
 
   @override

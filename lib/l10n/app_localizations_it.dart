@@ -679,6 +679,12 @@ class AppLocalizationsIt extends AppLocalizations {
   String get auto_execute_tools => 'Esecuzione automatica degli strumenti';
 
   @override
+  String get beta_label => 'Beta';
+
+  @override
+  String get experimental_label => 'Sperimentale';
+
+  @override
   String get add_ephemeral_mcp => 'Aggiungi server MCP effimero';
 
   @override

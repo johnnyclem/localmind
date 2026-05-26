@@ -23,6 +23,8 @@
   "auto_execute_tools": "Ejecutar herramientas automáticamente",
   "auto_generate_titles": "Autogenerar títulos",
   "available": "Disponible",
+  "beta_label": "Beta",
+  "experimental_label": "Experimental",
   "available_models": "Modelos disponibles",
   "available_ram": "RAM disponible",
   "backend_cpu_desc": "Funciona en todos los dispositivos. Más compatible.",

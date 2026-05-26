@@ -23,6 +23,8 @@
   "auto_execute_tools": "स्वचालित रूप से उपकरण निष्पादित करें",
   "auto_generate_titles": "स्वचालित रूप से शीर्षक उत्पन्न करें",
   "available": "उपलब्ध",
+  "beta_label": "बीटा",
+  "experimental_label": "प्रायोगिक",
   "available_models": "उपलब्ध मॉडल",
   "available_ram": "उपलब्ध रैम (RAM)",
   "backend_cpu_desc": "सभी उपकरणों पर काम करता है। सबसे अनुकूल।",

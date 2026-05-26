@@ -9,6 +9,7 @@ import 'message_action_bar.dart';
 import 'processing_indicator.dart';
 import 'typing_indicator.dart';
 import 'reasoning_widget.dart';
+import '../../data/tools/tool_definition.dart';
 import '../../data/tools/tool_event.dart';
 
 class ChatBubble extends StatelessWidget {
@@ -134,7 +135,12 @@ class _UserBubble extends StatelessWidget {
             constraints: BoxConstraints(
               maxWidth: MediaQuery.of(context).size.width * 0.75,
             ),
-            margin: const EdgeInsetsDirectional.only(start: 48, end: 8, top: 4, bottom: 2),
+            margin: const EdgeInsetsDirectional.only(
+              start: 48,
+              end: 8,
+              top: 4,
+              bottom: 2,
+            ),
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
               color: isDark ? const Color(0xFF3B82F6) : const Color(0xFF2563EB),
@@ -161,7 +167,11 @@ class _UserBubble extends StatelessWidget {
                   data: message.content,
                   selectable: true,
                   styleSheet: MarkdownStyleSheet(
-                    p: TextStyle(color: Colors.white, fontSize: 15, height: 1.4),
+                    p: TextStyle(
+                      color: Colors.white,
+                      fontSize: 15,
+                      height: 1.4,
+                    ),
                   ),
                   shrinkWrap: true,
                 ),
@@ -368,7 +378,9 @@ class _MarkdownContent extends StatelessWidget {
             ),
           ),
         ),
-        blockquotePadding: EdgeInsetsDirectional.only(start: 16).resolve(Directionality.of(context)),
+        blockquotePadding: EdgeInsetsDirectional.only(
+          start: 16,
+        ).resolve(Directionality.of(context)),
         listBullet: TextStyle(color: isDark ? Colors.white : Colors.black),
         tableHead: TextStyle(
           color: isDark ? Colors.white : Colors.black,
@@ -463,7 +475,12 @@ class _ToolBubble extends StatelessWidget {
         constraints: BoxConstraints(
           maxWidth: MediaQuery.of(context).size.width * 0.8,
         ),
-        margin: const EdgeInsetsDirectional.only(start: 8, end: 48, top: 4, bottom: 4),
+        margin: const EdgeInsetsDirectional.only(
+          start: 8,
+          end: 48,
+          top: 4,
+          bottom: 4,
+        ),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: isDark ? const Color(0xFF1F2937) : const Color(0xFFEEF2FF),
@@ -539,19 +556,34 @@ class _ToolTimeline extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(10, 8, 10, 4),
             child: Row(
               children: [
-                Icon(Icons.troubleshoot, size: 14, color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
+                Icon(
+                  Icons.troubleshoot,
+                  size: 14,
+                  color: isDark
+                      ? const Color(0xFF94A3B8)
+                      : const Color(0xFF64748B),
+                ),
                 const SizedBox(width: 4),
-                Text('Tools', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B))),
+                Text(
+                  'Tools',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: isDark
+                        ? const Color(0xFF94A3B8)
+                        : const Color(0xFF64748B),
+                  ),
+                ),
               ],
             ),
           ),
-          ...events.map((event) => _buildEventRow(event, isDark)),
+          ...events.map((event) => _buildEventRow(context, event, isDark)),
         ],
       ),
     );
   }
 
-  Widget _buildEventRow(ToolEvent event, bool isDark) {
+  Widget _buildEventRow(BuildContext context, ToolEvent event, bool isDark) {
     final iconData = switch (event.status) {
       ToolEventStatus.requested => Icons.hourglass_empty,
       ToolEventStatus.approved => Icons.check_circle_outline,
@@ -562,8 +594,10 @@ class _ToolTimeline extends StatelessWidget {
     };
     final iconColor = switch (event.status) {
       ToolEventStatus.completed => const Color(0xFF22C55E),
-      ToolEventStatus.failed || ToolEventStatus.rejected => const Color(0xFFEF4444),
-      ToolEventStatus.running || ToolEventStatus.requested => const Color(0xFFF59E0B),
+      ToolEventStatus.failed ||
+      ToolEventStatus.rejected => const Color(0xFFEF4444),
+      ToolEventStatus.running ||
+      ToolEventStatus.requested => const Color(0xFFF59E0B),
       ToolEventStatus.approved => const Color(0xFF3B82F6),
     };
     final label = switch (event.status) {
@@ -574,6 +608,8 @@ class _ToolTimeline extends StatelessWidget {
       ToolEventStatus.completed => 'Done',
       ToolEventStatus.failed => 'Failed',
     };
+    final l10n = AppLocalizations.of(context)!;
+    final isMcpTool = event.providerType == ToolProviderType.mcp;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
@@ -604,9 +640,22 @@ class _ToolTimeline extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 4),
+                    if (isMcpTool) ...[
+                      _InlineToolBadge(label: l10n.beta_label, isDark: isDark),
+                      const SizedBox(width: 4),
+                      _InlineToolBadge(
+                        label: l10n.experimental_label,
+                        isDark: isDark,
+                      ),
+                      const SizedBox(width: 4),
+                    ],
                     Text(
                       label,
-                      style: TextStyle(fontSize: 10, color: iconColor, fontWeight: FontWeight.w500),
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: iconColor,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                   ],
                 ),
@@ -617,7 +666,9 @@ class _ToolTimeline extends StatelessWidget {
                       _formatArgs(event.arguments!),
                       style: TextStyle(
                         fontSize: 10,
-                        color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                        color: isDark
+                            ? const Color(0xFF94A3B8)
+                            : const Color(0xFF64748B),
                         fontFamily: 'monospace',
                       ),
                       maxLines: 3,
@@ -631,7 +682,9 @@ class _ToolTimeline extends StatelessWidget {
                       '→ ${event.result}',
                       style: TextStyle(
                         fontSize: 10,
-                        color: isDark ? const Color(0xFF86EFAC) : const Color(0xFF166534),
+                        color: isDark
+                            ? const Color(0xFF86EFAC)
+                            : const Color(0xFF166534),
                         fontFamily: 'monospace',
                       ),
                       maxLines: 2,
@@ -659,7 +712,9 @@ class _ToolTimeline extends StatelessWidget {
                       '${event.durationMs}ms',
                       style: TextStyle(
                         fontSize: 9,
-                        color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
+                        color: isDark
+                            ? const Color(0xFF64748B)
+                            : const Color(0xFF94A3B8),
                       ),
                     ),
                   ),
@@ -673,6 +728,34 @@ class _ToolTimeline extends StatelessWidget {
 
   String _formatArgs(Map<String, dynamic> args) {
     return args.entries.map((e) => '${e.key}: ${e.value}').join(', ');
+  }
+}
+
+class _InlineToolBadge extends StatelessWidget {
+  const _InlineToolBadge({required this.label, required this.isDark});
+
+  final String label;
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+      decoration: BoxDecoration(
+        color: Colors.amber.withValues(alpha: isDark ? 0.18 : 0.14),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: Colors.amber.withValues(alpha: 0.45)),
+      ),
+      child: Text(
+        label.toUpperCase(),
+        style: const TextStyle(
+          color: Color(0xFFB45309),
+          fontSize: 8,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 0.35,
+        ),
+      ),
+    );
   }
 }
 

@@ -1368,6 +1368,18 @@ abstract class AppLocalizations {
   /// **'Auto-execute tools'**
   String get auto_execute_tools;
 
+  /// Badge label for beta features
+  ///
+  /// In en, this message translates to:
+  /// **'Beta'**
+  String get beta_label;
+
+  /// Badge label for experimental features
+  ///
+  /// In en, this message translates to:
+  /// **'Experimental'**
+  String get experimental_label;
+
   /// Section label for adding temp MCP server
   ///
   /// In en, this message translates to:

@@ -678,6 +678,12 @@ class AppLocalizationsHi extends AppLocalizations {
   String get auto_execute_tools => 'स्वचालित रूप से उपकरण निष्पादित करें';
 
   @override
+  String get beta_label => 'बीटा';
+
+  @override
+  String get experimental_label => 'प्रायोगिक';
+
+  @override
   String get add_ephemeral_mcp => 'अस्थायी MCP सर्वर जोड़ें';
 
   @override

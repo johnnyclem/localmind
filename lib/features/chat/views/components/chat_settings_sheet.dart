@@ -41,7 +41,8 @@ class _ChatSettingsSheetState extends ConsumerState<ChatSettingsSheet> {
     final maxTokens = activeConv?.maxTokens ?? settings.maxTokens;
     final contextLength = activeConv?.contextLength ?? settings.contextLength;
 
-    final hasOverrides = activeConv?.temperature != null ||
+    final hasOverrides =
+        activeConv?.temperature != null ||
         activeConv?.topP != null ||
         activeConv?.maxTokens != null ||
         activeConv?.contextLength != null;
@@ -116,7 +117,10 @@ class _ChatSettingsSheetState extends ConsumerState<ChatSettingsSheet> {
                   ),
                   child: Row(
                     children: [
-                      const HugeIcon(icon: HugeIcons.strokeRoundedSlidersHorizontal, size: 16),
+                      const HugeIcon(
+                        icon: HugeIcons.strokeRoundedSlidersHorizontal,
+                        size: 16,
+                      ),
                       const SizedBox(width: 8),
                       Text(l10n.parameters_tab),
                     ],
@@ -133,9 +137,14 @@ class _ChatSettingsSheetState extends ConsumerState<ChatSettingsSheet> {
                   ),
                   child: Row(
                     children: [
-                      const HugeIcon(icon: HugeIcons.strokeRoundedPuzzle, size: 16),
+                      const HugeIcon(
+                        icon: HugeIcons.strokeRoundedPuzzle,
+                        size: 16,
+                      ),
                       const SizedBox(width: 8),
                       Text(l10n.mcp_tab),
+                      const SizedBox(width: 6),
+                      _McpBadge(label: l10n.beta_label, isDark: isDark),
                     ],
                   ),
                 ),
@@ -190,7 +199,8 @@ class _ChatSettingsSheetState extends ConsumerState<ChatSettingsSheet> {
                   label: l10n.max_tokens,
                   value: maxTokens,
                   description: l10n.max_tokens_desc,
-                  onChanged: (v) => _updateParam(ref, conversationId, maxTokens: v),
+                  onChanged: (v) =>
+                      _updateParam(ref, conversationId, maxTokens: v),
                   isDark: isDark,
                 ),
               ),
@@ -200,7 +210,8 @@ class _ChatSettingsSheetState extends ConsumerState<ChatSettingsSheet> {
                   label: l10n.context_length,
                   value: contextLength,
                   description: l10n.context_length_desc,
-                  onChanged: (v) => _updateParam(ref, conversationId, contextLength: v),
+                  onChanged: (v) =>
+                      _updateParam(ref, conversationId, contextLength: v),
                   isDark: isDark,
                 ),
               ),
@@ -235,12 +246,19 @@ class _ChatSettingsSheetState extends ConsumerState<ChatSettingsSheet> {
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 20),
+                  const Icon(
+                    Icons.warning_amber_rounded,
+                    color: Colors.orange,
+                    size: 20,
+                  ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
                       l10n.mcp_disabled_warning,
-                      style: const TextStyle(fontSize: 13, color: Colors.orange),
+                      style: const TextStyle(
+                        fontSize: 13,
+                        color: Colors.orange,
+                      ),
                     ),
                   ),
                 ],
@@ -250,7 +268,9 @@ class _ChatSettingsSheetState extends ConsumerState<ChatSettingsSheet> {
             value: mcpConfig.enabled,
             onChanged: isGloballyEnabled
                 ? (v) {
-                    final convId = ref.read(conv.activeConversationProvider)?.id;
+                    final convId = ref
+                        .read(conv.activeConversationProvider)
+                        ?.id;
                     if (convId != null) {
                       ref
                           .read(chatMcpConfigProvider.notifier)
@@ -260,7 +280,16 @@ class _ChatSettingsSheetState extends ConsumerState<ChatSettingsSheet> {
                     }
                   }
                 : null,
-            label: Text(l10n.mcp_enable_chat),
+            label: Wrap(
+              spacing: 6,
+              runSpacing: 4,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                Text(l10n.mcp_enable_chat),
+                _McpBadge(label: l10n.beta_label, isDark: isDark),
+                _McpBadge(label: l10n.experimental_label, isDark: isDark),
+              ],
+            ),
           ),
           const SizedBox(height: 16),
           if (mcpConfig.enabled && isGloballyEnabled) ...[
@@ -268,13 +297,18 @@ class _ChatSettingsSheetState extends ConsumerState<ChatSettingsSheet> {
               value: mcpConfig.autoExecuteTools,
               onChanged: (v) =>
                   ref.read(chatMcpConfigProvider.notifier).toggleAutoExecute(),
-              label: Text(l10n.auto_execute_tools),
+              label: Wrap(
+                spacing: 6,
+                runSpacing: 4,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  Text(l10n.auto_execute_tools),
+                  _McpBadge(label: l10n.experimental_label, isDark: isDark),
+                ],
+              ),
             ),
             const SizedBox(height: 24),
-            Text(
-              l10n.add_ephemeral_mcp,
-              style: theme.textTheme.list,
-            ),
+            Text(l10n.add_ephemeral_mcp, style: theme.textTheme.list),
             const SizedBox(height: 12),
             Row(
               children: [
@@ -302,10 +336,7 @@ class _ChatSettingsSheetState extends ConsumerState<ChatSettingsSheet> {
             ),
             const SizedBox(height: 24),
             if (mcpConfig.integrations.isNotEmpty) ...[
-              Text(
-                l10n.active_integrations,
-                style: theme.textTheme.list,
-              ),
+              Text(l10n.active_integrations, style: theme.textTheme.list),
               const SizedBox(height: 12),
               ConstrainedBox(
                 constraints: const BoxConstraints(maxHeight: 200),
@@ -317,15 +348,22 @@ class _ChatSettingsSheetState extends ConsumerState<ChatSettingsSheet> {
                     return Container(
                       margin: const EdgeInsets.only(bottom: 8),
                       decoration: BoxDecoration(
-                        color: isDark ? const Color(0xFF1E1E1E) : const Color(0xFFF9FAFB),
+                        color: isDark
+                            ? const Color(0xFF1E1E1E)
+                            : const Color(0xFFF9FAFB),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color: isDark ? const Color(0xFF2A2A2A) : const Color(0xFFE5E7EB),
+                          color: isDark
+                              ? const Color(0xFF2A2A2A)
+                              : const Color(0xFFE5E7EB),
                         ),
                       ),
                       child: ListTile(
                         dense: true,
-                        leading: const HugeIcon(icon: HugeIcons.strokeRoundedPuzzle, size: 18),
+                        leading: const HugeIcon(
+                          icon: HugeIcons.strokeRoundedPuzzle,
+                          size: 18,
+                        ),
                         title: Text(
                           integration.serverLabel ?? integration.pluginId ?? '',
                           style: const TextStyle(fontWeight: FontWeight.w600),
@@ -335,7 +373,11 @@ class _ChatSettingsSheetState extends ConsumerState<ChatSettingsSheet> {
                           style: const TextStyle(fontSize: 11),
                         ),
                         trailing: ShadIconButton.ghost(
-                          icon: const Icon(Icons.delete_outline, size: 18, color: Colors.red),
+                          icon: const Icon(
+                            Icons.delete_outline,
+                            size: 18,
+                            color: Colors.red,
+                          ),
                           onPressed: () => ref
                               .read(chatMcpConfigProvider.notifier)
                               .removeIntegration(index),
@@ -387,23 +429,55 @@ class _ChatSettingsSheetState extends ConsumerState<ChatSettingsSheet> {
       return;
     }
 
-    ref.read(conv.conversationsProvider.notifier).updateChatParams(
-      conversationId,
-      temperature: temperature,
-      topP: topP,
-      maxTokens: maxTokens,
-      contextLength: contextLength,
-    );
+    ref
+        .read(conv.conversationsProvider.notifier)
+        .updateChatParams(
+          conversationId,
+          temperature: temperature,
+          topP: topP,
+          maxTokens: maxTokens,
+          contextLength: contextLength,
+        );
   }
 
   void _resetToDefaults(WidgetRef ref, String? conversationId) {
     if (conversationId == null) return;
-    ref.read(conv.conversationsProvider.notifier).updateChatParams(
-      conversationId,
-      clearTemperature: true,
-      clearTopP: true,
-      clearMaxTokens: true,
-      clearContextLength: true,
+    ref
+        .read(conv.conversationsProvider.notifier)
+        .updateChatParams(
+          conversationId,
+          clearTemperature: true,
+          clearTopP: true,
+          clearMaxTokens: true,
+          clearContextLength: true,
+        );
+  }
+}
+
+class _McpBadge extends StatelessWidget {
+  const _McpBadge({required this.label, required this.isDark});
+
+  final String label;
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: Colors.amber.withValues(alpha: isDark ? 0.18 : 0.14),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: Colors.amber.withValues(alpha: 0.45)),
+      ),
+      child: Text(
+        label.toUpperCase(),
+        style: const TextStyle(
+          color: Color(0xFFB45309),
+          fontSize: 9,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 0.4,
+        ),
+      ),
     );
   }
 }
@@ -516,7 +590,10 @@ class _ParamInput extends StatelessWidget {
   }
 }
 
-void showChatSettingsSheet(BuildContext context, {String initialTab = 'parameters'}) {
+void showChatSettingsSheet(
+  BuildContext context, {
+  String initialTab = 'parameters',
+}) {
   showModalBottomSheet(
     context: context,
     isScrollControlled: true,

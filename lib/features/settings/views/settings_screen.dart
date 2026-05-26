@@ -147,6 +147,10 @@ class SettingsViews extends ConsumerWidget {
           ),
           _ToggleSetting(
             label: l10n.enable_mcp,
+            badges: [
+              _FeatureBadge(label: l10n.beta_label, isDark: isDark),
+              _FeatureBadge(label: l10n.experimental_label, isDark: isDark),
+            ],
             value: settings.mcpEnabled,
             onChanged: (v) =>
                 ref.read(settingsProvider.notifier).setMcpEnabled(v),
@@ -155,6 +159,7 @@ class SettingsViews extends ConsumerWidget {
           if (settings.mcpEnabled)
             _ToggleSetting(
               label: l10n.new_chat_mcp_default,
+              badges: [_FeatureBadge(label: l10n.beta_label, isDark: isDark)],
               value: settings.newChatMcpEnabled,
               onChanged: (v) =>
                   ref.read(settingsProvider.notifier).setNewChatMcpEnabled(v),
@@ -356,8 +361,7 @@ class _LanguageSetting extends StatelessWidget {
                 isExpanded: true,
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 borderRadius: BorderRadius.circular(8),
-                dropdownColor:
-                    isDark ? const Color(0xFF1F1F1F) : Colors.white,
+                dropdownColor: isDark ? const Color(0xFF1F1F1F) : Colors.white,
                 items: [
                   DropdownMenuItem(
                     value: null,
@@ -381,49 +385,51 @@ class _LanguageSetting extends StatelessWidget {
                       ],
                     ),
                   ),
-                  ..._localeItems.map((item) => DropdownMenuItem(
-                    value: item.$1,
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 24,
-                          height: 16,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(2),
-                            border: Border.all(
-                              color: isDark
-                                  ? const Color(0xFF444444)
-                                  : const Color(0xFFDDDDDD),
-                              width: 0.5,
+                  ..._localeItems.map(
+                    (item) => DropdownMenuItem(
+                      value: item.$1,
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 24,
+                            height: 16,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(2),
+                              border: Border.all(
+                                color: isDark
+                                    ? const Color(0xFF444444)
+                                    : const Color(0xFFDDDDDD),
+                                width: 0.5,
+                              ),
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(2),
+                              child: Image.asset(
+                                item.$3,
+                                width: 24,
+                                height: 16,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return Text(
+                                    item.$4,
+                                    style: const TextStyle(fontSize: 12),
+                                  );
+                                },
+                              ),
                             ),
                           ),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(2),
-                            child: Image.asset(
-                              item.$3,
-                              width: 24,
-                              height: 16,
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) {
-                                return Text(
-                                  item.$4,
-                                  style: const TextStyle(fontSize: 12),
-                                );
-                              },
+                          const SizedBox(width: 10),
+                          Text(
+                            item.$2,
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: isDark ? Colors.white : Colors.black,
                             ),
                           ),
-                        ),
-                        const SizedBox(width: 10),
-                        Text(
-                          item.$2,
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: isDark ? Colors.white : Colors.black,
-                          ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  )),
+                  ),
                 ],
                 onChanged: onChanged,
               ),
@@ -645,27 +651,65 @@ class _ToggleSetting extends StatelessWidget {
     required this.value,
     required this.onChanged,
     required this.isDark,
+    this.badges = const [],
   });
 
   final String label;
   final bool value;
   final ValueChanged<bool> onChanged;
   final bool isDark;
+  final List<Widget> badges;
 
   @override
   Widget build(BuildContext context) {
     return SwitchListTile(
-      title: Text(
-        label,
-        style: TextStyle(
-          fontSize: 14,
-          color: isDark ? Colors.white : Colors.black,
-        ),
+      title: Wrap(
+        spacing: 6,
+        runSpacing: 4,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 14,
+              color: isDark ? Colors.white : Colors.black,
+            ),
+          ),
+          ...badges,
+        ],
       ),
       value: value,
       onChanged: onChanged,
       dense: true,
       contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+    );
+  }
+}
+
+class _FeatureBadge extends StatelessWidget {
+  const _FeatureBadge({required this.label, required this.isDark});
+
+  final String label;
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: Colors.amber.withValues(alpha: isDark ? 0.18 : 0.14),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: Colors.amber.withValues(alpha: 0.45)),
+      ),
+      child: Text(
+        label.toUpperCase(),
+        style: const TextStyle(
+          color: Color(0xFFB45309),
+          fontSize: 9,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 0.4,
+        ),
+      ),
     );
   }
 }
@@ -1024,9 +1068,9 @@ class _DangerousAction extends StatelessWidget {
                     onPressed: () {
                       Navigator.pop(ctx);
                       onConfirm();
-                      ScaffoldMessenger.of(
-                        context,
-                      ).showSnackBar(SnackBar(content: Text(l10n.label_completed(label))));
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(l10n.label_completed(label))),
+                      );
                     },
                     style: TextButton.styleFrom(foregroundColor: Colors.red),
                     child: Text(dlgL10n.confirm),
@@ -1400,10 +1444,15 @@ class _OnDeviceOnDeviceEngineStatus extends ConsumerWidget {
             Expanded(
               child: Text(
                 engineState.status == OnDeviceEngineStatus.loaded
-                    ? l10n.model_loaded(engineState.loadedModelId ?? "unknown", engineState.backend?.name ?? "CPU")
+                    ? l10n.model_loaded(
+                        engineState.loadedModelId ?? "unknown",
+                        engineState.backend?.name ?? "CPU",
+                      )
                     : engineState.status == OnDeviceEngineStatus.loading
                     ? l10n.loading
-                    : l10n.error_with_message(engineState.error ?? l10n.unknown_error),
+                    : l10n.error_with_message(
+                        engineState.error ?? l10n.unknown_error,
+                      ),
                 style: TextStyle(
                   fontSize: 13,
                   color: engineState.status == OnDeviceEngineStatus.loaded

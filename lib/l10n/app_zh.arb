@@ -23,6 +23,8 @@
   "auto_execute_tools": "自动执行工具",
   "auto_generate_titles": "自动生成标题",
   "available": "可用",
+  "beta_label": "Beta",
+  "experimental_label": "实验性",
   "available_models": "可用模型",
   "available_ram": "可用内存",
   "backend_cpu_desc": "适用于所有设备。兼容性最好。",

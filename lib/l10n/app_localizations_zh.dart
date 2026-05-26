@@ -667,6 +667,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get auto_execute_tools => '自动执行工具';
 
   @override
+  String get beta_label => 'Beta';
+
+  @override
+  String get experimental_label => '实验性';
+
+  @override
   String get add_ephemeral_mcp => '添加临时 MCP 服务器';
 
   @override

@@ -23,6 +23,8 @@
   "auto_execute_tools": "স্বয়ংক্রিয়ভাবে টুলস নির্বাহ করুন",
   "auto_generate_titles": "স্বয়ংক্রিয় শিরোনাম তৈরি করুন",
   "available": "উপলব্ধ",
+  "beta_label": "বেটা",
+  "experimental_label": "পরীক্ষামূলক",
   "available_models": "উপলব্ধ মডেলসমূহ",
   "available_ram": "উপলব্ধ র‍্যাম (RAM)",
   "backend_cpu_desc": "সব ডিভাইসে কাজ করে। সবচেয়ে বেশি সামঞ্জস্যপূর্ণ।",

@@ -421,6 +421,10 @@
 
   "auto_execute_tools": "تشغيل الأدوات تلقائياً",
 
+  "beta_label": "تجريبي",
+
+  "experimental_label": "اختباري",
+
   "add_ephemeral_mcp": "إضافة خادم MCP مؤقت",
 
   "mcp_label_placeholder": "التسمية",
