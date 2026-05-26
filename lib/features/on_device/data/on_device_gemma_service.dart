@@ -137,13 +137,18 @@ class OnDeviceGemmaService {
     Log.info('Model $modelId loaded successfully');
   }
 
-  Future<InferenceChat?> createChat({String? systemInstruction}) async {
+  Future<InferenceChat?> createChat({
+    String? systemInstruction,
+    List<Tool> tools = const [],
+  }) async {
     if (_model == null) {
       throw StateError('Model not loaded. Call loadModel first.');
     }
 
     return _model!.createChat(
       systemInstruction: systemInstruction,
+      tools: tools,
+      supportsFunctionCalls: tools.isNotEmpty,
     );
   }
 

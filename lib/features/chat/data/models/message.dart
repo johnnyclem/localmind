@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import '../../../../core/models/enums.dart';
+import '../tools/tool_event.dart';
 
 class Message {
   final String id;
@@ -18,6 +19,8 @@ class Message {
   final List<ToolCallData>? toolCalls;
   final String? toolCallId;
   final bool isProcessing;
+  final String? toolSessionId;
+  final List<ToolEvent>? toolEvents;
 
   Message({
     required this.id,
@@ -35,6 +38,8 @@ class Message {
     this.toolCalls,
     this.toolCallId,
     this.isProcessing = false,
+    this.toolSessionId,
+    this.toolEvents,
   });
 
   Message copyWith({
@@ -53,6 +58,8 @@ class Message {
     List<ToolCallData>? toolCalls,
     String? toolCallId,
     bool? isProcessing,
+    String? toolSessionId,
+    List<ToolEvent>? toolEvents,
   }) {
     return Message(
       id: id ?? this.id,
@@ -70,6 +77,8 @@ class Message {
       toolCalls: toolCalls ?? this.toolCalls,
       toolCallId: toolCallId ?? this.toolCallId,
       isProcessing: isProcessing ?? this.isProcessing,
+      toolSessionId: toolSessionId ?? this.toolSessionId,
+      toolEvents: toolEvents ?? this.toolEvents,
     );
   }
 }

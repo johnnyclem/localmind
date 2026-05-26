@@ -63,6 +63,7 @@ class OnDeviceChatService implements ChatService {
 
       final chat = await _gemmaService.createChat(
         systemInstruction: systemInstruction,
+        tools: const [], // will be populated in Task 6
       );
 
       if (chat == null) {

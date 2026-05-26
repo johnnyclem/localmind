@@ -9,6 +9,7 @@ import 'message_action_bar.dart';
 import 'processing_indicator.dart';
 import 'typing_indicator.dart';
 import 'reasoning_widget.dart';
+import '../../data/tools/tool_event.dart';
 
 class ChatBubble extends StatelessWidget {
   const ChatBubble({
@@ -261,6 +262,11 @@ class _AssistantBubble extends StatelessWidget {
                 ),
               ),
             ),
+          if (message.toolEvents != null && message.toolEvents!.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: _ToolTimeline(events: message.toolEvents!),
+            ),
           if (isStreaming && message.content.isNotEmpty)
             const Padding(
               padding: EdgeInsets.only(top: 8),
@@ -506,6 +512,167 @@ class _ToolBubble extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+class _ToolTimeline extends StatelessWidget {
+  const _ToolTimeline({required this.events});
+  final List<ToolEvent> events;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(10, 8, 10, 4),
+            child: Row(
+              children: [
+                Icon(Icons.troubleshoot, size: 14, color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
+                const SizedBox(width: 4),
+                Text('Tools', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B))),
+              ],
+            ),
+          ),
+          ...events.map((event) => _buildEventRow(event, isDark)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEventRow(ToolEvent event, bool isDark) {
+    final iconData = switch (event.status) {
+      ToolEventStatus.requested => Icons.hourglass_empty,
+      ToolEventStatus.approved => Icons.check_circle_outline,
+      ToolEventStatus.rejected => Icons.cancel_outlined,
+      ToolEventStatus.running => Icons.play_circle_outline,
+      ToolEventStatus.completed => Icons.check_circle,
+      ToolEventStatus.failed => Icons.error_outline,
+    };
+    final iconColor = switch (event.status) {
+      ToolEventStatus.completed => const Color(0xFF22C55E),
+      ToolEventStatus.failed || ToolEventStatus.rejected => const Color(0xFFEF4444),
+      ToolEventStatus.running || ToolEventStatus.requested => const Color(0xFFF59E0B),
+      ToolEventStatus.approved => const Color(0xFF3B82F6),
+    };
+    final label = switch (event.status) {
+      ToolEventStatus.requested => 'Requested',
+      ToolEventStatus.approved => 'Approved',
+      ToolEventStatus.rejected => 'Rejected',
+      ToolEventStatus.running => 'Running',
+      ToolEventStatus.completed => 'Done',
+      ToolEventStatus.failed => 'Failed',
+    };
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 2),
+            child: Icon(iconData, size: 14, color: iconColor),
+          ),
+          const SizedBox(width: 6),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Flexible(
+                      child: Text(
+                        event.toolName,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: isDark ? Colors.white : Colors.black87,
+                          fontFamily: 'monospace',
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      label,
+                      style: TextStyle(fontSize: 10, color: iconColor, fontWeight: FontWeight.w500),
+                    ),
+                  ],
+                ),
+                if (event.arguments != null && event.arguments!.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 2),
+                    child: Text(
+                      _formatArgs(event.arguments!),
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                        fontFamily: 'monospace',
+                      ),
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                if (event.result != null && event.result!.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 2),
+                    child: Text(
+                      '→ ${event.result}',
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: isDark ? const Color(0xFF86EFAC) : const Color(0xFF166534),
+                        fontFamily: 'monospace',
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                if (event.error != null && event.error!.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 2),
+                    child: Text(
+                      '✕ ${event.error}',
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: const Color(0xFFEF4444),
+                        fontFamily: 'monospace',
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                if (event.durationMs != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 1),
+                    child: Text(
+                      '${event.durationMs}ms',
+                      style: TextStyle(
+                        fontSize: 9,
+                        color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _formatArgs(Map<String, dynamic> args) {
+    return args.entries.map((e) => '${e.key}: ${e.value}').join(', ');
   }
 }
 

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:isolate';
 import 'dart:typed_data';
 
@@ -76,26 +77,33 @@ class TtsNotifier extends Notifier<TtsState> {
   bool _isWorkerInitializing = false;
   int _currentSessionId = 0;
 
+  StreamSubscription<void>? _playerCompleteSubscription;
+  bool _isProcessingChunk = false;
+  int _playbackSessionId = 0;
+  Completer<SendPort>? _workerPortCompleter;
+
   @override
   TtsState build() {
     ref.keepAlive();
 
-    // Listen for engine changes to update the state without rebuilding the whole notifier
     ref.listen(settingsProvider, (previous, next) {
       if (previous?.ttsEngine != next.ttsEngine) {
         state = state.copyWith(activeEngine: next.ttsEngine);
       }
     });
 
-    _player.onPlayerComplete.listen((_) {
+    _playerCompleteSubscription = _player.onPlayerComplete.listen((_) {
       _onChunkFinished();
     });
 
     _setupWorkerListener();
 
     ref.onDispose(() {
+      _workerPortCompleter?.completeError(StateError('Disposed'));
+      _workerPortCompleter = null;
       _workerIsolate?.kill();
       _mainReceivePort.close();
+      _playerCompleteSubscription?.cancel();
       if (!_isPlayerDisposed) {
         _isPlayerDisposed = true;
         try {
@@ -112,6 +120,8 @@ class TtsNotifier extends Notifier<TtsState> {
     _mainReceivePort.listen((message) {
       if (message is SendPort) {
         _workerSendPort = message;
+        _workerPortCompleter?.complete(message);
+        _workerPortCompleter = null;
       } else if (message is TtsWorkerResponse) {
         if (message.isInitResponse) {
           _initCompleter?.complete();
@@ -123,7 +133,6 @@ class TtsNotifier extends Notifier<TtsState> {
           }
           if (message.wavBytes != null) {
             _synthesizedChunks[message.chunkIndex!] = message.wavBytes!;
-            // If this was the chunk we were waiting for, play it
             if (message.chunkIndex == _currentChunkIndex && state.isSpeaking) {
               _playNextChunk();
             }
@@ -148,25 +157,20 @@ class TtsNotifier extends Notifier<TtsState> {
     if (_workerIsolate != null) return;
 
     Log.info('Spawning TTS worker isolate...');
+    _workerPortCompleter = Completer<SendPort>();
     _workerIsolate = await Isolate.spawn(
       ttsWorkerEntry,
       _mainReceivePort.sendPort,
     );
 
-    // Wait for worker to send its SendPort
-    int attempts = 0;
-    while (_workerSendPort == null && attempts < 200) {
-      await Future.delayed(const Duration(milliseconds: 50));
-      attempts++;
-    }
-
-    if (_workerSendPort == null) {
-      throw StateError('Failed to establish communication with TTS worker');
-    }
+    await _workerPortCompleter!.future.timeout(
+      const Duration(seconds: 10),
+    );
   }
 
   void _onPlaybackFinished() {
     if (_isStopping) return;
+    if (_currentSessionId != _playbackSessionId) return;
     state = state.copyWith(
       isSpeaking: false,
       isInitializing: false,
@@ -175,19 +179,23 @@ class TtsNotifier extends Notifier<TtsState> {
   }
 
   void _onChunkFinished() {
-    if (_isStopping) return;
-    _currentChunkIndex++;
-    if (_currentChunkIndex < _chunks.length) {
-      _playNextChunk();
-    } else {
-      _onPlaybackFinished();
+    if (_isStopping || _isProcessingChunk) return;
+    _isProcessingChunk = true;
+    try {
+      _currentChunkIndex++;
+      if (_currentChunkIndex < _chunks.length) {
+        _playNextChunk();
+      } else {
+        _onPlaybackFinished();
+      }
+    } finally {
+      _isProcessingChunk = false;
     }
   }
 
   List<String> _splitText(String text) {
     if (text.length <= 250) return [text];
 
-    // Split by common sentence terminators but keep them
     final regex = RegExp(r'(?<=[.!?])\s+');
     final sentences = text.split(regex);
 
@@ -202,7 +210,6 @@ class TtsNotifier extends Notifier<TtsState> {
       }
 
       if (sentence.length > 250) {
-        // If a single sentence is too long, split it by commas or spaces
         final subRegex = RegExp(r'(?<=[,;])\s+');
         final parts = sentence.split(subRegex);
         for (final part in parts) {
@@ -229,7 +236,9 @@ class TtsNotifier extends Notifier<TtsState> {
     await _ensureWorker();
 
     if (_isWorkerInitializing && _initCompleter != null) {
-      await _initCompleter!.future;
+      await _initCompleter!.future.timeout(
+        const Duration(seconds: 30),
+      );
     }
 
     String modelPath = '';
@@ -313,7 +322,9 @@ class TtsNotifier extends Notifier<TtsState> {
         ),
       );
 
-      await _initCompleter!.future;
+      await _initCompleter!.future.timeout(
+        const Duration(seconds: 30),
+      );
       _currentEngine = engineId;
       _currentModelPath = modelPath;
       _currentVoicesPath = voicesPath;
@@ -331,7 +342,6 @@ class TtsNotifier extends Notifier<TtsState> {
     _isStopping = false;
     if (state.isSpeaking) {
       await stop();
-      // Wait a bit for the player to fully stop
       await Future.delayed(const Duration(milliseconds: 100));
       _isStopping = false;
     }
@@ -359,6 +369,11 @@ class TtsNotifier extends Notifier<TtsState> {
         await _flutterTts!.setSpeechRate(
           (settings.ttsSpeed * 0.5).clamp(0.0, 1.0),
         );
+        _flutterTts!.setCompletionHandler(() {
+          if (!_isStopping) {
+            state = state.copyWith(isSpeaking: false, playingContent: null);
+          }
+        });
         await _flutterTts!.awaitSpeakCompletion(true);
         await _flutterTts!.speak(text);
       } catch (e) {
@@ -368,8 +383,6 @@ class TtsNotifier extends Notifier<TtsState> {
           playingContent: null,
         );
         rethrow;
-      } finally {
-        state = state.copyWith(isSpeaking: false, playingContent: null);
       }
       return;
     }
@@ -380,6 +393,7 @@ class TtsNotifier extends Notifier<TtsState> {
     _synthesizedChunks.clear();
     _lastEnqueuedChunk = -1;
     _currentSessionId++;
+    _playbackSessionId = _currentSessionId;
 
     state = state.copyWith(
       isSpeaking: true,
@@ -408,17 +422,15 @@ class TtsNotifier extends Notifier<TtsState> {
   Future<void> _playNextChunk() async {
     if (_isStopping || _currentChunkIndex >= _chunks.length) return;
 
-    // Start synthesizing more chunks
     _enqueueNextChunks();
 
-    // Check if current chunk is synthesized
     if (!_synthesizedChunks.containsKey(_currentChunkIndex)) {
       Log.debug('Waiting for chunk $_currentChunkIndex to be synthesized...');
       return;
     }
 
     final wavBytes = _synthesizedChunks[_currentChunkIndex]!;
-    _synthesizedChunks.remove(_currentChunkIndex); // Clear memory
+    _synthesizedChunks.remove(_currentChunkIndex);
 
     try {
       Log.debug(
@@ -426,11 +438,22 @@ class TtsNotifier extends Notifier<TtsState> {
       );
 
       await _player.stop();
-      await _player.setSource(BytesSource(wavBytes));
-      await _player.resume();
+
+      final tempDir = Directory.systemTemp;
+      final tempFile = File(
+        '${tempDir.path}/tts_chunk_${_currentSessionId}_$_currentChunkIndex.wav',
+      );
+      await tempFile.writeAsBytes(wavBytes);
+
+      await _player.play(DeviceFileSource(tempFile.path));
     } catch (e) {
       Log.error('Error playing chunk $_currentChunkIndex: $e');
-      _onChunkFinished();
+      _currentChunkIndex++;
+      if (_currentChunkIndex < _chunks.length) {
+        _playNextChunk();
+      } else {
+        _onPlaybackFinished();
+      }
     }
   }
 
@@ -442,7 +465,7 @@ class TtsNotifier extends Notifier<TtsState> {
     final voiceId =
         _currentVoice ??
         settings.ttsVoiceId ??
-        (availableVoices.isNotEmpty ? availableVoices.first.id : '');
+        (availableVoices.isNotEmpty ? availableVoices.first.id : null);
 
     while (_lastEnqueuedChunk < _chunks.length - 1 &&
         _lastEnqueuedChunk < _currentChunkIndex + _lookAheadCount) {
@@ -454,7 +477,7 @@ class TtsNotifier extends Notifier<TtsState> {
       _workerSendPort!.send(
         TtsSynthesizeRequest(
           text: text,
-          voiceId: voiceId,
+          voiceId: voiceId ?? '',
           speed: settings.ttsSpeed,
           chunkIndex: chunkIndex,
           sessionId: _currentSessionId,
@@ -468,7 +491,6 @@ class TtsNotifier extends Notifier<TtsState> {
     if (_isPlayerDisposed) return;
     try {
       await _player.stop();
-      // Don't release here, as it makes restarting slower and can cause state issues
     } catch (_) {}
     await _flutterTts?.stop();
     state = state.copyWith(

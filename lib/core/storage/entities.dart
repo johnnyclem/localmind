@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:objectbox/objectbox.dart';
 import '../models/enums.dart';
 import '../../features/chat/data/models/message.dart';
+import '../../features/chat/data/tools/tool_event.dart';
 import '../../features/conversations/data/models/conversation.dart';
 import '../../features/personas/data/models/persona.dart';
 import '../../features/servers/data/models/server.dart';
@@ -293,6 +294,8 @@ class MessageEntity {
   String? toolCallsJson;
   String? toolCallId;
   bool isProcessing;
+  String? toolSessionId;
+  String? toolEventsJson;
 
   MessageEntity({
     this.internalId = 0,
@@ -311,6 +314,8 @@ class MessageEntity {
     this.toolCallsJson,
     this.toolCallId,
     this.isProcessing = false,
+    this.toolSessionId,
+    this.toolEventsJson,
   });
 
   factory MessageEntity.fromDomain(Message message) {
@@ -334,6 +339,10 @@ class MessageEntity {
           : null,
       toolCallId: message.toolCallId,
       isProcessing: message.isProcessing,
+      toolSessionId: message.toolSessionId,
+      toolEventsJson: message.toolEvents != null
+          ? jsonEncode(message.toolEvents!.map((e) => e.toMap()).toList())
+          : null,
     );
   }
 
@@ -360,6 +369,12 @@ class MessageEntity {
           : null,
       toolCallId: toolCallId,
       isProcessing: isProcessing,
+      toolSessionId: toolSessionId,
+      toolEvents: toolEventsJson != null
+          ? (jsonDecode(toolEventsJson!) as List)
+                .map((e) => ToolEvent.fromMap(Map<String, dynamic>.from(e)))
+                .toList()
+          : null,
     );
   }
 }

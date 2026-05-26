@@ -10,6 +10,10 @@ import '../../../core/models/enums.dart';
 import '../../../core/logger/app_logger.dart';
 import '../../on_device/data/on_device_gemma_service.dart';
 import '../../on_device/data/on_device_chat_service.dart';
+import 'tools/adapters/tool_transport_adapter.dart';
+import 'tools/adapters/openai_tool_adapter.dart';
+import 'tools/adapters/openrouter_tool_adapter.dart';
+import 'tools/adapters/ollama_tool_adapter.dart';
 
 abstract class ChatService {
   Stream<ChatResponse> sendMessage({
@@ -449,6 +453,7 @@ class OpenAICompatibleChatService implements ChatService {
     String? previousResponseId,
   }) async* {
     _cancelToken = CancelToken();
+    final toolAdapter = OllamaToolAdapter();
 
     final apiMessages = messages
         .map((m) => {'role': _roleToString(m.role), 'content': m.content})
@@ -533,11 +538,21 @@ class OpenAICompatibleChatService implements ChatService {
             if (data == '[DONE]') {
               _timeoutTimer?.cancel();
               Log.debug('OpenAICompatible: Received [DONE]');
+              for (final call in toolAdapter.takeCompletedCalls()) {
+                yield ChatResponse(
+                  type: ChatResponseType.toolCall,
+                  toolCall: ToolCallData(
+                    tool: call.name,
+                    arguments: call.arguments,
+                  ),
+                );
+              }
               yield const ChatResponse(type: ChatResponseType.done);
               return;
             }
             try {
               final json = jsonDecode(data) as Map<String, dynamic>;
+              toolAdapter.consumeDynamicChunk(json);
 
               // Check for errors in the response
               if (json['error'] != null) {
@@ -642,6 +657,7 @@ class OllamaChatService implements ChatService {
     String? previousResponseId,
   }) async* {
     _cancelToken = CancelToken();
+    final toolAdapter = OpenAiToolAdapter();
 
     final body = {
       'model': modelId,
@@ -678,6 +694,7 @@ class OllamaChatService implements ChatService {
           if (line.isNotEmpty) {
             try {
               final json = jsonDecode(line) as Map<String, dynamic>;
+              toolAdapter.consumeDynamicChunk(json);
               final message = json['message'];
               if (message != null && message is Map<String, dynamic>) {
                 final content = message['content'] as String?;
@@ -697,6 +714,15 @@ class OllamaChatService implements ChatService {
                 }
               }
               if (json['done'] == true) {
+                for (final call in toolAdapter.takeCompletedCalls()) {
+                  yield ChatResponse(
+                    type: ChatResponseType.toolCall,
+                    toolCall: ToolCallData(
+                      tool: call.name,
+                      arguments: call.arguments,
+                    ),
+                  );
+                }
                 yield const ChatResponse(type: ChatResponseType.done);
                 return;
               }
@@ -738,6 +764,7 @@ class OpenRouterChatService implements ChatService {
     String? previousResponseId,
   }) async* {
     _cancelToken = CancelToken();
+    final toolAdapter = OpenRouterToolAdapter();
 
     final body = {
       'model': modelId,
@@ -813,11 +840,21 @@ class OpenRouterChatService implements ChatService {
             if (data == '[DONE]') {
               _timeoutTimer?.cancel();
               Log.debug('OpenRouter: Received [DONE]');
+              for (final call in toolAdapter.takeCompletedCalls()) {
+                yield ChatResponse(
+                  type: ChatResponseType.toolCall,
+                  toolCall: ToolCallData(
+                    tool: call.name,
+                    arguments: call.arguments,
+                  ),
+                );
+              }
               yield const ChatResponse(type: ChatResponseType.done);
               return;
             }
             try {
               final json = jsonDecode(data) as Map<String, dynamic>;
+              toolAdapter.consumeDynamicChunk(json);
 
               // Check for errors in the response
               if (json['error'] != null) {
@@ -969,3 +1006,17 @@ String _roleToString(MessageRole role) {
       return 'tool';
   }
 }
+
+/// Returns the streaming-parsing adapter for a server type.
+///
+/// OpenAI-compatible and Ollama servers use adapter-based tool call parsing
+/// from streaming chunks. LM Studio and on-device servers collect tool calls
+/// directly from [ChatResponseType.toolCall] events emitted during streaming
+/// and feed them to the loop via [ToolExecutionLoop.run]'s [preParsedCalls].
+ToolTransportAdapter createAdapterForServerType(ServerType type) => switch (type) {
+  ServerType.openAICompatible => OpenAiToolAdapter(),
+  ServerType.openRouter => OpenRouterToolAdapter(),
+  ServerType.lmStudio => OpenAiToolAdapter(),
+  ServerType.onDevice => OpenAiToolAdapter(),
+  ServerType.ollama => OllamaToolAdapter(),
+};

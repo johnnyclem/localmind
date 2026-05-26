@@ -23,9 +23,12 @@ import '../../../objectbox.g.dart';
 import '../../conversations/data/models/conversation.dart';
 import '../data/chat_service.dart';
 import '../data/models/chat_parameters.dart';
-import '../data/models/message.dart';
+import '../data/models/message.dart' hide ToolCallData;
 import '../data/smart_reply_service.dart';
+import '../data/tools/tool_execution_loop.dart';
+import '../data/tools/adapters/tool_transport_adapter.dart' show ParsedToolCall;
 import '../../../core/providers/chat_background_service_provider.dart';
+import './tooling_providers.dart';
 
 final selectedModelProvider =
     NotifierProvider<SelectedModelNotifier, ModelInfo?>(() {
@@ -622,12 +625,20 @@ class ChatNotifier extends Notifier<ChatState> {
       var streamingAssistantMessage = assistantMessage;
 
       if (chatService != null) {
+        final mcpConfig = ref.read(chatMcpConfigProvider);
+        final integrations = mcpConfig.enabled && mcpConfig.integrations.isNotEmpty
+            ? mcpConfig.integrations
+            : null;
+
+        final collectedToolCalls = <ToolCallData>[];
+
         _streamSubscription = chatService
             .sendMessage(
               server: server,
               modelId: selectedModel?.id ?? 'default',
               messages: messagesForApi,
               params: chatParams,
+              integrations: integrations,
             )
             .listen(
               (response) async {
@@ -765,6 +776,10 @@ class ChatNotifier extends Notifier<ChatState> {
                     await _saveMessage(streamingAssistantMessage);
                     break;
                   case ChatResponseType.toolCall:
+                    if (response.toolCall != null) {
+                      collectedToolCalls.add(response.toolCall!);
+                    }
+                    break;
                   case ChatResponseType.invalidToolCall:
                   case ChatResponseType.done:
                     break;
@@ -812,10 +827,54 @@ class ChatNotifier extends Notifier<ChatState> {
                     }
                   } else {
                     // Normal completion with content
-                    final finalMessage = streamingMessage.copyWith(
+                    var finalMessage = streamingMessage.copyWith(
                       status: MessageStatus.complete,
                       isProcessing: false,
                     );
+
+                    // ---- TOOL LOOP INTEGRATION ----
+                    if (mcpConfig.enabled && collectedToolCalls.isNotEmpty) {
+                      try {
+                        final registry = ref.read(toolRegistryProvider);
+                        final adapter = createAdapterForServerType(server.type);
+
+                        final preParsedCalls = collectedToolCalls
+                            .map((tc) => ParsedToolCall(
+                                  id: tc.tool,
+                                  name: tc.tool,
+                                  arguments: tc.arguments,
+                                ))
+                            .toList();
+
+                        final loop = ToolExecutionLoop(
+                          adapter: adapter,
+                          registry: registry,
+                          onRequestApproval: mcpConfig.autoExecuteTools
+                              ? null
+                              : (call) async {
+                                  // TODO: wire real approval UI dialog
+                                  return false;
+                                },
+                        );
+
+                        final loopResult = await loop.run(
+                          initialUserMessage: content,
+                          assistantContent: streamingAssistantMessage.content,
+                          preParsedCalls: preParsedCalls,
+                        );
+
+                        if (loopResult.events.isNotEmpty) {
+                          finalMessage = finalMessage.copyWith(
+                            toolSessionId: loop.sessionId,
+                            toolEvents: loopResult.events,
+                          );
+                        }
+                      } catch (e) {
+                        Log.error('Tool execution loop failed: $e');
+                      }
+                    }
+                    // ---- END TOOL LOOP INTEGRATION ----
+
                     await _saveMessage(finalMessage);
                     if (isCurrentContext) {
                       final messageIndex = state.messages.indexWhere(
