@@ -327,7 +327,12 @@ class ServerApiService {
     final List<ModelInfo> models = [];
     if (data['data'] != null) {
       for (final item in data['data']) {
-        if (item['architecture']?['modality'] == 'text->text') {
+        final modality = item['architecture']?['modality'] as String?;
+        final isTextModel = modality == null ||
+            modality.isEmpty ||
+            !modality.contains('->') ||
+            modality.split('->').last.contains('text');
+        if (isTextModel) {
           models.add(
             ModelInfo(
               id: item['id'] ?? '',

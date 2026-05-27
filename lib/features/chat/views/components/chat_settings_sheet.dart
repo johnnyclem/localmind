@@ -19,6 +19,13 @@ class ChatSettingsSheet extends ConsumerStatefulWidget {
 class _ChatSettingsSheetState extends ConsumerState<ChatSettingsSheet> {
   final _serverLabelController = TextEditingController();
   final _serverUrlController = TextEditingController();
+  late String _currentTab;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentTab = widget.initialTab;
+  }
 
   @override
   void dispose() {
@@ -101,7 +108,8 @@ class _ChatSettingsSheetState extends ConsumerState<ChatSettingsSheet> {
             ),
             const SizedBox(height: 20),
             ShadTabs<String>(
-              value: widget.initialTab,
+              value: _currentTab,
+              onChanged: (v) => setState(() => _currentTab = v),
               tabs: [
                 ShadTab(
                   value: 'parameters',
