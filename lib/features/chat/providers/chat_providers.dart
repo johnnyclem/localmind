@@ -75,7 +75,10 @@ final autoSelectFirstLoadedModelProvider = FutureProvider<void>((ref) async {
   }
 
   // Only auto-select for servers that support listing running models
-  if (activeServer.type == ServerType.openRouter) return;
+  if (activeServer.type == ServerType.openRouter ||
+      activeServer.type == ServerType.openAICompatible) {
+    return;
+  }
 
   try {
     final Set<String> loadedModels;

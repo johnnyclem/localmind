@@ -63,7 +63,8 @@ class ServerApiService {
   }
 
   Future<Set<String>> fetchRunningModels(Server server) async {
-    if (server.type == ServerType.openRouter) {
+    if (server.type == ServerType.openRouter ||
+        server.type == ServerType.openAICompatible) {
       return {};
     }
 
@@ -191,16 +192,18 @@ class ServerApiService {
 
   Set<String> _parseRunningOpenAICompatibleModels(dynamic data) {
     final runningModels = <String>{};
-    if (data['models'] != null) {
-      for (final item in data['models']) {
-        final id = item['key'] as String? ??
-            item['name'] as String? ??
-            item['id'] as String? ??
+    final modelItems = data['models'] ?? data['data'];
+    if (modelItems != null && modelItems is List) {
+      for (final item in modelItems) {
+        if (item is! Map) continue;
+        final id = item['key']?.toString() ??
+            item['name']?.toString() ??
+            item['id']?.toString() ??
             '';
         if (id.isEmpty) continue;
 
-        final loadedInstances = item['loaded_instances'] as List?;
-        if (loadedInstances != null) {
+        final loadedInstances = item['loaded_instances'];
+        if (loadedInstances is List) {
           if (loadedInstances.isNotEmpty) {
             runningModels.add(id);
           }
@@ -237,46 +240,63 @@ class ServerApiService {
     // Build a lookup from the OpenAI-style 'data' array for metadata
     // that may be missing from the 'models' array (e.g. llama.cpp)
     final Map<String, Map<String, dynamic>> metaById = {};
-    if (data['data'] != null) {
+    if (data['data'] != null && data['data'] is List) {
       for (final item in data['data']) {
-        final id = item['id'] as String? ?? '';
-        if (id.isNotEmpty) {
-          metaById[id] = (item['meta'] as Map<String, dynamic>?) ?? {};
+        if (item is Map) {
+          final id = item['id']?.toString() ?? '';
+          if (id.isNotEmpty) {
+            metaById[id] = (item['meta'] as Map<String, dynamic>?) ?? {};
+          }
         }
       }
     }
 
-    if (data['models'] != null) {
-      for (final item in data['models']) {
-        final id = item['key'] as String? ??
-            item['name'] as String? ??
-            item['id'] as String? ??
+    final modelItems = data['models'] ?? data['data'];
+    if (modelItems != null && modelItems is List) {
+      for (final item in modelItems) {
+        if (item is! Map) continue;
+        final id = item['key']?.toString() ??
+            item['name']?.toString() ??
+            item['id']?.toString() ??
             '';
         if (id.isEmpty) continue;
 
-        final displayName = item['display_name'] as String?;
+        final displayName = item['display_name']?.toString();
         final quantization = item['quantization'];
-        final paramsString = item['params_string'] as String?;
+        final paramsString = item['params_string']?.toString();
         
-        final meta = metaById[id];
-        if (meta == null && metaById.isNotEmpty) {
+        final meta = metaById[id] ?? (item['meta'] as Map<String, dynamic>?);
+        if (meta == null && metaById.isNotEmpty && data['models'] != null) {
           Log.warning('Metadata join failed for model: $id');
         }
         final finalMeta = meta ?? {};
+
+        String? quantName;
+        if (quantization is Map) {
+          quantName = quantization['name']?.toString();
+        } else if (quantization is String) {
+          quantName = quantization;
+        }
+
+        final archValue = item['architecture'];
+        String? archName;
+        if (archValue is String) {
+          archName = archValue;
+        }
 
         models.add(
           ModelInfo(
             id: id,
             name: displayName ?? _formatModelName(id),
-            description: item['description'] as String?,
+            description: item['description']?.toString(),
             parameterCount: _parseParameterString(paramsString) ??
                 _paramCountFromMeta(finalMeta['n_params']),
-            contextLength: item['max_context_length'] as int? ??
-                finalMeta['n_ctx_train'] as int?,
-            fileSize: item['size_bytes'] as int? ??
-                finalMeta['size'] as int?,
-            quantization: quantization?['name'] as String?,
-            architecture: item['architecture'] as String?,
+            contextLength: _toInt(item['max_context_length']) ??
+                _toInt(finalMeta['n_ctx_train']),
+            fileSize: _toInt(item['size_bytes']) ??
+                _toInt(finalMeta['size']),
+            quantization: quantName,
+            architecture: archName,
             serverType: server.type,
             serverId: server.id,
           ),
@@ -284,6 +304,14 @@ class ServerApiService {
       }
     }
     return models;
+  }
+
+  int? _toInt(dynamic value) {
+    if (value == null) return null;
+    if (value is int) return value;
+    if (value is double) return value.toInt();
+    if (value is String) return int.tryParse(value);
+    return null;
   }
 
   double? _paramCountFromMeta(dynamic nParams) {

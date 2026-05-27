@@ -4,30 +4,29 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:hugeicons/hugeicons.dart';
-import 'package:localmind/l10n/app_localizations.dart';
-import '../../servers/views/components/server_icon_picker.dart';
-import '../../servers/data/models/server.dart';
+import '../../conversations/providers/conversation_providers.dart' as conv;
+import '../../models/screens/model_picker_sheet.dart';
+import '../../personas/providers/personas_providers.dart';
+import '../../servers/providers/server_providers.dart';
+import '../../tts/views/components/tts_player_bar.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
+
 import '../../../core/models/enums.dart';
 import '../../../core/providers/app_providers.dart';
-
 import '../../../core/routes/app_routes.dart';
+import '../../../l10n/app_localizations.dart';
+import '../../conversations/data/models/conversation.dart';
+import '../../servers/data/models/server.dart';
+import '../../servers/views/components/server_icon_picker.dart';
 import '../data/models/message.dart';
+import '../providers/chat_mcp_providers.dart';
 import '../providers/chat_providers.dart';
 import 'components/chat_bubble.dart';
 import 'components/chat_input_bar.dart';
-import 'components/edit_message_dialog.dart';
-import '../providers/chat_mcp_providers.dart';
 import 'components/chat_settings_sheet.dart';
+import 'components/edit_message_dialog.dart';
 import 'components/notification_permission_banner.dart';
-import '../../conversations/data/models/conversation.dart';
-import 'package:localmind/features/conversations/providers/conversation_providers.dart'
-    as conv;
-import 'package:localmind/features/models/screens/model_picker_sheet.dart';
-import 'package:localmind/features/personas/providers/personas_providers.dart';
-import 'package:localmind/features/servers/providers/server_providers.dart';
-import 'package:localmind/features/tts/views/components/tts_player_bar.dart';
 
 class ChatScreen extends ConsumerStatefulWidget {
   const ChatScreen({super.key});

@@ -90,6 +90,11 @@ final loadedModelsProvider = FutureProvider.family<Set<String>, Server>((
         : {};
   }
 
+  if (server.type == ServerType.openAICompatible ||
+      server.type == ServerType.openRouter) {
+    return <String>{};
+  }
+
   final apiService = ref.watch(serverApiServiceProvider);
   try {
     return await apiService.fetchRunningModels(server);

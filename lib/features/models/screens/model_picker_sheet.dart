@@ -339,7 +339,10 @@ class _ModelList extends ConsumerWidget {
                 final activeServer = ref.read(activeServerProvider);
                 if (activeServer == null) return;
 
-                if (!isLoaded) {
+                final supportsLoad = model.serverType == ServerType.lmStudio ||
+                    model.serverType == ServerType.ollama;
+
+                if (supportsLoad && !isLoaded) {
                   ref.read(modelLoadingProvider.notifier).setLoading(model.id);
 
                   try {
@@ -503,29 +506,32 @@ class _ModelTile extends StatelessWidget {
                 ],
               ),
             ),
-            if (isLoaded) ...[
-              Container(
-                width: 15,
-                height: 15,
-                decoration: const BoxDecoration(
-                  color: Color(0xFF4CAF50),
-                  shape: BoxShape.circle,
+            if (model.serverType == ServerType.lmStudio ||
+                model.serverType == ServerType.ollama) ...[
+              if (isLoaded) ...[
+                Container(
+                  width: 15,
+                  height: 15,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFF4CAF50),
+                    shape: BoxShape.circle,
+                  ),
                 ),
-              ),
-            ],
-            if (isLoaded) ...[
-              IconButton(
-                icon: Icon(
-                  Icons.power_settings_new_outlined,
-                  size: 18,
-                  color: Colors.red[400],
+              ],
+              if (isLoaded) ...[
+                IconButton(
+                  icon: Icon(
+                    Icons.power_settings_new_outlined,
+                    size: 18,
+                    color: Colors.red[400],
+                  ),
+                  onPressed: onUnload,
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                  tooltip: l10n.unload_from_server,
                 ),
-                onPressed: onUnload,
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-                tooltip: l10n.unload_from_server,
-              ),
-              const SizedBox(width: 8),
+                const SizedBox(width: 8),
+              ],
             ],
             if (isSelected)
               Icon(Icons.check_circle, color: accent, size: 22)
