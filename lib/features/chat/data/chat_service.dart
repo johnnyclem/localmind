@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:isolate';
 import 'package:dio/dio.dart';
 import '../../servers/data/models/server.dart';
 import 'models/message.dart';
@@ -405,10 +406,16 @@ class LMStudioChatService implements ChatService {
           formattedInputs.add({'type': 'text', 'content': m.content});
           for (final path in m.attachmentPaths!) {
             try {
-              final file = File(path);
-              if (await file.exists()) {
-                final bytes = await file.readAsBytes();
-                final base64Image = base64Encode(bytes);
+              final base64Image = await Isolate.run(() async {
+                final file = File(path);
+                if (await file.exists()) {
+                  final bytes = await file.readAsBytes();
+                  return base64Encode(bytes);
+                }
+                return null;
+              });
+
+              if (base64Image != null) {
                 final ext = path.split('.').last.toLowerCase();
                 final mimeType = (ext == 'png')
                     ? 'image/png'

@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -35,9 +36,16 @@ class ChatScreen extends ConsumerStatefulWidget {
   ConsumerState<ChatScreen> createState() => _ChatScreenState();
 }
 
-class _ChatScreenState extends ConsumerState<ChatScreen> {
+class _ChatScreenState extends ConsumerState<ChatScreen>
+    with WidgetsBindingObserver {
   final ScrollController _scrollController = ScrollController();
   final FocusNode _inputFocusNode = FocusNode();
+  bool _isApprovalDialogOpen = false;
+  bool _autoScrollEnabled = true;
+  bool _scheduledAutoScroll = false;
+  int _lastMessageCount = 0;
+  int _lastStreamingLength = 0;
+  bool _lastIsStreaming = false;
 
   List<String> _quickPrompts(AppLocalizations l10n) => [
     l10n.quick_write,
@@ -49,15 +57,63 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _inputFocusNode.addListener(_onFocusChanged);
+    _scrollController.addListener(_onScrollChanged);
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.inactive ||
+        state == AppLifecycleState.paused ||
+        state == AppLifecycleState.hidden ||
+        state == AppLifecycleState.detached) {
+      ref.read(chatProvider.notifier).checkpointStreamingMessage(flush: true);
+    }
   }
 
   void _onFocusChanged() {
     setState(() {});
   }
 
+  void _onScrollChanged() {
+    if (!_scrollController.hasClients) return;
+    _autoScrollEnabled = _isNearBottom();
+  }
+
+  bool _isNearBottom() {
+    if (!_scrollController.hasClients) return true;
+    final position = _scrollController.position;
+    return (position.maxScrollExtent - position.pixels) <= 120;
+  }
+
+  void _scheduleAutoScroll({required bool streaming}) {
+    if (!_autoScrollEnabled || _scheduledAutoScroll) {
+      return;
+    }
+
+    _scheduledAutoScroll = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scheduledAutoScroll = false;
+      if (!_scrollController.hasClients || !_autoScrollEnabled) {
+        return;
+      }
+
+      final target = _scrollController.position.maxScrollExtent;
+      _scrollController.animateTo(
+        target,
+        duration: streaming
+            ? const Duration(milliseconds: 120)
+            : const Duration(milliseconds: 200),
+        curve: Curves.easeOutCubic,
+      );
+    });
+  }
+
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _scrollController.removeListener(_onScrollChanged);
     _scrollController.dispose();
     _inputFocusNode.removeListener(_onFocusChanged);
     _inputFocusNode.dispose();
@@ -69,7 +125,22 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     final l10n = AppLocalizations.of(context)!;
     ref.watch(autoSelectFirstLoadedModelProvider);
 
-    final chatState = ref.watch(chatProvider);
+    ref.listen<PendingToolApproval?>(
+      chatProvider.select((s) => s.pendingToolApproval),
+      (previous, next) {
+        if (next != null && !_isApprovalDialogOpen) {
+          _showToolApprovalDialog(context, next);
+        }
+      },
+    );
+
+    final isLoading = ref.watch(chatProvider.select((s) => s.isLoading));
+    final messages = ref.watch(chatProvider.select((s) => s.messages));
+    final isStreaming = ref.watch(chatProvider.select((s) => s.isStreaming));
+    final streamingLength = ref.watch(
+      chatProvider.select((s) => s.streamingMessage?.content.length ?? 0),
+    );
+    final errorMessage = ref.watch(chatProvider.select((s) => s.errorMessage));
     final selectedModel = ref.watch(selectedModelProvider);
     final connectionStatus = ref.watch(connectionStatusProvider);
     final activeServer = ref.watch(activeServerProvider);
@@ -80,6 +151,20 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         : null;
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+
+    final hasNewMessage = messages.length != _lastMessageCount;
+    final streamingProgressed =
+        isStreaming && streamingLength != _lastStreamingLength;
+    final streamStarted = isStreaming && !_lastIsStreaming;
+    final streamEnded = !isStreaming && _lastIsStreaming;
+
+    if (hasNewMessage || streamingProgressed || streamStarted || streamEnded) {
+      _scheduleAutoScroll(streaming: isStreaming);
+    }
+
+    _lastMessageCount = messages.length;
+    _lastStreamingLength = streamingLength;
+    _lastIsStreaming = isStreaming;
 
     return Column(
       children: [
@@ -245,16 +330,16 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         Expanded(
           child: Stack(
             children: [
-              if (chatState.isLoading)
+              if (isLoading)
                 const Center(child: CircularProgressIndicator(strokeWidth: 2))
-              else if (chatState.messages.isEmpty && activeConversation != null)
+              else if (messages.isEmpty && activeConversation != null)
                 _CorruptedChatState(
                   conversation: activeConversation,
-                  errorMessage: chatState.errorMessage,
+                  errorMessage: errorMessage,
                   onStartNewChat: () =>
                       ref.read(chatProvider.notifier).startNewConversation(),
                 )
-              else if (chatState.messages.isEmpty)
+              else if (messages.isEmpty)
                 _EmptyState(
                   onQuickPrompt: (prompt) =>
                       ref.read(chatProvider.notifier).sendMessage(prompt),
@@ -270,11 +355,10 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                       _showPersonaPickerForPreselection(context),
                 )
               else
-                _MessageList(
+                _MessageListConsumer(
                   scrollController: _scrollController,
-                  messages: chatState.messages,
-                  streamingMessage: chatState.streamingMessage,
-                  isStreaming: chatState.isStreaming,
+                  messages: messages,
+                  isStreaming: isStreaming,
                   onRetry: (messageId) {
                     ref.read(chatProvider.notifier).retryMessage(messageId);
                   },
@@ -293,7 +377,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                     }
                   },
                   hasSmartReplies:
-                      !chatState.isStreaming &&
+                      !isStreaming &&
                       MediaQuery.of(context).viewInsets.bottom == 0 &&
                       (ref
                               .watch(smartRepliesProvider)
@@ -323,7 +407,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      if (!chatState.isStreaming &&
+                      if (!isStreaming &&
                           MediaQuery.of(context).viewInsets.bottom == 0) ...[
                         const SizedBox(height: 4),
                         _SmartReplyChips(
@@ -336,7 +420,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                       ],
                       ChatInputBar(
                         focusNode: _inputFocusNode,
-                        isStreaming: chatState.isStreaming,
+                        isStreaming: isStreaming,
                         onSend: (message, {attachments}) {
                           ref
                               .read(chatProvider.notifier)
@@ -619,6 +703,79 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       size: 18,
       color: Theme.of(context).colorScheme.primary,
     );
+  }
+
+  void _showToolApprovalDialog(
+    BuildContext context,
+    PendingToolApproval approval,
+  ) {
+    setState(() {
+      _isApprovalDialogOpen = true;
+    });
+
+    final toolCall = approval.toolCall;
+
+    showShadDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return ShadDialog.alert(
+          title: Text('Execute Tool: ${toolCall.name}?'),
+          description: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                'The model is requesting to execute the following tool:',
+              ),
+              const SizedBox(height: 8),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surfaceContainer,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Text(
+                    const JsonEncoder.withIndent(
+                      '  ',
+                    ).convert(toolCall.arguments),
+                    style: const TextStyle(
+                      fontFamily: 'monospace',
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            ShadButton.outline(
+              child: const Text('Reject'),
+              onPressed: () {
+                Navigator.of(context).pop(false);
+              },
+            ),
+            ShadButton(
+              child: const Text('Approve'),
+              onPressed: () {
+                Navigator.of(context).pop(true);
+              },
+            ),
+          ],
+        );
+      },
+    ).then((value) {
+      if (mounted) {
+        setState(() {
+          _isApprovalDialogOpen = false;
+        });
+      }
+      final approved = value ?? false;
+      ref.read(chatProvider.notifier).approveTool(approved);
+    });
   }
 }
 
@@ -1143,6 +1300,44 @@ class _RecentConversationItem extends ConsumerWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _MessageListConsumer extends ConsumerWidget {
+  const _MessageListConsumer({
+    required this.scrollController,
+    required this.messages,
+    required this.isStreaming,
+    required this.onRetry,
+    required this.onDelete,
+    required this.onEdit,
+    this.hasSmartReplies = false,
+  });
+
+  final ScrollController scrollController;
+  final List<Message> messages;
+  final bool isStreaming;
+  final void Function(String) onRetry;
+  final void Function(String) onDelete;
+  final void Function(String messageId, String currentContent) onEdit;
+  final bool hasSmartReplies;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final streamingMessage = ref.watch(
+      chatProvider.select((s) => s.streamingMessage),
+    );
+
+    return _MessageList(
+      scrollController: scrollController,
+      messages: messages,
+      streamingMessage: streamingMessage,
+      isStreaming: isStreaming,
+      onRetry: onRetry,
+      onDelete: onDelete,
+      onEdit: onEdit,
+      hasSmartReplies: hasSmartReplies,
     );
   }
 }

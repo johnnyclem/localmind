@@ -18,19 +18,26 @@ class ConversationsNotifier extends AsyncNotifier<List<Conversation>> {
 
   Future<List<Conversation>> _loadAll() async {
     final db = ref.read(databaseProvider);
-    final entities = db.conversationBox.getAll();
-    final conversations = entities.map((e) => e.toDomain()).toList();
-    _sortConversations(conversations);
-    return conversations;
+    return await db.store.runInTransactionAsync(
+      TxMode.read,
+      _loadConversationsInBackground,
+      null,
+    );
   }
 
-  void _sortConversations(List<Conversation> conversations) {
+  static List<Conversation> _loadConversationsInBackground(Store store, _) {
+    final convBox = store.box<ConversationEntity>();
+    final entities = convBox.getAll();
+    final conversations = entities.map((e) => e.toDomain()).toList();
+
     conversations.sort((a, b) {
       if (a.isPinned != b.isPinned) {
         return a.isPinned ? -1 : 1;
       }
       return b.updatedAt.compareTo(a.updatedAt);
     });
+
+    return conversations;
   }
 
   Future<Conversation> createConversation({

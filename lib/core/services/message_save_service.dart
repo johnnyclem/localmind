@@ -18,6 +18,9 @@ class MessageSaveService {
   final List<Message> _queue = [];
   Timer? _flushTimer;
   bool _disposed = false;
+  bool _isFlushing = false;
+  bool _flushAgain = false;
+  Completer<void>? _activeFlushCompleter;
 
   MessageSaveService(this._db);
 
@@ -49,14 +52,36 @@ class MessageSaveService {
   }
 
   Future<void> _doFlush() async {
-    if (_queue.isEmpty) return;
-    final batch = List<Message>.from(_queue);
-    _queue.clear();
+    if (_isFlushing) {
+      _flushAgain = true;
+      await _activeFlushCompleter?.future;
+      return;
+    }
 
+    _isFlushing = true;
+    _activeFlushCompleter = Completer<void>();
     try {
-      await _db.store.runInTransactionAsync(TxMode.write, _writeBatch, batch);
-    } catch (e) {
-      Log.error('MessageSaveService flush error: $e');
+      do {
+        _flushAgain = false;
+        if (_queue.isEmpty) break;
+
+        final batch = List<Message>.from(_queue);
+        _queue.clear();
+
+        try {
+          await _db.store.runInTransactionAsync(
+            TxMode.write,
+            _writeBatch,
+            batch,
+          );
+        } catch (e) {
+          Log.error('MessageSaveService flush error: $e');
+        }
+      } while (_flushAgain || _queue.isNotEmpty);
+    } finally {
+      _isFlushing = false;
+      _activeFlushCompleter?.complete();
+      _activeFlushCompleter = null;
     }
   }
 

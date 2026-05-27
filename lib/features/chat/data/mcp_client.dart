@@ -185,7 +185,7 @@ class McpCapabilities {
   final bool resources;
   final bool prompts;
 
-  McpCapabilities({
+  const McpCapabilities({
     this.tools = false,
     this.resources = false,
     this.prompts = false,
@@ -205,7 +205,11 @@ class McpTool {
   final String? description;
   final Map<String, dynamic> inputSchema;
 
-  McpTool({required this.name, this.description, this.inputSchema = const {}});
+  const McpTool({
+    required this.name,
+    this.description,
+    this.inputSchema = const {},
+  });
 
   factory McpTool.fromJson(Map<String, dynamic> json) {
     return McpTool(

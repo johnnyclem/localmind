@@ -89,6 +89,9 @@ class OnDeviceEngineNotifier extends Notifier<OnDeviceEngineState> {
     await bgService.start();
 
     try {
+      // Yield control to the event loop so the UI has time to draw the loading indicator
+      // and stabilize before the native platform thread begins heavy model loading.
+      await Future.delayed(const Duration(milliseconds: 100));
       final isInstalled = await _gemmaService.isModelInstalled(modelId);
       if (!isInstalled) {
         state = state.copyWith(

@@ -1,10 +1,10 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
+import 'package:gpt_markdown/gpt_markdown.dart';
 import 'package:localmind/l10n/app_localizations.dart';
 import '../../../../core/models/enums.dart';
 import '../../data/models/message.dart';
-import 'code_block.dart';
 import 'message_action_bar.dart';
 import 'processing_indicator.dart';
 import 'typing_indicator.dart';
@@ -163,17 +163,16 @@ class _UserBubble extends StatelessWidget {
                       isUser: true,
                     ),
                   ),
-                MarkdownBody(
-                  data: message.content,
-                  selectable: true,
-                  styleSheet: MarkdownStyleSheet(
-                    p: TextStyle(
+                SelectionArea(
+                  child: _ThemedGptMarkdown(
+                    content: message.content,
+                    isDark: isDark,
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 15,
                       height: 1.4,
                     ),
                   ),
-                  shrinkWrap: true,
                 ),
               ],
             ),
@@ -248,6 +247,8 @@ class _AssistantBubble extends StatelessWidget {
             const ProcessingIndicator()
           else if (isStreaming && message.content.isEmpty)
             const TypingIndicator()
+          else if (isStreaming)
+            _StreamingContent(content: message.content, isDark: isDark)
           else
             _MarkdownContent(content: message.content, isDark: isDark),
           if (message.status == MessageStatus.error &&
@@ -316,6 +317,84 @@ class _AssistantBubble extends StatelessWidget {
   }
 }
 
+class _StreamingTextContent extends StatelessWidget {
+  const _StreamingTextContent({required this.content, required this.isDark});
+
+  final String content;
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      content,
+      style: TextStyle(
+        color: isDark ? Colors.white : Colors.black,
+        fontSize: 15,
+        height: 1.5,
+      ),
+    );
+  }
+}
+
+class _StreamingContent extends StatefulWidget {
+  const _StreamingContent({required this.content, required this.isDark});
+
+  final String content;
+  final bool isDark;
+
+  @override
+  State<_StreamingContent> createState() => _StreamingContentState();
+}
+
+class _StreamingContentState extends State<_StreamingContent> {
+  static const Duration _updateInterval = Duration(milliseconds: 80);
+  Timer? _flushTimer;
+  String _visibleContent = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _visibleContent = widget.content;
+  }
+
+  @override
+  void didUpdateWidget(covariant _StreamingContent oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.content == widget.content) {
+      return;
+    }
+
+    if (widget.content.length < _visibleContent.length) {
+      _flushTimer?.cancel();
+      _visibleContent = widget.content;
+      return;
+    }
+
+    _flushTimer ??= Timer(_updateInterval, () {
+      _flushTimer = null;
+      if (mounted) {
+        setState(() {
+          _visibleContent = widget.content;
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _flushTimer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _MarkdownBodyContent(
+      content: _visibleContent,
+      isDark: widget.isDark,
+    );
+  }
+}
+
 class _MarkdownContent extends StatelessWidget {
   const _MarkdownContent({required this.content, required this.isDark});
 
@@ -324,108 +403,131 @@ class _MarkdownContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MarkdownBody(
-      data: content,
-      selectable: true,
-      styleSheet: MarkdownStyleSheet(
-        p: TextStyle(
+    if (content.length > 2000) {
+      return _DeferredMarkdownContent(content: content, isDark: isDark);
+    }
+
+    return _MarkdownBodyContent(content: content, isDark: isDark);
+  }
+}
+
+class _MarkdownBodyContent extends StatelessWidget {
+  const _MarkdownBodyContent({required this.content, required this.isDark});
+
+  final String content;
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    return SelectionArea(
+      child: _ThemedGptMarkdown(
+        content: content,
+        isDark: isDark,
+        style: TextStyle(
           color: isDark ? Colors.white : Colors.black,
           fontSize: 15,
           height: 1.5,
         ),
-        h1: TextStyle(
-          color: isDark ? Colors.white : Colors.black,
-          fontSize: 24,
-          fontWeight: FontWeight.bold,
-        ),
-        h2: TextStyle(
-          color: isDark ? Colors.white : Colors.black,
-          fontSize: 20,
-          fontWeight: FontWeight.bold,
-        ),
-        h3: TextStyle(
-          color: isDark ? Colors.white : Colors.black,
-          fontSize: 18,
-          fontWeight: FontWeight.w600,
-        ),
-        h4: TextStyle(
-          color: isDark ? Colors.white : Colors.black,
-          fontSize: 16,
-          fontWeight: FontWeight.w600,
-        ),
-        code: TextStyle(
-          backgroundColor: isDark
-              ? const Color(0xFF2D2D2D)
-              : const Color(0xFFE8E8E8),
-          color: isDark ? const Color(0xFF9CDCFE) : const Color(0xFF001080),
-          fontFamily: 'monospace',
-          fontSize: 13,
-        ),
-        codeblockDecoration: BoxDecoration(
-          color: isDark ? const Color(0xFF1E1E1E) : const Color(0xFFF5F5F5),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        codeblockPadding: const EdgeInsets.all(12),
-        blockquote: TextStyle(
-          color: isDark ? const Color(0xFF888888) : const Color(0xFF666666),
-          fontStyle: FontStyle.italic,
-        ),
-        blockquoteDecoration: BoxDecoration(
-          border: Border(
-            left: BorderSide(
-              color: isDark ? const Color(0xFF3A3A3A) : const Color(0xFFE0E0E0),
-              width: 3,
-            ),
-          ),
-        ),
-        blockquotePadding: EdgeInsetsDirectional.only(
-          start: 16,
-        ).resolve(Directionality.of(context)),
-        listBullet: TextStyle(color: isDark ? Colors.white : Colors.black),
-        tableHead: TextStyle(
-          color: isDark ? Colors.white : Colors.black,
-          fontWeight: FontWeight.bold,
-        ),
-        tableBody: TextStyle(color: isDark ? Colors.white : Colors.black),
-        tableBorder: TableBorder.all(
-          color: isDark ? const Color(0xFF3A3A3A) : const Color(0xFFE0E0E0),
-        ),
-        horizontalRuleDecoration: BoxDecoration(
-          border: Border(
-            top: BorderSide(
-              color: isDark ? const Color(0xFF3A3A3A) : const Color(0xFFE0E0E0),
-            ),
-          ),
-        ),
-        a: TextStyle(
-          color: isDark ? const Color(0xFF60A5FA) : const Color(0xFF2563EB),
-          decoration: TextDecoration.underline,
-        ),
       ),
-      builders: {'code': CodeBlockBuilder(isDark: isDark)},
     );
   }
 }
 
-class CodeBlockBuilder extends MarkdownElementBuilder {
-  final bool isDark;
+class _ThemedGptMarkdown extends StatelessWidget {
+  const _ThemedGptMarkdown({
+    required this.content,
+    required this.isDark,
+    required this.style,
+  });
 
-  CodeBlockBuilder({required this.isDark});
+  final String content;
+  final bool isDark;
+  final TextStyle style;
 
   @override
-  Widget? visitElementAfter(element, TextStyle? preferredStyle) {
-    final code = element.textContent;
-    String? language;
+  Widget build(BuildContext context) {
+    final gptTheme = GptMarkdownThemeData(
+      brightness: isDark ? Brightness.dark : Brightness.light,
+      highlightColor: isDark
+          ? const Color(0xFF334155)
+          : const Color(0xFFDBEAFE),
+      linkColor: isDark ? const Color(0xFF60A5FA) : const Color(0xFF2563EB),
+      linkHoverColor: isDark
+          ? const Color(0xFF93C5FD)
+          : const Color(0xFF1D4ED8),
+      hrLineColor: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+      hrLineThickness: 1.0,
+      h1: style.copyWith(fontSize: 24, fontWeight: FontWeight.w700),
+      h2: style.copyWith(fontSize: 21, fontWeight: FontWeight.w700),
+      h3: style.copyWith(fontSize: 19, fontWeight: FontWeight.w600),
+      h4: style.copyWith(fontSize: 17, fontWeight: FontWeight.w600),
+      h5: style.copyWith(fontSize: 16, fontWeight: FontWeight.w600),
+      h6: style.copyWith(fontSize: 15, fontWeight: FontWeight.w600),
+    );
 
-    if (element.attributes.containsKey('class')) {
-      final classes = element.attributes['class']!;
-      final langMatch = RegExp(r'language-(\w+)').firstMatch(classes);
-      if (langMatch != null) {
-        language = langMatch.group(1);
+    return GptMarkdownTheme(
+      gptThemeData: gptTheme,
+      child: GptMarkdown(content, style: style, followLinkColor: true),
+    );
+  }
+}
+
+class _DeferredMarkdownContent extends StatefulWidget {
+  const _DeferredMarkdownContent({required this.content, required this.isDark});
+
+  final String content;
+  final bool isDark;
+
+  @override
+  State<_DeferredMarkdownContent> createState() =>
+      _DeferredMarkdownContentState();
+}
+
+class _DeferredMarkdownContentState extends State<_DeferredMarkdownContent> {
+  bool _showMarkdown = false;
+  Timer? _deferTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _deferTimer = Timer(const Duration(milliseconds: 120), () {
+      if (mounted) {
+        setState(() => _showMarkdown = true);
       }
+    });
+  }
+
+  @override
+  void dispose() {
+    _deferTimer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(_DeferredMarkdownContent oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.content != widget.content ||
+        oldWidget.isDark != widget.isDark) {
+      _showMarkdown = false;
+      _deferTimer?.cancel();
+      _deferTimer = Timer(const Duration(milliseconds: 120), () {
+        if (mounted) {
+          setState(() => _showMarkdown = true);
+        }
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!_showMarkdown) {
+      return _StreamingTextContent(
+        content: widget.content,
+        isDark: widget.isDark,
+      );
     }
 
-    return CodeBlock(code: code, language: language);
+    return _MarkdownBodyContent(content: widget.content, isDark: widget.isDark);
   }
 }
 

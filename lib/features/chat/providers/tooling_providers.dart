@@ -17,8 +17,7 @@ final toolRegistryProvider = Provider<ToolRegistry>((ref) {
   return ToolRegistry(
     providers: [
       ref.watch(builtInToolProviderProvider),
-      if (mcpServerManager.serverCount > 0)
-        McpToolProvider(serverManager: mcpServerManager),
+      McpToolProvider(serverManager: mcpServerManager),
     ],
   );
 });

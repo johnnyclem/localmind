@@ -12,6 +12,7 @@ import '../features/on_device/data/on_device_gemma_service.dart';
 import '../core/models/enums.dart';
 import '../features/servers/data/models/server.dart';
 import '../features/servers/providers/server_providers.dart';
+import '../core/logger/app_logger.dart';
 import 'bootstrap_screen.dart';
 import 'bootstrap_state.dart';
 
@@ -67,8 +68,11 @@ class _BootstrapHostState extends State<BootstrapHost> {
       _updateStage(BootstrapStage.initializingServices, 'Initializing services...');
       await OnDeviceGemmaService.initialize();
 
-      // Migrate models from old custom download location
-      await OnDeviceGemmaService.migrateOldModels();
+      // Migrate models from old custom download location in background to prevent cold start ANR
+      OnDeviceGemmaService.migrateOldModels().catchError((e) {
+        Log.error('Error migrating old models: $e');
+        return 0;
+      });
 
       _updateStage(BootstrapStage.configuringServer, 'Configuring server...');
       final servers = await container.read(serversProvider.future);

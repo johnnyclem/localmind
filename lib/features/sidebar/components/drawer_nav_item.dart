@@ -8,12 +8,14 @@ class DrawerNavItem extends StatelessWidget {
     required this.label,
     required this.isSelected,
     required this.onTap,
+    this.badgeText,
   });
 
   final List<List<dynamic>> iconData;
   final String label;
   final bool isSelected;
   final VoidCallback onTap;
+  final String? badgeText;
 
   @override
   Widget build(BuildContext context) {
@@ -45,16 +47,42 @@ class DrawerNavItem extends StatelessWidget {
                     : (isDark ? Colors.white70 : Colors.black54),
               ),
               const SizedBox(width: 16),
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                  color: isSelected
-                      ? (isDark ? Colors.white : theme.colorScheme.primary)
-                      : (isDark ? Colors.white70 : Colors.black87),
+              Expanded(
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                    color: isSelected
+                        ? (isDark ? Colors.white : theme.colorScheme.primary)
+                        : (isDark ? Colors.white70 : Colors.black87),
+                  ),
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
+              if (badgeText != null && badgeText!.isNotEmpty) ...[
+                const SizedBox(width: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? theme.colorScheme.primary.withAlpha(45)
+                        : theme.colorScheme.primary.withAlpha(20),
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: Text(
+                    badgeText!,
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.3,
+                      color: isSelected
+                          ? theme.colorScheme.primary
+                          : (isDark ? Colors.white : theme.colorScheme.primary),
+                    ),
+                  ),
+                ),
+              ],
             ],
           ),
         ),

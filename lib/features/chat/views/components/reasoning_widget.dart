@@ -33,15 +33,16 @@ class _ReasoningWidgetState extends State<ReasoningWidget> {
   }
 
   String _getLastLines(String content, int maxLines) {
-    final lines = content
-        .split('\n')
-        .where((line) => line.trim().isNotEmpty)
-        .toList();
-    if (lines.length <= maxLines) {
-      return content.trim();
+    var lineCount = 0;
+    for (var i = content.length - 1; i >= 0; i--) {
+      if (content.codeUnitAt(i) == 10) {
+        lineCount++;
+        if (lineCount >= maxLines) {
+          return '... ${content.substring(i + 1).trim()}';
+        }
+      }
     }
-    final lastLines = lines.reversed.take(maxLines).toList().reversed;
-    return '... ${lastLines.join('\n')}';
+    return content.trim();
   }
 
   @override
@@ -58,6 +59,9 @@ class _ReasoningWidgetState extends State<ReasoningWidget> {
     final previewText = hasContent
         ? _getLastLines(widget.reasoningContent!, 4)
         : '';
+    final visibleReasoningText = widget.isStreaming
+        ? previewText
+        : (_isExpanded ? widget.reasoningContent! : previewText);
 
     return GestureDetector(
       onTap: () => setState(() => _isExpanded = !_isExpanded),
@@ -124,7 +128,7 @@ class _ReasoningWidgetState extends State<ReasoningWidget> {
             if (hasContent) ...[
               const SizedBox(height: 8),
               Text(
-                _isExpanded ? widget.reasoningContent! : previewText,
+                visibleReasoningText,
                 style: TextStyle(
                   fontSize: 13,
                   color: isDark

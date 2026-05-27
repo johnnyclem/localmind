@@ -18,6 +18,7 @@ import '../../../core/models/enums.dart';
 import '../../../core/providers/service_providers.dart';
 import '../../../core/providers/storage_providers.dart';
 import '../../on_device/providers/on_device_providers.dart';
+import '../../on_device/data/on_device_chat_service.dart';
 import '../../../core/storage/entities.dart';
 import '../../../objectbox.g.dart';
 import '../../conversations/data/models/conversation.dart';
@@ -84,7 +85,9 @@ final autoSelectFirstLoadedModelProvider = FutureProvider<void>((ref) async {
     final Set<String> loadedModels;
     if (activeServer.type == ServerType.onDevice) {
       final engine = ref.watch(onDeviceEngineProvider);
-      loadedModels = engine.loadedModelId != null ? {engine.loadedModelId!} : {};
+      loadedModels = engine.loadedModelId != null
+          ? {engine.loadedModelId!}
+          : {};
     } else {
       final apiService = ref.read(serverApiServiceProvider);
       loadedModels = await apiService.fetchRunningModels(activeServer);
@@ -242,15 +245,26 @@ final chatServiceProvider = Provider<ChatService?>((ref) {
   if (server == null) {
     return null;
   }
+  final ChatService service;
   if (server.type == ServerType.onDevice) {
     final gemmaService = ref.read(onDeviceGemmaServiceProvider);
-    return ChatService.forServer(
+    service = ChatService.forServer(
       server.type,
       ref.read(dioProvider),
       onDeviceGemma: gemmaService,
     );
+  } else {
+    service = ChatService.forServer(server.type, ref.read(dioProvider));
   }
-  return ChatService.forServer(server.type, ref.read(dioProvider));
+
+  ref.onDispose(() {
+    final s = service;
+    if (s is OnDeviceChatService) {
+      s.dispose();
+    }
+  });
+
+  return service;
 });
 
 final smartReplyServiceProvider = Provider<SmartReplyService>((ref) {
@@ -260,13 +274,15 @@ final smartReplyServiceProvider = Provider<SmartReplyService>((ref) {
 });
 
 final smartRepliesProvider = FutureProvider<List<String>>((ref) async {
-  final chatState = ref.watch(chatProvider);
-  final isStreaming = ref.watch(isStreamingProvider);
+  final isStreaming = ref.watch(chatProvider.select((s) => s.isStreaming));
   final settings = ref.watch(settingsProvider);
 
-  if (chatState.messages.isEmpty || isStreaming) return [];
+  if (isStreaming) return [];
 
-  final lastMessage = chatState.messages.last;
+  final messages = ref.watch(chatProvider.select((s) => s.messages));
+  if (messages.isEmpty) return [];
+
+  final lastMessage = messages.last;
   if (lastMessage.role != MessageRole.assistant ||
       lastMessage.status != MessageStatus.complete) {
     return [];
@@ -295,9 +311,10 @@ final smartRepliesProvider = FutureProvider<List<String>>((ref) async {
         chatService: chatService,
         server: server,
         modelId: selectedModel.id,
-        messages: chatState.messages,
+        messages: messages,
         params: chatParams,
       );
+      if (!ref.mounted) return [];
     }
   }
 
@@ -309,14 +326,23 @@ final smartRepliesProvider = FutureProvider<List<String>>((ref) async {
   // Save the replies to the conversation database
   if (activeConv != null && suggestions.isNotEmpty) {
     Future.microtask(() {
-      ref
-          .read(conv.conversationsProvider.notifier)
-          .updateSmartReplies(activeConv.id, suggestions, lastMessage.id);
+      if (ref.mounted) {
+        ref
+            .read(conv.conversationsProvider.notifier)
+            .updateSmartReplies(activeConv.id, suggestions, lastMessage.id);
+      }
     });
   }
 
   return suggestions;
 });
+
+class PendingToolApproval {
+  final ParsedToolCall toolCall;
+  final Completer<bool> completer;
+
+  PendingToolApproval({required this.toolCall, required this.completer});
+}
 
 class ChatState {
   final List<Message> messages;
@@ -324,6 +350,7 @@ class ChatState {
   final bool isLoading;
   final String? errorMessage;
   final Message? streamingMessage;
+  final PendingToolApproval? pendingToolApproval;
 
   const ChatState({
     this.messages = const [],
@@ -331,6 +358,7 @@ class ChatState {
     this.isLoading = false,
     this.errorMessage,
     this.streamingMessage,
+    this.pendingToolApproval,
   });
 
   ChatState copyWith({
@@ -339,8 +367,10 @@ class ChatState {
     bool? isLoading,
     String? errorMessage,
     Message? streamingMessage,
+    PendingToolApproval? pendingToolApproval,
     bool clearError = false,
     bool clearStreaming = false,
+    bool clearPendingApproval = false,
   }) {
     return ChatState(
       messages: messages ?? this.messages,
@@ -350,6 +380,9 @@ class ChatState {
       streamingMessage: clearStreaming
           ? null
           : (streamingMessage ?? this.streamingMessage),
+      pendingToolApproval: clearPendingApproval
+          ? null
+          : (pendingToolApproval ?? this.pendingToolApproval),
     );
   }
 }
@@ -363,6 +396,8 @@ class ChatNotifier extends Notifier<ChatState> {
   static const _checkpointTimeThreshold = Duration(seconds: 2);
 
   StreamSubscription<ChatResponse>? _streamSubscription;
+  Timer? _uiUpdateTimer;
+  Message? _latestStreamingMessage;
   String? _currentConversationId;
   int _chunkCount = 0;
   DateTime? _lastCheckpointTime;
@@ -372,13 +407,35 @@ class ChatNotifier extends Notifier<ChatState> {
   /// Batches checkpoint saves off the UI thread during streaming.
   MessageSaveService? _saveService;
 
+  void approveTool(bool approved) {
+    final pending = state.pendingToolApproval;
+    if (pending != null && !pending.completer.isCompleted) {
+      pending.completer.complete(approved);
+    }
+  }
+
+  void _clearPendingApproval() {
+    final pending = state.pendingToolApproval;
+    if (pending != null) {
+      if (!pending.completer.isCompleted) {
+        pending.completer.complete(false);
+      }
+      state = state.copyWith(clearPendingApproval: true);
+    }
+  }
+
   @override
   ChatState build() {
     final db = ref.read(databaseProvider);
     _saveService = MessageSaveService(db);
     ref.onDispose(() {
+      _uiUpdateTimer?.cancel();
       _streamSubscription?.cancel();
       _saveService?.dispose();
+      final pending = state.pendingToolApproval;
+      if (pending != null && !pending.completer.isCompleted) {
+        pending.completer.complete(false);
+      }
     });
     return const ChatState();
   }
@@ -396,50 +453,11 @@ class ChatNotifier extends Notifier<ChatState> {
     try {
       final db = ref.read(databaseProvider);
 
-      // Attempt to find the conversation entity to use its native relation
-      final convQuery = db.conversationBox
-          .query(ConversationEntity_.id.equals(conversation.id))
-          .build();
-      final convEntity = convQuery.findFirst();
-      convQuery.close();
-
-      List<Message> messages = [];
-
-      if (convEntity != null) {
-        // 1. Try native ToMany relation first (managed by ObjectBox internal IDs)
-        final relatedEntities = convEntity.messages;
-        if (relatedEntities.isNotEmpty) {
-          messages = relatedEntities.map((e) => e.toDomain()).toList();
-        } else {
-          // 2. Fallback/Repair: Search by the indexed conversationUid string
-          final query = db.messageBox
-              .query(MessageEntity_.conversationUid.equals(conversation.id))
-              .build();
-          final manualEntities = query.find();
-          query.close();
-
-          if (manualEntities.isNotEmpty) {
-            // Automatic Repair: Link orphaned messages to the native relation
-            // for future consistency and performance.
-            for (final e in manualEntities) {
-              e.conversation.target = convEntity;
-              db.messageBox.put(e);
-            }
-            messages = manualEntities.map((e) => e.toDomain()).toList();
-          }
-        }
-      } else {
-        // Fallback for cases where the conversation entity itself might be hard to find by ID
-        // but messages exist tied to that UID string.
-        final query = db.messageBox
-            .query(MessageEntity_.conversationUid.equals(conversation.id))
-            .build();
-        final entities = query.find();
-        query.close();
-        messages = entities.map((e) => e.toDomain()).toList();
-      }
-
-      messages.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+      final messages = await db.store.runInTransactionAsync(
+        TxMode.write,
+        _loadMessagesInBackground,
+        conversation.id,
+      );
 
       state = ChatState(messages: messages, isLoading: false);
       ref
@@ -457,6 +475,53 @@ class ChatNotifier extends Notifier<ChatState> {
         errorMessage: 'Failed to load conversation: $e',
       );
     }
+  }
+
+  static List<Message> _loadMessagesInBackground(
+    Store store,
+    String conversationId,
+  ) {
+    final convBox = store.box<ConversationEntity>();
+    final messageBox = store.box<MessageEntity>();
+
+    final convQuery = convBox
+        .query(ConversationEntity_.id.equals(conversationId))
+        .build();
+    final convEntity = convQuery.findFirst();
+    convQuery.close();
+
+    List<Message> messages = [];
+
+    if (convEntity != null) {
+      final relatedEntities = convEntity.messages;
+      if (relatedEntities.isNotEmpty) {
+        messages = relatedEntities.map((e) => e.toDomain()).toList();
+      } else {
+        final query = messageBox
+            .query(MessageEntity_.conversationUid.equals(conversationId))
+            .build();
+        final manualEntities = query.find();
+        query.close();
+
+        if (manualEntities.isNotEmpty) {
+          for (final e in manualEntities) {
+            e.conversation.target = convEntity;
+            messageBox.put(e);
+          }
+          messages = manualEntities.map((e) => e.toDomain()).toList();
+        }
+      }
+    } else {
+      final query = messageBox
+          .query(MessageEntity_.conversationUid.equals(conversationId))
+          .build();
+      final entities = query.find();
+      query.close();
+      messages = entities.map((e) => e.toDomain()).toList();
+    }
+
+    messages.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+    return messages;
   }
 
   Future<void> startNewConversation() async {
@@ -519,6 +584,38 @@ class ChatNotifier extends Notifier<ChatState> {
   void _updateSavedMetrics(Message message) {
     _lastSavedContentLength = message.content.length;
     _lastSavedReasoningLength = message.reasoningContent?.length ?? 0;
+  }
+
+  Future<void> checkpointStreamingMessage({bool flush = false}) async {
+    final latest = _latestStreamingMessage ?? state.streamingMessage;
+    if (latest == null) return;
+
+    _saveService?.enqueue(latest);
+    _updateSavedMetrics(latest);
+    _resetCheckpointMetrics();
+
+    if (flush) {
+      await _saveService?.flush();
+    }
+  }
+
+  void _replaceMessageInState(Message message, {bool clearStreaming = false}) {
+    final messageIndex = state.messages.indexWhere((m) => m.id == message.id);
+    if (messageIndex == -1) {
+      state = state.copyWith(
+        streamingMessage: clearStreaming ? null : message,
+        clearStreaming: clearStreaming,
+      );
+      return;
+    }
+
+    final updatedMessages = List<Message>.from(state.messages);
+    updatedMessages[messageIndex] = message;
+    state = state.copyWith(
+      messages: updatedMessages,
+      streamingMessage: clearStreaming ? null : message,
+      clearStreaming: clearStreaming,
+    );
   }
 
   Future<void> sendMessage(String content, {List<File>? attachments}) async {
@@ -609,6 +706,7 @@ class ChatNotifier extends Notifier<ChatState> {
       streamingMessage: assistantMessage,
       clearError: true,
     );
+    ref.read(isStreamingProvider.notifier).setStreaming(true);
 
     await _saveMessage(userMessage);
     await _saveMessage(assistantMessage);
@@ -623,17 +721,38 @@ class ChatNotifier extends Notifier<ChatState> {
 
     try {
       _streamSubscription?.cancel();
+      _uiUpdateTimer?.cancel();
 
       String reasoningContent = '';
       var streamingAssistantMessage = assistantMessage;
+      _latestStreamingMessage = streamingAssistantMessage;
 
       if (chatService != null) {
         final mcpConfig = ref.read(chatMcpConfigProvider);
-        final integrations = mcpConfig.enabled && mcpConfig.integrations.isNotEmpty
+        final integrations =
+            mcpConfig.enabled && mcpConfig.integrations.isNotEmpty
             ? mcpConfig.integrations
             : null;
 
         final collectedToolCalls = <ToolCallData>[];
+
+        bool stateNeedsUpdate = false;
+
+        void updateUiState() {
+          if (!stateNeedsUpdate) return;
+          stateNeedsUpdate = false;
+
+          final streamConvId = assistantMessage.conversationId;
+          final isCurrentContext = _currentConversationId == streamConvId;
+
+          if (isCurrentContext) {
+            state = state.copyWith(streamingMessage: streamingAssistantMessage);
+          }
+        }
+
+        _uiUpdateTimer = Timer.periodic(const Duration(milliseconds: 80), (_) {
+          updateUiState();
+        });
 
         _streamSubscription = chatService
             .sendMessage(
@@ -657,6 +776,7 @@ class ChatNotifier extends Notifier<ChatState> {
                               (response.content ?? ''),
                           isProcessing: false,
                         );
+                    _latestStreamingMessage = streamingAssistantMessage;
 
                     _chunkCount++;
 
@@ -667,26 +787,7 @@ class ChatNotifier extends Notifier<ChatState> {
                       _resetCheckpointMetrics();
                     }
 
-                    if (isCurrentContext) {
-                      final messageIndex = state.messages.indexWhere(
-                        (m) => m.id == assistantMessageId,
-                      );
-                      if (messageIndex != -1) {
-                        final updatedMessages = List<Message>.from(
-                          state.messages,
-                        );
-                        updatedMessages[messageIndex] =
-                            streamingAssistantMessage;
-                        state = state.copyWith(
-                          streamingMessage: streamingAssistantMessage,
-                          messages: updatedMessages,
-                        );
-                      } else {
-                        state = state.copyWith(
-                          streamingMessage: streamingAssistantMessage,
-                        );
-                      }
-                    }
+                    stateNeedsUpdate = true;
                     break;
                   case ChatResponseType.reasoning:
                     reasoningContent += response.reasoningContent ?? '';
@@ -695,6 +796,7 @@ class ChatNotifier extends Notifier<ChatState> {
                           reasoningContent: reasoningContent,
                           isProcessing: false,
                         );
+                    _latestStreamingMessage = streamingAssistantMessage;
 
                     _chunkCount++;
 
@@ -705,45 +807,19 @@ class ChatNotifier extends Notifier<ChatState> {
                       _resetCheckpointMetrics();
                     }
 
-                    if (isCurrentContext) {
-                      state = state.copyWith(
-                        streamingMessage: streamingAssistantMessage,
-                      );
-                      final msgIndex = state.messages.indexWhere(
-                        (m) => m.id == assistantMessageId,
-                      );
-                      if (msgIndex != -1) {
-                        final updatedMessages = List<Message>.from(
-                          state.messages,
-                        );
-                        updatedMessages[msgIndex] = streamingAssistantMessage;
-                        state = state.copyWith(messages: updatedMessages);
-                      }
-                    }
+                    stateNeedsUpdate = true;
                     break;
                   case ChatResponseType.processing:
                     // Model is working but hasn't output content yet
                     streamingAssistantMessage = streamingAssistantMessage
                         .copyWith(isProcessing: true);
-
-                    if (isCurrentContext) {
-                      state = state.copyWith(
-                        streamingMessage: streamingAssistantMessage,
-                      );
-                      final procIndex = state.messages.indexWhere(
-                        (m) => m.id == assistantMessageId,
-                      );
-                      if (procIndex != -1) {
-                        final updatedMessages = List<Message>.from(
-                          state.messages,
-                        );
-                        updatedMessages[procIndex] = streamingAssistantMessage;
-                        state = state.copyWith(messages: updatedMessages);
-                      }
-                    }
+                    _latestStreamingMessage = streamingAssistantMessage;
+                    stateNeedsUpdate = true;
                     break;
                   case ChatResponseType.timeoutError:
                   case ChatResponseType.error:
+                    _uiUpdateTimer?.cancel();
+                    _uiUpdateTimer = null;
                     // Error reached without receiving content or mid-stream
                     streamingAssistantMessage = streamingAssistantMessage.copyWith(
                       status: MessageStatus.error,
@@ -754,28 +830,22 @@ class ChatNotifier extends Notifier<ChatState> {
                               : 'An unknown error occurred.'),
                       isProcessing: false,
                     );
+                    _latestStreamingMessage = streamingAssistantMessage;
 
                     if (isCurrentContext) {
+                      _replaceMessageInState(
+                        streamingAssistantMessage,
+                        clearStreaming: true,
+                      );
                       state = state.copyWith(
-                        streamingMessage: streamingAssistantMessage,
                         isStreaming: false,
+                        errorMessage: streamingAssistantMessage.errorMessage,
                       );
-                      final errIndex = state.messages.indexWhere(
-                        (m) => m.id == assistantMessageId,
-                      );
-                      if (errIndex != -1) {
-                        final updatedMessages = List<Message>.from(
-                          state.messages,
-                        );
-                        updatedMessages[errIndex] = streamingAssistantMessage;
-                        state = state.copyWith(
-                          messages: updatedMessages,
-                          errorMessage: streamingAssistantMessage.errorMessage,
-                          clearStreaming: true,
-                        );
-                      }
                     }
+                    ref.read(isStreamingProvider.notifier).setStreaming(false);
+                    _latestStreamingMessage = null;
                     // Save error message to storage
+                    await _saveService?.flush();
                     await _saveMessage(streamingAssistantMessage);
                     break;
                   case ChatResponseType.toolCall:
@@ -789,6 +859,10 @@ class ChatNotifier extends Notifier<ChatState> {
                 }
               },
               onDone: () async {
+                _uiUpdateTimer?.cancel();
+                _uiUpdateTimer = null;
+                updateUiState();
+
                 // Flush batched checkpoint saves before finalising UI state.
                 await _saveService?.flush();
                 ref.read(chatBackgroundServiceProvider).stop();
@@ -812,22 +886,17 @@ class ChatNotifier extends Notifier<ChatState> {
                     );
                     await _saveMessage(errorMessage);
                     if (isCurrentContext) {
-                      final messageIndex = state.messages.indexWhere(
-                        (m) => m.id == assistantMessageId,
+                      _replaceMessageInState(
+                        errorMessage,
+                        clearStreaming: true,
                       );
-                      if (messageIndex != -1) {
-                        final updatedMessages = List<Message>.from(
-                          state.messages,
-                        );
-                        updatedMessages[messageIndex] = errorMessage;
-                        state = state.copyWith(
-                          messages: updatedMessages,
-                          isStreaming: false,
-                          errorMessage: errorMessage.errorMessage,
-                          clearStreaming: true,
-                        );
-                      }
+                      state = state.copyWith(
+                        isStreaming: false,
+                        errorMessage: errorMessage.errorMessage,
+                      );
                     }
+                    ref.read(isStreamingProvider.notifier).setStreaming(false);
+                    _latestStreamingMessage = null;
                   } else {
                     // Normal completion with content
                     var finalMessage = streamingMessage.copyWith(
@@ -842,11 +911,13 @@ class ChatNotifier extends Notifier<ChatState> {
                         final adapter = createAdapterForServerType(server.type);
 
                         final preParsedCalls = collectedToolCalls
-                            .map((tc) => ParsedToolCall(
-                                  id: tc.tool,
-                                  name: tc.tool,
-                                  arguments: tc.arguments,
-                                ))
+                            .map(
+                              (tc) => ParsedToolCall(
+                                id: tc.tool,
+                                name: tc.tool,
+                                arguments: tc.arguments,
+                              ),
+                            )
                             .toList();
 
                         final loop = ToolExecutionLoop(
@@ -855,8 +926,21 @@ class ChatNotifier extends Notifier<ChatState> {
                           onRequestApproval: mcpConfig.autoExecuteTools
                               ? null
                               : (call) async {
-                                  // TODO: wire real approval UI dialog
-                                  return false;
+                                  final completer = Completer<bool>();
+                                  state = state.copyWith(
+                                    pendingToolApproval: PendingToolApproval(
+                                      toolCall: call,
+                                      completer: completer,
+                                    ),
+                                  );
+
+                                  final result = await completer.future;
+
+                                  state = state.copyWith(
+                                    clearPendingApproval: true,
+                                  );
+
+                                  return result;
                                 },
                         );
 
@@ -880,21 +964,14 @@ class ChatNotifier extends Notifier<ChatState> {
 
                     await _saveMessage(finalMessage);
                     if (isCurrentContext) {
-                      final messageIndex = state.messages.indexWhere(
-                        (m) => m.id == assistantMessageId,
+                      _replaceMessageInState(
+                        finalMessage,
+                        clearStreaming: true,
                       );
-                      if (messageIndex != -1) {
-                        final updatedMessages = List<Message>.from(
-                          state.messages,
-                        );
-                        updatedMessages[messageIndex] = finalMessage;
-                        state = state.copyWith(
-                          messages: updatedMessages,
-                          isStreaming: false,
-                          clearStreaming: true,
-                        );
-                      }
+                      state = state.copyWith(isStreaming: false);
                     }
+                    ref.read(isStreamingProvider.notifier).setStreaming(false);
+                    _latestStreamingMessage = null;
                     if (_currentConversationId != null) {
                       final preview = finalMessage.content.length > 100
                           ? '${finalMessage.content.substring(0, 100)}...'
@@ -927,16 +1004,20 @@ class ChatNotifier extends Notifier<ChatState> {
                 }
               },
               onError: (error) async {
+                _uiUpdateTimer?.cancel();
+                _uiUpdateTimer = null;
                 _chunkCount = 0;
                 _lastCheckpointTime = null;
                 _lastSavedContentLength = 0;
                 _lastSavedReasoningLength = 0;
                 // Flush any batched saves before processing the error state.
                 await _saveService?.flush();
-                final errorMessage = state.streamingMessage?.copyWith(
-                  status: MessageStatus.error,
-                  errorMessage: error.toString(),
-                );
+                final errorMessage =
+                    (_latestStreamingMessage ?? state.streamingMessage)
+                        ?.copyWith(
+                          status: MessageStatus.error,
+                          errorMessage: error.toString(),
+                        );
                 if (errorMessage != null) {
                   await _saveMessage(errorMessage);
 
@@ -944,27 +1025,21 @@ class ChatNotifier extends Notifier<ChatState> {
 
                   final streamConvId = assistantMessage.conversationId;
                   if (_currentConversationId == streamConvId) {
-                    final messageIndex = state.messages.indexWhere(
-                      (m) => m.id == assistantMessageId,
+                    _replaceMessageInState(errorMessage, clearStreaming: true);
+                    state = state.copyWith(
+                      isStreaming: false,
+                      errorMessage: error.toString(),
                     );
-                    if (messageIndex != -1) {
-                      final updatedMessages = List<Message>.from(
-                        state.messages,
-                      );
-                      updatedMessages[messageIndex] = errorMessage;
-                      state = state.copyWith(
-                        messages: updatedMessages,
-                        isStreaming: false,
-                        errorMessage: error.toString(),
-                        clearStreaming: true,
-                      );
-                    }
                   }
                 }
+                ref.read(isStreamingProvider.notifier).setStreaming(false);
+                _latestStreamingMessage = null;
               },
             );
       }
     } catch (e) {
+      _uiUpdateTimer?.cancel();
+      _uiUpdateTimer = null;
       final errorMsg = assistantMessage.copyWith(
         status: MessageStatus.error,
         errorMessage: e.toString(),
@@ -977,6 +1052,8 @@ class ChatNotifier extends Notifier<ChatState> {
         errorMessage: e.toString(),
         clearStreaming: true,
       );
+      ref.read(isStreamingProvider.notifier).setStreaming(false);
+      _latestStreamingMessage = null;
       ref.read(chatBackgroundServiceProvider).stop();
     }
   }
@@ -1088,6 +1165,9 @@ class ChatNotifier extends Notifier<ChatState> {
   }
 
   Future<void> cancelStream() async {
+    _uiUpdateTimer?.cancel();
+    _uiUpdateTimer = null;
+    _clearPendingApproval();
     _streamSubscription?.cancel();
     _streamSubscription = null;
     ref.read(chatServiceProvider)?.cancelStream();
@@ -1101,16 +1181,19 @@ class ChatNotifier extends Notifier<ChatState> {
     // Flush any in-flight checkpoint saves before writing the final state.
     await _saveService?.flush();
 
-    final streamingMessage = state.streamingMessage;
+    final streamingMessage = _latestStreamingMessage ?? state.streamingMessage;
     if (streamingMessage != null) {
       final finalMessage = streamingMessage.copyWith(
         status: MessageStatus.complete,
         isProcessing: false,
       );
       await _saveMessage(finalMessage);
+      _replaceMessageInState(finalMessage, clearStreaming: true);
     }
 
     state = state.copyWith(isStreaming: false, clearStreaming: true);
+    ref.read(isStreamingProvider.notifier).setStreaming(false);
+    _latestStreamingMessage = null;
   }
 
   Future<void> retryLastMessage() async {
@@ -1232,9 +1315,18 @@ class ChatNotifier extends Notifier<ChatState> {
 
   Future<void> _saveMessage(Message message) async {
     final db = ref.read(databaseProvider);
-    final query = db.messageBox
-        .query(MessageEntity_.id.equals(message.id))
-        .build();
+    await db.store.runInTransactionAsync(
+      TxMode.write,
+      _saveMessageInBackground,
+      message,
+    );
+  }
+
+  static void _saveMessageInBackground(Store store, Message message) {
+    final box = store.box<MessageEntity>();
+    final convBox = store.box<ConversationEntity>();
+
+    final query = box.query(MessageEntity_.id.equals(message.id)).build();
     final existing = query.findFirst();
     query.close();
 
@@ -1243,8 +1335,7 @@ class ChatNotifier extends Notifier<ChatState> {
       entity.internalId = existing.internalId;
     }
 
-    // Set native ObjectBox relation
-    final convQuery = db.conversationBox
+    final convQuery = convBox
         .query(ConversationEntity_.id.equals(message.conversationId))
         .build();
     final convEntity = convQuery.findFirst();
@@ -1252,14 +1343,12 @@ class ChatNotifier extends Notifier<ChatState> {
 
     if (convEntity != null) {
       entity.conversation.target = convEntity;
-      // Also ensure the string UID fallback is set correctly
       entity.conversationUid = convEntity.id;
     } else {
-      // Fallback: search by UID if the entity was just created in this frame (unlikely but safe)
       entity.conversationUid = message.conversationId;
     }
 
-    db.messageBox.put(entity);
+    box.put(entity);
   }
 
   Future<void> clearConversation() async {

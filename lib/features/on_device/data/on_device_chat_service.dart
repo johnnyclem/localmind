@@ -17,6 +17,8 @@ class OnDeviceChatService implements ChatService {
   StreamSubscription<gemma.ModelResponse>? _currentSubscription;
   StreamController<ChatResponse>? _streamController;
   gemma.InferenceChat? _activeChat;
+  String? _activeModelId;
+  String? _activeSystemInstruction;
   bool _isCancelled = false;
 
   OnDeviceChatService(this._gemmaService);
@@ -61,48 +63,77 @@ class OnDeviceChatService implements ChatService {
           ? params.systemPrompt
           : null;
 
-      final chat = await _gemmaService.createChat(
-        systemInstruction: systemInstruction,
-        tools: const [], // will be populated in Task 6
-      );
-
-      if (chat == null) {
-        _streamController?.add(
-          const ChatResponse(
-            type: ChatResponseType.error,
-            content: 'Failed to create chat session',
-          ),
-        );
-        _streamController?.add(const ChatResponse(type: ChatResponseType.done));
-        await _streamController?.close();
-        return;
-      }
-
-      _activeChat = chat;
-
-      // Convert and add all messages except the last user message to context
       final gemmaMessages = _convertMessages(messages);
 
-      if (_isCancelled) {
-        _disposeChat(chat);
-        _streamController?.add(const ChatResponse(type: ChatResponseType.done));
-        await _streamController?.close();
-        return;
+      bool canReuse = false;
+      List<gemma.Message> newMessagesToFeed = [];
+
+      if (_activeChat != null &&
+          _activeModelId == modelId &&
+          _activeSystemInstruction == systemInstruction) {
+        final existingHistory = _activeChat!.fullHistory;
+        if (existingHistory.length <= gemmaMessages.length) {
+          bool isPrefix = true;
+          for (int i = 0; i < existingHistory.length; i++) {
+            if (existingHistory[i].text != gemmaMessages[i].text ||
+                existingHistory[i].isUser != gemmaMessages[i].isUser) {
+              isPrefix = false;
+              break;
+            }
+          }
+          if (isPrefix) {
+            canReuse = true;
+            newMessagesToFeed = gemmaMessages.sublist(existingHistory.length);
+          }
+        }
       }
 
-      // Add all messages except the last one as context
-      if (gemmaMessages.length > 1) {
-        for (final msg in gemmaMessages.sublist(0, gemmaMessages.length - 1)) {
+      gemma.InferenceChat chat;
+      if (canReuse) {
+        chat = _activeChat!;
+        Log.debug('Reusing existing active chat session for on-device inference.');
+        for (final msg in newMessagesToFeed) {
+          if (_isCancelled) break;
+          await chat.addQueryChunk(msg);
+        }
+      } else {
+        Log.debug('Creating new chat session for on-device inference.');
+        if (_activeChat != null) {
+          _disposeChat(_activeChat!);
+          _activeChat = null;
+        }
+
+        final newChat = await _gemmaService.createChat(
+          systemInstruction: systemInstruction,
+          tools: const [],
+        );
+
+        if (newChat == null) {
+          _streamController?.add(
+            const ChatResponse(
+              type: ChatResponseType.error,
+              content: 'Failed to create chat session',
+            ),
+          );
+          _streamController?.add(const ChatResponse(type: ChatResponseType.done));
+          await _streamController?.close();
+          return;
+        }
+
+        chat = newChat;
+        _activeChat = chat;
+        _activeModelId = modelId;
+        _activeSystemInstruction = systemInstruction;
+
+        for (final msg in gemmaMessages) {
+          if (_isCancelled) break;
           await chat.addQueryChunk(msg);
         }
       }
 
-      // Add the last user message
-      final lastMessage = gemmaMessages.last;
-      await chat.addQueryChunk(lastMessage);
-
       if (_isCancelled) {
         _disposeChat(chat);
+        _activeChat = null;
         _streamController?.add(const ChatResponse(type: ChatResponseType.done));
         await _streamController?.close();
         return;
@@ -184,10 +215,8 @@ class OnDeviceChatService implements ChatService {
             _streamController?.add(
               const ChatResponse(type: ChatResponseType.done),
             );
-            _disposeChat(chat);
             _streamController?.close();
           }
-          _activeChat = null;
           _currentSubscription = null;
           if (!completer.isCompleted) completer.complete();
         },
@@ -206,7 +235,9 @@ class OnDeviceChatService implements ChatService {
             _streamController?.close();
           }
           _disposeChat(chat);
-          _activeChat = null;
+          if (_activeChat == chat) {
+            _activeChat = null;
+          }
           _currentSubscription = null;
           if (!completer.isCompleted) completer.complete();
         },
@@ -236,7 +267,13 @@ class OnDeviceChatService implements ChatService {
   }
 
   List<gemma.Message> _convertMessages(List<Message> messages) {
-    return messages
+    var list = messages;
+    if (list.isNotEmpty &&
+        list.last.role == MessageRole.assistant &&
+        list.last.content.isEmpty) {
+      list = list.sublist(0, list.length - 1);
+    }
+    return list
         .where(
           (m) =>
               m.role == MessageRole.user ||
@@ -259,18 +296,22 @@ class OnDeviceChatService implements ChatService {
     _currentSubscription?.cancel();
     _currentSubscription = null;
 
-    final chat = _activeChat;
-    _activeChat = null;
-    if (chat != null) {
-      chat.stopGeneration().then((_) => _disposeChat(chat)).catchError((e) {
+    if (_activeChat != null) {
+      _activeChat!.stopGeneration().catchError((e) {
         Log.error('Error stopping generation: $e');
-        _disposeChat(chat);
       });
     }
 
     if (!(_streamController?.isClosed ?? true)) {
       _streamController?.add(const ChatResponse(type: ChatResponseType.done));
       _streamController?.close();
+    }
+  }
+
+  void dispose() {
+    if (_activeChat != null) {
+      _disposeChat(_activeChat!);
+      _activeChat = null;
     }
   }
 }

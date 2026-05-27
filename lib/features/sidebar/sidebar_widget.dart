@@ -25,6 +25,7 @@ class SidebarWidget extends ConsumerWidget {
 
     final isHistory = location.startsWith(AppRoutes.chatHistory);
     final isServers = location.startsWith(AppRoutes.servers);
+    final isMcpTools = location.startsWith(AppRoutes.mcpTools);
     final isPersonas = location.startsWith(AppRoutes.personas);
     final isLocalModels = location.startsWith(AppRoutes.onDeviceModels);
     final isTtsModels = location.startsWith(AppRoutes.ttsModels);
@@ -90,6 +91,18 @@ class SidebarWidget extends ConsumerWidget {
                           Navigator.pop(context);
                         }
                         context.go(AppRoutes.servers);
+                      },
+                    ),
+                    DrawerNavItem(
+                      iconData: HugeIcons.strokeRoundedMcpServer,
+                      label: 'MCP Tools',
+                      badgeText: 'Beta',
+                      isSelected: isMcpTools,
+                      onTap: () {
+                        if (Scaffold.maybeOf(context)?.isDrawerOpen ?? false) {
+                          Navigator.pop(context);
+                        }
+                        context.go(AppRoutes.mcpTools);
                       },
                     ),
                     DrawerNavItem(

@@ -12,6 +12,7 @@ class AppRoutes {
   static const String createPersona = '/personas/create';
   static const String settings = '/settings';
   static const String models = '/models';
+  static const String mcpTools = '/mcp-tools';
   static const String chatHistory = '/history';
   static const String onDeviceModels = '/on-device-models';
   static const String ttsModels = '/tts-models';
