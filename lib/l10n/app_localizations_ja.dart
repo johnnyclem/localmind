@@ -1,0 +1,1596 @@
+// ignore: unused_import
+import 'package:intl/intl.dart' as intl;
+import 'app_localizations.dart';
+
+// ignore_for_file: type=lint
+
+/// The translations for Japanese (`ja`).
+class AppLocalizationsJa extends AppLocalizations {
+  AppLocalizationsJa([String locale = 'ja']) : super(locale);
+
+  @override
+  String get app_name => 'LocalMind';
+
+  @override
+  String get app_tagline => 'ローカルAI。プライバシーを保護して、あなたのルールで。';
+
+  @override
+  String get app_version => '1.0.0';
+
+  @override
+  String get cancel => 'キャンセル';
+
+  @override
+  String get confirm => '確認';
+
+  @override
+  String get delete => '削除';
+
+  @override
+  String get save => '保存';
+
+  @override
+  String get retry => '再試行';
+
+  @override
+  String get close => '閉じる';
+
+  @override
+  String get done => '完了';
+
+  @override
+  String get continue_action => '続行';
+
+  @override
+  String get skip => 'スキップ';
+
+  @override
+  String get install => 'インストール';
+
+  @override
+  String get download => 'ダウンロード';
+
+  @override
+  String get resume => '再開';
+
+  @override
+  String get pause => '一時停止';
+
+  @override
+  String get stop => '停止';
+
+  @override
+  String get edit => '編集';
+
+  @override
+  String get preview => 'プレビュー';
+
+  @override
+  String get unload => 'アンロード';
+
+  @override
+  String get load => 'ロード';
+
+  @override
+  String get rename => '名前変更';
+
+  @override
+  String get pin => 'ピン留め';
+
+  @override
+  String get unpin => 'ピン留め解除';
+
+  @override
+  String get share => '共有';
+
+  @override
+  String get copy => 'コピー';
+
+  @override
+  String get copied => 'コピーしました！';
+
+  @override
+  String get copied_to_clipboard => 'クリップボードにコピーしました';
+
+  @override
+  String get select => '選択';
+
+  @override
+  String get active => 'アクティブ';
+
+  @override
+  String get all => 'すべて';
+
+  @override
+  String get none => 'なし';
+
+  @override
+  String get none_selected => '未選択';
+
+  @override
+  String get online => 'オンライン';
+
+  @override
+  String get offline => 'オフライン';
+
+  @override
+  String get error => 'エラー';
+
+  @override
+  String get unknown_error => '不明なエラー';
+
+  @override
+  String get not_now => '後で';
+
+  @override
+  String get enable => '有効にする';
+
+  @override
+  String get proceed_anyway => 'このまま続行';
+
+  @override
+  String get test_connection => '接続テスト';
+
+  @override
+  String get testing => 'テスト中...';
+
+  @override
+  String get connection_successful => '接続に成功しました！';
+
+  @override
+  String get connection_failed => '接続に失敗しました。設定を確認してください。';
+
+  @override
+  String get save_continue => '保存して続行';
+
+  @override
+  String get save_changes => '変更を保存';
+
+  @override
+  String get finish_setup => 'セットアップを完了';
+
+  @override
+  String get start_new_chat => '新しいチャットを開始';
+
+  @override
+  String get cannot_undo => 'この操作は取り消せません。';
+
+  @override
+  String get ram_warning => 'RAM警告';
+
+  @override
+  String get recommended => '推奨';
+
+  @override
+  String get may_be_large => 'このデバイスには大きすぎる可能性があります';
+
+  @override
+  String get calculating => '計算中...';
+
+  @override
+  String get download_failed => 'ダウンロード失敗';
+
+  @override
+  String get downloaded => 'ダウンロード済み';
+
+  @override
+  String get not_downloaded => '未ダウンロード';
+
+  @override
+  String get installed => 'インストール済み';
+
+  @override
+  String get not_installed => '未インストール';
+
+  @override
+  String get loading => '読み込み中...';
+
+  @override
+  String get thinking => '思考中';
+
+  @override
+  String get processing => '処理中...';
+
+  @override
+  String get initializing => '初期化中...';
+
+  @override
+  String get ready => '準備完了';
+
+  @override
+  String get preparing_app => 'アプリを準備中...';
+
+  @override
+  String get initializing_services => 'サービスを初期化中...';
+
+  @override
+  String get configuring_server => 'サーバーを構成中...';
+
+  @override
+  String get startup_failed => '起動に失敗しました';
+
+  @override
+  String get something_went_wrong => '問題が発生しました';
+
+  @override
+  String get delete_model_title => 'モデルを削除';
+
+  @override
+  String delete_model_body(String name) {
+    return '$name を削除してもよろしいですか？';
+  }
+
+  @override
+  String delete_model_body_with_size(String name, String size) {
+    return '$name を削除してもよろしいですか？これにより約 $size の空き容量が増えます。\n\n必要に応じて、このモデルは後で再ダウンロードできます。';
+  }
+
+  @override
+  String get delete_voice_title => '音声の削除';
+
+  @override
+  String delete_voice_body(String name, String size) {
+    return '$name を削除してもよろしいですか？これにより約 $size の空き容量が増えます。\n\n必要に応じて、この音声は後で再ダウンロードできます。';
+  }
+
+  @override
+  String get delete_server_title => 'サーバーの削除';
+
+  @override
+  String delete_server_body(String name) {
+    return '本当に「$name」を削除しますか？この操作は取り消せません。';
+  }
+
+  @override
+  String get delete_conversation_title => 'チャットを削除しますか？';
+
+  @override
+  String delete_conversation_body(String title) {
+    return '本当に「$title」を削除しますか？この操作は取り消せません。';
+  }
+
+  @override
+  String get delete_message_title => 'メッセージを削除しますか？';
+
+  @override
+  String delete_persona_title(String name) {
+    return '「$name」を削除しますか？';
+  }
+
+  @override
+  String get delete_persona_body => 'この操作は取り消せません。';
+
+  @override
+  String get clear_conversation_title => 'チャット履歴をクリアしますか？';
+
+  @override
+  String get clear_conversation_body => 'このチャット内のすべてのメッセージが削除されます。';
+
+  @override
+  String get clear => 'クリア';
+
+  @override
+  String label_completed(String label) {
+    return '$label が完了しました';
+  }
+
+  @override
+  String error_with_message(String error) {
+    return 'エラー: $error';
+  }
+
+  @override
+  String preview_failed(String error) {
+    return 'プレビューに失敗しました: $error';
+  }
+
+  @override
+  String loading_model(String modelId) {
+    return '$modelId を読み込み中...';
+  }
+
+  @override
+  String model_loaded(String modelId, String backend) {
+    return 'モデルを読み込みました: $modelId ($backend)';
+  }
+
+  @override
+  String get no_model_loaded =>
+      'モデルが読み込まれていません。「ローカルモデルの管理」をタップしてモデルをダウンロードし、読み込んでください。';
+
+  @override
+  String loading_model_error(String error) {
+    return 'エラー: $error';
+  }
+
+  @override
+  String get delete_conversation => 'チャットを削除しますか？';
+
+  @override
+  String get nav_history => '履歴';
+
+  @override
+  String get nav_servers => 'サーバー';
+
+  @override
+  String get nav_local_models => 'ローカルモデル';
+
+  @override
+  String get nav_tts => '音声合成';
+
+  @override
+  String get nav_personas => 'ペルソナ';
+
+  @override
+  String get nav_settings => '設定';
+
+  @override
+  String get nav_new_chat => '新しいチャット';
+
+  @override
+  String get search_hint => 'チャットを検索...';
+
+  @override
+  String get no_server_selected => 'サーバーが選択されていません';
+
+  @override
+  String get switch_server => 'サーバー切り替え';
+
+  @override
+  String get switch_server_subtitle => '接続するサーバーを選択してください';
+
+  @override
+  String get manage_servers => 'サーバーの管理';
+
+  @override
+  String get open_source => 'オープンソース';
+
+  @override
+  String get open_source_desc =>
+      'LocalMind はオープンソースです。GitHub で開発状況の確認や貢献ができます。';
+
+  @override
+  String get star_on_github => 'GitHub でスターを付ける';
+
+  @override
+  String get settings_title => '設定';
+
+  @override
+  String get settings_appearance => '外観';
+
+  @override
+  String get settings_language => '言語';
+
+  @override
+  String get language_system_default => 'システムデフォルト';
+
+  @override
+  String get settings_tts => '音声合成';
+
+  @override
+  String get settings_behavior => '動作';
+
+  @override
+  String get settings_on_device => 'ローカル推論';
+
+  @override
+  String get settings_default_server => 'デフォルトサーバー';
+
+  @override
+  String get settings_default_persona => 'デフォルトペルソナ';
+
+  @override
+  String get settings_privacy => 'プライバシー';
+
+  @override
+  String get settings_data_management => 'データ管理';
+
+  @override
+  String get settings_about => 'LocalMind について';
+
+  @override
+  String get theme => 'テーマ';
+
+  @override
+  String get theme_system => 'システム';
+
+  @override
+  String get theme_light => 'ライト';
+
+  @override
+  String get theme_dark => 'ダーク';
+
+  @override
+  String get theme_claude => 'Claude';
+
+  @override
+  String get font_size => 'フォントサイズ';
+
+  @override
+  String get font_size_desc => 'チャットのテキストサイズを調整します。';
+
+  @override
+  String get font_preview => 'これはテキストの表示サイズ確認用のプレビューです。';
+
+  @override
+  String get code_theme_dark => 'コードテーマ (ダーク)';
+
+  @override
+  String get code_theme_light => 'コードテーマ (ライト)';
+
+  @override
+  String get code_theme_desc => 'コードブロックのシンタックスハイライトテーマを選択します。';
+
+  @override
+  String get tts_engine => '音声合成エンジン';
+
+  @override
+  String get tts_engine_system => 'システム音声合成';
+
+  @override
+  String get tts_engine_kitten => 'Kitten TTS';
+
+  @override
+  String get voice => '音声';
+
+  @override
+  String get voice_female => '女性';
+
+  @override
+  String get voice_male => '男性';
+
+  @override
+  String get voice_other => 'その他';
+
+  @override
+  String get tts_speed => '読み上げ速度';
+
+  @override
+  String get tts_speed_desc => '再生速度を調整します。';
+
+  @override
+  String get manage_tts_models => '音声合成モデルの管理';
+
+  @override
+  String get manage_on_device_models => 'ローカルモデルの管理';
+
+  @override
+  String get enable_smart_reply => 'スマートリプライ';
+
+  @override
+  String get streaming_responses => 'ストリーミング応答';
+
+  @override
+  String get auto_generate_titles => 'タイトルの自動生成';
+
+  @override
+  String get send_on_enter => 'Enterキーで送信';
+
+  @override
+  String get show_system_messages => 'システムメッセージを表示';
+
+  @override
+  String get haptic_feedback => '触覚フィードバック';
+
+  @override
+  String get enable_mcp => 'MCPを有効化';
+
+  @override
+  String get new_chat_mcp_default => '新規チャットでMCPをデフォルトにする';
+
+  @override
+  String get show_data_indicator => 'データインジケーターを表示';
+
+  @override
+  String get privacy_info => '「LocalMindがあなたのデータを閲覧することはありません」';
+
+  @override
+  String get delete_all_conversations => 'すべてのチャット履歴を削除';
+
+  @override
+  String get reset_settings_defaults => '設定をデフォルトに戻す';
+
+  @override
+  String get chat_title => 'LocalMind';
+
+  @override
+  String get chat_parameters_tooltip => 'チャットパラメータ';
+
+  @override
+  String get change_persona => 'ペルソナを変更';
+
+  @override
+  String get set_persona => 'ペルソナを設定';
+
+  @override
+  String get remove_persona => 'ペルソナを削除';
+
+  @override
+  String get clear_conversation => '履歴をクリア';
+
+  @override
+  String get connection_error => '接続エラー。サーバーを確認してください。';
+
+  @override
+  String get disconnected => 'サーバーから切断されました。';
+
+  @override
+  String get configure => '構成';
+
+  @override
+  String get select_model => 'モデルを選択';
+
+  @override
+  String get select_persona => 'ペルソナを選択';
+
+  @override
+  String get start_conversation => 'チャットを開始しましょう';
+
+  @override
+  String get recent_chats => '最近のチャット';
+
+  @override
+  String get see_all => 'すべて見る';
+
+  @override
+  String get quick_write => '関数の作成をサポートして';
+
+  @override
+  String get quick_explain => 'このコードを説明して';
+
+  @override
+  String get quick_debug => 'デバッグして';
+
+  @override
+  String get quick_async => 'async/await はどう使えばいい？';
+
+  @override
+  String get history_missing_title => '履歴が見つかりません';
+
+  @override
+  String get history_missing_desc => 'このチャットのメッセージが削除されたか、履歴レコードが破損しています。';
+
+  @override
+  String get technical_details => '技術的な詳細';
+
+  @override
+  String get last_error => '最後のエラー:';
+
+  @override
+  String get copy_info => '情報をコピー';
+
+  @override
+  String get conversation_id => '会話ID';
+
+  @override
+  String get created_at => '作成日時';
+
+  @override
+  String get expected_messages => '期待されるメッセージ数';
+
+  @override
+  String get debug_dialog_desc => '同期の問題を特定するための診断情報。';
+
+  @override
+  String get chat_input_hint => '何でも質問してください';
+
+  @override
+  String get send_message_tooltip => 'メッセージを送信';
+
+  @override
+  String get stop_generation_tooltip => '生成を停止';
+
+  @override
+  String get attach_images_tooltip => '画像を添付';
+
+  @override
+  String tool_label(String toolCallId) {
+    return 'ツール: $toolCallId';
+  }
+
+  @override
+  String get tool_unknown => 'ツール: 不明';
+
+  @override
+  String get message_options => 'メッセージオプション';
+
+  @override
+  String get copy_markdown => 'Markdownとしてコピー';
+
+  @override
+  String get copied_markdown => 'Markdownとしてコピーしました';
+
+  @override
+  String get read_aloud => '読み上げる';
+
+  @override
+  String get stop_reading => '読み上げを停止';
+
+  @override
+  String get more => 'その他';
+
+  @override
+  String character_count(int length) {
+    return '$length 文字';
+  }
+
+  @override
+  String get edit_message => 'メッセージを編集';
+
+  @override
+  String get edit_message_desc => '保存すると、以下の応答が削除され、再生成されます。';
+
+  @override
+  String get save_regenerate => '保存して再生成';
+
+  @override
+  String get chat_settings_title => 'チャット設定';
+
+  @override
+  String get reset_defaults => 'デフォルトに戻す';
+
+  @override
+  String get parameters_tab => 'パラメータ';
+
+  @override
+  String get mcp_tab => 'MCP';
+
+  @override
+  String get temperature => '温度';
+
+  @override
+  String get temperature_desc => 'ランダム性を制御：高い＝創造的、低い＝集中';
+
+  @override
+  String get top_p => 'Top P';
+
+  @override
+  String get top_p_desc => '核サンプリングしきい値';
+
+  @override
+  String get max_tokens => '最大トークン数';
+
+  @override
+  String get max_tokens_desc => '応答制限';
+
+  @override
+  String get context_length => 'コンテキスト長';
+
+  @override
+  String get context_length_desc => '履歴ウィンドウ';
+
+  @override
+  String get mcp_disabled_warning => 'MCPはグローバルで無効化されています。設定画面から有効化して使用してください。';
+
+  @override
+  String get mcp_enable_chat => 'このチャットでMCPを有効化';
+
+  @override
+  String get auto_execute_tools => 'ツールの自動実行';
+
+  @override
+  String get beta_label => 'ベータ';
+
+  @override
+  String get experimental_label => '実験的';
+
+  @override
+  String get add_ephemeral_mcp => '一時的なMCPサーバーを追加';
+
+  @override
+  String get mcp_label_placeholder => 'ラベル';
+
+  @override
+  String get mcp_url_placeholder => 'URL (https://...)';
+
+  @override
+  String get active_integrations => '有効な統合';
+
+  @override
+  String get enable_notifications => '通知を有効にする';
+
+  @override
+  String get enable_notifications_desc => 'モデルのダウンロード完了時に通知を受け取ります。';
+
+  @override
+  String get chat_history_title => 'チャット履歴';
+
+  @override
+  String get conversation_just_now => 'たった今';
+
+  @override
+  String conversation_minutes_ago(int minutes) {
+    return '$minutes分前';
+  }
+
+  @override
+  String conversation_hours_ago(int hours) {
+    return '$hours時間前';
+  }
+
+  @override
+  String get conversation_yesterday => '昨日';
+
+  @override
+  String conversation_days_ago(int days) {
+    return '$days日前';
+  }
+
+  @override
+  String conversation_date(int month, int day, int year) {
+    return '$year/$month/$day';
+  }
+
+  @override
+  String get options_tooltip => 'オプション';
+
+  @override
+  String get no_results_found => '結果が見つかりません';
+
+  @override
+  String get no_conversations_yet => 'チャット履歴がまだありません';
+
+  @override
+  String get try_different_search => '別の検索ワードを試してください';
+
+  @override
+  String get start_new_conversation => '新しいチャットを開始する';
+
+  @override
+  String get rename_conversation => 'チャットの名前を変更';
+
+  @override
+  String get enter_new_title => '新しいタイトルを入力';
+
+  @override
+  String get pinned_section => 'ピン留め済み';
+
+  @override
+  String get today_section => '今日';
+
+  @override
+  String get yesterday_section => '昨日';
+
+  @override
+  String get previous_7_days => '過去 7 日間';
+
+  @override
+  String get previous_30_days => '過去 30 日間';
+
+  @override
+  String get older_section => '過去';
+
+  @override
+  String get onboarding_choose_language => '言語の選択';
+
+  @override
+  String get onboarding_choose_language_desc =>
+      '優先する言語を選択してください。この設定はいつでも変更できます。';
+
+  @override
+  String get onboarding_localmind => 'LOCALMIND';
+
+  @override
+  String get onboarding_connect_server => 'サーバーへの接続';
+
+  @override
+  String get onboarding_connect_desc =>
+      'LM Studio、Ollama、またはOpenRouterに接続して、プライベートAI体験を開始しましょう。';
+
+  @override
+  String get onboarding_welcome => 'Welcome to LocalMind';
+
+  @override
+  String get server_type_on_device => 'ローカル';
+
+  @override
+  String get server_type_on_device_sub => 'サーバー不要';
+
+  @override
+  String get server_type_lm_studio => 'LM Studio';
+
+  @override
+  String get server_type_lm_studio_sub => 'ローカルAPI';
+
+  @override
+  String get server_type_ollama => 'Ollama';
+
+  @override
+  String get server_type_ollama_sub => 'CLIエンジン';
+
+  @override
+  String get server_type_openrouter => 'OpenRouter';
+
+  @override
+  String get server_type_openrouter_sub => '統合クラウド';
+
+  @override
+  String get ready_continue => '続行可能';
+
+  @override
+  String get waiting_selection => '選択待ち';
+
+  @override
+  String get setup_connection => '接続のセットアップ';
+
+  @override
+  String setup_connection_desc(String server) {
+    return 'チャットを開始するには、$server サーバーを構成してください。';
+  }
+
+  @override
+  String get server_name => 'サーバー名';
+
+  @override
+  String get name_required => '名前は必須です';
+
+  @override
+  String get name_max_50 => '最大50文字';
+
+  @override
+  String get host_label => 'ホスト / IPアドレス';
+
+  @override
+  String get host_required => 'ホストは必須です';
+
+  @override
+  String get port_label => 'ポート';
+
+  @override
+  String get port_required => 'ポートは必須です';
+
+  @override
+  String get port_invalid => '数値である必要があります';
+
+  @override
+  String get port_range => '有効なポート番号（1-65535）を入力してください';
+
+  @override
+  String get api_key_required => 'APIキー *';
+
+  @override
+  String get api_key_optional => 'APIキー（オプション）';
+
+  @override
+  String get api_key_required_openrouter => 'OpenRouterにはAPIキーが必要です';
+
+  @override
+  String get api_key_format => 'OpenRouterのAPIキーは sk- で始まります';
+
+  @override
+  String get my_server_hint => 'マイサーバー';
+
+  @override
+  String get name_length_validation => '名前は50文字以内にする必要があります';
+
+  @override
+  String get host_valid => '有効なホスト名またはIPアドレスを入力してください';
+
+  @override
+  String get api_key_hint_openrouter => 'sk-...';
+
+  @override
+  String get api_key_hint_generic => '認証が必要なサーバー用';
+
+  @override
+  String get update_server => 'サーバーを更新';
+
+  @override
+  String get save_server => 'サーバーを保存';
+
+  @override
+  String get server_updated => 'サーバーを更新しました';
+
+  @override
+  String get server_added => 'サーバーを追加しました';
+
+  @override
+  String get download_model_title => 'モデルのダウンロード';
+
+  @override
+  String get download_model_desc =>
+      'ダウンロードするモデルを選択してください。\nモデルはデバイス上でローカルに実行されます。';
+
+  @override
+  String get on_device_android_only => 'ローカル推論は現在Androidのみで利用可能です。';
+
+  @override
+  String get total_ram => '合計 RAM';
+
+  @override
+  String get available => '利用可能';
+
+  @override
+  String ram_min_required(String fileSize) {
+    return '最低 $fileSize GB RAM';
+  }
+
+  @override
+  String download_progress(String percent, String speed) {
+    return '$percent% • $speed';
+  }
+
+  @override
+  String eta_label(String eta) {
+    return '残り時間: $eta';
+  }
+
+  @override
+  String paused_progress(String percent) {
+    return '一時停止中 - $percent%';
+  }
+
+  @override
+  String ram_warning_body_download(String ram, String totalMemory) {
+    return 'このモデルは少なくとも $ram GB のRAMを必要としますが、お使いのデバイスのRAMは $totalMemory です。正常に動作しないか、アプリがクラッシュする原因になる可能性があります。';
+  }
+
+  @override
+  String ram_warning_body_load(String availableRAM, String ram) {
+    return 'デバイスの利用可能RAMは $availableRAM ですが、このモデルは少なくとも $ram GB を推奨しています。ロードに失敗するか、不安定になる可能性があります。';
+  }
+
+  @override
+  String get choose_theme => 'テーマの選択';
+
+  @override
+  String get choose_theme_desc => 'アプリの外観をパーソナライズします。この設定は後からいつでも変更できます。';
+
+  @override
+  String get theme_card_system => 'システム';
+
+  @override
+  String get theme_card_system_sub => 'デバイスの設定に合わせる';
+
+  @override
+  String get theme_card_light => 'ライト';
+
+  @override
+  String get theme_card_light_sub => 'クリーンで明るい外観';
+
+  @override
+  String get theme_card_dark => 'ダーク';
+
+  @override
+  String get theme_card_dark_sub => '目に優しい外観';
+
+  @override
+  String get theme_card_claude => 'Claude';
+
+  @override
+  String get theme_card_claude_sub => '温かみのあるピーチ調のテーマ';
+
+  @override
+  String get stay_updated => '最新情報を維持';
+
+  @override
+  String get stay_updated_desc => 'AIモデルのダウンロード完了時や、長時間実行タスクの完了時に通知を受け取ります。';
+
+  @override
+  String get notification_benefit_downloads => 'モデルのダウンロード進捗';
+
+  @override
+  String get notification_benefit_completions => '生成の完了';
+
+  @override
+  String get notification_benefit_background => 'バックグラウンドタスクのステータス';
+
+  @override
+  String get allow_notifications => '通知を許可する';
+
+  @override
+  String get servers_title => 'サーバー';
+
+  @override
+  String get no_servers_yet => 'サーバーがありません';
+
+  @override
+  String get no_servers_desc => 'AIモデルとチャットを開始するには、最初のサーバーを追加してください。';
+
+  @override
+  String get add_server => 'サーバーを追加';
+
+  @override
+  String switched_to_server(String name) {
+    return '$name に切り替えました';
+  }
+
+  @override
+  String get edit_server => 'サーバーを編集';
+
+  @override
+  String get add_server_title => 'サーバーを追加';
+
+  @override
+  String get server_type_label => 'サーバータイプ';
+
+  @override
+  String get server_icon_label => 'サーバーアイコン';
+
+  @override
+  String get default_icon => 'デフォルトアイコン';
+
+  @override
+  String get server_type_lm_studio_display => 'LM Studio';
+
+  @override
+  String get server_type_openai_display => 'OpenAI 互換';
+
+  @override
+  String get server_type_ollama_display => 'Ollama';
+
+  @override
+  String get server_type_openrouter_display => 'OpenRouter';
+
+  @override
+  String get server_type_on_device_display => 'ローカル';
+
+  @override
+  String get server_address_openrouter => 'openrouter.ai';
+
+  @override
+  String get server_address_on_device => 'ローカル推論';
+
+  @override
+  String server_address_format(String host, String port) {
+    return '$host:$port';
+  }
+
+  @override
+  String get default_badge => 'デフォルト';
+
+  @override
+  String get set_as_default => 'デフォルトに設定';
+
+  @override
+  String get select_icon => 'アイコンを選択';
+
+  @override
+  String get select_icon_desc => 'サーバーのアイコンを選択してください';
+
+  @override
+  String get search_icons_hint => 'アイコンを検索...';
+
+  @override
+  String get server_icon_stack => 'サーバースタック';
+
+  @override
+  String get server_icon_stack2 => 'サーバースタック 02';
+
+  @override
+  String get server_icon_stack3 => 'サーバースタック 03';
+
+  @override
+  String get server_icon_cloud => 'クラウド';
+
+  @override
+  String get server_icon_cloud_server => 'クラウドサーバー';
+
+  @override
+  String get server_icon_mcp => 'MCP サーバー';
+
+  @override
+  String get server_icon_database => 'データベース';
+
+  @override
+  String get server_icon_database1 => 'データベース 01';
+
+  @override
+  String get server_icon_database2 => 'データベース 02';
+
+  @override
+  String get server_icon_cpu => 'CPU';
+
+  @override
+  String get server_icon_chip => 'チップ';
+
+  @override
+  String get server_icon_chip2 => 'チップ 02';
+
+  @override
+  String get server_icon_computer => 'コンピューター';
+
+  @override
+  String get server_icon_laptop => 'ノートパソコン';
+
+  @override
+  String get server_icon_terminal => 'コンピューターターミナル';
+
+  @override
+  String get server_icon_code => 'コード';
+
+  @override
+  String get server_icon_ai_brain => 'AI ブレイン';
+
+  @override
+  String get server_icon_ai_brain2 => 'AI ブレイン 02';
+
+  @override
+  String get server_icon_ai_cloud => 'AI クラウド';
+
+  @override
+  String get server_icon_ai_network => 'AI ネットワーク';
+
+  @override
+  String get server_icon_ai_chat => 'AI チャット';
+
+  @override
+  String get server_icon_cellular => 'モバイルネットワーク';
+
+  @override
+  String get server_icon_plug1 => 'プラグ 01';
+
+  @override
+  String get server_icon_plug2 => 'プラグ 02';
+
+  @override
+  String get server_icon_bot => 'ボット';
+
+  @override
+  String get server_icon_bot2 => 'ボット 02';
+
+  @override
+  String get server_icon_robotic => 'ロボット';
+
+  @override
+  String get server_icon_rocket => 'ロケット';
+
+  @override
+  String get server_icon_star => 'スター';
+
+  @override
+  String get server_icon_settings1 => '設定 01';
+
+  @override
+  String get server_icon_settings2 => '設定 02';
+
+  @override
+  String get server_icon_home1 => 'ホーム 01';
+
+  @override
+  String get server_icon_home2 => 'ホーム 02';
+
+  @override
+  String get server_icon_folder1 => 'フォルダ 01';
+
+  @override
+  String get server_icon_folder2 => 'フォルダ 02';
+
+  @override
+  String get server_icon_file1 => 'ファイル 01';
+
+  @override
+  String get server_icon_lock => 'ロック';
+
+  @override
+  String get server_icon_key => 'キー 01';
+
+  @override
+  String get server_icon_link => 'リンク 01';
+
+  @override
+  String get server_icon_globe => '地球儀';
+
+  @override
+  String get server_icon_api => 'API';
+
+  @override
+  String get server_icon_arrow_right => '右矢印 01';
+
+  @override
+  String get server_icon_check => 'チェックマーク';
+
+  @override
+  String get server_icon_alert => '警告マーク';
+
+  @override
+  String get server_icon_info => '情報マーク';
+
+  @override
+  String get server_icon_zap => '稲妻マーク';
+
+  @override
+  String get server_icon_cloud_upload => 'クラウドアップロード';
+
+  @override
+  String get server_icon_cloud_download => 'クラウドダウンロード';
+
+  @override
+  String get server_icon_refresh => '更新';
+
+  @override
+  String get server_icon_hard_drive => 'ハードドライブ';
+
+  @override
+  String get server_icon_drive => 'ドライブ';
+
+  @override
+  String get personas_title => 'ペルソナ';
+
+  @override
+  String get persona_category_general => '全般';
+
+  @override
+  String get persona_category_coding => 'コーディング';
+
+  @override
+  String get persona_category_education => '教育';
+
+  @override
+  String get persona_category_creative => 'クリエイティブ';
+
+  @override
+  String get persona_builtin_section => 'プリセット';
+
+  @override
+  String get persona_my_section => 'マイペルソナ';
+
+  @override
+  String get clone_edit => '複製して編集';
+
+  @override
+  String get builtin_badge => 'プリセット';
+
+  @override
+  String get no_personas_found => 'ペルソナが見つかりません';
+
+  @override
+  String get no_personas_desc => '最初のペルソナを作成して、AIの動作をカスタマイズしましょう。';
+
+  @override
+  String get edit_persona => 'ペルソナを編集';
+
+  @override
+  String get create_persona => 'ペルソナを作成';
+
+  @override
+  String get create_persona_button => '作成';
+
+  @override
+  String get emoji_label => '絵文字';
+
+  @override
+  String get name_label => '名前';
+
+  @override
+  String get my_persona_hint => 'マイペルソナ';
+
+  @override
+  String get category_label => 'カテゴリ';
+
+  @override
+  String get description_optional => '説明（オプション）';
+
+  @override
+  String get description_hint => 'このペルソナの役割について...';
+
+  @override
+  String get system_prompt => 'システムプロンプト';
+
+  @override
+  String character_count_max(int currentLen) {
+    return '$currentLen/4000';
+  }
+
+  @override
+  String get no_prompt_placeholder => 'プロンプトがまだありません...';
+
+  @override
+  String get prompt_hint => 'あなたは親切なアシスタントです...';
+
+  @override
+  String get prompt_required => 'システムプロンプトは必須です';
+
+  @override
+  String get prompt_max_chars => '最大4000文字';
+
+  @override
+  String get advanced_settings => '詳細設定';
+
+  @override
+  String get temperature_label => '温度（0.0-2.0）';
+
+  @override
+  String get top_p_label => 'Top P（0.0-1.0）';
+
+  @override
+  String get temp_hint => '0.7';
+
+  @override
+  String get top_p_hint => '0.9';
+
+  @override
+  String get range_0_2 => '0.0-2.0';
+
+  @override
+  String get range_0_1 => '0.0-1.0';
+
+  @override
+  String get persona_updated => 'ペルソナを更新しました';
+
+  @override
+  String get persona_created => 'ペルソナを作成しました';
+
+  @override
+  String get tts_models_title => '音声合成モデル';
+
+  @override
+  String get always_available => 'いつでも利用可能';
+
+  @override
+  String get tts_system_desc =>
+      'デバイスの内蔵音声合成エンジンを使用します。\nダウンロードは不要です。音声の選択はデバイスのシステム設定を使用します。';
+
+  @override
+  String get downloading_status => 'ダウンロード中...';
+
+  @override
+  String tts_kitten_desc(String size) {
+    return '8つの表現力豊かな音声を備えた超高速ニューラル音声合成。\nダウンロードサイズ: $size。';
+  }
+
+  @override
+  String tts_piper_desc(String size) {
+    return '2つの表現力豊かな音声を備えた高速オフラインPiper音声。\n音声ごとに $size のダウンロードが必要です。';
+  }
+
+  @override
+  String engine_spec(String sizeMb, String ramMb, int voiceCount) {
+    return '$sizeMb MB · $ramMb MB RAM · $voiceCount 音声';
+  }
+
+  @override
+  String get on_device_models_title => 'ローカルモデル';
+
+  @override
+  String get available_models => '利用可能なモデル';
+
+  @override
+  String get device_memory => 'デバイスのメモリ';
+
+  @override
+  String get ram_usage => 'RAM使用量';
+
+  @override
+  String get memory_healthy => '正常';
+
+  @override
+  String get memory_critical => '致命的';
+
+  @override
+  String get memory_low => '警告';
+
+  @override
+  String ram_used(String percent) {
+    return '$percent% 使用中';
+  }
+
+  @override
+  String get available_ram => '空き RAM';
+
+  @override
+  String get total_capacity => '合計容量';
+
+  @override
+  String get loaded_status => 'ロード済み';
+
+  @override
+  String get inference_backend => '推論バックエンド';
+
+  @override
+  String get backend_ios_notice => 'iOSではCPUバックエンドのみ利用可能です。';
+
+  @override
+  String get backend_cpu_desc => 'すべてのデバイスで動作します。互換性が最も高いです。';
+
+  @override
+  String get backend_gpu_desc => 'OpenCL アクセラレーション。サポートされているデバイスで高速に動作します。';
+
+  @override
+  String get backend_npu_desc => 'ベンダー NPU (Qualcomm/MediaTek)。最も高速な推論。';
+
+  @override
+  String get select_model_title => 'モデルを選択';
+
+  @override
+  String get refresh_models => 'モデルを更新';
+
+  @override
+  String get search_models_hint => 'モデルを検索...';
+
+  @override
+  String get no_server_connected => 'サーバーが接続されていません';
+
+  @override
+  String get add_server_first => '利用可能なモデルを表示するには、まずサーバーを追加してください。';
+
+  @override
+  String get failed_load_models => 'モデルの読み込みに失敗しました';
+
+  @override
+  String get no_models_available => '利用可能なモデルはありません';
+
+  @override
+  String no_models_match(String searchQuery) {
+    return '「$searchQuery」に一致するモデルはありません';
+  }
+
+  @override
+  String model_load_failed(String error) {
+    return 'モデルの読み込みに失敗しました: $error';
+  }
+
+  @override
+  String model_unloaded_ollama(String name) {
+    return 'キープアライブ時間を経過すると $name がアンロードされます';
+  }
+
+  @override
+  String model_unloaded_success(String name) {
+    return '$name を正常にアンロードしました';
+  }
+
+  @override
+  String model_unload_failed(String error) {
+    return 'モデルのアンロードに失敗しました: $error';
+  }
+
+  @override
+  String get unload_from_server => 'サーバーからアンロード';
+
+  @override
+  String context_chip(String ctx) {
+    return '$ctx コンテキスト';
+  }
+
+  @override
+  String download_notification_title(String modelName) {
+    return '$modelName をダウンロード中...';
+  }
+
+  @override
+  String get download_complete_notification => 'ダウンロード完了！';
+
+  @override
+  String download_complete_body(String modelName) {
+    return '$modelName のダウンロードが正常に完了しました。';
+  }
+
+  @override
+  String download_failed_notification(String error) {
+    return 'ダウンロード失敗: $error';
+  }
+
+  @override
+  String download_failed_body(String modelName) {
+    return '$modelName のダウンロードに失敗しました。';
+  }
+
+  @override
+  String get engine_name_system => 'システム音声合成';
+
+  @override
+  String get engine_tagline_system => 'デバイス内蔵エンジン';
+
+  @override
+  String get engine_name_kitten => 'Kitten TTS';
+
+  @override
+  String get engine_tagline_kitten => '高速ニューラル音声合成';
+
+  @override
+  String get engine_name_sherpa => 'Sherpa ONNX VITS';
+
+  @override
+  String get engine_tagline_sherpa => 'オフライン Piper 音声';
+
+  @override
+  String get voice_jasper => 'Jasper';
+
+  @override
+  String get voice_bella => 'Bella';
+
+  @override
+  String get voice_bruno => 'Bruno';
+
+  @override
+  String get voice_luna => 'Luna';
+
+  @override
+  String get voice_hugo => 'Hugo';
+
+  @override
+  String get voice_rosie => 'Rosie';
+
+  @override
+  String get voice_leo => 'Leo';
+
+  @override
+  String get voice_kiki => 'Kiki';
+
+  @override
+  String get voice_lessac => 'Lessac (米国)';
+
+  @override
+  String get voice_ryan => 'Ryan (米国)';
+
+  @override
+  String get model_qwen_3 => 'Qwen 3 0.6B';
+
+  @override
+  String get model_qwen_3_desc => '最小の汎用チャットモデル。高速な応答と低メモリ使用が特徴です。';
+
+  @override
+  String get model_license_apache => 'Apache-2.0';
+
+  @override
+  String get model_qwen_25 => 'Qwen 2.5 1.5B Instruct';
+
+  @override
+  String get model_qwen_25_desc => '品質とサイズのバランスが取れたモデル。一般的な会話に適しています。';
+
+  @override
+  String get model_deepseek => 'DeepSeek R1 Distill Qwen 1.5B';
+
+  @override
+  String get model_deepseek_desc => '推論・思考プロセス（CoT）モデル。論理的なタスクに最適です。';
+
+  @override
+  String get model_license_mit => 'MIT';
+
+  @override
+  String get model_gemma => 'Gemma 4 E2B Instruct';
+
+  @override
+  String get model_gemma_desc => 'Googleのフラッグシップモデル。最高品質ですが、より多くのRAMが必要です。';
+
+  @override
+  String export_header(String date) {
+    return '*LocalMindからエクスポート — $date*';
+  }
+
+  @override
+  String get export_role_user => '## 👤 ユーザー';
+
+  @override
+  String get export_role_assistant => '## 🤖 アシスタント';
+
+  @override
+  String get export_role_system => '## ⚙️ システム';
+
+  @override
+  String get export_role_tool => '## 🔧 ツール';
+
+  @override
+  String get export_text_user => '[ユーザー]';
+
+  @override
+  String get export_text_assistant => '[アシスタント]';
+
+  @override
+  String get export_text_system => '[システム]';
+
+  @override
+  String get export_text_tool => '[ツール]';
+
+  @override
+  String get export_label_user => 'ユーザー';
+
+  @override
+  String get export_label_assistant => 'アシスタント';
+
+  @override
+  String get export_label_system => 'システム';
+
+  @override
+  String get export_label_tool => 'ツール';
+
+  @override
+  String get select_model_hint => 'モデルを選択してチャットを開始';
+
+  @override
+  String get test_notification_title => 'テスト通知';
+
+  @override
+  String get test_notification_body => 'これはモデルのダウンロード進捗用のテスト通知です。';
+}

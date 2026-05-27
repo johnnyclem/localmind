@@ -101,6 +101,16 @@ const _languages = [
     shortText: 'Hi',
     gradient: [Color(0xFFEC4899), Color(0xFFDB2777)],
   ),
+  _LanguageOption(
+    code: 'ja',
+    nativeName: '日本語',
+    englishName: 'Japanese',
+    flag: '🇯🇵',
+    flagAsset: 'assets/images/flag_jp.png',
+    countryCode: 'JP',
+    shortText: 'Ja',
+    gradient: [Color(0xFFF43F5E), Color(0xFFBE123C)],
+  ),
 ];
 
 class OnboardingLanguageScreen extends ConsumerStatefulWidget {

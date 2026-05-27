@@ -316,6 +316,7 @@ class _LanguageSetting extends StatelessWidget {
 
   static const _localeItems = <(String, String, String, String)>[
     ('en', 'English', 'assets/images/flag_us.png', '🇺🇸'),
+    ('ja', '日本語', 'assets/images/flag_jp.png', '🇯🇵'),
     ('it', 'Italiano', 'assets/images/flag_it.png', '🇮🇹'),
     ('es', 'Español', 'assets/images/flag_es.png', '🇪🇸'),
     ('zh', '中文', 'assets/images/flag_cn.png', '🇨🇳'),
