@@ -467,7 +467,104 @@ class _ThemedGptMarkdown extends StatelessWidget {
 
     return GptMarkdownTheme(
       gptThemeData: gptTheme,
-      child: GptMarkdown(content, style: style, followLinkColor: true),
+      child: GptMarkdown(
+        content,
+        style: style,
+        followLinkColor: true,
+        tableBuilder: _buildTable,
+      ),
+    );
+  }
+}
+
+Widget _buildTable(
+  BuildContext context,
+  List<CustomTableRow> tableRows,
+  TextStyle textStyle,
+  GptMarkdownConfig config,
+) {
+  return _TableScrollView(
+    tableRows: tableRows,
+    config: config,
+  );
+}
+
+class _TableScrollView extends StatefulWidget {
+  const _TableScrollView({
+    required this.tableRows,
+    required this.config,
+  });
+
+  final List<CustomTableRow> tableRows;
+  final GptMarkdownConfig config;
+
+  @override
+  State<_TableScrollView> createState() => _TableScrollViewState();
+}
+
+class _TableScrollViewState extends State<_TableScrollView> {
+  final ScrollController _controller = ScrollController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scrollbar(
+      controller: _controller,
+      thumbVisibility: true,
+      child: SingleChildScrollView(
+        controller: _controller,
+        scrollDirection: Axis.horizontal,
+        child: Table(
+          textDirection: widget.config.textDirection,
+          defaultColumnWidth: const IntrinsicColumnWidth(),
+          defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+          border: TableBorder.all(
+            width: 1,
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
+          children: widget.tableRows.map((row) {
+            return TableRow(
+              decoration: row.isHeader
+                  ? BoxDecoration(
+                      color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                    )
+                  : null,
+              children: row.fields.map((field) {
+                Widget content = Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  child: MdWidget(
+                    context,
+                    field.data,
+                    false,
+                    config: widget.config,
+                  ),
+                );
+                switch (field.alignment) {
+                  case TextAlign.center:
+                    content = Center(child: content);
+                  case TextAlign.right:
+                    content = Align(
+                      alignment: Alignment.centerRight,
+                      child: content,
+                    );
+                  case TextAlign.left:
+                  default:
+                    content = Align(
+                      alignment: Alignment.centerLeft,
+                      child: content,
+                    );
+                }
+                return content;
+              }).toList(),
+            );
+          }).toList(),
+        ),
+      ),
     );
   }
 }
