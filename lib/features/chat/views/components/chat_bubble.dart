@@ -8,6 +8,7 @@ import '../../data/models/message.dart';
 import 'message_action_bar.dart';
 import 'processing_indicator.dart';
 import 'typing_indicator.dart';
+import 'audio_player_widget.dart';
 import 'reasoning_widget.dart';
 import '../../data/tools/tool_definition.dart';
 import '../../data/tools/tool_event.dart';
@@ -444,6 +445,18 @@ class _ThemedGptMarkdown extends StatelessWidget {
   final bool isDark;
   final TextStyle style;
 
+  static bool _isAudioUrl(String url) {
+    final lower = url.toLowerCase();
+    return lower.endsWith('.mp3') ||
+        lower.endsWith('.wav') ||
+        lower.endsWith('.ogg') ||
+        lower.endsWith('.flac') ||
+        lower.endsWith('.aac') ||
+        lower.endsWith('.m4a') ||
+        lower.endsWith('.wma') ||
+        lower.endsWith('.opus');
+  }
+
   @override
   Widget build(BuildContext context) {
     final gptTheme = GptMarkdownThemeData(
@@ -471,98 +484,45 @@ class _ThemedGptMarkdown extends StatelessWidget {
         content,
         style: style,
         followLinkColor: true,
-        tableBuilder: _buildTable,
+        imageBuilder: _buildImageOrAudio,
+        onLinkTap: (url, title) {
+          if (_isAudioUrl(url) && context.mounted) {
+            showDialog(
+              context: context,
+              builder: (ctx) => AlertDialog(
+                contentPadding: const EdgeInsets.all(16),
+                content: AudioPlayerWidget(source: url),
+              ),
+            );
+          }
+        },
       ),
     );
   }
-}
 
-Widget _buildTable(
-  BuildContext context,
-  List<CustomTableRow> tableRows,
-  TextStyle textStyle,
-  GptMarkdownConfig config,
-) {
-  return _TableScrollView(
-    tableRows: tableRows,
-    config: config,
-  );
-}
-
-class _TableScrollView extends StatefulWidget {
-  const _TableScrollView({
-    required this.tableRows,
-    required this.config,
-  });
-
-  final List<CustomTableRow> tableRows;
-  final GptMarkdownConfig config;
-
-  @override
-  State<_TableScrollView> createState() => _TableScrollViewState();
-}
-
-class _TableScrollViewState extends State<_TableScrollView> {
-  final ScrollController _controller = ScrollController();
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scrollbar(
-      controller: _controller,
-      thumbVisibility: true,
-      child: SingleChildScrollView(
-        controller: _controller,
-        scrollDirection: Axis.horizontal,
-        child: Table(
-          textDirection: widget.config.textDirection,
-          defaultColumnWidth: const IntrinsicColumnWidth(),
-          defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-          border: TableBorder.all(
-            width: 1,
-            color: Theme.of(context).colorScheme.onSurface,
-          ),
-          children: widget.tableRows.map((row) {
-            return TableRow(
-              decoration: row.isHeader
-                  ? BoxDecoration(
-                      color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                    )
+  Widget _buildImageOrAudio(BuildContext context, String url, double? width, double? height) {
+    if (_isAudioUrl(url)) {
+      return AudioPlayerWidget(source: url, height: 56);
+    }
+    return SizedBox(
+      width: width,
+      height: height,
+      child: Image(
+        image: NetworkImage(url),
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) return child;
+          return Center(
+            child: CircularProgressIndicator(
+              value: loadingProgress.expectedTotalBytes != null
+                  ? loadingProgress.cumulativeBytesLoaded /
+                      loadingProgress.expectedTotalBytes!
                   : null,
-              children: row.fields.map((field) {
-                Widget content = Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  child: MdWidget(
-                    context,
-                    field.data,
-                    false,
-                    config: widget.config,
-                  ),
-                );
-                switch (field.alignment) {
-                  case TextAlign.center:
-                    content = Center(child: content);
-                  case TextAlign.right:
-                    content = Align(
-                      alignment: Alignment.centerRight,
-                      child: content,
-                    );
-                  case TextAlign.left:
-                  default:
-                    content = Align(
-                      alignment: Alignment.centerLeft,
-                      child: content,
-                    );
-                }
-                return content;
-              }).toList(),
-            );
-          }).toList(),
+            ),
+          );
+        },
+        errorBuilder: (context, error, stackTrace) => Container(
+          color: Colors.grey[800],
+          child: const Center(child: Icon(Icons.broken_image, color: Colors.white54)),
         ),
       ),
     );
@@ -988,6 +948,18 @@ class _AttachmentItem extends StatelessWidget {
         mime.endsWith('.webp');
   }
 
+  bool _isAudio(String path) {
+    final ext = path.toLowerCase();
+    return ext.endsWith('.mp3') ||
+        ext.endsWith('.wav') ||
+        ext.endsWith('.ogg') ||
+        ext.endsWith('.flac') ||
+        ext.endsWith('.aac') ||
+        ext.endsWith('.m4a') ||
+        ext.endsWith('.wma') ||
+        ext.endsWith('.opus');
+  }
+
   void _viewImage(BuildContext context) {
     showDialog(
       context: context,
@@ -1018,6 +990,10 @@ class _AttachmentItem extends StatelessWidget {
           ),
         ),
       );
+    }
+
+    if (_isAudio(path)) {
+      return AudioPlayerWidget(source: path);
     }
 
     return Container(
