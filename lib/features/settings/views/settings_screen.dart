@@ -7,6 +7,7 @@ import '../../../core/providers/app_providers.dart';
 import '../../../core/models/enums.dart';
 import '../../../core/routes/app_routes.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/system_insets.dart';
 import '../../conversations/providers/conversation_providers.dart';
 import '../../on_device/providers/on_device_providers.dart';
 import '../../servers/providers/server_providers.dart';
@@ -22,12 +23,13 @@ class SettingsViews extends ConsumerWidget {
     final settings = ref.watch(settingsProvider);
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final systemBottomInset = bottomSystemInset(context);
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.settings_title)),
       drawer: SidebarWidget(),
       body: ListView(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: EdgeInsets.fromLTRB(16, 8, 16, 8 + systemBottomInset),
         children: [
           _SectionHeader(title: l10n.settings_appearance),
           _ThemeToggle(current: settings.themeMode, ref: ref),

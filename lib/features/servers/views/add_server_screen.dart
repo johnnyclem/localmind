@@ -8,6 +8,7 @@ import '../../../core/constants/app_constants.dart';
 import '../data/models/server.dart';
 import '../../../core/models/enums.dart';
 import '../../../core/providers/service_providers.dart';
+import '../../../core/utils/system_insets.dart';
 import '../providers/server_providers.dart';
 import 'components/server_icon_picker.dart';
 import 'components/server_type_selector.dart';
@@ -99,7 +100,9 @@ class _AddServerScreenState extends ConsumerState<AddServerScreen> {
       });
     } catch (e) {
       setState(() {
-        _testResult = AppLocalizations.of(context)!.error_with_message(e.toString());
+        _testResult = AppLocalizations.of(
+          context,
+        )!.error_with_message(e.toString());
       });
     } finally {
       setState(() {
@@ -160,7 +163,9 @@ class _AddServerScreenState extends ConsumerState<AddServerScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(AppLocalizations.of(context)!.error_with_message(e.toString())),
+            content: Text(
+              AppLocalizations.of(context)!.error_with_message(e.toString()),
+            ),
             backgroundColor: Colors.red,
           ),
         );
@@ -248,6 +253,7 @@ class _AddServerScreenState extends ConsumerState<AddServerScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
+    final systemBottomInset = bottomSystemInset(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -260,7 +266,7 @@ class _AddServerScreenState extends ConsumerState<AddServerScreen> {
       body: Form(
         key: _formKey,
         child: ListView(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.fromLTRB(16, 16, 16, 16 + systemBottomInset),
           children: [
             Text(l10n.server_type_label, style: theme.textTheme.titleSmall),
             const SizedBox(height: 8),
@@ -376,12 +382,18 @@ class _AddServerScreenState extends ConsumerState<AddServerScreen> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: _testResult!.contains(l10n.connection_successful.split('!')[0])
+                  color:
+                      _testResult!.contains(
+                        l10n.connection_successful.split('!')[0],
+                      )
                       ? Colors.green.withAlpha(25)
                       : Colors.red.withAlpha(25),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                    color: _testResult!.contains(l10n.connection_successful.split('!')[0])
+                    color:
+                        _testResult!.contains(
+                          l10n.connection_successful.split('!')[0],
+                        )
                         ? Colors.green
                         : Colors.red,
                   ),
@@ -389,10 +401,15 @@ class _AddServerScreenState extends ConsumerState<AddServerScreen> {
                 child: Row(
                   children: [
                     Icon(
-                      _testResult!.contains(l10n.connection_successful.split('!')[0])
+                      _testResult!.contains(
+                            l10n.connection_successful.split('!')[0],
+                          )
                           ? Icons.check_circle
                           : Icons.error,
-                      color: _testResult!.contains(l10n.connection_successful.split('!')[0])
+                      color:
+                          _testResult!.contains(
+                            l10n.connection_successful.split('!')[0],
+                          )
                           ? Colors.green
                           : Colors.red,
                     ),
@@ -401,7 +418,10 @@ class _AddServerScreenState extends ConsumerState<AddServerScreen> {
                       child: Text(
                         _testResult!,
                         style: TextStyle(
-                          color: _testResult!.contains(l10n.connection_successful.split('!')[0])
+                          color:
+                              _testResult!.contains(
+                                l10n.connection_successful.split('!')[0],
+                              )
                               ? Colors.green
                               : Colors.red,
                         ),

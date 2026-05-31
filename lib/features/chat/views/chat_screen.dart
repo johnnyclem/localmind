@@ -16,6 +16,7 @@ import 'package:shadcn_ui/shadcn_ui.dart';
 import '../../../core/models/enums.dart';
 import '../../../core/providers/app_providers.dart';
 import '../../../core/routes/app_routes.dart';
+import '../../../core/utils/system_insets.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../conversations/data/models/conversation.dart';
 import '../../servers/data/models/server.dart';
@@ -151,6 +152,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
         : null;
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final keyboardBottomInset = bottomKeyboardInset(context);
+    final systemBottomInset = bottomSystemInset(context);
+    final effectiveBottomInset = keyboardBottomInset > 0
+        ? 0.0
+        : systemBottomInset;
 
     final hasNewMessage = messages.length != _lastMessageCount;
     final streamingProgressed =
@@ -378,13 +384,14 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
                   },
                   hasSmartReplies:
                       !isStreaming &&
-                      MediaQuery.of(context).viewInsets.bottom == 0 &&
+                      keyboardBottomInset == 0 &&
                       (ref
                               .watch(smartRepliesProvider)
                               .asData
                               ?.value
                               .isNotEmpty ??
                           false),
+                  bottomInset: effectiveBottomInset,
                 ),
 
               Positioned(
@@ -407,8 +414,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      if (!isStreaming &&
-                          MediaQuery.of(context).viewInsets.bottom == 0) ...[
+                      if (!isStreaming && keyboardBottomInset == 0) ...[
                         const SizedBox(height: 4),
                         _SmartReplyChips(
                           onSend: (message) {
@@ -1313,6 +1319,7 @@ class _MessageListConsumer extends ConsumerWidget {
     required this.onDelete,
     required this.onEdit,
     this.hasSmartReplies = false,
+    this.bottomInset = 0,
   });
 
   final ScrollController scrollController;
@@ -1322,6 +1329,7 @@ class _MessageListConsumer extends ConsumerWidget {
   final void Function(String) onDelete;
   final void Function(String messageId, String currentContent) onEdit;
   final bool hasSmartReplies;
+  final double bottomInset;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -1338,6 +1346,7 @@ class _MessageListConsumer extends ConsumerWidget {
       onDelete: onDelete,
       onEdit: onEdit,
       hasSmartReplies: hasSmartReplies,
+      bottomInset: bottomInset,
     );
   }
 }
@@ -1352,6 +1361,7 @@ class _MessageList extends StatelessWidget {
     required this.onDelete,
     required this.onEdit,
     this.hasSmartReplies = false,
+    this.bottomInset = 0,
   });
 
   final ScrollController scrollController;
@@ -1362,6 +1372,7 @@ class _MessageList extends StatelessWidget {
   final void Function(String) onDelete;
   final void Function(String messageId, String currentContent) onEdit;
   final bool hasSmartReplies;
+  final double bottomInset;
 
   @override
   Widget build(BuildContext context) {
@@ -1381,7 +1392,7 @@ class _MessageList extends StatelessWidget {
       cacheExtent: 1000,
       padding: EdgeInsets.only(
         top: 16,
-        bottom: 120 + (hasSmartReplies ? 64 : 0),
+        bottom: 120 + (hasSmartReplies ? 64 : 0) + bottomInset,
       ),
       itemCount:
           allMessages.length +

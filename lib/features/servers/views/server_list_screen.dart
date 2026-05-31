@@ -5,6 +5,7 @@ import 'package:localmind/l10n/app_localizations.dart';
 import '../../../core/models/enums.dart';
 import '../../../core/providers/service_providers.dart';
 import '../../../core/routes/app_routes.dart';
+import '../../../core/utils/system_insets.dart';
 import '../providers/server_providers.dart';
 import 'components/server_card.dart';
 
@@ -18,6 +19,7 @@ class ServerListScreen extends ConsumerWidget {
     final activeServer = ref.watch(activeServerProvider);
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final systemBottomInset = bottomSystemInset(context);
 
     return SafeArea(
       child: Stack(
@@ -75,7 +77,12 @@ class ServerListScreen extends ConsumerWidget {
                             }
                           },
                           child: ListView.builder(
-                            padding: const EdgeInsets.all(16),
+                            padding: EdgeInsets.fromLTRB(
+                              16,
+                              16,
+                              16,
+                              16 + systemBottomInset + 80,
+                            ),
                             itemCount: serverList.length,
                             itemBuilder: (context, index) {
                               final server = serverList[index];
@@ -101,10 +108,19 @@ class ServerListScreen extends ConsumerWidget {
                                   },
                                   onEdit: isOnDevice
                                       ? null
-                                      : () => _showEditDialog(context, ref, server),
+                                      : () => _showEditDialog(
+                                          context,
+                                          ref,
+                                          server,
+                                        ),
                                   onDelete: isOnDevice
                                       ? null
-                                      : () => _showDeleteConfirmation(context, ref, l10n, server),
+                                      : () => _showDeleteConfirmation(
+                                          context,
+                                          ref,
+                                          l10n,
+                                          server,
+                                        ),
                                   onSetDefault: () {
                                     ref
                                         .read(serversProvider.notifier)
@@ -140,7 +156,7 @@ class ServerListScreen extends ConsumerWidget {
             ],
           ),
           PositionedDirectional(
-            bottom: 24,
+            bottom: 24 + systemBottomInset,
             end: 24,
             child: FloatingActionButton(
               onPressed: () => context.push(AppRoutes.addServer),
@@ -152,7 +168,11 @@ class ServerListScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildEmptyState(BuildContext context, AppLocalizations l10n, ThemeData theme) {
+  Widget _buildEmptyState(
+    BuildContext context,
+    AppLocalizations l10n,
+    ThemeData theme,
+  ) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
