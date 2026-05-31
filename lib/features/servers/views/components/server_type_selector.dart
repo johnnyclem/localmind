@@ -46,66 +46,109 @@ class ServerTypeSelector extends StatelessWidget {
       ),
     ];
 
-    return GridView.count(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      crossAxisCount: 2,
-      mainAxisSpacing: 8,
-      crossAxisSpacing: 8,
-      childAspectRatio: 2.0,
-      children: types.map((item) {
-        final type = item.$1;
-        final label = item.$2;
-        final icon = item.$3;
-        final accentColor = item.$4;
-        final isSelected = selectedType == type;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final itemAspectRatio = constraints.maxWidth >= 420 ? 2.15 : 1.95;
 
-        return GestureDetector(
-          onTap: () => onChanged(type),
-          child: Container(
-            decoration: BoxDecoration(
-              color: isSelected
-                  ? accentColor.withValues(alpha: 0.15)
-                  : colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: isSelected
-                    ? accentColor.withValues(alpha: 0.5)
-                    : colorScheme.outline.withValues(alpha: 0.3),
-                width: isSelected ? 2 : 1,
-              ),
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  width: 32,
-                  height: 32,
+        return GridView.count(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          padding: EdgeInsets.zero,
+          crossAxisCount: 2,
+          mainAxisSpacing: 8,
+          crossAxisSpacing: 8,
+          childAspectRatio: itemAspectRatio,
+          children: types.map((item) {
+            final type = item.$1;
+            final label = item.$2;
+            final icon = item.$3;
+            final accentColor = item.$4;
+            final isSelected = selectedType == type;
+
+            return Material(
+              color: Colors.transparent,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(14),
+                onTap: () => onChanged(type),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 180),
+                  curve: Curves.easeOut,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 10,
+                  ),
                   decoration: BoxDecoration(
                     color: isSelected
-                        ? accentColor.withValues(alpha: 0.2)
-                        : colorScheme.surface,
-                    borderRadius: BorderRadius.circular(8),
+                        ? accentColor.withValues(alpha: 0.14)
+                        : colorScheme.surfaceContainerHighest.withValues(
+                            alpha: 0.38,
+                          ),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                      color: isSelected
+                          ? accentColor.withValues(alpha: 0.58)
+                          : colorScheme.outline.withValues(alpha: 0.24),
+                      width: isSelected ? 2 : 1,
+                    ),
                   ),
-                  child: HugeIcon(
-                    icon: icon,
-                    size: 18,
-                    color: isSelected ? accentColor : colorScheme.onSurface,
+                  child: Stack(
+                    children: [
+                      Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              width: 32,
+                              height: 32,
+                              decoration: BoxDecoration(
+                                color: isSelected
+                                    ? accentColor.withValues(alpha: 0.20)
+                                    : colorScheme.surface,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: HugeIcon(
+                                icon: icon,
+                                size: 18,
+                                color: isSelected
+                                    ? accentColor
+                                    : colorScheme.onSurface,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              label,
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                fontSize: 15,
+                                fontWeight: isSelected
+                                    ? FontWeight.w600
+                                    : FontWeight.w500,
+                                color: isSelected
+                                    ? accentColor
+                                    : colorScheme.onSurface,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (isSelected)
+                        PositionedDirectional(
+                          top: 6,
+                          end: 6,
+                          child: Icon(
+                            Icons.check_circle,
+                            size: 17,
+                            color: accentColor,
+                          ),
+                        ),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 6),
-                Text(
-                  label,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                    color: isSelected ? accentColor : colorScheme.onSurface,
-                  ),
-                ),
-              ],
-            ),
-          ),
+              ),
+            );
+          }).toList(),
         );
-      }).toList(),
+      },
     );
   }
 }

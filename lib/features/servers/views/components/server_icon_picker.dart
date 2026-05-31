@@ -115,6 +115,8 @@ class _ServerIconPickerState extends State<ServerIconPicker> {
     final theme = Theme.of(context);
 
     return ShadSheet(
+      padding: EdgeInsets.all(8),
+      radius: BorderRadius.circular(32),
       title: Text(l10n.select_icon),
       description: Text(l10n.select_icon_desc),
       child: SizedBox(
@@ -135,64 +137,66 @@ class _ServerIconPickerState extends State<ServerIconPicker> {
               ),
             ),
             Expanded(
-              child: GridView.builder(
-                padding: const EdgeInsets.all(16),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 5,
-                  mainAxisSpacing: 8,
-                  crossAxisSpacing: 8,
-                ),
-                itemCount: _filteredIcons.length,
-                itemBuilder: (context, index) {
-                  final icon = _filteredIcons[index];
-                  final isSelected = _selected == icon.name;
+              child: Scrollbar(
+                child: GridView.builder(
+                  padding: const EdgeInsets.all(16),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 5,
+                    mainAxisSpacing: 8,
+                    crossAxisSpacing: 8,
+                  ),
+                  itemCount: _filteredIcons.length,
+                  itemBuilder: (context, index) {
+                    final icon = _filteredIcons[index];
+                    final isSelected = _selected == icon.name;
 
-                  return GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        _selected = icon.name;
-                      });
-                      widget.onIconSelected(icon.name);
-                    },
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? theme.colorScheme.primary.withValues(alpha: 0.2)
-                            : theme.colorScheme.surfaceContainerHighest
-                                  .withValues(alpha: 0.3),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
+                    return GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _selected = icon.name;
+                        });
+                        widget.onIconSelected(icon.name);
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
                           color: isSelected
-                              ? theme.colorScheme.primary
-                              : Colors.transparent,
-                          width: 2,
-                        ),
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          HugeIcon(
-                            icon: icon.icon,
-                            size: 24,
+                              ? theme.colorScheme.primary.withValues(alpha: 0.2)
+                              : theme.colorScheme.surfaceContainerHighest
+                                    .withValues(alpha: 0.3),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
                             color: isSelected
                                 ? theme.colorScheme.primary
-                                : theme.colorScheme.onSurface,
+                                : Colors.transparent,
+                            width: 2,
                           ),
-                          const SizedBox(height: 4),
-                          Text(
-                            icon.name,
-                            style: theme.textTheme.labelSmall?.copyWith(
-                              fontSize: 8,
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            HugeIcon(
+                              icon: icon.icon,
+                              size: 24,
+                              color: isSelected
+                                  ? theme.colorScheme.primary
+                                  : theme.colorScheme.onSurface,
                             ),
-                            textAlign: TextAlign.center,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
+                            const SizedBox(height: 4),
+                            Text(
+                              icon.name,
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                fontSize: 8,
+                              ),
+                              textAlign: TextAlign.center,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  );
-                },
+                    );
+                  },
+                ),
               ),
             ),
             Padding(

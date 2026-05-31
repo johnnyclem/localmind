@@ -101,6 +101,9 @@ class ActiveServerIndicator extends ConsumerWidget {
             isScrollControlled: true,
             backgroundColor: Colors.transparent,
             builder: (context) => Container(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).padding.bottom,
+              ),
               decoration: BoxDecoration(
                 color: theme.colorScheme.surface,
                 borderRadius: const BorderRadius.vertical(

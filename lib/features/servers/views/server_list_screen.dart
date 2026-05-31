@@ -156,7 +156,7 @@ class ServerListScreen extends ConsumerWidget {
             ],
           ),
           PositionedDirectional(
-            bottom: 24 + systemBottomInset,
+            bottom: 24,
             end: 24,
             child: FloatingActionButton(
               onPressed: () => context.push(AppRoutes.addServer),

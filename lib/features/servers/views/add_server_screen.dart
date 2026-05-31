@@ -36,6 +36,8 @@ class _AddServerScreenState extends ConsumerState<AddServerScreen> {
   String? _testResult;
 
   bool get _isEditing => widget.editServer != null;
+  bool get _requiresEndpoint => _selectedType != ServerType.openRouter;
+  bool get _requiresMandatoryApiKey => _selectedType == ServerType.openRouter;
 
   @override
   void initState() {
@@ -192,7 +194,7 @@ class _AddServerScreenState extends ConsumerState<AddServerScreen> {
   }
 
   String? _validateHost(String? value) {
-    if (_selectedType == ServerType.openRouter) return null;
+    if (!_requiresEndpoint) return null;
     final l10n = AppLocalizations.of(context)!;
 
     if (value == null || value.trim().isEmpty) {
@@ -208,7 +210,7 @@ class _AddServerScreenState extends ConsumerState<AddServerScreen> {
   }
 
   String? _validatePort(String? value) {
-    if (_selectedType == ServerType.openRouter) return null;
+    if (!_requiresEndpoint) return null;
     final l10n = AppLocalizations.of(context)!;
 
     if (value == null || value.trim().isEmpty) {
@@ -222,7 +224,7 @@ class _AddServerScreenState extends ConsumerState<AddServerScreen> {
   }
 
   String? _validateApiKey(String? value) {
-    if (_selectedType == ServerType.openRouter) {
+    if (_requiresMandatoryApiKey) {
       final l10n = AppLocalizations.of(context)!;
       if (value == null || value.trim().isEmpty) {
         return l10n.api_key_required_openrouter;
@@ -254,6 +256,7 @@ class _AddServerScreenState extends ConsumerState<AddServerScreen> {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final systemBottomInset = bottomSystemInset(context);
+    final colorScheme = theme.colorScheme;
 
     return Scaffold(
       appBar: AppBar(
@@ -263,202 +266,448 @@ class _AddServerScreenState extends ConsumerState<AddServerScreen> {
           onPressed: () => context.pop(),
         ),
       ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: _buildFloatingActionBar(
+        context,
+        bottomInset: systemBottomInset,
+      ),
       body: Form(
         key: _formKey,
         child: ListView(
-          padding: EdgeInsets.fromLTRB(16, 16, 16, 16 + systemBottomInset),
+          padding: EdgeInsets.fromLTRB(16, 12, 16, 120 + systemBottomInset),
           children: [
-            Text(l10n.server_type_label, style: theme.textTheme.titleSmall),
-            const SizedBox(height: 8),
-            ServerTypeSelector(
-              selectedType: _selectedType,
-              onChanged: _onTypeChanged,
+            _buildHeaderCard(context),
+            const SizedBox(height: 14),
+            _buildSectionCard(
+              context,
+              title: l10n.server_type_label,
+              subtitle: 'Pick the provider before filling connection details.',
+              child: ServerTypeSelector(
+                selectedType: _selectedType,
+                onChanged: _onTypeChanged,
+              ),
             ),
-            const SizedBox(height: 24),
-
-            Text(l10n.server_icon_label, style: theme.textTheme.titleSmall),
-            const SizedBox(height: 8),
-            GestureDetector(
-              onTap: _showIconPicker,
-              child: Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  border: Border.all(color: theme.colorScheme.outline),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 40,
-                      height: 40,
+            const SizedBox(height: 12),
+            _buildSectionCard(
+              context,
+              title: 'Identity',
+              subtitle:
+                  'Name this server and choose how it appears in the list.',
+              child: Column(
+                children: [
+                  GestureDetector(
+                    onTap: _showIconPicker,
+                    child: Container(
+                      padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: HugeIcon(
-                        icon: _selectedIconName != null
-                            ? (getHugeIconByName(_selectedIconName)?.icon ??
-                                  getDefaultServerIcon(
-                                    _selectedType.name,
-                                  )!.icon)
-                            : getDefaultServerIcon(_selectedType.name)!.icon,
-                        size: 24,
-                        color: theme.colorScheme.primary,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        _selectedIconName ?? l10n.default_icon,
-                        style: theme.textTheme.bodyMedium,
-                      ),
-                    ),
-                    Icon(
-                      Icons.edit,
-                      size: 18,
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 24),
-
-            TextFormField(
-              controller: _nameController,
-              decoration: InputDecoration(
-                labelText: l10n.name_label,
-                hintText: l10n.my_server_hint,
-              ),
-              validator: _validateName,
-              textInputAction: TextInputAction.next,
-            ),
-            const SizedBox(height: 16),
-
-            if (_selectedType != ServerType.openRouter) ...[
-              TextFormField(
-                controller: _hostController,
-                decoration: InputDecoration(
-                  labelText: l10n.host_label,
-                  hintText: '192.168.1.100',
-                ),
-                validator: _validateHost,
-                keyboardType: TextInputType.text,
-                textInputAction: TextInputAction.next,
-              ),
-              const SizedBox(height: 16),
-
-              TextFormField(
-                controller: _portController,
-                decoration: InputDecoration(
-                  labelText: l10n.port_label,
-                  hintText: _selectedType == ServerType.lmStudio
-                      ? AppConstants.lmStudioDefaultPort.toString()
-                      : AppConstants.ollamaDefaultPort.toString(),
-                ),
-                validator: _validatePort,
-                keyboardType: TextInputType.number,
-                textInputAction: TextInputAction.next,
-              ),
-              const SizedBox(height: 16),
-            ],
-
-            TextFormField(
-              controller: _apiKeyController,
-              decoration: InputDecoration(
-                labelText: _selectedType == ServerType.openRouter
-                    ? l10n.api_key_required
-                    : l10n.api_key_optional,
-                hintText: _selectedType == ServerType.openRouter
-                    ? l10n.api_key_hint_openrouter
-                    : l10n.api_key_hint_generic,
-              ),
-              validator: _validateApiKey,
-              obscureText: true,
-              textInputAction: TextInputAction.done,
-            ),
-            const SizedBox(height: 24),
-
-            if (_testResult != null) ...[
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color:
-                      _testResult!.contains(
-                        l10n.connection_successful.split('!')[0],
-                      )
-                      ? Colors.green.withAlpha(25)
-                      : Colors.red.withAlpha(25),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color:
-                        _testResult!.contains(
-                          l10n.connection_successful.split('!')[0],
-                        )
-                        ? Colors.green
-                        : Colors.red,
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      _testResult!.contains(
-                            l10n.connection_successful.split('!')[0],
-                          )
-                          ? Icons.check_circle
-                          : Icons.error,
-                      color:
-                          _testResult!.contains(
-                            l10n.connection_successful.split('!')[0],
-                          )
-                          ? Colors.green
-                          : Colors.red,
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        _testResult!,
-                        style: TextStyle(
-                          color:
-                              _testResult!.contains(
-                                l10n.connection_successful.split('!')[0],
-                              )
-                              ? Colors.green
-                              : Colors.red,
+                        color: colorScheme.surfaceContainerHighest.withValues(
+                          alpha: 0.35,
                         ),
+                        border: Border.all(
+                          color: colorScheme.outline.withValues(alpha: 0.4),
+                        ),
+                        borderRadius: BorderRadius.circular(16),
                       ),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 48,
+                            height: 48,
+                            decoration: BoxDecoration(
+                              color: colorScheme.primary.withValues(
+                                alpha: 0.12,
+                              ),
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            child: HugeIcon(
+                              icon: _selectedIconName != null
+                                  ? (getHugeIconByName(
+                                          _selectedIconName,
+                                        )?.icon ??
+                                        getDefaultServerIcon(
+                                          _selectedType.name,
+                                        )!.icon)
+                                  : getDefaultServerIcon(
+                                      _selectedType.name,
+                                    )!.icon,
+                              size: 24,
+                              color: colorScheme.primary,
+                            ),
+                          ),
+                          const SizedBox(width: 14),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  l10n.server_icon_label,
+                                  style: theme.textTheme.labelLarge?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  _selectedIconName ?? l10n.default_icon,
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    color: colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Icon(
+                            Icons.arrow_forward_ios_rounded,
+                            size: 16,
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    controller: _nameController,
+                    decoration: InputDecoration(
+                      labelText: l10n.name_label,
+                      hintText: l10n.my_server_hint,
+                    ),
+                    validator: _validateName,
+                    textInputAction: TextInputAction.next,
+                  ),
+                ],
+              ),
+            ),
+            if (_requiresEndpoint) ...[
+              const SizedBox(height: 12),
+              _buildSectionCard(
+                context,
+                title: 'Connection',
+                subtitle: 'Use the address and port exposed by your server.',
+                child: Column(
+                  children: [
+                    TextFormField(
+                      controller: _hostController,
+                      decoration: InputDecoration(
+                        labelText: l10n.host_label,
+                        hintText: '192.168.1.100',
+                      ),
+                      validator: _validateHost,
+                      keyboardType: TextInputType.text,
+                      textInputAction: TextInputAction.next,
+                    ),
+                    const SizedBox(height: 12),
+                    TextFormField(
+                      controller: _portController,
+                      decoration: InputDecoration(
+                        labelText: l10n.port_label,
+                        hintText: _selectedType == ServerType.lmStudio
+                            ? AppConstants.lmStudioDefaultPort.toString()
+                            : AppConstants.ollamaDefaultPort.toString(),
+                      ),
+                      validator: _validatePort,
+                      keyboardType: TextInputType.number,
+                      textInputAction: TextInputAction.next,
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: 16),
             ],
-
-            OutlinedButton.icon(
-              onPressed: _isTesting ? null : _testConnection,
-              icon: _isTesting
-                  ? const SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Icon(Icons.network_check),
-              label: Text(_isTesting ? l10n.testing : l10n.test_connection),
+            const SizedBox(height: 12),
+            _buildSectionCard(
+              context,
+              title: 'Authentication',
+              subtitle: _requiresMandatoryApiKey
+                  ? 'OpenRouter requires an API key before testing.'
+                  : 'Leave the API key empty if this server does not require one.',
+              child: TextFormField(
+                controller: _apiKeyController,
+                decoration: InputDecoration(
+                  labelText: _requiresMandatoryApiKey
+                      ? l10n.api_key_required
+                      : l10n.api_key_optional,
+                  hintText: _requiresMandatoryApiKey
+                      ? l10n.api_key_hint_openrouter
+                      : l10n.api_key_hint_generic,
+                ),
+                validator: _validateApiKey,
+                obscureText: true,
+                textInputAction: TextInputAction.done,
+              ),
             ),
-            const SizedBox(height: 24),
-
-            ElevatedButton(
-              onPressed: _isSaving ? null : _saveServer,
-              child: _isSaving
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : Text(_isEditing ? l10n.update_server : l10n.save_server),
-            ),
+            if (_testResult != null) ...[
+              const SizedBox(height: 12),
+              _buildTestResultBanner(context),
+            ],
           ],
         ),
       ),
     );
+  }
+
+  Widget _buildHeaderCard(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.38),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: colorScheme.outline.withValues(alpha: 0.2)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 52,
+            height: 52,
+            decoration: BoxDecoration(
+              color: colorScheme.primary.withValues(alpha: 0.14),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: HugeIcon(
+              icon: getDefaultServerIcon(_selectedType.name)!.icon,
+              size: 28,
+              color: colorScheme.primary,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            _isEditing ? l10n.edit_server : l10n.add_server_title,
+            style: theme.textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            _requiresEndpoint
+                ? 'Configure a local or self-hosted endpoint, then verify the connection before saving.'
+                : 'Connect through OpenRouter with a valid API key and keep this profile ready for model routing.',
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: colorScheme.onSurfaceVariant,
+              height: 1.4,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              _buildInfoPill(
+                context,
+                icon: Icons.hub_outlined,
+                label: _serverTypeLabel(context),
+              ),
+              _buildInfoPill(
+                context,
+                icon: _requiresMandatoryApiKey ? Icons.key_outlined : Icons.dns,
+                label: _requiresMandatoryApiKey
+                    ? l10n.api_key_required
+                    : l10n.host_label,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSectionCard(
+    BuildContext context, {
+    required String title,
+    required String subtitle,
+    required Widget child,
+  }) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: colorScheme.outline.withValues(alpha: 0.16)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            subtitle,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: colorScheme.onSurfaceVariant,
+              height: 1.35,
+            ),
+          ),
+          const SizedBox(height: 12),
+          child,
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTestResultBanner(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final success = _testResult!.contains(
+      l10n.connection_successful.split('!')[0],
+    );
+    final accent = success ? Colors.green : theme.colorScheme.error;
+
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: accent.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: accent.withValues(alpha: 0.3)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(
+            success ? Icons.check_circle_rounded : Icons.error_rounded,
+            color: accent,
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              _testResult!,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: accent,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFloatingActionBar(
+    BuildContext context, {
+    required double bottomInset,
+  }) {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Padding(
+      padding: EdgeInsets.fromLTRB(16, 0, 16, bottomInset > 0 ? 4 : 8),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: colorScheme.surface.withValues(alpha: 0.96),
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(
+            color: colorScheme.outline.withValues(alpha: 0.14),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.08),
+              blurRadius: 24,
+              offset: const Offset(0, 12),
+            ),
+          ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: _isTesting ? null : _testConnection,
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: const Size.fromHeight(52),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                  icon: _isTesting
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.network_check_rounded),
+                  label: Text(_isTesting ? l10n.testing : l10n.test_connection),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: _isSaving ? null : _saveServer,
+                  style: ElevatedButton.styleFrom(
+                    minimumSize: const Size.fromHeight(52),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                  icon: _isSaving
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.save_rounded),
+                  label: Text(
+                    _isSaving
+                        ? l10n.save
+                        : (_isEditing ? l10n.update_server : l10n.save_server),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoPill(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+  }) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: colorScheme.surface.withValues(alpha: 0.7),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: colorScheme.outline.withValues(alpha: 0.18)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 16, color: colorScheme.primary),
+          const SizedBox(width: 8),
+          Text(
+            label,
+            style: theme.textTheme.labelLarge?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _serverTypeLabel(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return switch (_selectedType) {
+      ServerType.lmStudio => l10n.server_type_lm_studio,
+      ServerType.openAICompatible => 'OpenAI',
+      ServerType.ollama => l10n.server_type_ollama,
+      ServerType.openRouter => l10n.server_type_openrouter,
+      ServerType.onDevice => l10n.server_type_on_device_display,
+    };
   }
 }
