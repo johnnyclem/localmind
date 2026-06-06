@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
+import 'package:cue/cue.dart';
 
 import '../../../core/providers/app_providers.dart';
 import '../../../core/routes/app_routes.dart';
@@ -35,95 +36,118 @@ class _OnboardingThemeScreenState extends ConsumerState<OnboardingThemeScreen> {
         ),
       ),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                l10n.choose_theme_desc,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
-                ),
-              ),
-              const SizedBox(height: 32),
-
-              Expanded(
-                child: ListView(
-                  children: [
-                    _buildThemeCard(
-                      type: AppThemeType.system,
-                      title: l10n.theme_card_system,
-                      subtitle: l10n.theme_card_system_sub,
-                      iconWidget: HugeIcon(
-                        icon: HugeIcons.strokeRoundedSettings01,
-                        color: currentTheme == AppThemeType.system
-                            ? theme.colorScheme.primary
-                            : theme.colorScheme.onSurface,
-                      ),
-                      currentTheme: currentTheme,
-                      context: context,
-                    ),
-                    const SizedBox(height: 16),
-                    _buildThemeCard(
-                      type: AppThemeType.light,
-                      title: l10n.theme_card_light,
-                      subtitle: l10n.theme_card_light_sub,
-                      iconWidget: HugeIcon(
-                        icon: HugeIcons.strokeRoundedSun01,
-                        color: currentTheme == AppThemeType.light
-                            ? theme.colorScheme.primary
-                            : theme.colorScheme.onSurface,
-                      ),
-                      currentTheme: currentTheme,
-                      context: context,
-                    ),
-                    const SizedBox(height: 16),
-                    _buildThemeCard(
-                      type: AppThemeType.dark,
-                      title: l10n.theme_card_dark,
-                      subtitle: l10n.theme_card_dark_sub,
-                      iconWidget: HugeIcon(
-                        icon: HugeIcons.strokeRoundedMoon02,
-                        color: currentTheme == AppThemeType.dark
-                            ? theme.colorScheme.primary
-                            : theme.colorScheme.onSurface,
-                      ),
-                      currentTheme: currentTheme,
-                      context: context,
-                    ),
-                    const SizedBox(height: 16),
-                    _buildThemeCard(
-                      type: AppThemeType.claude,
-                      title: l10n.theme_card_claude,
-                      subtitle: l10n.theme_card_claude_sub,
-                      iconWidget: HugeIcon(
-                        icon: HugeIcons.strokeRoundedPaintBrush02,
-                        color: currentTheme == AppThemeType.claude
-                            ? theme.colorScheme.primary
-                            : theme.colorScheme.onSurface,
-                      ),
-                      currentTheme: currentTheme,
-                      context: context,
-                    ),
+        child: Cue.onMount(
+          motion: .smooth(),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Actor(
+                  acts: [
+                    .fadeIn(),
+                    .slideY(from: 0.08),
                   ],
+                  child: Text(
+                    l10n.choose_theme_desc,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                    ),
+                  ),
                 ),
-              ),
+                const SizedBox(height: 32),
 
-              const SizedBox(height: 24),
-              ShadButton(
-                width: double.infinity,
-                onPressed: () async {
-                  if (context.mounted) {
-                    context.push(AppRoutes.onboardingNotifications);
-                  }
-                },
-                child: Text(
-                  l10n.finish_setup,
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                Expanded(
+                  child: Actor(
+                    delay: 60.ms,
+                    acts: [
+                      .fadeIn(),
+                      .slideY(from: 0.08),
+                    ],
+                    child: ListView(
+                      children: [
+                        _buildThemeCard(
+                          type: AppThemeType.system,
+                          title: l10n.theme_card_system,
+                          subtitle: l10n.theme_card_system_sub,
+                          iconWidget: HugeIcon(
+                            icon: HugeIcons.strokeRoundedSettings01,
+                            color: currentTheme == AppThemeType.system
+                                ? theme.colorScheme.primary
+                                : theme.colorScheme.onSurface,
+                          ),
+                          currentTheme: currentTheme,
+                          context: context,
+                        ),
+                        const SizedBox(height: 16),
+                        _buildThemeCard(
+                          type: AppThemeType.light,
+                          title: l10n.theme_card_light,
+                          subtitle: l10n.theme_card_light_sub,
+                          iconWidget: HugeIcon(
+                            icon: HugeIcons.strokeRoundedSun01,
+                            color: currentTheme == AppThemeType.light
+                                ? theme.colorScheme.primary
+                                : theme.colorScheme.onSurface,
+                          ),
+                          currentTheme: currentTheme,
+                          context: context,
+                        ),
+                        const SizedBox(height: 16),
+                        _buildThemeCard(
+                          type: AppThemeType.dark,
+                          title: l10n.theme_card_dark,
+                          subtitle: l10n.theme_card_dark_sub,
+                          iconWidget: HugeIcon(
+                            icon: HugeIcons.strokeRoundedMoon02,
+                            color: currentTheme == AppThemeType.dark
+                                ? theme.colorScheme.primary
+                                : theme.colorScheme.onSurface,
+                          ),
+                          currentTheme: currentTheme,
+                          context: context,
+                        ),
+                        const SizedBox(height: 16),
+                        _buildThemeCard(
+                          type: AppThemeType.claude,
+                          title: l10n.theme_card_claude,
+                          subtitle: l10n.theme_card_claude_sub,
+                          iconWidget: HugeIcon(
+                            icon: HugeIcons.strokeRoundedPaintBrush02,
+                            color: currentTheme == AppThemeType.claude
+                                ? theme.colorScheme.primary
+                                : theme.colorScheme.onSurface,
+                          ),
+                          currentTheme: currentTheme,
+                          context: context,
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
-            ],
+
+                const SizedBox(height: 24),
+                Actor(
+                  delay: 120.ms,
+                  acts: [
+                    .fadeIn(),
+                    .slideY(from: 0.08),
+                  ],
+                  child: ShadButton(
+                    width: double.infinity,
+                    onPressed: () async {
+                      if (context.mounted) {
+                        context.push(AppRoutes.onboardingNotifications);
+                      }
+                    },
+                    child: Text(
+                      l10n.finish_setup,
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

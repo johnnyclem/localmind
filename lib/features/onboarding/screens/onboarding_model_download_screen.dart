@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
+import 'package:cue/cue.dart';
 
 import '../../../core/models/enums.dart';
 import '../../../core/routes/app_routes.dart';
@@ -38,77 +39,112 @@ class _OnboardingModelDownloadScreenState
     final models = ref.watch(onDeviceModelsProvider);
     final downloadedModelsAsync = ref.watch(downloadedModelsProvider);
     final downloadStates = ref.watch(foregroundDownloadNotifierProvider);
-    final isAndroid = Platform.isAndroid;
     final deviceMemoryAsync = ref.watch(deviceMemoryProvider);
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.download_model_title)),
       body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
-          children: [
-            Text(
-              l10n.download_model_desc,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
-              ),
-            ),
-            const SizedBox(height: 24),
-            if (!isAndroid)
-              Container(
-                padding: const EdgeInsets.all(12),
-                margin: const EdgeInsets.only(bottom: 16),
-                decoration: BoxDecoration(
-                  color: Colors.orange.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.orange),
-                ),
-                child: Row(
+        child: Cue.onMount(
+          motion: .smooth(),
+          child: ListView(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+            children: [
+              Actor(
+                acts: [
+                  .fadeIn(),
+                  .slideY(from: 0.08),
+                ],
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const Icon(Icons.info_outline, color: Colors.orange, size: 20),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        l10n.on_device_android_only,
-                        style: const TextStyle(color: Colors.orange),
+                    Text(
+                      l10n.download_model_desc,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                       ),
                     ),
+                    const SizedBox(height: 24),
+                    if (!Platform.isAndroid && !Platform.isIOS)
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        margin: const EdgeInsets.only(bottom: 16),
+                        decoration: BoxDecoration(
+                          color: Colors.orange.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.orange),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.info_outline, color: Colors.orange, size: 20),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                l10n.on_device_android_only,
+                                style: const TextStyle(color: Colors.orange),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    _buildMemoryInfo(context, ref, deviceMemoryAsync),
                   ],
                 ),
               ),
-            _buildMemoryInfo(context, ref, deviceMemoryAsync),
-            ...models.map((model) {
-              final isDownloaded = downloadedModelsAsync.when(
-                data: (set) => set.contains(model.id),
-                loading: () => false,
-                error: (_, _) => false,
-              );
-              final progressInfo = downloadStates[model.id];
+              Actor(
+                delay: 60.ms,
+                acts: [
+                  .fadeIn(),
+                  .slideY(from: 0.08),
+                ],
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: models.map((model) {
+                    final isDownloaded = downloadedModelsAsync.when(
+                      data: (set) => set.contains(model.id),
+                      loading: () => false,
+                      error: (_, _) => false,
+                    );
+                    final progressInfo = downloadStates[model.id];
 
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: _ModelCard(
-                  model: model,
-                  isDownloaded: isDownloaded,
-                  progressInfo: progressInfo,
-                  theme: theme,
-                  deviceMemory: deviceMemoryAsync.value,
-                ),
-              );
-            }),
-            const SizedBox(height: 24),
-            if (_isCreatingServer)
-              const Center(child: CircularProgressIndicator())
-            else
-              ShadButton(
-                width: double.infinity,
-                onPressed: _canContinue() ? _createOnDeviceServer : null,
-                child: Text(
-                  l10n.continue_action,
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: _ModelCard(
+                        model: model,
+                        isDownloaded: isDownloaded,
+                        progressInfo: progressInfo,
+                        theme: theme,
+                        deviceMemory: deviceMemoryAsync.value,
+                      ),
+                    );
+                  }).toList(),
                 ),
               ),
-          ],
+              Actor(
+                delay: 120.ms,
+                acts: [
+                  .fadeIn(),
+                  .slideY(from: 0.08),
+                ],
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const SizedBox(height: 24),
+                    if (_isCreatingServer)
+                      const Center(child: CircularProgressIndicator())
+                    else
+                      ShadButton(
+                        width: double.infinity,
+                        onPressed: _canContinue() ? _createOnDeviceServer : null,
+                        child: Text(
+                          l10n.continue_action,
+                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -311,7 +347,7 @@ class _ModelCard extends ConsumerWidget {
                 ),
             ],
           ),
-          if (deviceMemory != null && deviceMemory!.isOversized(model.minRamMb))
+          if (!Platform.isIOS && deviceMemory != null && deviceMemory!.isOversized(model.minRamMb))
             Padding(
               padding: const EdgeInsets.only(top: 4),
               child: Row(
@@ -438,7 +474,7 @@ class _ModelCard extends ConsumerWidget {
   }
 
   Future<void> _startDownload(BuildContext context, WidgetRef ref) async {
-    if (deviceMemory != null) {
+    if (!Platform.isIOS && deviceMemory != null) {
       if (deviceMemory!.isOversized(model.minRamMb)) {
         final proceed = await _showRamWarning(context);
         if (!proceed) return;

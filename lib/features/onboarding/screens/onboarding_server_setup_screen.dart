@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
+import 'package:cue/cue.dart';
 
 import '../../../core/constants/app_constants.dart';
 import '../../../core/models/enums.dart';
@@ -181,156 +182,182 @@ class _OnboardingServerSetupScreenState
     return Scaffold(
       appBar: AppBar(title: Text(l10n.setup_connection)),
       body: SafeArea(
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 24.0,
-              vertical: 16.0,
-            ),
-            children: [
-              Text(
-                l10n.setup_connection_desc(widget.selectedType.name),
-                style: theme.textTheme.titleMedium?.copyWith(
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
-                ),
+        child: Cue.onMount(
+          motion: .smooth(),
+          child: Form(
+            key: _formKey,
+            child: ListView(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 24.0,
+                vertical: 16.0,
               ),
-              const SizedBox(height: 32),
-
-              TextFormField(
-                controller: _nameController,
-                decoration: InputDecoration(
-                  labelText: l10n.server_name,
-                  filled: true,
-                  fillColor: theme.colorScheme.surface,
-                ),
-                validator: (val) => val == null || val.trim().isEmpty
-                    ? l10n.name_required
-                    : null,
-              ),
-              const SizedBox(height: 16),
-
-              if (!isCloud) ...[
-                TextFormField(
-                  controller: _hostController,
-                  decoration: InputDecoration(
-                    labelText: l10n.host_label,
-                    filled: true,
-                    fillColor: theme.colorScheme.surface,
-                  ),
-                  validator: (val) => val == null || val.trim().isEmpty
-                      ? l10n.host_required
-                      : null,
-                ),
-                const SizedBox(height: 16),
-
-                TextFormField(
-                  controller: _portController,
-                  decoration: InputDecoration(
-                    labelText: l10n.port_label,
-                    filled: true,
-                    fillColor: theme.colorScheme.surface,
-                  ),
-                  validator: (val) {
-                    if (val == null || val.trim().isEmpty) {
-                      return l10n.port_required;
-                    } else {
-                      if (int.tryParse(val) == null) {
-                        return l10n.port_invalid;
-                      } else {
-                        return null;
-                      }
-                    }
-                  },
-                ),
-                const SizedBox(height: 16),
-              ],
-
-              TextFormField(
-                controller: _apiKeyController,
-                decoration: InputDecoration(
-                  labelText: isCloud
-                      ? l10n.api_key_required
-                      : l10n.api_key_optional,
-                  filled: true,
-                  fillColor: theme.colorScheme.surface,
-                ),
-                validator: (val) {
-                  if (isCloud && (val == null || val.trim().isEmpty)) {
-                    return l10n.api_key_required_openrouter;
-                  }
-                  return null;
-                },
-                obscureText: true,
-              ),
-              const SizedBox(height: 24),
-
-              if (_testResult != null)
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  margin: const EdgeInsets.only(bottom: 24),
-                  decoration: BoxDecoration(
-                    color: _testSuccess
-                        ? Colors.green.withValues(alpha: 0.1)
-                        : Colors.red.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: _testSuccess ? Colors.green : Colors.red,
+              children: [
+                Actor(
+                  acts: [
+                    .fadeIn(),
+                    .slideY(from: 0.08),
+                  ],
+                  child: Text(
+                    l10n.setup_connection_desc(widget.selectedType.name),
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                     ),
                   ),
-                  child: Row(
+                ),
+                Actor(
+                  delay: 60.ms,
+                  acts: [
+                    .fadeIn(),
+                    .slideY(from: 0.08),
+                  ],
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Icon(
-                        _testSuccess ? Icons.check_circle : Icons.error,
-                        color: _testSuccess ? Colors.green : Colors.red,
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          _testResult!,
-                          style: TextStyle(
-                            color: _testSuccess ? Colors.green : Colors.red,
-                          ),
+                      const SizedBox(height: 32),
+                      TextFormField(
+                        controller: _nameController,
+                        decoration: InputDecoration(
+                          labelText: l10n.server_name,
+                          filled: true,
+                          fillColor: theme.colorScheme.surface,
                         ),
+                        validator: (val) => val == null || val.trim().isEmpty
+                            ? l10n.name_required
+                            : null,
+                      ),
+                      const SizedBox(height: 16),
+                      if (!isCloud) ...[
+                        TextFormField(
+                          controller: _hostController,
+                          decoration: InputDecoration(
+                            labelText: l10n.host_label,
+                            filled: true,
+                            fillColor: theme.colorScheme.surface,
+                          ),
+                          validator: (val) => val == null || val.trim().isEmpty
+                              ? l10n.host_required
+                              : null,
+                        ),
+                        const SizedBox(height: 16),
+                        TextFormField(
+                          controller: _portController,
+                          decoration: InputDecoration(
+                            labelText: l10n.port_label,
+                            filled: true,
+                            fillColor: theme.colorScheme.surface,
+                          ),
+                          validator: (val) {
+                            if (val == null || val.trim().isEmpty) {
+                              return l10n.port_required;
+                            } else {
+                              if (int.tryParse(val) == null) {
+                                return l10n.port_invalid;
+                              } else {
+                                return null;
+                              }
+                            }
+                          },
+                        ),
+                        const SizedBox(height: 16),
+                      ],
+                      TextFormField(
+                        controller: _apiKeyController,
+                        decoration: InputDecoration(
+                          labelText: isCloud
+                              ? l10n.api_key_required
+                              : l10n.api_key_optional,
+                          filled: true,
+                          fillColor: theme.colorScheme.surface,
+                        ),
+                        validator: (val) {
+                          if (isCloud && (val == null || val.trim().isEmpty)) {
+                            return l10n.api_key_required_openrouter;
+                          }
+                          return null;
+                        },
+                        obscureText: true,
                       ),
                     ],
                   ),
                 ),
-
-              ShadButton.outline(
-                width: double.infinity,
-                onPressed: _isTesting ? null : _testConnection,
-                child: _isTesting
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : Text(l10n.test_connection),
-              ),
-              const SizedBox(height: 16),
-
-              ShadButton(
-                width: double.infinity,
-                onPressed: _isSaving ? null : _saveAndContinue,
-                child: _isSaving
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
+                Actor(
+                  delay: 120.ms,
+                  acts: [
+                    .fadeIn(),
+                    .slideY(from: 0.08),
+                  ],
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const SizedBox(height: 24),
+                      if (_testResult != null)
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          margin: const EdgeInsets.only(bottom: 24),
+                          decoration: BoxDecoration(
+                            color: _testSuccess
+                                ? Colors.green.withValues(alpha: 0.1)
+                                : Colors.red.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: _testSuccess ? Colors.green : Colors.red,
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                _testSuccess ? Icons.check_circle : Icons.error,
+                                color: _testSuccess ? Colors.green : Colors.red,
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  _testResult!,
+                                  style: TextStyle(
+                                    color: _testSuccess ? Colors.green : Colors.red,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      )
-                    : Text(
-                        l10n.save_continue,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
+                      ShadButton.outline(
+                        width: double.infinity,
+                        onPressed: _isTesting ? null : _testConnection,
+                        child: _isTesting
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              )
+                            : Text(l10n.test_connection),
                       ),
-              ),
-            ],
+                      const SizedBox(height: 16),
+                      ShadButton(
+                        width: double.infinity,
+                        onPressed: _isSaving ? null : _saveAndContinue,
+                        child: _isSaving
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : Text(
+                                l10n.save_continue,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

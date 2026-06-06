@@ -58,12 +58,12 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.onboarding,
         pageBuilder: (context, state) =>
-            const NoTransitionPage(child: OnboardingLanguageScreen()),
+            const MaterialPage(child: OnboardingLanguageScreen()),
       ),
       GoRoute(
         path: AppRoutes.onboardingServerType,
         pageBuilder: (context, state) =>
-            const NoTransitionPage(child: OnboardingServerTypeScreen()),
+            const MaterialPage(child: OnboardingServerTypeScreen()),
       ),
       GoRoute(
         path: AppRoutes.onboardingSetup,

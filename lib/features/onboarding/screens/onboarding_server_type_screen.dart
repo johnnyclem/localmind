@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
+import 'package:cue/cue.dart';
 
 import '../../../core/models/enums.dart';
 import '../../../core/providers/app_providers.dart';
@@ -60,156 +61,189 @@ class _OnboardingServerTypeScreenState
           ),
         ],
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const SizedBox(height: 24),
-                  Text(
-                    l10n.onboarding_connect_server,
-                    textAlign: TextAlign.center,
-                    style: theme.textTheme.headlineLarge?.copyWith(
-                      fontWeight: FontWeight.w800,
-                      height: 1.1,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    l10n.onboarding_connect_desc,
-                    textAlign: TextAlign.center,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
-                      height: 1.5,
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  _buildServerCard(
-                    type: ServerType.onDevice,
-                    title: l10n.server_type_on_device,
-                    subtitle: l10n.server_type_on_device_sub,
-                    iconWidget: Icon(
-                      Icons.phone_android_rounded,
-                      color: _selectedType == ServerType.onDevice
-                          ? theme.colorScheme.primary
-                          : theme.colorScheme.onSurface,
-                    ),
-                    theme: theme,
-                  ),
-                  const SizedBox(height: 16),
-                  _buildServerCard(
-                    type: ServerType.lmStudio,
-                    title: l10n.server_type_lm_studio,
-                    subtitle: l10n.server_type_lm_studio_sub,
-                    iconWidget: Icon(
-                      Icons.terminal_rounded,
-                      color: _selectedType == ServerType.lmStudio
-                          ? theme.colorScheme.primary
-                          : theme.colorScheme.onSurface,
-                    ),
-                    theme: theme,
-                  ),
-                  const SizedBox(height: 16),
-                  _buildServerCard(
-                    type: ServerType.ollama,
-                    title: l10n.server_type_ollama,
-                    subtitle: l10n.server_type_ollama_sub,
-                    iconWidget: Icon(
-                      Icons.smart_toy_rounded,
-                      color: _selectedType == ServerType.ollama
-                          ? theme.colorScheme.primary
-                          : theme.colorScheme.onSurface,
-                    ),
-                    theme: theme,
-                  ),
-                  const SizedBox(height: 16),
-                  _buildServerCard(
-                    type: ServerType.openRouter,
-                    title: l10n.server_type_openrouter,
-                    subtitle: l10n.server_type_openrouter_sub,
-                    iconWidget: HugeIcon(
-                      icon: HugeIcons.strokeRoundedCloudServer,
-                      color: _selectedType == ServerType.openRouter
-                          ? theme.colorScheme.primary
-                          : theme.colorScheme.onSurface,
-                    ),
-                    theme: theme,
-                  ),
-                  const SizedBox(height: 32),
-                ],
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0),
-            child: Column(
-              children: [
-                // Status Indicator
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+      body: Cue.onMount(
+        motion: .smooth(),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Container(
-                      width: 8,
-                      height: 8,
-                      decoration: BoxDecoration(
-                        color: _selectedType != null
-                            ? theme.colorScheme.primary
-                            : theme.colorScheme.onSurface.withValues(
-                                alpha: 0.4,
-                              ),
-                        shape: BoxShape.circle,
+                    Actor(
+                      acts: [
+                        .fadeIn(),
+                        .slideY(from: 0.08),
+                      ],
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          const SizedBox(height: 24),
+                          Text(
+                            l10n.onboarding_connect_server,
+                            textAlign: TextAlign.center,
+                            style: theme.textTheme.headlineLarge?.copyWith(
+                              fontWeight: FontWeight.w800,
+                              height: 1.1,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            l10n.onboarding_connect_desc,
+                            textAlign: TextAlign.center,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                              height: 1.5,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    Text(
-                      _selectedType != null
-                          ? l10n.ready_continue
-                          : l10n.waiting_selection,
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: theme.colorScheme.onSurface.withValues(
-                          alpha: 0.5,
-                        ),
-                        letterSpacing: 2,
-                        fontWeight: FontWeight.w600,
+                    Actor(
+                      delay: 60.ms,
+                      acts: [
+                        .fadeIn(),
+                        .slideY(from: 0.08),
+                      ],
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          const SizedBox(height: 24),
+                          _buildServerCard(
+                            type: ServerType.onDevice,
+                            title: l10n.server_type_on_device,
+                            subtitle: l10n.server_type_on_device_sub,
+                            iconWidget: Icon(
+                              Icons.phone_android_rounded,
+                              color: _selectedType == ServerType.onDevice
+                                  ? theme.colorScheme.primary
+                                  : theme.colorScheme.onSurface,
+                            ),
+                            theme: theme,
+                          ),
+                          const SizedBox(height: 16),
+                          _buildServerCard(
+                            type: ServerType.lmStudio,
+                            title: l10n.server_type_lm_studio,
+                            subtitle: l10n.server_type_lm_studio_sub,
+                            iconWidget: Icon(
+                              Icons.terminal_rounded,
+                              color: _selectedType == ServerType.lmStudio
+                                  ? theme.colorScheme.primary
+                                  : theme.colorScheme.onSurface,
+                            ),
+                            theme: theme,
+                          ),
+                          const SizedBox(height: 16),
+                          _buildServerCard(
+                            type: ServerType.ollama,
+                            title: l10n.server_type_ollama,
+                            subtitle: l10n.server_type_ollama_sub,
+                            iconWidget: Icon(
+                              Icons.smart_toy_rounded,
+                              color: _selectedType == ServerType.ollama
+                                  ? theme.colorScheme.primary
+                                  : theme.colorScheme.onSurface,
+                            ),
+                            theme: theme,
+                          ),
+                          const SizedBox(height: 16),
+                          _buildServerCard(
+                            type: ServerType.openRouter,
+                            title: l10n.server_type_openrouter,
+                            subtitle: l10n.server_type_openrouter_sub,
+                            iconWidget: HugeIcon(
+                              icon: HugeIcons.strokeRoundedCloudServer,
+                              color: _selectedType == ServerType.openRouter
+                                  ? theme.colorScheme.primary
+                                  : theme.colorScheme.onSurface,
+                            ),
+                            theme: theme,
+                          ),
+                        ],
                       ),
                     ),
+                    const SizedBox(height: 32),
                   ],
                 ),
-                const SizedBox(height: 16),
-                ShadButton(
-                  width: double.infinity,
-                  enabled: _selectedType != null,
-                  onPressed: () {
-                    if (_selectedType != null) {
-                      if (_selectedType == ServerType.onDevice) {
-                        context.push(AppRoutes.onboardingModelDownload);
-                      } else {
-                        context.push(
-                          AppRoutes.onboardingSetup,
-                          extra: _selectedType,
-                        );
-                      }
-                    }
-                  },
-                  child: Text(
-                    l10n.continue_action,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-                SizedBox(
-                  height: MediaQuery.of(context).padding.bottom,
-                ), // Reduced bottom padding slightly for small screens
-              ],
+              ),
             ),
-          ),
-        ],
+            Actor(
+              delay: 120.ms,
+              acts: [
+                .fadeIn(),
+                .slideY(from: 0.08),
+              ],
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                child: Column(
+                  children: [
+                    // Status Indicator
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          width: 8,
+                          height: 8,
+                          decoration: BoxDecoration(
+                            color: _selectedType != null
+                                ? theme.colorScheme.primary
+                                : theme.colorScheme.onSurface.withValues(
+                                    alpha: 0.4,
+                                  ),
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          _selectedType != null
+                              ? l10n.ready_continue
+                              : l10n.waiting_selection,
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: theme.colorScheme.onSurface.withValues(
+                              alpha: 0.5,
+                            ),
+                            letterSpacing: 2,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    ShadButton(
+                      width: double.infinity,
+                      enabled: _selectedType != null,
+                      onPressed: () {
+                        if (_selectedType != null) {
+                          if (_selectedType == ServerType.onDevice) {
+                            context.push(AppRoutes.onboardingModelDownload);
+                          } else {
+                            context.push(
+                              AppRoutes.onboardingSetup,
+                              extra: _selectedType,
+                            );
+                          }
+                        }
+                      },
+                      child: Text(
+                        l10n.continue_action,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      height: MediaQuery.of(context).padding.bottom,
+                    ), // Reduced bottom padding slightly for small screens
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

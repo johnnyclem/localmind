@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:localmind/l10n/app_localizations.dart';
@@ -837,7 +839,7 @@ class _OnDeviceModelTile extends ConsumerWidget {
                         ),
                     ],
                   ),
-                  if (deviceMemory != null && deviceMemory!.isOversized(model.minRamMb))
+                  if (!Platform.isIOS && deviceMemory != null && deviceMemory!.isOversized(model.minRamMb))
                     Padding(
                       padding: const EdgeInsets.only(top: 2),
                       child: Row(
@@ -980,7 +982,7 @@ class _OnDeviceModelTile extends ConsumerWidget {
   }
 
   void _loadModel(BuildContext context, WidgetRef ref) async {
-    if (deviceMemory != null) {
+    if (!Platform.isIOS && deviceMemory != null) {
       if (!deviceMemory!.hasEnoughRam(model.minRamMb)) {
         final proceed = await _showRamWarning(context);
         if (!proceed) return;

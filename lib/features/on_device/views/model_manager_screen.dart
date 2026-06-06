@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:localmind/l10n/app_localizations.dart';
@@ -460,7 +462,7 @@ class _ModelCard extends ConsumerWidget {
                   ),
               ],
             ),
-            if (deviceMemory != null && deviceMemory!.isOversized(model.minRamMb))
+            if (!Platform.isIOS && deviceMemory != null && deviceMemory!.isOversized(model.minRamMb))
               Padding(
                 padding: const EdgeInsets.only(top: 6),
                 child: Container(
@@ -697,7 +699,7 @@ class _ModelCard extends ConsumerWidget {
 
   Future<void> _startDownload(BuildContext context, WidgetRef ref) async {
     final l10n = AppLocalizations.of(context)!;
-    if (deviceMemory != null) {
+    if (!Platform.isIOS && deviceMemory != null) {
       if (deviceMemory!.isOversized(model.minRamMb)) {
         final proceed = await _showRamWarning(
           context,
@@ -717,7 +719,7 @@ class _ModelCard extends ConsumerWidget {
 
   Future<void> _loadModel(BuildContext context, WidgetRef ref) async {
     final l10n = AppLocalizations.of(context)!;
-    if (deviceMemory != null) {
+    if (!Platform.isIOS && deviceMemory != null) {
       if (!deviceMemory!.hasEnoughRam(model.minRamMb)) {
         final proceed = await _showRamWarning(
           context,
