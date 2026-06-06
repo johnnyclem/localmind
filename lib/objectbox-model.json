@@ -111,7 +111,7 @@
     },
     {
       "id": "2:196881068437544233",
-      "lastPropertyId": "17:6197342254666211356",
+      "lastPropertyId": "19:5573835801528383007",
       "name": "MessageEntity",
       "properties": [
         {
@@ -206,6 +206,16 @@
           "id": "17:6197342254666211356",
           "name": "isProcessing",
           "type": 1
+        },
+        {
+          "id": "18:3862782083473953676",
+          "name": "toolSessionId",
+          "type": 9
+        },
+        {
+          "id": "19:5573835801528383007",
+          "name": "toolEventsJson",
+          "type": 9
         }
       ],
       "relations": []

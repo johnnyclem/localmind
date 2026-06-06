@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:gpt_markdown/gpt_markdown.dart';
@@ -691,75 +692,306 @@ class _ToolBubble extends StatelessWidget {
   }
 }
 
+class _AnimatedRunningIcon extends StatefulWidget {
+  const _AnimatedRunningIcon({required this.color});
+  final Color color;
+
+  @override
+  State<_AnimatedRunningIcon> createState() => _AnimatedRunningIconState();
+}
+
+class _AnimatedRunningIconState extends State<_AnimatedRunningIcon>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 2),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return RotationTransition(
+      turns: _controller,
+      child: Icon(
+        Icons.cached_rounded,
+        size: 14,
+        color: widget.color,
+      ),
+    );
+  }
+}
+
+class _GroupedToolCall {
+  final String baseId;
+  final String toolName;
+  final ToolProviderType providerType;
+  final String? providerRef;
+  final Map<String, dynamic>? arguments;
+  final ToolEventStatus status;
+  final String? result;
+  final String? error;
+  final int? durationMs;
+  final DateTime timestamp;
+
+  const _GroupedToolCall({
+    required this.baseId,
+    required this.toolName,
+    required this.providerType,
+    this.providerRef,
+    this.arguments,
+    required this.status,
+    this.result,
+    this.error,
+    this.durationMs,
+    required this.timestamp,
+  });
+}
+
 class _ToolTimeline extends StatelessWidget {
   const _ToolTimeline({required this.events});
   final List<ToolEvent> events;
+
+  List<_GroupedToolCall> _groupEvents(List<ToolEvent> events) {
+    final Map<String, _GroupedToolCall> groups = {};
+    final List<String> orderedBaseIds = [];
+
+    for (final event in events) {
+      final dotIndex = event.eventId.lastIndexOf('.');
+      final baseId = dotIndex != -1 ? event.eventId.substring(0, dotIndex) : event.eventId;
+
+      if (!orderedBaseIds.contains(baseId)) {
+        orderedBaseIds.add(baseId);
+      }
+
+      final existing = groups[baseId];
+      if (existing == null) {
+        groups[baseId] = _GroupedToolCall(
+          baseId: baseId,
+          toolName: event.toolName,
+          providerType: event.providerType,
+          providerRef: event.providerRef,
+          arguments: event.arguments,
+          status: event.status,
+          result: event.result,
+          error: event.error,
+          durationMs: event.durationMs,
+          timestamp: event.timestamp,
+        );
+      } else {
+        groups[baseId] = _GroupedToolCall(
+          baseId: baseId,
+          toolName: event.toolName,
+          providerType: event.providerType,
+          providerRef: event.providerRef,
+          arguments: event.arguments ?? existing.arguments,
+          status: event.status,
+          result: event.result ?? existing.result,
+          error: event.error ?? existing.error,
+          durationMs: event.durationMs ?? existing.durationMs,
+          timestamp: event.timestamp,
+        );
+      }
+    }
+
+    return orderedBaseIds.map((id) => groups[id]!).toList();
+  }
+
+  String _formatArgs(Map<String, dynamic> args) {
+    if (args.isEmpty) return '';
+    try {
+      final encoder = JsonEncoder.withIndent('  ');
+      return encoder.convert(args);
+    } catch (_) {
+      return args.entries.map((e) => '  ${e.key}: ${e.value}').join('\n');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final groupedCalls = _groupEvents(events);
+
+    if (groupedCalls.isEmpty) {
+      return const SizedBox.shrink();
+    }
 
     return Container(
+      margin: const EdgeInsets.only(top: 8, bottom: 4),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
-        borderRadius: BorderRadius.circular(8),
+        color: isDark
+            ? const Color(0xFF1E1E2E).withValues(alpha: 0.6)
+            : const Color(0xFFF5F7FF).withValues(alpha: 0.8),
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+          color: isDark
+              ? const Color(0xFF313244).withValues(alpha: 0.8)
+              : const Color(0xFFE0E5F5),
         ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDark ? 0.1 : 0.02),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(10, 8, 10, 4),
+          // Header Bar
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            decoration: BoxDecoration(
+              border: Border(
+                bottom: BorderSide(
+                  color: isDark
+                      ? const Color(0xFF313244).withValues(alpha: 0.5)
+                      : const Color(0xFFE0E5F5).withValues(alpha: 0.5),
+                ),
+              ),
+            ),
             child: Row(
               children: [
                 Icon(
-                  Icons.troubleshoot,
-                  size: 14,
+                  Icons.terminal_rounded,
+                  size: 16,
                   color: isDark
-                      ? const Color(0xFF94A3B8)
-                      : const Color(0xFF64748B),
+                      ? const Color(0xFFBAC2DE)
+                      : const Color(0xFF585B70),
                 ),
-                const SizedBox(width: 4),
+                const SizedBox(width: 8),
                 Text(
-                  'Tools',
+                  'SYSTEM ACTIONS',
                   style: TextStyle(
                     fontSize: 11,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.5,
                     color: isDark
-                        ? const Color(0xFF94A3B8)
-                        : const Color(0xFF64748B),
+                      ? const Color(0xFFBAC2DE)
+                      : const Color(0xFF585B70),
+                  ),
+                ),
+                const Spacer(),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: isDark ? const Color(0xFF313244) : const Color(0xFFE0E5F5),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    '${groupedCalls.length} ${groupedCalls.length == 1 ? "action" : "actions"}',
+                    style: TextStyle(
+                      fontSize: 9,
+                      fontWeight: FontWeight.bold,
+                      color: isDark ? Colors.white70 : Colors.black54,
+                    ),
                   ),
                 ),
               ],
             ),
           ),
-          ...events.map((event) => _buildEventRow(context, event, isDark)),
+          const SizedBox(height: 4),
+          // Grouped tool calls
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            child: ListView.separated(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: groupedCalls.length,
+              separatorBuilder: (context, index) => Padding(
+                padding: const EdgeInsets.symmetric(vertical: 6),
+                child: Divider(
+                  height: 1,
+                  thickness: 1,
+                  color: isDark
+                      ? const Color(0xFF313244).withValues(alpha: 0.3)
+                      : const Color(0xFFE0E5F5).withValues(alpha: 0.5),
+                ),
+              ),
+              itemBuilder: (context, index) => _ToolRowWidget(
+                call: groupedCalls[index],
+                isDark: isDark,
+                formatArgs: _formatArgs,
+              ),
+            ),
+          ),
+          const SizedBox(height: 4),
         ],
       ),
     );
   }
+}
 
-  Widget _buildEventRow(BuildContext context, ToolEvent event, bool isDark) {
-    final iconData = switch (event.status) {
-      ToolEventStatus.requested => Icons.hourglass_empty,
-      ToolEventStatus.approved => Icons.check_circle_outline,
-      ToolEventStatus.rejected => Icons.cancel_outlined,
-      ToolEventStatus.running => Icons.play_circle_outline,
-      ToolEventStatus.completed => Icons.check_circle,
-      ToolEventStatus.failed => Icons.error_outline,
-    };
-    final iconColor = switch (event.status) {
+class _ToolRowWidget extends StatefulWidget {
+  const _ToolRowWidget({
+    required this.call,
+    required this.isDark,
+    required this.formatArgs,
+  });
+
+  final _GroupedToolCall call;
+  final bool isDark;
+  final String Function(Map<String, dynamic>) formatArgs;
+
+  @override
+  State<_ToolRowWidget> createState() => _ToolRowWidgetState();
+}
+
+class _ToolRowWidgetState extends State<_ToolRowWidget> {
+  late bool _isExpanded;
+
+  @override
+  void initState() {
+    super.initState();
+    _isExpanded = widget.call.status == ToolEventStatus.running ||
+        widget.call.status == ToolEventStatus.failed ||
+        widget.call.status == ToolEventStatus.requested ||
+        widget.call.status == ToolEventStatus.approved;
+  }
+
+  @override
+  void didUpdateWidget(_ToolRowWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.call.status != widget.call.status) {
+      if (widget.call.status == ToolEventStatus.running ||
+          widget.call.status == ToolEventStatus.failed ||
+          widget.call.status == ToolEventStatus.requested ||
+          widget.call.status == ToolEventStatus.approved) {
+        setState(() {
+          _isExpanded = true;
+        });
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final call = widget.call;
+    final isDark = widget.isDark;
+    final isMcpTool = call.providerType == ToolProviderType.mcp;
+
+    final iconColor = switch (call.status) {
       ToolEventStatus.completed => const Color(0xFF22C55E),
       ToolEventStatus.failed ||
       ToolEventStatus.rejected => const Color(0xFFEF4444),
-      ToolEventStatus.running ||
-      ToolEventStatus.requested => const Color(0xFFF59E0B),
-      ToolEventStatus.approved => const Color(0xFF3B82F6),
+      ToolEventStatus.running => const Color(0xFF3B82F6),
+      ToolEventStatus.requested ||
+      ToolEventStatus.approved => const Color(0xFFF59E0B),
     };
-    final label = switch (event.status) {
+
+    final statusLabel = switch (call.status) {
       ToolEventStatus.requested => 'Requested',
       ToolEventStatus.approved => 'Approved',
       ToolEventStatus.rejected => 'Rejected',
@@ -767,148 +999,226 @@ class _ToolTimeline extends StatelessWidget {
       ToolEventStatus.completed => 'Done',
       ToolEventStatus.failed => 'Failed',
     };
-    final l10n = AppLocalizations.of(context)!;
-    final isMcpTool = event.providerType == ToolProviderType.mcp;
+
+    final showCodeBlock = (call.arguments != null && call.arguments!.isNotEmpty) ||
+        (call.result != null && call.result!.isNotEmpty) ||
+        (call.error != null && call.error!.isNotEmpty);
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-      child: Row(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.only(top: 2),
-            child: Icon(iconData, size: 14, color: iconColor),
-          ),
-          const SizedBox(width: 6),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Flexible(
-                      child: Text(
-                        event.toolName,
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: isDark ? Colors.white : Colors.black87,
-                          fontFamily: 'monospace',
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
+          InkWell(
+            onTap: showCodeBlock
+                ? () => setState(() => _isExpanded = !_isExpanded)
+                : null,
+            borderRadius: BorderRadius.circular(6),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  if (call.status == ToolEventStatus.running)
+                    _AnimatedRunningIcon(color: iconColor)
+                  else
+                    Icon(
+                      switch (call.status) {
+                        ToolEventStatus.requested => Icons.hourglass_empty_rounded,
+                        ToolEventStatus.approved => Icons.check_circle_outline_rounded,
+                        ToolEventStatus.rejected => Icons.block_flipped,
+                        ToolEventStatus.running => Icons.cached_rounded,
+                        ToolEventStatus.completed => Icons.check_circle_rounded,
+                        ToolEventStatus.failed => Icons.error_rounded,
+                      },
+                      size: 14,
+                      color: iconColor,
                     ),
-                    const SizedBox(width: 4),
-                    if (isMcpTool) ...[
-                      _InlineToolBadge(label: l10n.beta_label, isDark: isDark),
-                      const SizedBox(width: 4),
-                      _InlineToolBadge(
-                        label: l10n.experimental_label,
-                        isDark: isDark,
-                      ),
-                      const SizedBox(width: 4),
-                    ],
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            call.toolName,
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: isDark ? Colors.white : Colors.black87,
+                              fontFamily: 'monospace',
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        if (isMcpTool) ...[
+                          _InlineToolBadge(
+                            label: 'MCP',
+                            backgroundColor: Colors.purple.withValues(alpha: isDark ? 0.2 : 0.1),
+                            textColor: isDark ? const Color(0xFFC084FC) : const Color(0xFF7E22CE),
+                          ),
+                        ] else if (call.providerType == ToolProviderType.lmStudioServer) ...[
+                          _InlineToolBadge(
+                            label: 'LM Studio',
+                            backgroundColor: Colors.orange.withValues(alpha: isDark ? 0.2 : 0.1),
+                            textColor: isDark ? const Color(0xFFF97316) : const Color(0xFFC2410C),
+                          ),
+                        ] else ...[
+                          _InlineToolBadge(
+                            label: 'LOCAL',
+                            backgroundColor: Colors.blue.withValues(alpha: isDark ? 0.2 : 0.1),
+                            textColor: isDark ? const Color(0xFF60A5FA) : const Color(0xFF1D4ED8),
+                          ),
+                        ],
+                        const SizedBox(width: 6),
+                        _InlineToolBadge(
+                          label: statusLabel,
+                          backgroundColor: iconColor.withValues(alpha: isDark ? 0.15 : 0.1),
+                          textColor: iconColor,
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (call.durationMs != null) ...[
+                    const SizedBox(width: 8),
                     Text(
-                      label,
+                      '${call.durationMs}ms',
                       style: TextStyle(
                         fontSize: 10,
-                        color: iconColor,
-                        fontWeight: FontWeight.w500,
+                        color: isDark ? const Color(0xFF6B7280) : const Color(0xFF9CA3AF),
                       ),
                     ),
                   ],
-                ),
-                if (event.arguments != null && event.arguments!.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 2),
-                    child: Text(
-                      _formatArgs(event.arguments!),
-                      style: TextStyle(
-                        fontSize: 10,
-                        color: isDark
-                            ? const Color(0xFF94A3B8)
-                            : const Color(0xFF64748B),
-                        fontFamily: 'monospace',
-                      ),
-                      maxLines: 3,
-                      overflow: TextOverflow.ellipsis,
+                  if (showCodeBlock) ...[
+                    const SizedBox(width: 6),
+                    Icon(
+                      _isExpanded
+                          ? Icons.keyboard_arrow_up_rounded
+                          : Icons.keyboard_arrow_down_rounded,
+                      size: 16,
+                      color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280),
                     ),
-                  ),
-                if (event.result != null && event.result!.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 2),
-                    child: Text(
-                      '→ ${event.result}',
-                      style: TextStyle(
-                        fontSize: 10,
-                        color: isDark
-                            ? const Color(0xFF86EFAC)
-                            : const Color(0xFF166534),
-                        fontFamily: 'monospace',
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                if (event.error != null && event.error!.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 2),
-                    child: Text(
-                      '✕ ${event.error}',
-                      style: TextStyle(
-                        fontSize: 10,
-                        color: const Color(0xFFEF4444),
-                        fontFamily: 'monospace',
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                if (event.durationMs != null)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 1),
-                    child: Text(
-                      '${event.durationMs}ms',
-                      style: TextStyle(
-                        fontSize: 9,
-                        color: isDark
-                            ? const Color(0xFF64748B)
-                            : const Color(0xFF94A3B8),
-                      ),
-                    ),
-                  ),
-              ],
+                  ],
+                ],
+              ),
             ),
           ),
+          if (showCodeBlock && _isExpanded)
+            Padding(
+              padding: const EdgeInsets.only(top: 6, left: 22),
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF1F5F9),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (call.arguments != null && call.arguments!.isNotEmpty) ...[
+                      Text(
+                        'Arguments:',
+                        style: TextStyle(
+                          fontSize: 9,
+                          fontWeight: FontWeight.bold,
+                          color: isDark ? const Color(0xFF38BDF8) : const Color(0xFF0284C7),
+                          fontFamily: 'monospace',
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        widget.formatArgs(call.arguments!),
+                        style: TextStyle(
+                          fontSize: 10.5,
+                          color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF475569),
+                          fontFamily: 'monospace',
+                          height: 1.3,
+                        ),
+                      ),
+                    ],
+                    if (call.result != null && call.result!.isNotEmpty) ...[
+                      if (call.arguments != null && call.arguments!.isNotEmpty)
+                        const SizedBox(height: 8),
+                      Text(
+                        'Output:',
+                        style: TextStyle(
+                          fontSize: 9,
+                          fontWeight: FontWeight.bold,
+                          color: isDark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A),
+                          fontFamily: 'monospace',
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        call.result!,
+                        style: TextStyle(
+                          fontSize: 10.5,
+                          color: isDark ? const Color(0xFFF8FAFC) : const Color(0xFF0F172A),
+                          fontFamily: 'monospace',
+                          height: 1.3,
+                        ),
+                      ),
+                    ],
+                    if (call.error != null && call.error!.isNotEmpty) ...[
+                      if (call.arguments != null && call.arguments!.isNotEmpty)
+                        const SizedBox(height: 8),
+                      Text(
+                        'Error:',
+                        style: TextStyle(
+                          fontSize: 9,
+                          fontWeight: FontWeight.bold,
+                          color: isDark ? const Color(0xFFF87171) : const Color(0xFFDC2626),
+                          fontFamily: 'monospace',
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        call.error!,
+                        style: TextStyle(
+                          fontSize: 10.5,
+                          color: isDark ? const Color(0xFFFCA5A5) : const Color(0xFF991B1B),
+                          fontFamily: 'monospace',
+                          height: 1.3,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ),
         ],
       ),
     );
   }
-
-  String _formatArgs(Map<String, dynamic> args) {
-    return args.entries.map((e) => '${e.key}: ${e.value}').join(', ');
-  }
 }
 
 class _InlineToolBadge extends StatelessWidget {
-  const _InlineToolBadge({required this.label, required this.isDark});
+  const _InlineToolBadge({
+    required this.label,
+    required this.backgroundColor,
+    required this.textColor,
+  });
 
   final String label;
-  final bool isDark;
+  final Color backgroundColor;
+  final Color textColor;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
       decoration: BoxDecoration(
-        color: Colors.amber.withValues(alpha: isDark ? 0.18 : 0.14),
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: Colors.amber.withValues(alpha: 0.45)),
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(4),
       ),
       child: Text(
         label.toUpperCase(),
-        style: const TextStyle(
-          color: Color(0xFFB45309),
+        style: TextStyle(
+          color: textColor,
           fontSize: 8,
           fontWeight: FontWeight.w700,
           letterSpacing: 0.35,

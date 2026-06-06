@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/providers/app_providers.dart';
 import '../data/models/mcp_integration.dart';
 import '../../conversations/providers/conversation_providers.dart';
+import 'tooling_providers.dart';
 
 export '../data/models/mcp_integration.dart';
 
@@ -15,6 +16,17 @@ class ChatMcpConfigNotifier extends Notifier<ChatMcpConfig> {
 
   void setConfig(ChatMcpConfig config) {
     state = config;
+    final manager = ref.read(mcpServerManagerProvider);
+    manager.clear();
+    for (final integration in config.integrations) {
+      if (integration.serverLabel != null && integration.serverUrl != null) {
+        manager.addServer(
+          integration.serverLabel!,
+          integration.serverUrl!,
+          headers: integration.headers,
+        ).catchError((_) {});
+      }
+    }
   }
 
   void setEnabled(bool enabled) {
@@ -39,6 +51,13 @@ class ChatMcpConfigNotifier extends Notifier<ChatMcpConfig> {
             }
           : state.activeMcpServers,
     );
+    if (integration.serverLabel != null && integration.serverUrl != null) {
+      ref.read(mcpServerManagerProvider).addServer(
+        integration.serverLabel!,
+        integration.serverUrl!,
+        headers: integration.headers,
+      ).catchError((_) {});
+    }
   }
 
   void removeIntegration(int index) {
@@ -53,11 +72,11 @@ class ChatMcpConfigNotifier extends Notifier<ChatMcpConfig> {
       integrations: newIntegrations,
       activeMcpServers: newServers,
     );
+    if (integration.serverLabel != null) {
+      ref.read(mcpServerManagerProvider).removeServer(integration.serverLabel!);
+    }
   }
 
-  void toggleAutoExecute() {
-    state = state.copyWith(autoExecuteTools: !state.autoExecuteTools);
-  }
 
   void toggleEnabled() {
     state = state.copyWith(enabled: !state.enabled);
@@ -66,6 +85,7 @@ class ChatMcpConfigNotifier extends Notifier<ChatMcpConfig> {
   void clearAll() {
     final settings = ref.read(settingsProvider);
     state = ChatMcpConfig(enabled: settings.newChatMcpEnabled);
+    ref.read(mcpServerManagerProvider).clear();
   }
 }
 

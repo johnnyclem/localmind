@@ -26,6 +26,7 @@ import '../data/chat_service.dart';
 import '../data/models/chat_parameters.dart';
 import '../data/models/message.dart' hide ToolCallData;
 import '../data/smart_reply_service.dart';
+import '../data/tools/tool_definition.dart';
 import '../data/tools/tool_execution_loop.dart';
 import '../data/tools/adapters/tool_transport_adapter.dart' show ParsedToolCall;
 import '../../../core/providers/chat_background_service_provider.dart';
@@ -734,6 +735,11 @@ class ChatNotifier extends Notifier<ChatState> {
             ? mcpConfig.integrations
             : null;
 
+        final registry = ref.read(toolRegistryProvider);
+        final tools = mcpConfig.enabled
+            ? await registry.listTools()
+            : const <ToolDefinition>[];
+
         final collectedToolCalls = <ToolCallData>[];
 
         bool stateNeedsUpdate = false;
@@ -761,6 +767,7 @@ class ChatNotifier extends Notifier<ChatState> {
               messages: messagesForApi,
               params: chatParams,
               integrations: integrations,
+              tools: tools,
             )
             .listen(
               (response) async {
@@ -923,25 +930,23 @@ class ChatNotifier extends Notifier<ChatState> {
                         final loop = ToolExecutionLoop(
                           adapter: adapter,
                           registry: registry,
-                          onRequestApproval: mcpConfig.autoExecuteTools
-                              ? null
-                              : (call) async {
-                                  final completer = Completer<bool>();
-                                  state = state.copyWith(
-                                    pendingToolApproval: PendingToolApproval(
-                                      toolCall: call,
-                                      completer: completer,
-                                    ),
-                                  );
+                          onRequestApproval: (call) async {
+                            final completer = Completer<bool>();
+                            state = state.copyWith(
+                              pendingToolApproval: PendingToolApproval(
+                                toolCall: call,
+                                completer: completer,
+                              ),
+                            );
 
-                                  final result = await completer.future;
+                            final result = await completer.future;
 
-                                  state = state.copyWith(
-                                    clearPendingApproval: true,
-                                  );
+                            state = state.copyWith(
+                              clearPendingApproval: true,
+                            );
 
-                                  return result;
-                                },
+                            return result;
+                          },
                         );
 
                         final loopResult = await loop.run(

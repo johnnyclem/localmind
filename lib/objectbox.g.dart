@@ -153,7 +153,7 @@ final _entities = <obx_int.ModelEntity>[
   obx_int.ModelEntity(
     id: const obx_int.IdUid(2, 196881068437544233),
     name: 'MessageEntity',
-    lastPropertyId: const obx_int.IdUid(17, 6197342254666211356),
+    lastPropertyId: const obx_int.IdUid(19, 5573835801528383007),
     flags: 0,
     properties: <obx_int.ModelProperty>[
       obx_int.ModelProperty(
@@ -261,6 +261,18 @@ final _entities = <obx_int.ModelEntity>[
         id: const obx_int.IdUid(17, 6197342254666211356),
         name: 'isProcessing',
         type: 1,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(18, 3862782083473953676),
+        name: 'toolSessionId',
+        type: 9,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(19, 5573835801528383007),
+        name: 'toolEventsJson',
+        type: 9,
         flags: 0,
       ),
     ],
@@ -690,7 +702,13 @@ obx_int.ModelDefinition getObjectBoxModel() {
         final toolCallIdOffset = object.toolCallId == null
             ? null
             : fbb.writeString(object.toolCallId!);
-        fbb.startTable(18);
+        final toolSessionIdOffset = object.toolSessionId == null
+            ? null
+            : fbb.writeString(object.toolSessionId!);
+        final toolEventsJsonOffset = object.toolEventsJson == null
+            ? null
+            : fbb.writeString(object.toolEventsJson!);
+        fbb.startTable(20);
         fbb.addInt64(0, object.internalId);
         fbb.addOffset(1, idOffset);
         fbb.addInt64(2, object.conversation.targetId);
@@ -708,6 +726,8 @@ obx_int.ModelDefinition getObjectBoxModel() {
         fbb.addOffset(14, toolCallsJsonOffset);
         fbb.addOffset(15, toolCallIdOffset);
         fbb.addBool(16, object.isProcessing);
+        fbb.addOffset(17, toolSessionIdOffset);
+        fbb.addOffset(18, toolEventsJsonOffset);
         fbb.finish(fbb.endTable());
         return object.internalId;
       },
@@ -778,6 +798,12 @@ obx_int.ModelDefinition getObjectBoxModel() {
           36,
           false,
         );
+        final toolSessionIdParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGetNullable(buffer, rootOffset, 38);
+        final toolEventsJsonParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGetNullable(buffer, rootOffset, 40);
         final object = MessageEntity(
           internalId: internalIdParam,
           id: idParam,
@@ -795,6 +821,8 @@ obx_int.ModelDefinition getObjectBoxModel() {
           toolCallsJson: toolCallsJsonParam,
           toolCallId: toolCallIdParam,
           isProcessing: isProcessingParam,
+          toolSessionId: toolSessionIdParam,
+          toolEventsJson: toolEventsJsonParam,
         );
         object.conversation.targetId = const fb.Int64Reader().vTableGet(
           buffer,
@@ -1202,6 +1230,16 @@ class MessageEntity_ {
   /// See [MessageEntity.isProcessing].
   static final isProcessing = obx.QueryBooleanProperty<MessageEntity>(
     _entities[1].properties[16],
+  );
+
+  /// See [MessageEntity.toolSessionId].
+  static final toolSessionId = obx.QueryStringProperty<MessageEntity>(
+    _entities[1].properties[17],
+  );
+
+  /// See [MessageEntity.toolEventsJson].
+  static final toolEventsJson = obx.QueryStringProperty<MessageEntity>(
+    _entities[1].properties[18],
   );
 }
 

@@ -162,7 +162,6 @@ class SettingsViews extends ConsumerWidget {
                 label: l10n.enable_mcp,
                 value: settings.mcpEnabled,
                 badges: [
-                  _FeatureBadge(label: l10n.beta_label),
                   _FeatureBadge(label: l10n.experimental_label),
                 ],
                 onChanged: (value) =>
@@ -172,7 +171,6 @@ class SettingsViews extends ConsumerWidget {
                 _ToggleSetting(
                   label: l10n.new_chat_mcp_default,
                   value: settings.newChatMcpEnabled,
-                  badges: [_FeatureBadge(label: l10n.beta_label)],
                   onChanged: (value) => ref
                       .read(settingsProvider.notifier)
                       .setNewChatMcpEnabled(value),

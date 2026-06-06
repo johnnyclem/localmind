@@ -71,26 +71,22 @@ class McpIntegration {
 
 class ChatMcpConfig {
   final List<McpIntegration> integrations;
-  final bool autoExecuteTools;
   final Map<String, String> activeMcpServers;
   final bool enabled;
 
   const ChatMcpConfig({
     this.integrations = const [],
-    this.autoExecuteTools = true,
     this.activeMcpServers = const {},
     this.enabled = true,
   });
 
   ChatMcpConfig copyWith({
     List<McpIntegration>? integrations,
-    bool? autoExecuteTools,
     Map<String, String>? activeMcpServers,
     bool? enabled,
   }) {
     return ChatMcpConfig(
       integrations: integrations ?? this.integrations,
-      autoExecuteTools: autoExecuteTools ?? this.autoExecuteTools,
       activeMcpServers: activeMcpServers ?? this.activeMcpServers,
       enabled: enabled ?? this.enabled,
     );
@@ -99,7 +95,6 @@ class ChatMcpConfig {
   Map<String, dynamic> toJson() {
     return {
       'integrations': integrations.map((i) => i.toJson()).toList(),
-      'autoExecuteTools': autoExecuteTools,
       'activeMcpServers': activeMcpServers,
     };
   }
@@ -111,7 +106,6 @@ class ChatMcpConfig {
               ?.map((i) => McpIntegration.fromJson(i as Map<String, dynamic>))
               .toList() ??
           [],
-      autoExecuteTools: json['autoExecuteTools'] as bool? ?? true,
       activeMcpServers:
           (json['activeMcpServers'] as Map?)?.cast<String, String>() ?? {},
       enabled: json['enabled'] as bool? ?? true,

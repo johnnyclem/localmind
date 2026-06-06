@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 import '../logger/app_logger.dart';
@@ -10,7 +11,9 @@ class ChatBackgroundService {
     if (_isActive) return;
     try {
       Log.info('Starting background chat service');
-      await _channel.invokeMethod('startForeground');
+      if (Platform.isAndroid) {
+        await _channel.invokeMethod('startForeground');
+      }
       await WakelockPlus.enable();
       _isActive = true;
     } catch (e) {
@@ -22,7 +25,9 @@ class ChatBackgroundService {
     if (!_isActive) return;
     try {
       Log.info('Stopping background chat service');
-      await _channel.invokeMethod('stopForeground');
+      if (Platform.isAndroid) {
+        await _channel.invokeMethod('stopForeground');
+      }
       await WakelockPlus.disable();
       _isActive = false;
     } catch (e) {

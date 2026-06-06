@@ -151,8 +151,6 @@ class _ChatSettingsSheetState extends ConsumerState<ChatSettingsSheet> {
                       ),
                       const SizedBox(width: 8),
                       Text(l10n.mcp_tab),
-                      const SizedBox(width: 6),
-                      _McpBadge(label: l10n.beta_label, isDark: isDark),
                     ],
                   ),
                 ),
@@ -294,28 +292,12 @@ class _ChatSettingsSheetState extends ConsumerState<ChatSettingsSheet> {
               crossAxisAlignment: WrapCrossAlignment.center,
               children: [
                 Text(l10n.mcp_enable_chat),
-                _McpBadge(label: l10n.beta_label, isDark: isDark),
                 _McpBadge(label: l10n.experimental_label, isDark: isDark),
               ],
             ),
           ),
           const SizedBox(height: 16),
           if (mcpConfig.enabled && isGloballyEnabled) ...[
-            ShadSwitch(
-              value: mcpConfig.autoExecuteTools,
-              onChanged: (v) =>
-                  ref.read(chatMcpConfigProvider.notifier).toggleAutoExecute(),
-              label: Wrap(
-                spacing: 6,
-                runSpacing: 4,
-                crossAxisAlignment: WrapCrossAlignment.center,
-                children: [
-                  Text(l10n.auto_execute_tools),
-                  _McpBadge(label: l10n.experimental_label, isDark: isDark),
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
             Text(l10n.add_ephemeral_mcp, style: theme.textTheme.list),
             const SizedBox(height: 12),
             Row(

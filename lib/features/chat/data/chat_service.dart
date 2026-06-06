@@ -7,6 +7,7 @@ import '../../servers/data/models/server.dart';
 import 'models/message.dart';
 import 'models/chat_parameters.dart';
 import 'models/mcp_integration.dart';
+import 'tools/tool_definition.dart';
 import '../../../core/models/enums.dart';
 import '../../../core/logger/app_logger.dart';
 import '../../on_device/data/on_device_gemma_service.dart';
@@ -23,6 +24,7 @@ abstract class ChatService {
     required List<Message> messages,
     required ChatParameters params,
     List<McpIntegration>? integrations,
+    List<ToolDefinition>? tools,
     String? previousResponseId,
   });
 
@@ -151,6 +153,7 @@ class LMStudioChatService implements ChatService {
     required List<Message> messages,
     required ChatParameters params,
     List<McpIntegration>? integrations,
+    List<ToolDefinition>? tools,
     String? previousResponseId,
   }) async* {
     _cancelToken = CancelToken();
@@ -457,10 +460,11 @@ class OpenAICompatibleChatService implements ChatService {
     required List<Message> messages,
     required ChatParameters params,
     List<McpIntegration>? integrations,
+    List<ToolDefinition>? tools,
     String? previousResponseId,
   }) async* {
     _cancelToken = CancelToken();
-    final toolAdapter = OllamaToolAdapter();
+    final toolAdapter = OpenAiToolAdapter();
 
     final apiMessages = messages
         .map((m) => {'role': _roleToString(m.role), 'content': m.content})
@@ -482,6 +486,13 @@ class OpenAICompatibleChatService implements ChatService {
       'max_tokens': params.maxTokens,
       'stream': true,
     };
+
+    if (tools != null && tools.isNotEmpty) {
+      final toolsPayload = toolAdapter.buildToolDefinitionPayload(tools);
+      if (toolsPayload.containsKey('tools')) {
+        body['tools'] = toolsPayload['tools'];
+      }
+    }
 
     Log.debug(
       'OpenAICompatible: Sending request to ${server.chatEndpoint} with model: $modelId',
@@ -661,10 +672,11 @@ class OllamaChatService implements ChatService {
     required List<Message> messages,
     required ChatParameters params,
     List<McpIntegration>? integrations,
+    List<ToolDefinition>? tools,
     String? previousResponseId,
   }) async* {
     _cancelToken = CancelToken();
-    final toolAdapter = OpenAiToolAdapter();
+    final toolAdapter = OllamaToolAdapter();
 
     final body = {
       'model': modelId,
@@ -678,6 +690,13 @@ class OllamaChatService implements ChatService {
         'num_predict': params.maxTokens,
       },
     };
+
+    if (tools != null && tools.isNotEmpty) {
+      final toolsPayload = toolAdapter.buildToolDefinitionPayload(tools);
+      if (toolsPayload.containsKey('tools')) {
+        body['tools'] = toolsPayload['tools'];
+      }
+    }
 
     try {
       final response = await _dio.post<ResponseBody>(
@@ -768,6 +787,7 @@ class OpenRouterChatService implements ChatService {
     required List<Message> messages,
     required ChatParameters params,
     List<McpIntegration>? integrations,
+    List<ToolDefinition>? tools,
     String? previousResponseId,
   }) async* {
     _cancelToken = CancelToken();
@@ -783,6 +803,13 @@ class OpenRouterChatService implements ChatService {
       'max_tokens': params.maxTokens,
       'stream': true,
     };
+
+    if (tools != null && tools.isNotEmpty) {
+      final toolsPayload = toolAdapter.buildToolDefinitionPayload(tools);
+      if (toolsPayload.containsKey('tools')) {
+        body['tools'] = toolsPayload['tools'];
+      }
+    }
 
     Log.debug(
       'OpenRouter: Sending request to ${server.chatEndpoint} with model: $modelId',

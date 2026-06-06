@@ -9,6 +9,7 @@ import '../../chat/data/chat_service.dart';
 import '../../chat/data/models/chat_parameters.dart';
 import '../../chat/data/models/mcp_integration.dart';
 import '../../chat/data/models/message.dart' hide ToolCallData;
+import '../../chat/data/tools/tool_definition.dart';
 import '../../servers/data/models/server.dart';
 import 'on_device_gemma_service.dart';
 
@@ -30,6 +31,7 @@ class OnDeviceChatService implements ChatService {
     required List<Message> messages,
     required ChatParameters params,
     List<McpIntegration>? integrations,
+    List<ToolDefinition>? tools,
     String? previousResponseId,
   }) {
     cancelStream();

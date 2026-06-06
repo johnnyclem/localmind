@@ -96,7 +96,6 @@ class SidebarWidget extends ConsumerWidget {
                     DrawerNavItem(
                       iconData: HugeIcons.strokeRoundedMcpServer,
                       label: 'MCP Tools',
-                      badgeText: 'Beta',
                       isSelected: isMcpTools,
                       onTap: () {
                         if (Scaffold.maybeOf(context)?.isDrawerOpen ?? false) {
