@@ -213,6 +213,18 @@
 
   "star_on_github": "نجمة على GitHub",
 
+  "add_more": "أضف المزيد",
+
+  "on_github": "على GitHub",
+
+  "could_not_open_github": "تعذر فتح GitHub.",
+
+  "openai_compatible_api": "واجهة متوافقة مع OpenAI",
+
+  "https_requires_ssl": "يتطلب HTTPS استخدام SSL",
+
+  "most_local_setups_use_http": "تستخدم معظم الإعدادات المحلية http://",
+
   "settings_title": "الإعدادات",
 
   "settings_appearance": "المظهر",

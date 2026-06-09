@@ -28,7 +28,7 @@ class ServerTypeSelector extends StatelessWidget {
       ),
       (
         ServerType.openAICompatible,
-        'OpenAI',
+        l10n.server_type_openai_display,
         HugeIcons.strokeRoundedApi,
         Colors.green,
       ),

@@ -16,6 +16,14 @@ final _modelCache = ModelCache();
 
 bool _onDeviceServerEnsured = false;
 
+void invalidateAvailableModelsCache(String serverId) {
+  _modelCache.invalidate(serverId);
+}
+
+void invalidateAllAvailableModelsCache() {
+  _modelCache.invalidateAll();
+}
+
 final ensureOnDeviceServerProvider = FutureProvider<void>((ref) async {
   if (_onDeviceServerEnsured) return;
 
@@ -157,6 +165,7 @@ class ServersNotifier extends AsyncNotifier<List<Server>> {
   Future<void> addServer(Server server) async {
     final db = ref.read(databaseProvider);
     db.serverBox.put(ServerEntity.fromDomain(server));
+    invalidateAvailableModelsCache(server.id);
     state = AsyncData(await _loadAll());
   }
 
@@ -173,6 +182,7 @@ class ServersNotifier extends AsyncNotifier<List<Server>> {
       entity.internalId = existing.internalId;
     }
     db.serverBox.put(entity);
+    invalidateAvailableModelsCache(server.id);
     state = AsyncData(await _loadAll());
   }
 
@@ -181,6 +191,7 @@ class ServersNotifier extends AsyncNotifier<List<Server>> {
     final query = db.serverBox.query(ServerEntity_.id.equals(serverId)).build();
     db.serverBox.removeMany(query.findIds());
     query.close();
+    invalidateAvailableModelsCache(serverId);
     state = AsyncData(await _loadAll());
   }
 
@@ -203,6 +214,7 @@ class ServersNotifier extends AsyncNotifier<List<Server>> {
         entity.internalId = existing.internalId;
       }
       db.serverBox.put(entity);
+      invalidateAvailableModelsCache(server.id);
     }
     state = AsyncData(await _loadAll());
   }
@@ -235,6 +247,7 @@ class ServersNotifier extends AsyncNotifier<List<Server>> {
       entity.internalId = existing.internalId;
     }
     db.serverBox.put(entity);
+    invalidateAvailableModelsCache(updatedServer.id);
 
     state = AsyncData(await _loadAll());
     return status;

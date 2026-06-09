@@ -355,6 +355,15 @@ class AppLocalizationsHi extends AppLocalizations {
   String get star_on_github => 'GitHub पर स्टार दें';
 
   @override
+  String get add_more => 'और जोड़ें';
+
+  @override
+  String get on_github => 'GitHub पर';
+
+  @override
+  String get could_not_open_github => 'GitHub नहीं खोल सका।';
+
+  @override
   String get settings_title => 'सेटिंग्स';
 
   @override
@@ -786,6 +795,16 @@ class AppLocalizationsHi extends AppLocalizations {
   @override
   String get onboarding_connect_desc =>
       'अपना निजी AI अनुभव शुरू करने के लिए\nLM Studio, Ollama, या OpenRouter से\nकनेक्ट करें।';
+
+  @override
+  String get openai_compatible_api => 'OpenAI-संगत API';
+
+  @override
+  String get https_requires_ssl => 'HTTPS के लिए SSL आवश्यक है';
+
+  @override
+  String get most_local_setups_use_http =>
+      'ज़्यादातर स्थानीय सेटअप में http:// इस्तेमाल होता है';
 
   @override
   String get onboarding_welcome => 'LocalMind में आपका स्वागत है';

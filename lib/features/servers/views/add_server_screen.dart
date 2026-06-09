@@ -10,6 +10,7 @@ import '../../../core/models/enums.dart';
 import '../../../core/providers/service_providers.dart';
 import '../../../core/utils/system_insets.dart';
 import '../providers/server_providers.dart';
+import 'components/https_scheme_hint.dart';
 import 'components/server_icon_picker.dart';
 import 'components/server_type_selector.dart';
 
@@ -100,6 +101,9 @@ class _AddServerScreenState extends ConsumerState<AddServerScreen> {
             ? AppLocalizations.of(context)!.connection_successful
             : AppLocalizations.of(context)!.connection_failed;
       });
+      if (isConnected) {
+        invalidateAvailableModelsCache(testServer.id);
+      }
     } catch (e) {
       setState(() {
         _testResult = AppLocalizations.of(
@@ -150,6 +154,7 @@ class _AddServerScreenState extends ConsumerState<AddServerScreen> {
       } else {
         await ref.read(serversProvider.notifier).addServer(server);
       }
+      invalidateAvailableModelsCache(server.id);
 
       if (mounted) {
         final l10n = AppLocalizations.of(context)!;
@@ -200,10 +205,8 @@ class _AddServerScreenState extends ConsumerState<AddServerScreen> {
     if (value == null || value.trim().isEmpty) {
       return l10n.host_required;
     }
-    // Clean any protocol prefixes (http:// or https://) for validation
-    final cleaned = value.trim().replaceFirst(RegExp(r'^https?://'), '');
-    final hostPattern = RegExp(r'^[a-zA-Z0-9]([a-zA-Z0-9\-\.]*[a-zA-Z0-9])?$');
-    if (!hostPattern.hasMatch(cleaned)) {
+    final parsed = parseServerAddressInput(value);
+    if (parsed == null) {
       return l10n.host_valid;
     }
     return null;
@@ -395,6 +398,7 @@ class _AddServerScreenState extends ConsumerState<AddServerScreen> {
                       keyboardType: TextInputType.text,
                       textInputAction: TextInputAction.next,
                     ),
+                    HttpsSchemeHint(controller: _hostController),
                     const SizedBox(height: 12),
                     TextFormField(
                       controller: _portController,
@@ -704,7 +708,7 @@ class _AddServerScreenState extends ConsumerState<AddServerScreen> {
     final l10n = AppLocalizations.of(context)!;
     return switch (_selectedType) {
       ServerType.lmStudio => l10n.server_type_lm_studio,
-      ServerType.openAICompatible => 'OpenAI',
+      ServerType.openAICompatible => l10n.server_type_openai_display,
       ServerType.ollama => l10n.server_type_ollama,
       ServerType.openRouter => l10n.server_type_openrouter,
       ServerType.onDevice => l10n.server_type_on_device_display,

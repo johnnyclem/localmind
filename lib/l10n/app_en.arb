@@ -615,6 +615,21 @@
     "description": "Button to star repo on GitHub"
   },
 
+  "add_more": "Add more",
+  "@add_more": {
+    "description": "Label for the decorative GitHub tile on onboarding"
+  },
+
+  "on_github": "on GitHub",
+  "@on_github": {
+    "description": "Secondary label for the decorative GitHub tile on onboarding"
+  },
+
+  "could_not_open_github": "Could not open GitHub.",
+  "@could_not_open_github": {
+    "description": "Snackbar text shown when opening the GitHub repo fails"
+  },
+
   "settings_title": "Settings",
   "@settings_title": {
     "description": "Settings screen title"
@@ -1342,6 +1357,21 @@
   "onboarding_connect_desc": "Connect to LM Studio, Ollama, or\nOpenRouter to start your private AI\nexperience.",
   "@onboarding_connect_desc": {
     "description": "Onboarding server connection description"
+  },
+
+  "openai_compatible_api": "OpenAI-compatible API",
+  "@openai_compatible_api": {
+    "description": "Subtitle for the OpenAI compatible server card in onboarding"
+  },
+
+  "https_requires_ssl": "HTTPS requires SSL",
+  "@https_requires_ssl": {
+    "description": "Hint shown when a user enters an https URL for a local server"
+  },
+
+  "most_local_setups_use_http": "Most local setups use http://",
+  "@most_local_setups_use_http": {
+    "description": "Hint shown with the HTTPS warning chip"
   },
 
   "onboarding_welcome": "Welcome to LocalMind",

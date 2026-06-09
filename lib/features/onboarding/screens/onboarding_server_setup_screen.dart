@@ -13,6 +13,7 @@ import '../../../core/routes/app_routes.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../servers/data/models/server.dart';
 import '../../servers/providers/server_providers.dart';
+import '../../servers/views/components/https_scheme_hint.dart';
 
 class OnboardingServerSetupScreen extends ConsumerStatefulWidget {
   final ServerType selectedType;
@@ -49,7 +50,7 @@ class _OnboardingServerSetupScreenState
         defaultPort = AppConstants.lmStudioDefaultPort.toString();
         break;
       case ServerType.openAICompatible:
-        defaultName = 'Local AI';
+        defaultName = 'OpenAI Compatible';
         defaultPort = AppConstants.openAICompatibleDefaultPort.toString();
         break;
       case ServerType.ollama:
@@ -104,6 +105,31 @@ class _OnboardingServerSetupScreenState
     );
   }
 
+  String? _validateHost(String? value) {
+    if (widget.selectedType == ServerType.openRouter) return null;
+    final l10n = AppLocalizations.of(context)!;
+    if (value == null || value.trim().isEmpty) {
+      return l10n.host_required;
+    }
+    if (parseServerAddressInput(value) == null) {
+      return l10n.host_valid;
+    }
+    return null;
+  }
+
+  String? _validatePort(String? value) {
+    if (widget.selectedType == ServerType.openRouter) return null;
+    final l10n = AppLocalizations.of(context)!;
+    if (value == null || value.trim().isEmpty) {
+      return l10n.port_required;
+    }
+    final port = int.tryParse(value.trim());
+    if (port == null || port < 1 || port > 65535) {
+      return l10n.port_invalid;
+    }
+    return null;
+  }
+
   Future<void> _testConnection() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -125,6 +151,9 @@ class _OnboardingServerSetupScreenState
             ? l10n.connection_successful
             : l10n.connection_failed;
       });
+      if (isConnected) {
+        invalidateAvailableModelsCache(testServer.id);
+      }
     } catch (e) {
       setState(() {
         _testSuccess = false;
@@ -148,6 +177,7 @@ class _OnboardingServerSetupScreenState
       final server = _buildServer();
       await ref.read(serversProvider.notifier).addServer(server);
       await ref.read(serversProvider.notifier).setDefault(server.id);
+      invalidateAvailableModelsCache(server.id);
       ref.read(activeServerProvider.notifier).setActiveServer(server);
 
       if (mounted) {
@@ -234,10 +264,9 @@ class _OnboardingServerSetupScreenState
                             filled: true,
                             fillColor: theme.colorScheme.surface,
                           ),
-                          validator: (val) => val == null || val.trim().isEmpty
-                              ? l10n.host_required
-                              : null,
+                          validator: _validateHost,
                         ),
+                        HttpsSchemeHint(controller: _hostController),
                         const SizedBox(height: 16),
                         TextFormField(
                           controller: _portController,
@@ -246,17 +275,7 @@ class _OnboardingServerSetupScreenState
                             filled: true,
                             fillColor: theme.colorScheme.surface,
                           ),
-                          validator: (val) {
-                            if (val == null || val.trim().isEmpty) {
-                              return l10n.port_required;
-                            } else {
-                              if (int.tryParse(val) == null) {
-                                return l10n.port_invalid;
-                              } else {
-                                return null;
-                              }
-                            }
-                          },
+                          validator: _validatePort,
                         ),
                         const SizedBox(height: 16),
                       ],

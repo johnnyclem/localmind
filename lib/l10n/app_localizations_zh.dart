@@ -351,6 +351,15 @@ class AppLocalizationsZh extends AppLocalizations {
   String get star_on_github => '在 GitHub 上点亮 Star';
 
   @override
+  String get add_more => '添加更多';
+
+  @override
+  String get on_github => '在 GitHub 上';
+
+  @override
+  String get could_not_open_github => '无法打开 GitHub。';
+
+  @override
   String get settings_title => '设置';
 
   @override
@@ -773,6 +782,15 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String get onboarding_connect_desc =>
       '连接到 LM Studio、Ollama 或\nOpenRouter，开启您的私有 AI\n体验。';
+
+  @override
+  String get openai_compatible_api => 'OpenAI 兼容 API';
+
+  @override
+  String get https_requires_ssl => 'HTTPS 需要 SSL';
+
+  @override
+  String get most_local_setups_use_http => '大多数本地配置使用 http://';
 
   @override
   String get onboarding_welcome => '欢迎使用 LocalMind';

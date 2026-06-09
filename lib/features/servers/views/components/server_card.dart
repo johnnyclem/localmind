@@ -53,7 +53,7 @@ class ServerCard extends StatelessWidget {
     if (server.type == ServerType.onDevice) {
       return l10n.server_address_on_device;
     }
-    return l10n.server_address_format(server.host, server.port.toString());
+    return server.displayAddress;
   }
 
   @override

@@ -1,5 +1,91 @@
 import '../../../../core/models/enums.dart';
 
+bool _hasExplicitHttpScheme(String input) {
+  final trimmed = input.trim().toLowerCase();
+  return trimmed.startsWith('http://') || trimmed.startsWith('https://');
+}
+
+Uri? parseServerAddressInput(String input) {
+  final trimmed = input.trim();
+  if (trimmed.isEmpty) return null;
+
+  final candidate = _hasExplicitHttpScheme(trimmed) ? trimmed : 'http://$trimmed';
+  final uri = Uri.tryParse(candidate);
+  if (uri == null || uri.host.isEmpty) return null;
+  if (uri.scheme != 'http' && uri.scheme != 'https') return null;
+  if (uri.path.isNotEmpty && uri.path != '/') return null;
+  return uri;
+}
+
+bool isHttpsAddressInput(String input) {
+  return input.trim().toLowerCase().startsWith('https://');
+}
+
+Uri _normalizeNetworkUri(Uri uri, {int? port}) {
+  return Uri(
+    scheme: uri.scheme,
+    userInfo: uri.userInfo,
+    host: uri.host,
+    port: port ?? (uri.hasPort ? uri.port : null),
+  );
+}
+
+String displayServerAddress(String host, int port, ServerType type) {
+  if (type == ServerType.openRouter) {
+    return 'openrouter.ai';
+  }
+  if (type == ServerType.onDevice) {
+    return 'Local inference';
+  }
+
+  final trimmedHost = host.trim();
+  if (trimmedHost.isEmpty) {
+    return port > 0 ? 'localhost:$port' : 'localhost';
+  }
+
+  if (_hasExplicitHttpScheme(trimmedHost)) {
+    final uri = parseServerAddressInput(trimmedHost);
+    if (uri != null) {
+      return _normalizeNetworkUri(
+        uri,
+        port: uri.hasPort || port <= 0 ? null : port,
+      ).toString();
+    }
+    return trimmedHost;
+  }
+
+  if (trimmedHost.contains(':')) {
+    return trimmedHost;
+  }
+
+  return port > 0 ? '$trimmedHost:$port' : trimmedHost;
+}
+
+String buildServerBaseUrl(String host, int port, ServerType type) {
+  if (type == ServerType.openRouter) {
+    return 'https://openrouter.ai/api/v1';
+  }
+  if (type == ServerType.onDevice) {
+    return 'on-device';
+  }
+
+  final trimmedHost = host.trim();
+  final uri = parseServerAddressInput(trimmedHost);
+  if (uri != null) {
+    return _normalizeNetworkUri(
+      uri,
+      port: uri.hasPort || port <= 0 ? null : port,
+    ).toString();
+  }
+
+  if (trimmedHost.isEmpty) {
+    return '';
+  }
+
+  final protocol = (port == 443) ? 'https' : 'http';
+  return '$protocol://$trimmedHost:$port';
+}
+
 class Server {
   final String id;
   final String name;
@@ -28,18 +114,7 @@ class Server {
   });
 
   String get baseUrl {
-    if (type == ServerType.openRouter) {
-      return 'https://openrouter.ai/api/v1';
-    }
-    if (type == ServerType.onDevice) {
-      return 'on-device';
-    }
-    final trimmedHost = host.trim();
-    if (trimmedHost.startsWith('http://') || trimmedHost.startsWith('https://')) {
-      return '$trimmedHost:$port';
-    }
-    final protocol = (port == 443) ? 'https' : 'http';
-    return '$protocol://$trimmedHost:$port';
+    return buildServerBaseUrl(host, port, type);
   }
 
   String get chatEndpoint {
@@ -118,6 +193,8 @@ class Server {
   }
 
   bool get isOnDevice => type == ServerType.onDevice;
+
+  String get displayAddress => displayServerAddress(host, port, type);
 
   Server copyWith({
     String? id,

@@ -746,6 +746,24 @@ abstract class AppLocalizations {
   /// **'Star on GitHub'**
   String get star_on_github;
 
+  /// Label for the decorative GitHub tile on onboarding
+  ///
+  /// In en, this message translates to:
+  /// **'Add more'**
+  String get add_more;
+
+  /// Secondary label for the decorative GitHub tile on onboarding
+  ///
+  /// In en, this message translates to:
+  /// **'on GitHub'**
+  String get on_github;
+
+  /// Snackbar text shown when opening the GitHub repo fails
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open GitHub.'**
+  String get could_not_open_github;
+
   /// Settings screen title
   ///
   /// In en, this message translates to:
@@ -1567,6 +1585,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Connect to LM Studio, Ollama, or\nOpenRouter to start your private AI\nexperience.'**
   String get onboarding_connect_desc;
+
+  /// Subtitle for the OpenAI compatible server card in onboarding
+  ///
+  /// In en, this message translates to:
+  /// **'OpenAI-compatible API'**
+  String get openai_compatible_api;
+
+  /// Hint shown when a user enters an https URL for a local server
+  ///
+  /// In en, this message translates to:
+  /// **'HTTPS requires SSL'**
+  String get https_requires_ssl;
+
+  /// Hint shown with the HTTPS warning chip
+  ///
+  /// In en, this message translates to:
+  /// **'Most local setups use http://'**
+  String get most_local_setups_use_http;
 
   /// Onboarding welcome message
   ///
