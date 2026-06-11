@@ -80,13 +80,32 @@ class _SystemVoicesList extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.only(top: 12),
-      child: Text(
-        l10n.tts_system_desc,
-        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-        ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.tts_system_desc,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+            ),
+          ),
+          const SizedBox(height: 12),
+          ShadAlert(
+            icon: Icon(
+              Icons.info_outline,
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+            ),
+            description: Text(
+              l10n.tts_other_services_background_note,
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -135,6 +154,22 @@ class _KittenEngineCard extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 12),
+            child: ShadBadge.secondary(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.music_note, size: 12),
+                  const SizedBox(width: 4),
+                  Text(
+                    l10n.tts_supports_background,
+                    style: const TextStyle(fontSize: 10),
+                  ),
+                ],
+              ),
+            ),
+          ),
           Padding(
             padding: const EdgeInsets.only(top: 12),
             child: Text(
@@ -351,6 +386,22 @@ class _PiperEngineCard extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 12),
+            child: ShadBadge.secondary(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.music_note, size: 12),
+                  const SizedBox(width: 4),
+                  Text(
+                    l10n.tts_supports_background,
+                    style: const TextStyle(fontSize: 10),
+                  ),
+                ],
+              ),
+            ),
+          ),
           Padding(
             padding: const EdgeInsets.only(top: 12),
             child: Text(
@@ -756,6 +807,14 @@ class _VoiceChipsState extends ConsumerState<_VoiceChips> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen<tts.TtsState>(tts.ttsProvider, (previous, next) {
+      if (!next.isSpeaking && (previous?.isSpeaking ?? false)) {
+        if (mounted && _playingVoice != null) {
+          setState(() => _playingVoice = null);
+        }
+      }
+    });
+
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final settings = ref.watch(settingsProvider);
@@ -938,13 +997,11 @@ class _VoiceChipsState extends ConsumerState<_VoiceChips> {
       return;
     }
     try {
-      await ref.read(tts.ttsProvider.notifier).previewVoice(voice);
       if (mounted) setState(() => _playingVoice = voice);
-      Future.delayed(const Duration(seconds: 2), () {
-        if (mounted) setState(() => _playingVoice = null);
-      });
+      await ref.read(tts.ttsProvider.notifier).previewVoice(voice);
     } catch (e) {
       if (mounted) {
+        setState(() => _playingVoice = null);
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text(l10n.preview_failed(e.toString()))));

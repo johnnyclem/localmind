@@ -1606,4 +1606,10 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get test_notification_body => '这是用于展示模型下载进度的测试通知。';
+
+  @override
+  String get tts_supports_background => '支持后台播放（原生音频格式）';
+
+  @override
+  String get tts_other_services_background_note => '注意：其他TTS服务支持后台播放（原生音频格式）。';
 }

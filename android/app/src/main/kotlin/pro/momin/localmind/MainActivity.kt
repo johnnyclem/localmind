@@ -3,11 +3,11 @@ package pro.momin.localmind
 import androidx.annotation.NonNull
 import android.app.ActivityManager
 import android.content.Context
-import io.flutter.embedding.android.FlutterActivity
+import com.ryanheise.audioservice.AudioServiceActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 
-class MainActivity : FlutterActivity() {
+class MainActivity : AudioServiceActivity() {
     private val CHANNEL = "localmind/chat_background"
     private val MEMORY_CHANNEL = "localmind/device_memory"
 

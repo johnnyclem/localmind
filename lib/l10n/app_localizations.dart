@@ -3133,6 +3133,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This is a test notification for model download progress.'**
   String get test_notification_body;
+
+  /// TTS background playback support status
+  ///
+  /// In en, this message translates to:
+  /// **'Supports background playback as native audio'**
+  String get tts_supports_background;
+
+  /// TTS background playback support status
+  ///
+  /// In en, this message translates to:
+  /// **'Note: The other TTS services support background playback as native audio.'**
+  String get tts_other_services_background_note;
 }
 
 class _AppLocalizationsDelegate

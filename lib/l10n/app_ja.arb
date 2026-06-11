@@ -503,5 +503,7 @@
   "export_label_tool": "ツール",
   "select_model_hint": "モデルを選択してチャットを開始",
   "test_notification_title": "テスト通知",
-  "test_notification_body": "これはモデルのダウンロード進捗用のテスト通知です。"
+  "test_notification_body": "これはモデルのダウンロード進捗用のテスト通知です。",
+  "tts_supports_background": "ネイティブオーディオとしてバックグラウンド再生をサポート",
+  "tts_other_services_background_note": "注意: 他のTTSサービスはネイティブオーディオとしてバックグラウンド再生をサポートしています。"
 }

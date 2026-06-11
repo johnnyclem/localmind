@@ -1611,4 +1611,11 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get test_notification_body => 'これはモデルのダウンロード進捗用のテスト通知です。';
+
+  @override
+  String get tts_supports_background => 'ネイティブオーディオとしてバックグラウンド再生をサポート';
+
+  @override
+  String get tts_other_services_background_note =>
+      '注意: 他のTTSサービスはネイティブオーディオとしてバックグラウンド再生をサポートしています。';
 }

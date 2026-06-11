@@ -1628,4 +1628,11 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get test_notification_body => 'هذا إشعار تجريبي لتقدم تنزيل النموذج.';
+
+  @override
+  String get tts_supports_background => 'يدعم التشغيل في الخلفية كصوت أصلي';
+
+  @override
+  String get tts_other_services_background_note =>
+      'ملاحظة: تدعم خدمات TTS الأخرى التشغيل في الخلفية كصوت أصلي.';
 }

@@ -503,5 +503,7 @@
   "voice_rosie": "Rosie",
   "voice_ryan": "Ryan (美音)",
   "waiting_selection": "等待选择",
-  "yesterday_section": "昨天"
+  "yesterday_section": "昨天",
+  "tts_supports_background": "支持后台播放（原生音频格式）",
+  "tts_other_services_background_note": "注意：其他TTS服务支持后台播放（原生音频格式）。"
 }

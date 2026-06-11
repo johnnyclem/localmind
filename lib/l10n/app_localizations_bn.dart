@@ -1638,4 +1638,12 @@ class AppLocalizationsBn extends AppLocalizations {
   @override
   String get test_notification_body =>
       'এটি মডেল ডাউনলোডের অগ্রগতির জন্য একটি পরীক্ষা নোটিফিকেশন।';
+
+  @override
+  String get tts_supports_background =>
+      'নেটিভ অডিও হিসাবে ব্যাকগ্রাউন্ড প্লেব্যাক সমর্থন করে';
+
+  @override
+  String get tts_other_services_background_note =>
+      'দ্রষ্টব্য: অন্যান্য টিটিএস পরিষেবাগুলি নেটিভ অডিও হিসাবে ব্যাকগ্রাউন্ড প্লেব্যাক সমর্থন করে।';
 }

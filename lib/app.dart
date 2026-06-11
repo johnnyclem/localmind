@@ -276,13 +276,18 @@ class AppShell extends StatelessWidget {
                       ? const Color(0xFF1A1A1A)
                       : const Color(0xFFE5E5E5),
                 ),
-                Expanded(child: child),
+                Expanded(
+                  child: child,
+                ),
               ],
             ),
           );
         }
 
-        return Scaffold(body: child, drawer: const ConversationDrawer());
+        return Scaffold(
+          body: child,
+          drawer: const ConversationDrawer(),
+        );
       },
     );
   }

@@ -7,12 +7,12 @@ import 'package:shadcn_ui/shadcn_ui.dart';
 import '../../core/routes/app_routes.dart';
 import '../../l10n/app_localizations.dart';
 import '../chat/providers/chat_providers.dart';
-import '../tts/views/components/tts_player_bar.dart';
 import 'components/active_server_indicator.dart';
 import 'components/conversation_drawer_header.dart';
 import 'components/drawer_nav_item.dart';
 import 'components/github_repo_card.dart';
 import 'components/sidebar_search_button.dart';
+import '../tts/views/components/tts_player_bar.dart';
 
 class SidebarWidget extends ConsumerWidget {
   const SidebarWidget({super.key});
@@ -156,9 +156,8 @@ class SidebarWidget extends ConsumerWidget {
               ),
             ),
 
-            // TTS Mini Player (only visible when TTS is active)
+            // Duplicate Player controls
             const TtsPlayerBar(),
-            const SizedBox(height: 4),
 
             // Bottom Section
             const GitHubRepoCard(),

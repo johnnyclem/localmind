@@ -1644,4 +1644,12 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get test_notification_body =>
       'Esta es una notificación de prueba para el progreso de descarga de modelos.';
+
+  @override
+  String get tts_supports_background =>
+      'Soporta reproducción en segundo plano como audio nativo';
+
+  @override
+  String get tts_other_services_background_note =>
+      'Nota: Los otros servicios de TTS soportan reproducción en segundo plano como audio nativo.';
 }

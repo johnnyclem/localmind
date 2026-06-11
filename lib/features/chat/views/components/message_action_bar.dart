@@ -32,12 +32,13 @@ class _MessageActionBarState extends ConsumerState<MessageActionBar> {
   void _toggleTts() async {
     final ttsNotifier = ref.read(tts.ttsProvider.notifier);
     final ttsState = ref.read(tts.ttsProvider);
-    final isThisPlaying = ttsState.playingContent == widget.content && ttsState.isSpeaking;
+    final isThisActive = ttsState.playingContent == widget.content &&
+        (ttsState.isSpeaking || ttsState.isPaused);
 
-    if (isThisPlaying) {
-      await ttsNotifier.stop();
+    if (isThisActive) {
+      ttsNotifier.togglePauseResume();
     } else {
-      if (ttsState.isSpeaking) {
+      if (ttsState.isSpeaking || ttsState.isPaused) {
         await ttsNotifier.stop();
       }
       try {
@@ -50,7 +51,9 @@ class _MessageActionBarState extends ConsumerState<MessageActionBar> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final ttsState = ref.watch(tts.ttsProvider);
-    final isThisPlaying = ttsState.playingContent == widget.content && ttsState.isSpeaking;
+    final isThisActive = ttsState.playingContent == widget.content &&
+        (ttsState.isSpeaking || ttsState.isPaused);
+    final isThisPlaying = ttsState.playingContent == widget.content && ttsState.isSpeaking && !ttsState.isPaused;
     final isThisInitializing = ttsState.playingContent == widget.content && ttsState.isInitializing;
 
     return Row(
@@ -103,11 +106,11 @@ class _MessageActionBarState extends ConsumerState<MessageActionBar> {
         ],
         const SizedBox(width: 4),
         _ActionButton(
-          icon: isThisPlaying
-              ? Icons.stop_circle
+          icon: isThisActive
+              ? (isThisPlaying ? Icons.pause_circle_filled : Icons.play_circle_filled)
               : (isThisInitializing ? Icons.hourglass_top : Icons.volume_up),
-          label: isThisPlaying
-              ? l10n.stop
+          label: isThisActive
+              ? (isThisPlaying ? l10n.pause : l10n.resume)
               : (isThisInitializing ? l10n.initializing : l10n.read_aloud),
           onTap: isThisInitializing ? null : _toggleTts,
         ),
@@ -148,7 +151,9 @@ class _MessageActionBarState extends ConsumerState<MessageActionBar> {
   void _showMoreOptions(BuildContext context) {
     final sheetL10n = AppLocalizations.of(context)!;
     final ttsState = ref.read(tts.ttsProvider);
-    final isThisPlaying = ttsState.playingContent == widget.content && ttsState.isSpeaking;
+    final isThisActive = ttsState.playingContent == widget.content &&
+        (ttsState.isSpeaking || ttsState.isPaused);
+    final isThisPlaying = ttsState.playingContent == widget.content && ttsState.isSpeaking && !ttsState.isPaused;
 
     showShadSheet(
       context: context,
@@ -169,8 +174,16 @@ class _MessageActionBarState extends ConsumerState<MessageActionBar> {
               },
             ),
             ListTile(
-              leading: Icon(isThisPlaying ? Icons.stop : Icons.volume_up),
-              title: Text(isThisPlaying ? sheetL10n.stop_reading : sheetL10n.read_aloud),
+              leading: Icon(
+                isThisActive
+                    ? (isThisPlaying ? Icons.pause_circle_filled : Icons.play_circle_filled)
+                    : Icons.volume_up,
+              ),
+              title: Text(
+                isThisActive
+                    ? (isThisPlaying ? sheetL10n.pause : sheetL10n.resume)
+                    : sheetL10n.read_aloud,
+              ),
               onTap: () {
                 Navigator.of(context).pop();
                 _toggleTts();

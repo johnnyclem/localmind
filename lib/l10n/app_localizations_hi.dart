@@ -1635,4 +1635,12 @@ class AppLocalizationsHi extends AppLocalizations {
   @override
   String get test_notification_body =>
       'यह मॉडल डाउनलोड प्रगति के लिए एक परीक्षण सूचना है।';
+
+  @override
+  String get tts_supports_background =>
+      'मूल ऑडियो के रूप में पृष्ठभूमि प्लेबैक का समर्थन करता है';
+
+  @override
+  String get tts_other_services_background_note =>
+      'नोट: अन्य टीटीएस सेवाएं मूल ऑडियो के रूप में पृष्ठभूमि प्लेबैक का समर्थन करती हैं।';
 }

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
-import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../l10n/app_localizations.dart';
@@ -23,69 +22,60 @@ class GitHubRepoCard extends StatelessWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     
-    // Using standard colors from theme or defaults to ensure consistent premium look
     final cardBg = isDark ? const Color(0xFF1F1F1F) : const Color(0xFFF9FAFB);
     final borderColor = isDark ? const Color(0xFF374151) : const Color(0xFFE5E7EB);
     final accentColor = isDark ? const Color(0xFF3B82F6) : const Color(0xFF2563EB);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: ShadCard(
-        padding: const EdgeInsets.all(16),
-        backgroundColor: cardBg,
-        border: ShadBorder.all(color: borderColor),
-        radius: BorderRadius.circular(12),
-        title: Row(
-          children: [
-            HugeIcon(
-              icon: HugeIcons.strokeRoundedGithub,
-              size: 20,
-              color: isDark ? Colors.white : Colors.black,
-            ),
-            const SizedBox(width: 8),
-            Text(
-              l10n.open_source,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: isDark ? Colors.white : Colors.black,
-              ),
-            ),
-          ],
+      child: Container(
+        decoration: BoxDecoration(
+          color: cardBg,
+          border: Border.all(color: borderColor),
+          borderRadius: BorderRadius.circular(10),
         ),
-        description: Padding(
-          padding: const EdgeInsets.only(top: 4),
-          child: Text(
-            l10n.open_source_desc,
-            style: TextStyle(
-              fontSize: 12,
-              color: isDark ? const Color(0xFFA0A0A0) : const Color(0xFF666666),
-              height: 1.4,
-            ),
-          ),
-        ),
-        footer: Padding(
-          padding: const EdgeInsets.only(top: 12),
-          child: ShadButton.ghost(
-            width: double.infinity,
-            padding: EdgeInsets.zero,
-            onPressed: _launchUrl,
+        child: InkWell(
+          onTap: _launchUrl,
+          borderRadius: BorderRadius.circular(10),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(
-                  l10n.star_on_github,
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: accentColor,
+                HugeIcon(
+                  icon: HugeIcons.strokeRoundedGithub,
+                  size: 20,
+                  color: isDark ? Colors.white70 : Colors.black87,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        l10n.open_source,
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: isDark ? Colors.white : Colors.black,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        l10n.star_on_github,
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w500,
+                          color: accentColor,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(width: 4),
                 Icon(
                   Icons.open_in_new,
                   size: 14,
-                  color: accentColor,
+                  color: isDark ? Colors.white54 : Colors.black54,
                 ),
               ],
             ),

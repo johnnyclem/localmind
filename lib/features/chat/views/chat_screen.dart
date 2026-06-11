@@ -10,7 +10,6 @@ import '../../conversations/providers/conversation_providers.dart' as conv;
 import '../../models/screens/model_picker_sheet.dart';
 import '../../personas/providers/personas_providers.dart';
 import '../../servers/providers/server_providers.dart';
-import '../../tts/views/components/tts_player_bar.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
 import '../../../core/models/enums.dart';
@@ -29,6 +28,7 @@ import 'components/chat_input_bar.dart';
 import 'components/chat_settings_sheet.dart';
 import 'components/edit_message_dialog.dart';
 import 'components/notification_permission_banner.dart';
+import '../../tts/views/components/tts_player_bar.dart';
 
 class ChatScreen extends ConsumerStatefulWidget {
   const ChatScreen({super.key});
@@ -314,9 +314,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
           ),
         ),
         const NotificationPermissionBanner(),
-        const TtsPlayerBar(
-          margin: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-        ),
         if (connectionStatus == ConnectionStatus.disconnected ||
             connectionStatus == ConnectionStatus.error)
           _ConnectionBanner(status: connectionStatus),
@@ -333,6 +330,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
               }
             },
           ),
+        const TtsPlayerBar(),
         Expanded(
           child: Stack(
             children: [
