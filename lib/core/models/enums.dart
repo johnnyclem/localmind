@@ -206,7 +206,7 @@ enum ConnectionStatus { connected, disconnected, checking, error }
 
 enum MessageRole { user, assistant, system, tool }
 
-enum MessageStatus { sending, streaming, complete, error }
+enum MessageStatus { sending, streaming, complete, error, cancelled }
 
 enum ModelStatus { unloaded, loading, loaded, preloaded, thinking }
 

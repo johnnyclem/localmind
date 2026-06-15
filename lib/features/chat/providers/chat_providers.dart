@@ -881,7 +881,8 @@ class ChatNotifier extends Notifier<ChatState> {
                   // Check if content is empty - this happens when free models refuse or fail
                   final hasContent =
                       streamingMessage.content.isNotEmpty ||
-                      (streamingMessage.reasoningContent?.isNotEmpty ?? false);
+                      (streamingMessage.reasoningContent?.isNotEmpty ?? false) ||
+                      collectedToolCalls.isNotEmpty;
 
                   if (!hasContent) {
                     // Mark as error if no content received
@@ -917,7 +918,16 @@ class ChatNotifier extends Notifier<ChatState> {
                         final registry = ref.read(toolRegistryProvider);
                         final adapter = createAdapterForServerType(server.type);
 
-                        final preParsedCalls = collectedToolCalls
+                        // Deduplicate tool calls by name — LM Studio emits
+                        // tool_call.start, tool_call.arguments, and
+                        // tool_call.success as separate events. Keep only the
+                        // last event per tool (most complete arguments/output).
+                        final dedupedCalls = <String, ToolCallData>{};
+                        for (final tc in collectedToolCalls) {
+                          dedupedCalls[tc.tool] = tc;
+                        }
+
+                        final preParsedCalls = dedupedCalls.values
                             .map(
                               (tc) => ParsedToolCall(
                                 id: tc.tool,
@@ -1173,7 +1183,7 @@ class ChatNotifier extends Notifier<ChatState> {
     _uiUpdateTimer?.cancel();
     _uiUpdateTimer = null;
     _clearPendingApproval();
-    _streamSubscription?.cancel();
+    await _streamSubscription?.cancel();
     _streamSubscription = null;
     ref.read(chatServiceProvider)?.cancelStream();
     ref.read(chatBackgroundServiceProvider).stop();
@@ -1189,7 +1199,7 @@ class ChatNotifier extends Notifier<ChatState> {
     final streamingMessage = _latestStreamingMessage ?? state.streamingMessage;
     if (streamingMessage != null) {
       final finalMessage = streamingMessage.copyWith(
-        status: MessageStatus.complete,
+        status: MessageStatus.cancelled,
         isProcessing: false,
       );
       await _saveMessage(finalMessage);

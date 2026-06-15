@@ -505,5 +505,7 @@
   "waiting_selection": "ESPERANDO SELECCIÓN",
   "yesterday_section": "AYER",
   "tts_supports_background": "Soporta reproducción en segundo plano como audio nativo",
-  "tts_other_services_background_note": "Nota: Los otros servicios de TTS soportan reproducción en segundo plano como audio nativo."
+  "tts_other_services_background_note": "Nota: Los otros servicios de TTS soportan reproducción en segundo plano como audio nativo.",
+  "start_listening_tooltip": "Iniciar escucha",
+  "stop_listening_tooltip": "Detener escucha"
 }

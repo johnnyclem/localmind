@@ -596,6 +596,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get attach_images_tooltip => 'إرفاق صور';
 
   @override
+  String get start_listening_tooltip => 'بدء الاستماع';
+
+  @override
+  String get stop_listening_tooltip => 'إيقاف الاستماع';
+
+  @override
   String tool_label(String toolCallId) {
     return 'أداة: $toolCallId';
   }

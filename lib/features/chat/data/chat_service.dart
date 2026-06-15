@@ -640,6 +640,18 @@ class OpenAICompatibleChatService implements ChatService {
           }
         }
       }
+
+      // Flush any tool calls accumulated without a [DONE] marker (e.g.
+      // connection drop or server crash before sending [DONE]).
+      for (final call in toolAdapter.takeCompletedCalls()) {
+        yield ChatResponse(
+          type: ChatResponseType.toolCall,
+          toolCall: ToolCallData(
+            tool: call.name,
+            arguments: call.arguments,
+          ),
+        );
+      }
     } catch (e) {
       Log.error('OpenAICompatible connection error: $e');
       yield ChatResponse(
@@ -962,6 +974,18 @@ class OpenRouterChatService implements ChatService {
             }
           }
         }
+      }
+
+      // Flush any tool calls accumulated without a [DONE] marker (e.g.
+      // connection drop or server crash before sending [DONE]).
+      for (final call in toolAdapter.takeCompletedCalls()) {
+        yield ChatResponse(
+          type: ChatResponseType.toolCall,
+          toolCall: ToolCallData(
+            tool: call.name,
+            arguments: call.arguments,
+          ),
+        );
       }
     } catch (e) {
       Log.error('OpenRouter connection error: $e');

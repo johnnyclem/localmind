@@ -599,6 +599,12 @@ class AppLocalizationsEs extends AppLocalizations {
   String get attach_images_tooltip => 'Adjuntar imágenes';
 
   @override
+  String get start_listening_tooltip => 'Iniciar escucha';
+
+  @override
+  String get stop_listening_tooltip => 'Detener escucha';
+
+  @override
   String tool_label(String toolCallId) {
     return 'Herramienta: $toolCallId';
   }

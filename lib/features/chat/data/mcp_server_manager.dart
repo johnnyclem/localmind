@@ -9,38 +9,51 @@ class McpServerManager {
   final Map<String, List<McpTool>> _tools = {};
   final Map<String, String> _serverUrls = {};
   final Set<String> _localExampleServers = {};
+  final Set<String> _pendingLabels = {};
 
   Future<void> addServer(
     String label,
     String url, {
     Map<String, String>? headers,
   }) async {
-    if (_clients.containsKey(label)) {
-      removeServer(label);
+    // Guard against concurrent addServer calls for the same label.
+    if (_pendingLabels.contains(label)) return;
+    _pendingLabels.add(label);
+
+    try {
+      if (_clients.containsKey(label)) {
+        final oldClient = _clients.remove(label);
+        await oldClient?.close();
+        _capabilities.remove(label);
+        _tools.remove(label);
+        _serverUrls.remove(label);
+      }
+
+      final client = McpClient(serverUrl: url, headers: headers);
+
+      final capabilities = await client.initialize();
+      final tools = await client.listTools();
+
+      _clients[label] = client;
+      _capabilities[label] = capabilities;
+      _tools[label] = tools;
+      _serverUrls[label] = url;
+    } finally {
+      _pendingLabels.remove(label);
     }
-
-    final client = McpClient(serverUrl: url, headers: headers);
-
-    final capabilities = await client.initialize();
-    final tools = await client.listTools();
-
-    _clients[label] = client;
-    _capabilities[label] = capabilities;
-    _tools[label] = tools;
-    _serverUrls[label] = url;
   }
 
-  void removeServer(String label) {
-    _clients[label]?.close();
-    _clients.remove(label);
+  Future<void> removeServer(String label) async {
+    final client = _clients.remove(label);
+    await client?.close();
     _capabilities.remove(label);
     _tools.remove(label);
     _serverUrls.remove(label);
     _localExampleServers.remove(label);
   }
 
-  void addExampleServer() {
-    removeServer(exampleMcpServerLabel);
+  Future<void> addExampleServer() async {
+    await removeServer(exampleMcpServerLabel);
 
     _capabilities[exampleMcpServerLabel] = const McpCapabilities(tools: true);
     _tools[exampleMcpServerLabel] = const [
@@ -125,9 +138,9 @@ class McpServerManager {
     return client.readResource(uri);
   }
 
-  void clear() {
+  Future<void> clear() async {
     for (final client in _clients.values) {
-      client.close();
+      await client.close();
     }
     _clients.clear();
     _capabilities.clear();

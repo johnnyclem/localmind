@@ -505,5 +505,7 @@
   "test_notification_title": "Notifica di prova",
   "test_notification_body": "Questa è una notifica di prova per l'avanzamento del download del modello.",
   "tts_supports_background": "Supporta la riproduzione in background come audio nativo",
-  "tts_other_services_background_note": "Nota: Gli altri servizi TTS supportano la riproduzione in background come audio nativo."
+  "tts_other_services_background_note": "Nota: Gli altri servizi TTS supportano la riproduzione in background come audio nativo.",
+  "start_listening_tooltip": "Avvia ascolto",
+  "stop_listening_tooltip": "Interrompi ascolto"
 }

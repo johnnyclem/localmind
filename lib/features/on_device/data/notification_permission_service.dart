@@ -12,7 +12,7 @@ class NotificationPermissionService {
       iOS: darwinInit,
     );
 
-    await _notifications.initialize(initSettings);
+    await _notifications.initialize(settings: initSettings);
   }
 
   Future<bool> isPermissionGranted() async {

@@ -505,5 +505,7 @@
   "waiting_selection": "নির্বাচনের জন্য অপেক্ষা করা হচ্ছে",
   "yesterday_section": "গতকাল",
   "tts_supports_background": "নেটিভ অডিও হিসাবে ব্যাকগ্রাউন্ড প্লেব্যাক সমর্থন করে",
-  "tts_other_services_background_note": "দ্রষ্টব্য: অন্যান্য টিটিএস পরিষেবাগুলি নেটিভ অডিও হিসাবে ব্যাকগ্রাউন্ড প্লেব্যাক সমর্থন করে।"
+  "tts_other_services_background_note": "দ্রষ্টব্য: অন্যান্য টিটিএস পরিষেবাগুলি নেটিভ অডিও হিসাবে ব্যাকগ্রাউন্ড প্লেব্যাক সমর্থন করে।",
+  "start_listening_tooltip": "শোনা শুরু করুন",
+  "stop_listening_tooltip": "শোনা বন্ধ করুন"
 }

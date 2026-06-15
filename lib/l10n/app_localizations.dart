@@ -1226,6 +1226,18 @@ abstract class AppLocalizations {
   /// **'Attach images'**
   String get attach_images_tooltip;
 
+  /// Tooltip for start listening button
+  ///
+  /// In en, this message translates to:
+  /// **'Start listening'**
+  String get start_listening_tooltip;
+
+  /// Tooltip for stop listening button
+  ///
+  /// In en, this message translates to:
+  /// **'Stop listening'**
+  String get stop_listening_tooltip;
+
   /// Tool call label in chat bubble
   ///
   /// In en, this message translates to:

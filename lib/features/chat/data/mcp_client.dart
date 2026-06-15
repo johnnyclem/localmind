@@ -10,6 +10,7 @@ class McpClient {
   final Dio _dio;
   bool _initialized = false;
   McpCapabilities? _capabilities;
+  Future<McpCapabilities>? _initializationFuture;
 
   bool _useSse = false;
   StreamSubscription? _sseSubscription;
@@ -87,6 +88,14 @@ class McpClient {
           _handleSseDisconnect(e);
         },
         onDone: () {
+          // Process any remaining data in the buffer before disconnecting.
+          if (buffer.isNotEmpty || currentData.isNotEmpty) {
+            if (currentData.isNotEmpty) {
+              _handleSseMessage(currentEvent, currentData, handshakeCompleter);
+            } else if (buffer.trim().isNotEmpty) {
+              _handleSseMessage(currentEvent, buffer.trim(), handshakeCompleter);
+            }
+          }
           if (!handshakeCompleter.isCompleted) {
             handshakeCompleter.completeError(McpException('SSE stream closed before handshake completed'));
           }
@@ -234,6 +243,21 @@ class McpClient {
     if (_initialized && _capabilities != null) {
       return _capabilities!;
     }
+
+    // If initialization is already in progress, wait for it.
+    if (_initializationFuture != null) {
+      return _initializationFuture!;
+    }
+
+    _initializationFuture = _doInitialize();
+    try {
+      return await _initializationFuture!;
+    } finally {
+      _initializationFuture = null;
+    }
+  }
+
+  Future<McpCapabilities> _doInitialize() async {
 
     try {
       try {

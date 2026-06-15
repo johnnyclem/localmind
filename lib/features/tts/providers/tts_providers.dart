@@ -91,7 +91,6 @@ class TtsNotifier extends Notifier<TtsState> {
   Completer<SendPort>? _workerPortCompleter;
 
   bool _isPreview = false;
-  final ConcatenatingAudioSource _playlist = ConcatenatingAudioSource(children: []);
   final Map<int, AudioSource> _playlistBuffer = {};
   int _nextPlaylistIndexToAdd = 0;
   StreamSubscription<int?>? _currentIndexSubscription;
@@ -118,7 +117,7 @@ class TtsNotifier extends Notifier<TtsState> {
       }
     });
 
-    _player.setAudioSource(_playlist);
+    _player.setAudioSources([]);
 
     _playerCompleteSubscription = _player.playerStateStream.listen((playerState) {
       if (playerState.processingState == ProcessingState.completed) {
@@ -481,7 +480,7 @@ class TtsNotifier extends Notifier<TtsState> {
     _isPreview = isPreview;
     _playlistBuffer.clear();
     _nextPlaylistIndexToAdd = 0;
-    await _playlist.clear();
+    await _player.clearAudioSources();
 
     try {
       AudioSession.instance.then((session) {
@@ -539,7 +538,7 @@ class TtsNotifier extends Notifier<TtsState> {
     _playlistBuffer[chunkIndex] = source;
     while (_playlistBuffer.containsKey(_nextPlaylistIndexToAdd)) {
       final src = _playlistBuffer.remove(_nextPlaylistIndexToAdd)!;
-      await _playlist.add(src);
+      await _player.addAudioSource(src);
 
       if (_nextPlaylistIndexToAdd == 0) {
         if (!state.isPaused) {
@@ -605,7 +604,7 @@ class TtsNotifier extends Notifier<TtsState> {
     if (_isPlayerDisposed) return;
     try {
       await _player.stop();
-      await _playlist.clear();
+      await _player.clearAudioSources();
     } catch (_) {}
     await _flutterTts?.stop();
     _cleanupSessionFiles(_currentSessionId, _chunks.length);

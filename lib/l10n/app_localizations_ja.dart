@@ -593,6 +593,12 @@ class AppLocalizationsJa extends AppLocalizations {
   String get attach_images_tooltip => '画像を添付';
 
   @override
+  String get start_listening_tooltip => '聞き取りを開始';
+
+  @override
+  String get stop_listening_tooltip => '聞き取りを停止';
+
+  @override
   String tool_label(String toolCallId) {
     return 'ツール: $toolCallId';
   }

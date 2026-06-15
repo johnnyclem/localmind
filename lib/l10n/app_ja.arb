@@ -505,5 +505,7 @@
   "test_notification_title": "テスト通知",
   "test_notification_body": "これはモデルのダウンロード進捗用のテスト通知です。",
   "tts_supports_background": "ネイティブオーディオとしてバックグラウンド再生をサポート",
-  "tts_other_services_background_note": "注意: 他のTTSサービスはネイティブオーディオとしてバックグラウンド再生をサポートしています。"
+  "tts_other_services_background_note": "注意: 他のTTSサービスはネイティブオーディオとしてバックグラウンド再生をサポートしています。",
+  "start_listening_tooltip": "聞き取りを開始",
+  "stop_listening_tooltip": "聞き取りを停止"
 }

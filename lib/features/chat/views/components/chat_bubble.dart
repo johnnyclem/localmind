@@ -304,7 +304,8 @@ class _AssistantBubble extends StatelessWidget {
               const Spacer(),
               if (!isStreaming &&
                   (message.status == MessageStatus.complete ||
-                      message.status == MessageStatus.error))
+                      message.status == MessageStatus.error ||
+                      message.status == MessageStatus.cancelled))
                 MessageActionBar(
                   content: message.content,
                   onCopy: onCopy,

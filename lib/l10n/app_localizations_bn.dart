@@ -599,6 +599,12 @@ class AppLocalizationsBn extends AppLocalizations {
   String get attach_images_tooltip => 'ছবি সংযুক্ত করুন';
 
   @override
+  String get start_listening_tooltip => 'শোনা শুরু করুন';
+
+  @override
+  String get stop_listening_tooltip => 'শোনা বন্ধ করুন';
+
+  @override
   String tool_label(String toolCallId) {
     return 'টুল: $toolCallId';
   }

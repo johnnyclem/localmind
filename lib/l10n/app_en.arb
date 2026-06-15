@@ -828,6 +828,14 @@
   "@attach_images_tooltip": {
     "description": "Tooltip for attach button"
   },
+  "start_listening_tooltip": "Start listening",
+  "@start_listening_tooltip": {
+    "description": "Tooltip for start listening button"
+  },
+  "stop_listening_tooltip": "Stop listening",
+  "@stop_listening_tooltip": {
+    "description": "Tooltip for stop listening button"
+  },
   "tool_label": "Tool: {toolCallId}",
   "@tool_label": {
     "description": "Tool call label in chat bubble",

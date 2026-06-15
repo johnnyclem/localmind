@@ -505,5 +505,7 @@
   "test_notification_title": "إشعار تجريبي",
   "test_notification_body": "هذا إشعار تجريبي لتقدم تنزيل النموذج.",
   "tts_supports_background": "يدعم التشغيل في الخلفية كصوت أصلي",
-  "tts_other_services_background_note": "ملاحظة: تدعم خدمات TTS الأخرى التشغيل في الخلفية كصوت أصلي."
+  "tts_other_services_background_note": "ملاحظة: تدعم خدمات TTS الأخرى التشغيل في الخلفية كصوت أصلي.",
+  "start_listening_tooltip": "بدء الاستماع",
+  "stop_listening_tooltip": "إيقاف الاستماع"
 }

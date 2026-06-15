@@ -591,6 +591,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get attach_images_tooltip => '附加图片';
 
   @override
+  String get start_listening_tooltip => '开始聆听';
+
+  @override
+  String get stop_listening_tooltip => '停止聆听';
+
+  @override
   String tool_label(String toolCallId) {
     return '工具: $toolCallId';
   }

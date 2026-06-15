@@ -9,6 +9,7 @@ import 'package:localmind/l10n/app_localizations.dart';
 
 import '../../../../core/models/enums.dart';
 import '../../../servers/providers/server_providers.dart';
+import '../../../stt/providers/stt_providers.dart';
 
 class ChatInputBar extends ConsumerStatefulWidget {
   const ChatInputBar({
@@ -33,12 +34,14 @@ class ChatInputBar extends ConsumerStatefulWidget {
 }
 
 class _ChatInputBarState extends ConsumerState<ChatInputBar>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   final _controller = TextEditingController();
   late final FocusNode _focusNode;
   final List<File> _attachedFiles = [];
   late AnimationController _sendButtonAnimController;
   late Animation<double> _sendButtonScale;
+  late AnimationController _micAnimController;
+  String _preSpeechText = '';
 
   @override
   void initState() {
@@ -51,6 +54,10 @@ class _ChatInputBarState extends ConsumerState<ChatInputBar>
     _sendButtonScale = Tween<double>(begin: 1.0, end: 1.1).animate(
       CurvedAnimation(parent: _sendButtonAnimController, curve: Curves.easeOut),
     );
+    _micAnimController = AnimationController(
+      duration: const Duration(milliseconds: 800),
+      vsync: this,
+    );
   }
 
   @override
@@ -60,13 +67,89 @@ class _ChatInputBarState extends ConsumerState<ChatInputBar>
       _focusNode.dispose();
     }
     _sendButtonAnimController.dispose();
+    _micAnimController.dispose();
     super.dispose();
   }
 
+  Future<void> _handleMicToggle() async {
+    final stt = ref.read(sttProvider.notifier);
+    final isListening = ref.read(sttProvider).isListening;
+
+    Haptics.vibrate(HapticsType.light);
+
+    if (isListening) {
+      await stt.stopListening();
+    } else {
+      _preSpeechText = _controller.text;
+      await stt.startListening(
+        onResult: (words) {
+          if (words.isNotEmpty) {
+            setState(() {
+              if (_preSpeechText.isEmpty) {
+                _controller.text = words;
+              } else {
+                _controller.text = '$_preSpeechText $words';
+              }
+              // Position the cursor at the end of the text
+              _controller.selection = TextSelection.fromPosition(
+                TextPosition(offset: _controller.text.length),
+              );
+            });
+          }
+        },
+      );
+    }
+  }
+
+  Widget _buildMicButton(bool isListening, ThemeData theme) {
+    final l10n = AppLocalizations.of(context)!;
+    return AnimatedBuilder(
+      animation: _micAnimController,
+      builder: (context, child) {
+        final pulseValue = isListening ? _micAnimController.value : 0.0;
+        return Container(
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            boxShadow: [
+              if (isListening)
+                BoxShadow(
+                  color: Colors.red.withValues(alpha: 0.4 * pulseValue),
+                  blurRadius: 8 + (8 * pulseValue),
+                  spreadRadius: 1 + (3 * pulseValue),
+                ),
+            ],
+          ),
+          child: Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: isListening
+                  ? Colors.red
+                  : theme.colorScheme.onSurface.withValues(alpha: 0.05),
+              shape: BoxShape.circle,
+            ),
+            child: IconButton(
+              icon: HugeIcon(
+                icon: isListening
+                    ? HugeIcons.strokeRoundedVoice
+                    : HugeIcons.strokeRoundedMic01,
+                color: isListening
+                    ? Colors.white
+                    : theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                size: 20,
+              ),
+              onPressed: _handleMicToggle,
+              tooltip: isListening ? l10n.stop_listening_tooltip : l10n.start_listening_tooltip,
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   Future<void> _handleAttach() async {
-    final result = await FilePicker.platform.pickFiles(
+    final result = await FilePicker.pickFiles(
       type: FileType.image,
-      allowMultiple: true,
     );
     if (result != null && result.files.isNotEmpty) {
       setState(() {
@@ -151,6 +234,30 @@ class _ChatInputBarState extends ConsumerState<ChatInputBar>
     );
   }
 
+  String? _mapSttError(String error) {
+    switch (error) {
+      case 'error_no_match':
+        return 'No speech recognized. Please try speaking again and check your microphone.';
+      case 'error_speech_timeout':
+        return 'No speech detected. Timed out.';
+      case 'error_permission':
+        return 'Microphone permission denied.';
+      case 'error_busy':
+        return 'Speech recognition is busy. Please try again.';
+      case 'error_network':
+      case 'error_network_timeout':
+        return 'Network error. Please check your connection and try again.';
+      case 'error_audio':
+        return 'Audio recording error. Please check your microphone.';
+      default:
+        if (error.startsWith('error_')) {
+          final cleanName = error.replaceFirst('error_', '').replaceAll('_', ' ');
+          return 'Speech recognition error: $cleanName';
+        }
+        return error;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -158,6 +265,34 @@ class _ChatInputBarState extends ConsumerState<ChatInputBar>
     final isDark = theme.brightness == Brightness.dark;
     final connectionStatus = ref.watch(connectionStatusProvider);
     final isConnected = connectionStatus == ConnectionStatus.connected;
+
+    final sttState = ref.watch(sttProvider);
+    final isListening = sttState.isListening;
+
+    if (isListening) {
+      if (!_micAnimController.isAnimating) {
+        _micAnimController.repeat(reverse: true);
+      }
+    } else {
+      if (_micAnimController.isAnimating) {
+        _micAnimController.stop();
+        _micAnimController.reset();
+      }
+    }
+
+    ref.listen<String?>(
+      sttProvider.select((s) => s.error),
+      (previous, next) {
+        if (next != null) {
+          final message = _mapSttError(next);
+          if (message != null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(message)),
+            );
+          }
+        }
+      },
+    );
 
     final canSend =
         widget.enabled &&
@@ -302,6 +437,8 @@ class _ChatInputBarState extends ConsumerState<ChatInputBar>
                     ),
                   ),
                 ),
+                const SizedBox(width: 8),
+                _buildMicButton(isListening, theme),
                 const SizedBox(width: 8),
                 _buildActionButton(canSend, theme),
               ],

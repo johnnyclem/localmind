@@ -505,5 +505,7 @@
   "waiting_selection": "चयन की प्रतीक्षा की जा रही है",
   "yesterday_section": "कल",
   "tts_supports_background": "मूल ऑडियो के रूप में पृष्ठभूमि प्लेबैक का समर्थन करता है",
-  "tts_other_services_background_note": "नोट: अन्य टीटीएस सेवाएं मूल ऑडियो के रूप में पृष्ठभूमि प्लेबैक का समर्थन करती हैं।"
+  "tts_other_services_background_note": "नोट: अन्य टीटीएस सेवाएं मूल ऑडियो के रूप में पृष्ठभूमि प्लेबैक का समर्थन करती हैं।",
+  "start_listening_tooltip": "सुनना शुरू करें",
+  "stop_listening_tooltip": "सुनना बंद करें"
 }

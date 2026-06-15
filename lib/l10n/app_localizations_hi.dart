@@ -599,6 +599,12 @@ class AppLocalizationsHi extends AppLocalizations {
   String get attach_images_tooltip => 'छवियाँ संलग्न करें';
 
   @override
+  String get start_listening_tooltip => 'सुनना शुरू करें';
+
+  @override
+  String get stop_listening_tooltip => 'सुनना बंद करें';
+
+  @override
   String tool_label(String toolCallId) {
     return 'उपकरण: $toolCallId';
   }
