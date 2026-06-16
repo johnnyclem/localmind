@@ -11,51 +11,24 @@ PODS:
     - Flutter
   - clipboard (3.0.9):
     - Flutter
+  - CwlCatchException (2.2.1):
+    - CwlCatchExceptionSupport (~> 2.2.1)
+  - CwlCatchExceptionSupport (2.2.1)
   - device_info_plus (0.0.1):
     - Flutter
-  - DKImagePickerController/Core (4.3.9):
-    - DKImagePickerController/ImageDataManager
-    - DKImagePickerController/Resource
-  - DKImagePickerController/ImageDataManager (4.3.9)
-  - DKImagePickerController/PhotoGallery (4.3.9):
-    - DKImagePickerController/Core
-    - DKPhotoGallery
-  - DKImagePickerController/Resource (4.3.9)
-  - DKPhotoGallery (0.0.19):
-    - DKPhotoGallery/Core (= 0.0.19)
-    - DKPhotoGallery/Model (= 0.0.19)
-    - DKPhotoGallery/Preview (= 0.0.19)
-    - DKPhotoGallery/Resource (= 0.0.19)
-    - SDWebImage
-    - SwiftyGif
-  - DKPhotoGallery/Core (0.0.19):
-    - DKPhotoGallery/Model
-    - DKPhotoGallery/Preview
-    - SDWebImage
-    - SwiftyGif
-  - DKPhotoGallery/Model (0.0.19):
-    - SDWebImage
-    - SwiftyGif
-  - DKPhotoGallery/Preview (0.0.19):
-    - DKPhotoGallery/Model
-    - DKPhotoGallery/Resource
-    - SDWebImage
-    - SwiftyGif
-  - DKPhotoGallery/Resource (0.0.19):
-    - SDWebImage
-    - SwiftyGif
   - file_picker (0.0.1):
-    - DKImagePickerController/PhotoGallery
     - Flutter
+    - FlutterMacOS
   - Flutter (1.0.0)
-  - flutter_gemma (0.16.1):
+  - flutter_gemma (0.16.5):
     - Flutter
     - MediaPipeTasksGenAI (= 0.10.33)
     - MediaPipeTasksGenAIC (= 0.10.33)
   - flutter_local_notifications (0.0.1):
     - Flutter
-  - flutter_secure_storage (6.0.0):
+  - flutter_secure_storage_darwin (10.0.0):
     - Flutter
+    - FlutterMacOS
   - flutter_tts (0.0.1):
     - Flutter
   - haptic_feedback (0.5.1):
@@ -63,29 +36,32 @@ PODS:
   - just_audio (0.0.1):
     - Flutter
     - FlutterMacOS
-  - large_file_handler (0.0.1):
+  - large_file_handler (0.4.0):
     - Flutter
   - MediaPipeTasksGenAI (0.10.33):
     - MediaPipeTasksGenAIC (= 0.10.33)
   - MediaPipeTasksGenAIC (0.10.33)
-  - ObjectBox (5.3.0-beta.4)
+  - ObjectBox (5.3.0)
   - objectbox_flutter_libs (0.0.1):
     - Flutter
-    - ObjectBox (= 5.3.0-beta.4)
+    - ObjectBox (= 5.3.0)
   - package_info_plus (0.4.5):
     - Flutter
-  - SDWebImage (5.21.7):
-    - SDWebImage/Core (= 5.21.7)
-  - SDWebImage/Core (5.21.7)
+  - path_provider_foundation (0.0.1):
+    - Flutter
+    - FlutterMacOS
   - shared_preferences_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
   - sherpa_onnx_ios (1.13.2):
     - Flutter
+  - speech_to_text (7.2.0):
+    - CwlCatchException
+    - Flutter
+    - FlutterMacOS
   - sqflite_darwin (0.0.4):
     - Flutter
     - FlutterMacOS
-  - SwiftyGif (5.4.5)
   - url_launcher_ios (0.0.1):
     - Flutter
   - wakelock_plus (0.0.1):
@@ -98,32 +74,32 @@ DEPENDENCIES:
   - background_downloader (from `.symlinks/plugins/background_downloader/ios`)
   - clipboard (from `.symlinks/plugins/clipboard/ios`)
   - device_info_plus (from `.symlinks/plugins/device_info_plus/ios`)
-  - file_picker (from `.symlinks/plugins/file_picker/ios`)
+  - file_picker (from `.symlinks/plugins/file_picker/darwin`)
   - Flutter (from `Flutter`)
   - flutter_gemma (from `.symlinks/plugins/flutter_gemma/ios`)
   - flutter_local_notifications (from `.symlinks/plugins/flutter_local_notifications/ios`)
-  - flutter_secure_storage (from `.symlinks/plugins/flutter_secure_storage/ios`)
+  - flutter_secure_storage_darwin (from `.symlinks/plugins/flutter_secure_storage_darwin/darwin`)
   - flutter_tts (from `.symlinks/plugins/flutter_tts/ios`)
   - haptic_feedback (from `.symlinks/plugins/haptic_feedback/ios`)
   - just_audio (from `.symlinks/plugins/just_audio/darwin`)
   - large_file_handler (from `.symlinks/plugins/large_file_handler/ios`)
   - objectbox_flutter_libs (from `.symlinks/plugins/objectbox_flutter_libs/ios`)
   - package_info_plus (from `.symlinks/plugins/package_info_plus/ios`)
+  - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
   - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
   - sherpa_onnx_ios (from `.symlinks/plugins/sherpa_onnx_ios/ios`)
+  - speech_to_text (from `.symlinks/plugins/speech_to_text/darwin`)
   - sqflite_darwin (from `.symlinks/plugins/sqflite_darwin/darwin`)
   - url_launcher_ios (from `.symlinks/plugins/url_launcher_ios/ios`)
   - wakelock_plus (from `.symlinks/plugins/wakelock_plus/ios`)
 
 SPEC REPOS:
   trunk:
-    - DKImagePickerController
-    - DKPhotoGallery
+    - CwlCatchException
+    - CwlCatchExceptionSupport
     - MediaPipeTasksGenAI
     - MediaPipeTasksGenAIC
     - ObjectBox
-    - SDWebImage
-    - SwiftyGif
 
 EXTERNAL SOURCES:
   audio_service:
@@ -139,15 +115,15 @@ EXTERNAL SOURCES:
   device_info_plus:
     :path: ".symlinks/plugins/device_info_plus/ios"
   file_picker:
-    :path: ".symlinks/plugins/file_picker/ios"
+    :path: ".symlinks/plugins/file_picker/darwin"
   Flutter:
     :path: Flutter
   flutter_gemma:
     :path: ".symlinks/plugins/flutter_gemma/ios"
   flutter_local_notifications:
     :path: ".symlinks/plugins/flutter_local_notifications/ios"
-  flutter_secure_storage:
-    :path: ".symlinks/plugins/flutter_secure_storage/ios"
+  flutter_secure_storage_darwin:
+    :path: ".symlinks/plugins/flutter_secure_storage_darwin/darwin"
   flutter_tts:
     :path: ".symlinks/plugins/flutter_tts/ios"
   haptic_feedback:
@@ -160,10 +136,14 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/objectbox_flutter_libs/ios"
   package_info_plus:
     :path: ".symlinks/plugins/package_info_plus/ios"
+  path_provider_foundation:
+    :path: ".symlinks/plugins/path_provider_foundation/darwin"
   shared_preferences_foundation:
     :path: ".symlinks/plugins/shared_preferences_foundation/darwin"
   sherpa_onnx_ios:
     :path: ".symlinks/plugins/sherpa_onnx_ios/ios"
+  speech_to_text:
+    :path: ".symlinks/plugins/speech_to_text/darwin"
   sqflite_darwin:
     :path: ".symlinks/plugins/sqflite_darwin/darwin"
   url_launcher_ios:
@@ -177,28 +157,28 @@ SPEC CHECKSUMS:
   audioplayers_darwin: f15e209a3e856d1a7edcf98dc029f484fead2242
   background_downloader: a05c77d32a0d70615b9c04577aa203535fc924ff
   clipboard: 1dfb1b37c0b722d20b0ca76a89bb2e7194e85811
+  CwlCatchException: 7acc161b299a6de7f0a46a6ed741eae2c8b4d75a
+  CwlCatchExceptionSupport: 54ccab8d8c78907b57f99717fb19d4cc3bce02dc
   device_info_plus: bf2e3232933866d73fe290f2942f2156cdd10342
-  DKImagePickerController: 946cec48c7873164274ecc4624d19e3da4c1ef3c
-  DKPhotoGallery: b3834fecb755ee09a593d7c9e389d8b5d6deed60
-  file_picker: b159e0c068aef54932bb15dc9fd1571818edaf49
+  file_picker: e81e2d2db6261a4e98febeae383bd2173ba8b396
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
-  flutter_gemma: 9c3d57a8dff68fe107140bb4ed908ff53ff6dab0
-  flutter_local_notifications: df98d66e515e1ca797af436137b4459b160ad8c9
-  flutter_secure_storage: d33dac7ae2ea08509be337e775f6b59f1ff45f12
+  flutter_gemma: 6bf34a12b45df17e3db9b33db7fea51506c8628f
+  flutter_local_notifications: eda81afddbf18f8589f6ec069ce593c4c6378769
+  flutter_secure_storage_darwin: 557817588b80e60213cbecb573c45c76b788018d
   flutter_tts: 91ad1884033cd95ef6e9338754adad54f01f090f
   haptic_feedback: a366a27ec760f0e865651605b95de8a9bb04ef01
   just_audio: a42c63806f16995daf5b219ae1d679deb76e6a79
-  large_file_handler: e3686e246052b0f03955789d3a04604574f80afe
+  large_file_handler: b0da5998ce84ea647987d9cc2c37d2383eabdca6
   MediaPipeTasksGenAI: 8eed8e6d03fe26d30c4205cb5295ec7b394432ad
   MediaPipeTasksGenAIC: cb098ecea44e248efe8fe7e2f62b4cb0df781802
-  ObjectBox: eccb95ea2054c39d81dfa2d4ccc5f1e31187228a
-  objectbox_flutter_libs: 893a4322e8ec87438912bae6dfa745929adc6bf5
+  ObjectBox: 2aae8ad350012cb53c6e7848064307cf68617f73
+  objectbox_flutter_libs: bfbfc0486c06b0b29b130ca1ad9467e8314f32f1
   package_info_plus: c0502532a26c7662a62a356cebe2692ec5fe4ec4
-  SDWebImage: e9fc87c1aab89a8ab1bbd74eba378c6f53be8abf
+  path_provider_foundation: 0b743cbb62d8e47eab856f09262bb8c1ddcfe6ba
   shared_preferences_foundation: 5086985c1d43c5ba4d5e69a4e8083a389e2909e6
   sherpa_onnx_ios: 9f536d001daeaca36fc812fa1b1234870df3bc91
+  speech_to_text: 87bf9298952e8d9073be1b6aade6d5758db5170c
   sqflite_darwin: 5a7236e3b501866c1c9befc6771dfd73ffb8702d
-  SwiftyGif: 706c60cf65fa2bc5ee0313beece843c8eb8194d4
   url_launcher_ios: bb13df5870e8c4234ca12609d04010a21be43dfa
   wakelock_plus: 76957ab028e12bfa4e66813c99e46637f367fc7e
 
