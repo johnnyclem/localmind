@@ -4,12 +4,15 @@ const exampleMcpServerLabel = 'Example MCP';
 const exampleMcpServerUrl = 'local://example-mcp';
 
 class McpServerManager {
+  final String _appVersion;
   final Map<String, McpClient> _clients = {};
   final Map<String, McpCapabilities> _capabilities = {};
   final Map<String, List<McpTool>> _tools = {};
   final Map<String, String> _serverUrls = {};
   final Set<String> _localExampleServers = {};
   final Set<String> _pendingLabels = {};
+
+  McpServerManager({String appVersion = '1.0.0'}) : _appVersion = appVersion;
 
   Future<void> addServer(
     String label,
@@ -29,7 +32,11 @@ class McpServerManager {
         _serverUrls.remove(label);
       }
 
-      final client = McpClient(serverUrl: url, headers: headers);
+      final client = McpClient(
+        serverUrl: url,
+        headers: headers,
+        version: _appVersion,
+      );
 
       final capabilities = await client.initialize();
       final tools = await client.listTools();

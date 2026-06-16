@@ -1,5 +1,6 @@
 import 'package:flutter_gemma/flutter_gemma.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 import '../../features/settings/data/models/app_settings.dart';
 import '../models/enums.dart';
@@ -114,3 +115,7 @@ class SettingsNotifier extends Notifier<AppSettings> {
     await prefs.setString('appSettings', state.toJson());
   }
 }
+
+final packageInfoProvider = FutureProvider<PackageInfo>((ref) async {
+  return PackageInfo.fromPlatform();
+});

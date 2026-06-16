@@ -7,6 +7,7 @@ import 'package:localmind/core/logger/app_logger.dart';
 class McpClient {
   final String serverUrl;
   final Map<String, String>? headers;
+  final String _version;
   final Dio _dio;
   bool _initialized = false;
   McpCapabilities? _capabilities;
@@ -18,8 +19,13 @@ class McpClient {
   final Map<String, Completer<Map<String, dynamic>>> _pendingRequests = {};
   int _requestIdCounter = 1;
 
-  McpClient({required this.serverUrl, this.headers, Dio? dio})
-    : _dio = dio ?? Dio();
+  McpClient({
+    required this.serverUrl,
+    this.headers,
+    String version = '1.0.0',
+    Dio? dio,
+  })  : _version = version,
+        _dio = dio ?? Dio();
 
   bool get isInitialized => _initialized;
   McpCapabilities? get capabilities => _capabilities;
@@ -270,7 +276,7 @@ class McpClient {
       final response = await _sendJsonRpc('initialize', {
         'protocolVersion': '2024-11-05',
         'capabilities': {},
-        'clientInfo': {'name': 'localmind', 'version': '1.0.0'},
+        'clientInfo': {'name': 'localmind', 'version': _version},
       });
 
       _capabilities = McpCapabilities.fromJson(

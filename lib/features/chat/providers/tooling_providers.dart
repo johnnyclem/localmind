@@ -1,11 +1,15 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/providers/app_providers.dart';
 import '../data/tools/tool_registry.dart';
 import '../data/tools/builtin_tool_provider.dart';
 import '../data/tools/mcp_tool_provider.dart';
 import '../data/mcp_server_manager.dart';
 
 final mcpServerManagerProvider = Provider<McpServerManager>((ref) {
-  return McpServerManager();
+  final packageInfo = ref.watch(packageInfoProvider);
+  return McpServerManager(
+    appVersion: packageInfo.value?.version ?? '1.0.0',
+  );
 });
 
 final builtInToolProviderProvider = Provider<BuiltInToolProvider>((ref) {

@@ -42,6 +42,22 @@ class ModelPickerSheet extends ConsumerWidget {
     final modelLoading = ref.watch(modelLoadingProvider);
     final isThinking = ref.watch(modelThinkingProvider);
 
+    ref.listen(onDeviceEngineProvider, (prev, next) {
+      if (next.status == OnDeviceEngineStatus.loaded &&
+          prev?.status == OnDeviceEngineStatus.loading) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              l10n.model_loaded(
+                next.loadedModelId ?? 'Unknown',
+                next.backend?.name ?? 'CPU',
+              ),
+            ),
+          ),
+        );
+      }
+    });
+
     return Container(
       height: MediaQuery.of(context).size.height * 0.7,
       padding: const EdgeInsets.all(16),
@@ -92,7 +108,9 @@ class ModelPickerSheet extends ConsumerWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              l10n.loading_model(modelLoading.modelId ?? 'model'),
+                              l10n.loading_model(
+                                modelLoading.modelId ?? 'model',
+                              ),
                               style: TextStyle(
                                 fontSize: 12,
                                 color: isDark
@@ -341,7 +359,8 @@ class _ModelList extends ConsumerWidget {
                 final activeServer = ref.read(activeServerProvider);
                 if (activeServer == null) return;
 
-                final supportsLoad = model.serverType == ServerType.lmStudio ||
+                final supportsLoad =
+                    model.serverType == ServerType.lmStudio ||
                     model.serverType == ServerType.ollama;
 
                 if (supportsLoad && !isLoaded) {
@@ -483,24 +502,29 @@ class _ModelTile extends StatelessWidget {
                     spacing: 6,
                     runSpacing: 4,
                     children: [
-                      if (model.parameterCountDisplay != null && model.parameterCountDisplay!.isNotEmpty)
+                      if (model.parameterCountDisplay != null &&
+                          model.parameterCountDisplay!.isNotEmpty)
                         _MetadataChip(
                           label: model.parameterCountDisplay!,
                           isDark: isDark,
                         ),
-                      if (model.quantization != null && model.quantization!.isNotEmpty)
+                      if (model.quantization != null &&
+                          model.quantization!.isNotEmpty)
                         _MetadataChip(
                           label: model.quantization!,
                           isDark: isDark,
                         ),
-                      if (model.formattedSize != null && model.formattedSize!.isNotEmpty)
+                      if (model.formattedSize != null &&
+                          model.formattedSize!.isNotEmpty)
                         _MetadataChip(
                           label: model.formattedSize!,
                           isDark: isDark,
                         ),
                       if (model.contextLength != null)
                         _MetadataChip(
-                          label: l10n.context_chip(model.contextLength.toString()),
+                          label: l10n.context_chip(
+                            model.contextLength.toString(),
+                          ),
                           isDark: isDark,
                         ),
                     ],
@@ -792,9 +816,13 @@ class _OnDeviceModelTile extends ConsumerWidget {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
         margin: const EdgeInsets.only(bottom: 4),
         decoration: BoxDecoration(
-          color: isSelected ? accent.withValues(alpha: 0.1) : Colors.transparent,
+          color: isSelected
+              ? accent.withValues(alpha: 0.1)
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(8),
-          border: isSelected ? Border.all(color: accent.withValues(alpha: 0.3)) : null,
+          border: isSelected
+              ? Border.all(color: accent.withValues(alpha: 0.3))
+              : null,
         ),
         child: Row(
           children: [
@@ -809,10 +837,14 @@ class _OnDeviceModelTile extends ConsumerWidget {
                           model.name,
                           style: TextStyle(
                             fontSize: 15,
-                            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                            fontWeight: isSelected
+                                ? FontWeight.w600
+                                : FontWeight.w500,
                             color: isDownloaded
                                 ? (isDark ? Colors.white : Colors.black)
-                                : (isDark ? const Color(0xFF555555) : const Color(0xFF999999)),
+                                : (isDark
+                                      ? const Color(0xFF555555)
+                                      : const Color(0xFF999999)),
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -839,12 +871,18 @@ class _OnDeviceModelTile extends ConsumerWidget {
                         ),
                     ],
                   ),
-                  if (!Platform.isIOS && deviceMemory != null && deviceMemory!.isOversized(model.minRamMb))
+                  if (!Platform.isIOS &&
+                      deviceMemory != null &&
+                      deviceMemory!.isOversized(model.minRamMb))
                     Padding(
                       padding: const EdgeInsets.only(top: 2),
                       child: Row(
                         children: [
-                          const Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 12),
+                          const Icon(
+                            Icons.warning_amber_rounded,
+                            color: Colors.orange,
+                            size: 12,
+                          ),
                           const SizedBox(width: 4),
                           Text(
                             l10n.may_be_large,
@@ -865,16 +903,23 @@ class _OnDeviceModelTile extends ConsumerWidget {
                         children: [
                           LinearProgressIndicator(
                             value: downloadProgress?.progress ?? 0.0,
-                            backgroundColor: isDark ? const Color(0xFF333333) : const Color(0xFFE0E0E0),
+                            backgroundColor: isDark
+                                ? const Color(0xFF333333)
+                                : const Color(0xFFE0E0E0),
                           ),
                           const SizedBox(height: 2),
                           Text(
                             isPaused
-                                ? l10n.paused_progress(((downloadProgress?.progress ?? 0) * 100).toStringAsFixed(0))
+                                ? l10n.paused_progress(
+                                    ((downloadProgress?.progress ?? 0) * 100)
+                                        .toStringAsFixed(0),
+                                  )
                                 : '${l10n.downloading_status} ${((downloadProgress?.progress ?? 0) * 100).toStringAsFixed(0)}%',
                             style: TextStyle(
                               fontSize: 10,
-                              color: isDark ? const Color(0xFF888888) : const Color(0xFF999999),
+                              color: isDark
+                                  ? const Color(0xFF888888)
+                                  : const Color(0xFF999999),
                             ),
                           ),
                         ],
@@ -890,7 +935,10 @@ class _OnDeviceModelTile extends ConsumerWidget {
                         isDark: isDark,
                       ),
                       _MetadataChip(label: model.license, isDark: isDark),
-                      _MetadataChip(label: model.parameterLabel, isDark: isDark),
+                      _MetadataChip(
+                        label: model.parameterLabel,
+                        isDark: isDark,
+                      ),
                     ],
                   ),
                 ],
@@ -933,7 +981,9 @@ class _OnDeviceModelTile extends ConsumerWidget {
                 icon: Icon(
                   Icons.delete_outline,
                   size: 18,
-                  color: isDark ? const Color(0xFF666666) : const Color(0xFF999999),
+                  color: isDark
+                      ? const Color(0xFF666666)
+                      : const Color(0xFF999999),
                 ),
                 tooltip: l10n.delete,
                 onPressed: () => _deleteModel(context, ref),
@@ -943,17 +993,23 @@ class _OnDeviceModelTile extends ConsumerWidget {
                 icon: Icon(
                   Icons.close,
                   size: 16,
-                  color: isDark ? const Color(0xFF666666) : const Color(0xFF999999),
+                  color: isDark
+                      ? const Color(0xFF666666)
+                      : const Color(0xFF999999),
                 ),
                 tooltip: l10n.cancel,
-                onPressed: () => ref.read(foregroundDownloadNotifierProvider.notifier).cancelDownload(model.id),
+                onPressed: () => ref
+                    .read(foregroundDownloadNotifierProvider.notifier)
+                    .cancelDownload(model.id),
               ),
             ] else ...[
               _IconButton(
                 icon: Icon(
                   Icons.cloud_download_outlined,
                   size: 18,
-                  color: isDark ? const Color(0xFF555555) : const Color(0xFF999999),
+                  color: isDark
+                      ? const Color(0xFF555555)
+                      : const Color(0xFF999999),
                 ),
                 tooltip: l10n.download,
                 onPressed: () {
@@ -967,7 +1023,9 @@ class _OnDeviceModelTile extends ConsumerWidget {
                 l10n.not_downloaded,
                 style: TextStyle(
                   fontSize: 11,
-                  color: isDark ? const Color(0xFF666666) : const Color(0xFF999999),
+                  color: isDark
+                      ? const Color(0xFF666666)
+                      : const Color(0xFF999999),
                 ),
               ),
             ],
@@ -982,15 +1040,16 @@ class _OnDeviceModelTile extends ConsumerWidget {
   }
 
   void _loadModel(BuildContext context, WidgetRef ref) async {
+    final settings = ref.read(settingsProvider);
+    final engineNotifier = ref.read(onDeviceEngineProvider.notifier);
+
     if (!Platform.isIOS && deviceMemory != null) {
       if (!deviceMemory!.hasEnoughRam(model.minRamMb)) {
         final proceed = await _showRamWarning(context);
+        if (!context.mounted) return;
         if (!proceed) return;
       }
     }
-
-    final settings = ref.read(settingsProvider);
-    final engineNotifier = ref.read(onDeviceEngineProvider.notifier);
 
     final modelInfo = ModelInfo(
       id: model.id,
@@ -1004,13 +1063,12 @@ class _OnDeviceModelTile extends ConsumerWidget {
     );
 
     await engineNotifier.loadModel(model.id, settings.preferredBackend);
+    if (!context.mounted) return;
 
     final engineState = ref.read(onDeviceEngineProvider);
     if (engineState.loadedModelId == model.id) {
       ref.read(selectedModelProvider.notifier).setModel(modelInfo);
-      if (context.mounted) {
-        Navigator.pop(context);
-      }
+      Navigator.pop(context);
     }
   }
 
@@ -1067,6 +1125,7 @@ class _OnDeviceModelTile extends ConsumerWidget {
   void _unloadModel(BuildContext context, WidgetRef ref) async {
     final engineNotifier = ref.read(onDeviceEngineProvider.notifier);
     await engineNotifier.unloadModel();
+    if (!context.mounted) return;
 
     final selectedModel = ref.read(selectedModelProvider);
     if (selectedModel?.id == model.id) {
@@ -1095,14 +1154,21 @@ class _OnDeviceModelTile extends ConsumerWidget {
     );
 
     if (confirm == true) {
+      if (!context.mounted) return;
+
       final engineState = ref.read(onDeviceEngineProvider);
+      final engineNotifier = ref.read(onDeviceEngineProvider.notifier);
+      final selectedModelNotifier = ref.read(selectedModelProvider.notifier);
+      final gemmaService = ref.read(onDeviceGemmaServiceProvider);
+
       if (engineState.loadedModelId == model.id) {
-        await ref.read(onDeviceEngineProvider.notifier).unloadModel();
-        ref.read(selectedModelProvider.notifier).clear();
+        await engineNotifier.unloadModel();
+        if (!context.mounted) return;
+        selectedModelNotifier.clear();
       }
 
-      final gemmaService = ref.read(onDeviceGemmaServiceProvider);
       await gemmaService.deleteModel(model.id);
+      if (!context.mounted) return;
       ref.invalidate(downloadedModelsProvider);
     }
   }

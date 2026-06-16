@@ -29,6 +29,22 @@ class OnDeviceModelManagerScreen extends ConsumerWidget {
     final downloadProgress = ref.watch(foregroundDownloadNotifierProvider);
     final deviceMemoryAsync = ref.watch(deviceMemoryProvider);
 
+    ref.listen(onDeviceEngineProvider, (prev, next) {
+      if (next.status == OnDeviceEngineStatus.loaded &&
+          prev?.status == OnDeviceEngineStatus.loading) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              l10n.model_loaded(
+                next.loadedModelId ?? 'Unknown',
+                next.backend?.name ?? 'CPU',
+              ),
+            ),
+          ),
+        );
+      }
+    });
+
     return Scaffold(
       drawer: const SidebarWidget(),
       appBar: AppBar(title: Text(l10n.on_device_models_title)),
@@ -51,7 +67,10 @@ class OnDeviceModelManagerScreen extends ConsumerWidget {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      l10n.model_loaded(engineState.loadedModelId ?? 'Unknown', engineState.backend?.name ?? 'CPU'),
+                      l10n.model_loaded(
+                        engineState.loadedModelId ?? 'Unknown',
+                        engineState.backend?.name ?? 'CPU',
+                      ),
                       style: const TextStyle(color: Colors.green),
                     ),
                   ),
@@ -112,7 +131,7 @@ class OnDeviceModelManagerScreen extends ConsumerWidget {
         final theme = Theme.of(context);
         final usedMb = info.totalMemoryMb - info.availableMemoryMb;
         final usagePercent = usedMb / info.totalMemoryMb;
-        
+
         // Memory health logic
         Color statusColor = Colors.green;
         String statusText = l10n.memory_healthy;
@@ -133,7 +152,9 @@ class OnDeviceModelManagerScreen extends ConsumerWidget {
               end: Alignment.bottomRight,
               colors: [
                 theme.colorScheme.surfaceContainerHighest,
-                theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                theme.colorScheme.surfaceContainerHighest.withValues(
+                  alpha: 0.5,
+                ),
               ],
             ),
             boxShadow: [
@@ -150,7 +171,12 @@ class OnDeviceModelManagerScreen extends ConsumerWidget {
           child: Column(
             children: [
               Padding(
-                padding: const EdgeInsetsDirectional.only(start: 20, top: 16, end: 12, bottom: 8),
+                padding: const EdgeInsetsDirectional.only(
+                  start: 20,
+                  top: 16,
+                  end: 12,
+                  bottom: 8,
+                ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -189,15 +215,22 @@ class OnDeviceModelManagerScreen extends ConsumerWidget {
                         Text(
                           l10n.ram_usage,
                           style: theme.textTheme.labelMedium?.copyWith(
-                            color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                            color: theme.colorScheme.onSurface.withValues(
+                              alpha: 0.6,
+                            ),
                           ),
                         ),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 2,
+                          ),
                           decoration: BoxDecoration(
                             color: statusColor.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: statusColor.withValues(alpha: 0.2)),
+                            border: Border.all(
+                              color: statusColor.withValues(alpha: 0.2),
+                            ),
                           ),
                           child: Text(
                             statusText,
@@ -222,7 +255,9 @@ class OnDeviceModelManagerScreen extends ConsumerWidget {
                           AnimatedContainer(
                             duration: const Duration(milliseconds: 500),
                             height: 10,
-                            width: MediaQuery.of(context).size.width * usagePercent,
+                            width:
+                                MediaQuery.of(context).size.width *
+                                usagePercent,
                             decoration: BoxDecoration(
                               gradient: LinearGradient(
                                 colors: [
@@ -248,7 +283,9 @@ class OnDeviceModelManagerScreen extends ConsumerWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          l10n.ram_used((usagePercent * 100).toStringAsFixed(0)),
+                          l10n.ram_used(
+                            (usagePercent * 100).toStringAsFixed(0),
+                          ),
                           style: theme.textTheme.labelSmall?.copyWith(
                             fontWeight: FontWeight.w600,
                           ),
@@ -256,7 +293,9 @@ class OnDeviceModelManagerScreen extends ConsumerWidget {
                         Text(
                           '${_formatMb(usedMb)} / ${info.totalMemoryFormatted}',
                           style: theme.textTheme.labelSmall?.copyWith(
-                            color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                            color: theme.colorScheme.onSurface.withValues(
+                              alpha: 0.5,
+                            ),
                           ),
                         ),
                       ],
@@ -267,7 +306,10 @@ class OnDeviceModelManagerScreen extends ConsumerWidget {
               const SizedBox(height: 16),
               const Divider(height: 1),
               Padding(
-                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 12,
+                  horizontal: 20,
+                ),
                 child: Row(
                   children: [
                     Expanded(
@@ -337,7 +379,8 @@ class _MemoryStat extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final iconColor = color ?? theme.colorScheme.onSurface.withValues(alpha: 0.4);
+    final iconColor =
+        color ?? theme.colorScheme.onSurface.withValues(alpha: 0.4);
 
     return Column(
       crossAxisAlignment: alignment,
@@ -365,11 +408,15 @@ class _MemoryStat extends StatelessWidget {
         const SizedBox(height: 2),
         Text(
           value,
-          style: (isPrimary ? theme.textTheme.titleMedium : theme.textTheme.bodyMedium)?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: color,
-            letterSpacing: isPrimary ? -0.5 : null,
-          ),
+          style:
+              (isPrimary
+                      ? theme.textTheme.titleMedium
+                      : theme.textTheme.bodyMedium)
+                  ?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: color,
+                    letterSpacing: isPrimary ? -0.5 : null,
+                  ),
         ),
       ],
     );
@@ -462,20 +509,31 @@ class _ModelCard extends ConsumerWidget {
                   ),
               ],
             ),
-            if (!Platform.isIOS && deviceMemory != null && deviceMemory!.isOversized(model.minRamMb))
+            if (!Platform.isIOS &&
+                deviceMemory != null &&
+                deviceMemory!.isOversized(model.minRamMb))
               Padding(
                 padding: const EdgeInsets.only(top: 6),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.orange.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(6),
-                    border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
+                    border: Border.all(
+                      color: Colors.orange.withValues(alpha: 0.3),
+                    ),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 14),
+                      const Icon(
+                        Icons.warning_amber_rounded,
+                        color: Colors.orange,
+                        size: 14,
+                      ),
                       const SizedBox(width: 6),
                       Text(
                         l10n.may_be_large,
@@ -495,6 +553,8 @@ class _ModelCard extends ConsumerWidget {
                 color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
               ),
             ),
+            const SizedBox(height: 8),
+            _buildCapabilityChips(),
             const SizedBox(height: 8),
             Row(
               children: [
@@ -523,6 +583,45 @@ class _ModelCard extends ConsumerWidget {
               isPaused,
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCapabilityChips() {
+    final chips = <String>[
+      if (model.supportsFunctionCalling) 'Tools',
+      if (model.supportsThinking) 'Thinking',
+      if (model.supportsVision) 'Vision',
+      model.languagesLabel,
+      if (model.backendNote != null) model.backendNote!,
+    ];
+
+    return Wrap(
+      spacing: 6,
+      runSpacing: 6,
+      children: chips.map(_buildCapabilityChip).toList(),
+    );
+  }
+
+  Widget _buildCapabilityChip(String label) {
+    final isBackendNote = label == model.backendNote;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: (isBackendNote ? Colors.orange : theme.colorScheme.primary)
+            .withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(
+          color: (isBackendNote ? Colors.orange : theme.colorScheme.primary)
+              .withValues(alpha: 0.2),
+        ),
+      ),
+      child: Text(
+        label,
+        style: theme.textTheme.labelSmall?.copyWith(
+          color: isBackendNote ? Colors.orange : theme.colorScheme.primary,
+          fontWeight: FontWeight.w600,
         ),
       ),
     );
@@ -599,8 +698,12 @@ class _ModelCard extends ConsumerWidget {
                       child: LinearProgressIndicator(
                         value: downloadProgress?.progress ?? 0.0,
                         minHeight: 6,
-                        backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.1),
-                        valueColor: AlwaysStoppedAnimation<Color>(theme.colorScheme.primary),
+                        backgroundColor: theme.colorScheme.primary.withValues(
+                          alpha: 0.1,
+                        ),
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          theme.colorScheme.primary,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 6),
@@ -609,7 +712,8 @@ class _ModelCard extends ConsumerWidget {
                       children: [
                         Text(
                           l10n.download_progress(
-                            ((downloadProgress?.progress ?? 0) * 100).toStringAsFixed(1),
+                            ((downloadProgress?.progress ?? 0) * 100)
+                                .toStringAsFixed(1),
                             downloadProgress?.speedFormatted ?? '0 B/s',
                           ),
                           style: theme.textTheme.labelSmall?.copyWith(
@@ -617,7 +721,9 @@ class _ModelCard extends ConsumerWidget {
                           ),
                         ),
                         Text(
-                          l10n.eta_label(downloadProgress?.etaFormatted ?? l10n.calculating),
+                          l10n.eta_label(
+                            downloadProgress?.etaFormatted ?? l10n.calculating,
+                          ),
                           style: theme.textTheme.labelSmall,
                         ),
                       ],
@@ -626,7 +732,9 @@ class _ModelCard extends ConsumerWidget {
                     Text(
                       downloadProgress?.progressFormatted ?? '',
                       style: theme.textTheme.labelSmall?.copyWith(
-                        color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                        color: theme.colorScheme.onSurface.withValues(
+                          alpha: 0.5,
+                        ),
                         fontSize: 10,
                       ),
                     ),
@@ -672,7 +780,9 @@ class _ModelCard extends ConsumerWidget {
       return Row(
         children: [
           Text(
-            l10n.paused_progress(((downloadProgress?.progress ?? 0) * 100).toStringAsFixed(0)),
+            l10n.paused_progress(
+              ((downloadProgress?.progress ?? 0) * 100).toStringAsFixed(0),
+            ),
             style: theme.textTheme.bodySmall,
           ),
           const Spacer(),

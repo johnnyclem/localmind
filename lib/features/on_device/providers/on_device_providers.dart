@@ -12,8 +12,8 @@ import '../data/on_device_gemma_service.dart';
 
 final notificationPermissionServiceProvider =
     Provider<NotificationPermissionService>((ref) {
-  return NotificationPermissionService();
-});
+      return NotificationPermissionService();
+    });
 
 final onDeviceGemmaServiceProvider = Provider<OnDeviceGemmaService>((ref) {
   final service = OnDeviceGemmaService();
@@ -89,6 +89,12 @@ class OnDeviceEngineNotifier extends Notifier<OnDeviceEngineState> {
     await bgService.start();
 
     try {
+      final model = OnDeviceModel.curatedModels.firstWhere(
+        (m) => m.id == modelId,
+        orElse: () => throw Exception('Model not found: $modelId'),
+      );
+      final effectiveBackend = model.isCpuOnly ? PreferredBackend.cpu : backend;
+
       // Yield control to the event loop so the UI has time to draw the loading indicator
       // and stabilize before the native platform thread begins heavy model loading.
       await Future.delayed(const Duration(milliseconds: 100));
@@ -101,15 +107,17 @@ class OnDeviceEngineNotifier extends Notifier<OnDeviceEngineState> {
         return;
       }
 
-      await _gemmaService.loadModel(modelId, backend);
+      await _gemmaService.loadModel(modelId, effectiveBackend);
 
       state = state.copyWith(
         status: OnDeviceEngineStatus.loaded,
         loadedModelId: modelId,
-        backend: backend,
+        backend: effectiveBackend,
       );
 
-      Log.info('Model $modelId loaded successfully with ${backend.name}');
+      Log.info(
+        'Model $modelId loaded successfully with ${effectiveBackend.name}',
+      );
     } catch (e) {
       Log.error('Failed to load model $modelId: $e');
       state = state.copyWith(
@@ -149,8 +157,7 @@ class OnDeviceModelStateNotifier
     PreferredBackend? backend,
     OnDeviceEngineStatus? engineStatus,
   }) {
-    final current =
-        state[modelId] ?? OnDeviceModelStateInfo(modelId: modelId);
+    final current = state[modelId] ?? OnDeviceModelStateInfo(modelId: modelId);
     state = {
       ...state,
       modelId: current.copyWith(

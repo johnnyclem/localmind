@@ -46,101 +46,119 @@ class _OnboardingModelDownloadScreenState
       body: SafeArea(
         child: Cue.onMount(
           motion: .smooth(),
-          child: ListView(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+          child: Column(
             children: [
-              Actor(
-                acts: [
-                  .fadeIn(),
-                  .slideY(from: 0.08),
-                ],
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
+              Expanded(
+                child: ListView(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24.0,
+                    vertical: 16.0,
+                  ),
                   children: [
-                    Text(
-                      l10n.download_model_desc,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    if (!Platform.isAndroid && !Platform.isIOS)
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        margin: const EdgeInsets.only(bottom: 16),
-                        decoration: BoxDecoration(
-                          color: Colors.orange.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: Colors.orange),
-                        ),
-                        child: Row(
-                          children: [
-                            const Icon(Icons.info_outline, color: Colors.orange, size: 20),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                l10n.on_device_android_only,
-                                style: const TextStyle(color: Colors.orange),
+                    Actor(
+                      acts: [.fadeIn(), .slideY(from: 0.08)],
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Text(
+                            l10n.download_model_desc,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: theme.colorScheme.onSurface.withValues(
+                                alpha: 0.7,
                               ),
                             ),
-                          ],
-                        ),
+                          ),
+                          const SizedBox(height: 24),
+                          if (!Platform.isAndroid && !Platform.isIOS)
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              margin: const EdgeInsets.only(bottom: 16),
+                              decoration: BoxDecoration(
+                                color: Colors.orange.withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: Colors.orange),
+                              ),
+                              child: Row(
+                                children: [
+                                  const Icon(
+                                    Icons.info_outline,
+                                    color: Colors.orange,
+                                    size: 20,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      l10n.on_device_android_only,
+                                      style: const TextStyle(
+                                        color: Colors.orange,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          _buildMemoryInfo(context, ref, deviceMemoryAsync),
+                        ],
                       ),
-                    _buildMemoryInfo(context, ref, deviceMemoryAsync),
-                  ],
-                ),
-              ),
-              Actor(
-                delay: 60.ms,
-                acts: [
-                  .fadeIn(),
-                  .slideY(from: 0.08),
-                ],
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: models.map((model) {
-                    final isDownloaded = downloadedModelsAsync.when(
-                      data: (set) => set.contains(model.id),
-                      loading: () => false,
-                      error: (_, _) => false,
-                    );
-                    final progressInfo = downloadStates[model.id];
+                    ),
+                    Actor(
+                      delay: 60.ms,
+                      acts: [.fadeIn(), .slideY(from: 0.08)],
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: models.map((model) {
+                          final isDownloaded = downloadedModelsAsync.when(
+                            data: (set) => set.contains(model.id),
+                            loading: () => false,
+                            error: (_, _) => false,
+                          );
+                          final progressInfo = downloadStates[model.id];
 
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: _ModelCard(
-                        model: model,
-                        isDownloaded: isDownloaded,
-                        progressInfo: progressInfo,
-                        theme: theme,
-                        deviceMemory: deviceMemoryAsync.value,
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 12),
+                            child: _ModelCard(
+                              model: model,
+                              isDownloaded: isDownloaded,
+                              progressInfo: progressInfo,
+                              theme: theme,
+                              deviceMemory: deviceMemoryAsync.value,
+                            ),
+                          );
+                        }).toList(),
                       ),
-                    );
-                  }).toList(),
+                    ),
+                  ],
                 ),
               ),
               Actor(
                 delay: 120.ms,
-                acts: [
-                  .fadeIn(),
-                  .slideY(from: 0.08),
-                ],
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    const SizedBox(height: 24),
-                    if (_isCreatingServer)
-                      const Center(child: CircularProgressIndicator())
-                    else
-                      ShadButton(
-                        width: double.infinity,
-                        onPressed: _canContinue() ? _createOnDeviceServer : null,
-                        child: Text(
-                          l10n.continue_action,
-                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                acts: [.fadeIn(), .slideY(from: 0.08)],
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      if (_isCreatingServer)
+                        const Center(child: CircularProgressIndicator())
+                      else
+                        ShadButton(
+                          width: double.infinity,
+                          onPressed: _canContinue()
+                              ? _createOnDeviceServer
+                              : null,
+                          child: Text(
+                            l10n.continue_action,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
                         ),
-                      ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -181,9 +199,13 @@ class _OnboardingModelDownloadScreenState
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.error_with_message(e.toString()))));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              AppLocalizations.of(context)!.error_with_message(e.toString()),
+            ),
+          ),
+        );
       }
     } finally {
       if (mounted) {
@@ -206,9 +228,13 @@ class _OnboardingModelDownloadScreenState
           padding: const EdgeInsets.all(12),
           margin: const EdgeInsets.only(bottom: 24),
           decoration: BoxDecoration(
-            color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+            color: theme.colorScheme.surfaceContainerHighest.withValues(
+              alpha: 0.3,
+            ),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.1)),
+            border: Border.all(
+              color: theme.colorScheme.outline.withValues(alpha: 0.1),
+            ),
           ),
           child: Row(
             children: [
@@ -347,12 +373,18 @@ class _ModelCard extends ConsumerWidget {
                 ),
             ],
           ),
-          if (!Platform.isIOS && deviceMemory != null && deviceMemory!.isOversized(model.minRamMb))
+          if (!Platform.isIOS &&
+              deviceMemory != null &&
+              deviceMemory!.isOversized(model.minRamMb))
             Padding(
               padding: const EdgeInsets.only(top: 4),
               child: Row(
                 children: [
-                  const Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 14),
+                  const Icon(
+                    Icons.warning_amber_rounded,
+                    color: Colors.orange,
+                    size: 14,
+                  ),
                   const SizedBox(width: 4),
                   Text(
                     l10n.may_be_large,
@@ -371,6 +403,8 @@ class _ModelCard extends ConsumerWidget {
               color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
             ),
           ),
+          const SizedBox(height: 8),
+          _buildCapabilityChips(),
           const SizedBox(height: 8),
           Row(
             children: [
@@ -413,8 +447,12 @@ class _ModelCard extends ConsumerWidget {
                         child: LinearProgressIndicator(
                           value: progressInfo?.progress ?? 0.0,
                           minHeight: 6,
-                          backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.1),
-                          valueColor: AlwaysStoppedAnimation<Color>(theme.colorScheme.primary),
+                          backgroundColor: theme.colorScheme.primary.withValues(
+                            alpha: 0.1,
+                          ),
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            theme.colorScheme.primary,
+                          ),
                         ),
                       ),
                       const SizedBox(height: 6),
@@ -423,13 +461,16 @@ class _ModelCard extends ConsumerWidget {
                         children: [
                           Text(
                             l10n.download_progress(
-                              ((progressInfo?.progress ?? 0) * 100).toStringAsFixed(0),
+                              ((progressInfo?.progress ?? 0) * 100)
+                                  .toStringAsFixed(0),
                               progressInfo?.speedFormatted ?? '0 B/s',
                             ),
                             style: theme.textTheme.labelSmall,
                           ),
                           Text(
-                            l10n.eta_label(progressInfo?.etaFormatted ?? l10n.calculating),
+                            l10n.eta_label(
+                              progressInfo?.etaFormatted ?? l10n.calculating,
+                            ),
                             style: theme.textTheme.labelSmall,
                           ),
                         ],
@@ -451,7 +492,9 @@ class _ModelCard extends ConsumerWidget {
             Row(
               children: [
                 Text(
-                  l10n.paused_progress('${((progressInfo?.progress ?? 0) * 100).toStringAsFixed(0)}%'),
+                  l10n.paused_progress(
+                    '${((progressInfo?.progress ?? 0) * 100).toStringAsFixed(0)}%',
+                  ),
                   style: theme.textTheme.bodySmall,
                 ),
                 const Spacer(),
@@ -469,6 +512,45 @@ class _ModelCard extends ConsumerWidget {
               child: Text(l10n.download),
             ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildCapabilityChips() {
+    final chips = <String>[
+      if (model.supportsFunctionCalling) 'Tools',
+      if (model.supportsThinking) 'Thinking',
+      if (model.supportsVision) 'Vision',
+      model.languagesLabel,
+      if (model.backendNote != null) model.backendNote!,
+    ];
+
+    return Wrap(
+      spacing: 6,
+      runSpacing: 6,
+      children: chips.map(_buildCapabilityChip).toList(),
+    );
+  }
+
+  Widget _buildCapabilityChip(String label) {
+    final isBackendNote = label == model.backendNote;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: (isBackendNote ? Colors.orange : theme.colorScheme.primary)
+            .withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(
+          color: (isBackendNote ? Colors.orange : theme.colorScheme.primary)
+              .withValues(alpha: 0.2),
+        ),
+      ),
+      child: Text(
+        label,
+        style: theme.textTheme.labelSmall?.copyWith(
+          color: isBackendNote ? Colors.orange : theme.colorScheme.primary,
+          fontWeight: FontWeight.w600,
+        ),
       ),
     );
   }

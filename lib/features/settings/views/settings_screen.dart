@@ -26,6 +26,7 @@ class SettingsViews extends ConsumerWidget {
     final settings = ref.watch(settingsProvider);
     final currentTheme = ref.watch(themeModeProvider);
     final systemBottomInset = bottomSystemInset(context);
+    final packageInfo = ref.watch(packageInfoProvider);
     final servers = (ref.watch(serversProvider).value ?? [])
         .map((server) => (server.id, server.name))
         .toList();
@@ -266,7 +267,7 @@ class SettingsViews extends ConsumerWidget {
             accent: const Color(0xFFF59E0B),
             children: [
               _AboutPanel(
-                title: '${l10n.app_name} v${l10n.app_version}',
+                title: '${l10n.app_name} v${packageInfo.value?.version ?? l10n.app_version} (${packageInfo.value?.buildNumber ?? ''})',
                 subtitle: l10n.onboarding_connect_desc.replaceAll('\n', ' '),
                 providers: [
                   l10n.server_type_lm_studio,
