@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:localmind/core/theme/colors.dart';
 
 import '../../../l10n/app_localizations.dart';
 
@@ -19,24 +20,21 @@ class GitHubRepoCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    
-    final cardBg = isDark ? const Color(0xFF1F1F1F) : const Color(0xFFF9FAFB);
-    final borderColor = isDark ? const Color(0xFF374151) : const Color(0xFFE5E7EB);
-    final accentColor = isDark ? const Color(0xFF3B82F6) : const Color(0xFF2563EB);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       child: Container(
         decoration: BoxDecoration(
-          color: cardBg,
-          border: Border.all(color: borderColor),
-          borderRadius: BorderRadius.circular(10),
+          color: isDark ? AppColors.darkSurfaceCard : AppColors.lightSurface,
+          border: Border.all(
+            color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
+          ),
+          borderRadius: BorderRadius.circular(8),
         ),
         child: InkWell(
           onTap: _launchUrl,
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(8),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             child: Row(
@@ -44,7 +42,7 @@ class GitHubRepoCard extends StatelessWidget {
                 HugeIcon(
                   icon: HugeIcons.strokeRoundedGithub,
                   size: 20,
-                  color: isDark ? Colors.white70 : Colors.black87,
+                  color: isDark ? AppColors.darkPrimaryText : AppColors.lightPrimaryText,
                 ),
                 const SizedBox(width: 10),
                 Expanded(
@@ -57,7 +55,7 @@ class GitHubRepoCard extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
-                          color: isDark ? Colors.white : Colors.black,
+                          color: isDark ? AppColors.darkPrimaryText : AppColors.lightPrimaryText,
                         ),
                       ),
                       const SizedBox(height: 2),
@@ -66,7 +64,7 @@ class GitHubRepoCard extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w500,
-                          color: accentColor,
+                          color: isDark ? AppColors.darkAccent : AppColors.lightAccent,
                         ),
                       ),
                     ],
@@ -75,7 +73,7 @@ class GitHubRepoCard extends StatelessWidget {
                 Icon(
                   Icons.open_in_new,
                   size: 14,
-                  color: isDark ? Colors.white54 : Colors.black54,
+                  color: isDark ? AppColors.darkMutedText : AppColors.lightMutedText,
                 ),
               ],
             ),

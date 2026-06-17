@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:localmind/l10n/app_localizations.dart';
+import 'package:localmind/core/theme/colors.dart';
 import '../../data/models/conversation.dart';
 
 class ConversationTile extends StatelessWidget {
@@ -62,8 +63,8 @@ class ConversationTile extends StatelessWidget {
       child: Material(
         color: isActive
             ? (isDark
-                  ? const Color(0xFF3B82F6).withValues(alpha: 0.2)
-                  : const Color(0xFF2563EB).withValues(alpha: 0.1))
+                  ? AppColors.darkAccent.withValues(alpha: 0.2)
+                  : AppColors.lightAccent.withValues(alpha: 0.1))
             : Colors.transparent,
         child: InkWell(
           onTap: onTap,
@@ -77,13 +78,13 @@ class ConversationTile extends StatelessWidget {
                       ? Icons.push_pin
                       : Icons.chat_bubble_outline,
                   size: 20,
-                  color: isActive
-                      ? (isDark
-                            ? const Color(0xFF3B82F6)
-                            : const Color(0xFF2563EB))
-                      : (isDark
-                            ? const Color(0xFF888888)
-                            : const Color(0xFF666666)),
+                    color: isActive
+                        ? (isDark
+                              ? AppColors.darkAccent
+                              : AppColors.lightAccent)
+                        : (isDark
+                              ? AppColors.darkMutedText
+                              : AppColors.lightMutedText),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -97,7 +98,7 @@ class ConversationTile extends StatelessWidget {
                           fontWeight: isActive
                               ? FontWeight.w600
                               : FontWeight.w500,
-                          color: isDark ? Colors.white : Colors.black,
+                          color: isDark ? AppColors.darkPrimaryText : AppColors.lightPrimaryText,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -109,8 +110,8 @@ class ConversationTile extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 12,
                             color: isDark
-                                ? const Color(0xFF888888)
-                                : const Color(0xFF666666),
+                                ? AppColors.darkMutedText
+                                : AppColors.lightMutedText,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -125,8 +126,8 @@ class ConversationTile extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 12,
                     color: isDark
-                        ? const Color(0xFF666666)
-                        : const Color(0xFF999999),
+                        ? AppColors.darkMutedText
+                        : AppColors.lightMutedText,
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -136,8 +137,8 @@ class ConversationTile extends StatelessWidget {
                     icon: HugeIcons.strokeRoundedMoreVertical,
                     size: 18,
                     color: isDark
-                        ? const Color(0xFF888888)
-                        : const Color(0xFF666666),
+                        ? AppColors.darkMutedText
+                        : AppColors.lightMutedText,
                   ),
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(),

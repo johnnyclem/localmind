@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:localmind/l10n/app_localizations.dart';
+import 'package:localmind/core/theme/colors.dart';
 import '../../../tts/providers/tts_providers.dart' as tts;
 
 class MessageActionBar extends ConsumerStatefulWidget {
@@ -259,11 +260,11 @@ class _ActionButtonState extends State<_ActionButton>
 
     final baseColor = widget.isDestructive
         ? (isDark ? Colors.red[300] : Colors.red[600])
-        : (isDark ? const Color(0xFF888888) : const Color(0xFF666666));
+        : (isDark ? AppColors.darkMutedText : AppColors.lightMutedText);
 
     final hoverColor = widget.isDestructive
         ? (isDark ? Colors.red[200] : Colors.red[500])
-        : (isDark ? const Color(0xFFAAAAAA) : const Color(0xFF444444));
+        : (isDark ? AppColors.darkPrimaryText : AppColors.lightPrimaryText);
 
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
@@ -288,8 +289,8 @@ class _ActionButtonState extends State<_ActionButton>
               decoration: BoxDecoration(
                 color: _isHovered
                     ? (isDark
-                          ? const Color(0xFF2A2A2A)
-                          : const Color(0xFFE5E5E5))
+                          ? AppColors.darkSurfaceCard
+                          : AppColors.lightBorder)
                     : Colors.transparent,
                 borderRadius: BorderRadius.circular(4),
               ),

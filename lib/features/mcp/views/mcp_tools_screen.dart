@@ -1,3 +1,4 @@
+import "package:localmind/core/theme/colors.dart";
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
@@ -50,12 +51,17 @@ class _McpToolsScreenState extends ConsumerState<McpToolsScreen> {
     final isDark = theme.brightness == Brightness.dark;
     final manager = ref.watch(mcpServerManagerProvider);
     final hasExampleServer = manager.hasExampleServer();
+    final topPadding = MediaQuery.of(context).padding.top;
 
-    return SafeArea(
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.only(left: 16, right: 16, bottom: 12),
+    return Column(
+      children: [
+        Container(
+          padding: EdgeInsets.only(
+            left: 16,
+            right: 16,
+            top: topPadding + 8,
+            bottom: 16,
+          ),
             decoration: BoxDecoration(
               color: isDark ? const Color(0xFF0A0A0A) : const Color(0xFFFAFAFA),
               border: Border(
@@ -75,15 +81,12 @@ class _McpToolsScreenState extends ConsumerState<McpToolsScreen> {
                   ),
                 ),
                 const SizedBox(width: 8),
-                const HugeIcon(
-                  icon: HugeIcons.strokeRoundedMcpServer,
-                  size: 22,
-                ),
-                const SizedBox(width: 10),
                 Text(
                   'MCP Tools',
-                  style: theme.textTheme.titleLarge?.copyWith(
+                  style: TextStyle(
+                    fontSize: 20,
                     fontWeight: FontWeight.bold,
+                    color: isDark ? Colors.white : Colors.black,
                   ),
                 ),
               ],
@@ -148,8 +151,7 @@ class _McpToolsScreenState extends ConsumerState<McpToolsScreen> {
               ),
             ),
           ),
-        ],
-      ),
+      ],
     );
   }
 }
@@ -171,7 +173,7 @@ class _ExampleServerPanel extends StatelessWidget {
         color: isDark ? const Color(0xFF141414) : const Color(0xFFF8FAFC),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: isDark ? const Color(0xFF2A2A2A) : const Color(0xFFE2E8F0),
+          color: isDark ? AppColors.darkSurfaceCard : AppColors.lightSurface,
         ),
       ),
       child: Column(
@@ -249,7 +251,7 @@ class _ToolRow extends StatelessWidget {
         color: isDark ? const Color(0xFF111111) : Colors.white,
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: isDark ? const Color(0xFF2A2A2A) : const Color(0xFFE5E7EB),
+          color: isDark ? AppColors.darkSurfaceCard : AppColors.lightSurface,
         ),
       ),
       child: Row(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:go_router/go_router.dart';
+import 'package:localmind/core/theme/colors.dart';
 import '../../../core/routes/app_routes.dart';
 
 class SidebarSearchButton extends StatelessWidget {
@@ -8,11 +9,10 @@ class SidebarSearchButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       child: InkWell(
         onTap: () {
           if (Scaffold.maybeOf(context)?.isDrawerOpen ?? false) {
@@ -20,42 +20,42 @@ class SidebarSearchButton extends StatelessWidget {
           }
           context.go(AppRoutes.chatHistory);
         },
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(8),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           decoration: BoxDecoration(
-            color: isDark 
-                ? theme.colorScheme.surfaceContainerHighest.withAlpha(50) 
-                : theme.colorScheme.surfaceContainerHighest.withAlpha(100),
-            borderRadius: BorderRadius.circular(12),
+            color: isDark
+                ? AppColors.darkSurfaceInput
+                : AppColors.lightSurface,
+            borderRadius: BorderRadius.circular(8),
             border: Border.all(
-              color: isDark 
-                  ? theme.colorScheme.outlineVariant.withAlpha(100) 
-                  : theme.colorScheme.outlineVariant,
+              color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
             ),
           ),
           child: Row(
             children: [
               HugeIcon(
                 icon: HugeIcons.strokeRoundedSearch01,
-                size: 20,
-                color: isDark ? Colors.white70 : Colors.black54,
+                size: 18,
+                color: isDark ? AppColors.darkMutedText : AppColors.lightMutedText,
               ),
-              const SizedBox(width: 12),
-              Text(
-                'Search conversations...',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: isDark ? Colors.white38 : Colors.black38,
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  'Search conversations...',
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: isDark ? AppColors.darkMutedText : AppColors.lightMutedText,
+                  ),
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
-              const Spacer(),
               Text(
                 '⌘K',
                 style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w500,
-                  color: isDark ? Colors.white24 : Colors.black26,
+                  color: isDark ? AppColors.darkMutedText : AppColors.lightMutedText,
                   letterSpacing: 0.5,
                 ),
               ),

@@ -1,3 +1,4 @@
+import "package:localmind/core/theme/colors.dart";
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -18,14 +19,19 @@ class PersonaListScreen extends ConsumerWidget {
     final selectedCategory = ref.watch(personaCategoryFilterProvider);
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final topPadding = MediaQuery.of(context).padding.top;
 
-    return SafeArea(
-      child: Stack(
-        children: [
-          Column(
-            children: [
-              Container(
-                padding: const EdgeInsets.only(left: 16, right: 16, bottom: 12),
+    return Stack(
+      children: [
+        Column(
+          children: [
+            Container(
+              padding: EdgeInsets.only(
+                left: 16,
+                right: 16,
+                top: topPadding + 8,
+                bottom: 16,
+              ),
                 decoration: BoxDecoration(
                   color: isDark
                       ? const Color(0xFF0A0A0A)
@@ -186,8 +192,7 @@ class PersonaListScreen extends ConsumerWidget {
               child: const Icon(Icons.add),
             ),
           ),
-        ],
-      ),
+      ],
     );
   }
 
@@ -291,7 +296,7 @@ class _SectionLabel extends StatelessWidget {
           fontSize: 11,
           fontWeight: FontWeight.w600,
           letterSpacing: 0.8,
-          color: isDark ? const Color(0xFF888888) : const Color(0xFF999999),
+          color: isDark ? AppColors.darkMutedText : AppColors.lightMutedText,
         ),
       ),
     );
@@ -322,10 +327,10 @@ class _PersonaCard extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 8),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF1F1F1F) : const Color(0xFFF5F5F5),
+          color: isDark ? AppColors.darkSurface : AppColors.lightSurface,
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
-            color: isDark ? const Color(0xFF2A2A2A) : const Color(0xFFE5E5E5),
+            color: isDark ? AppColors.darkSurfaceCard : AppColors.lightBorder,
           ),
         ),
         child: Row(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../theme/colors.dart';
 import 'app_sizes.dart';
 
 class AppButton extends StatelessWidget {
@@ -25,7 +26,7 @@ class AppButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final accent = AppColors.accentForDark(isDark);
+    final accent = isDark ? AppColors.darkAccent : AppColors.lightAccent;
     final height = switch (size) {
       AppButtonSize.small => 32.0,
       AppButtonSize.medium => 44.0,
@@ -118,15 +119,17 @@ class AppCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final radius = borderRadius ?? AppSizes.radiusMd;
+    final radius = borderRadius ?? AppSizes.radiusLg;
 
     final container = Container(
-      padding: padding ?? const EdgeInsets.all(AppSizes.md),
+      padding: padding ?? const EdgeInsets.all(AppSizes.lg),
       margin: margin ?? const EdgeInsets.only(bottom: AppSizes.sm),
       decoration: BoxDecoration(
-        color: AppColors.surfaceForDark(isDark),
+        color: isDark ? AppColors.darkSurfaceCard : AppColors.lightSurface,
         borderRadius: BorderRadius.circular(radius),
-        border: Border.all(color: AppColors.borderForDark(isDark)),
+        border: Border.all(
+          color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
+        ),
       ),
       child: child,
     );
@@ -147,13 +150,14 @@ class AppLoadingIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     return SizedBox(
       width: size,
       height: size,
       child: CircularProgressIndicator(
         strokeWidth: strokeWidth,
-        color: AppColors.accentForDark(isDark),
+        color: Theme.of(context).brightness == Brightness.dark
+            ? AppColors.darkAccent
+            : AppColors.lightAccent,
       ),
     );
   }

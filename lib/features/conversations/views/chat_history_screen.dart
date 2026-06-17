@@ -18,12 +18,17 @@ class ChatHistoryScreen extends ConsumerWidget {
     final groupedConversations = ref.watch(groupedConversationsProvider);
     final activeConversation = ref.watch(activeConversationProvider);
     final searchQuery = ref.watch(conversationSearchProvider);
+    final topPadding = MediaQuery.of(context).padding.top;
 
-    return SafeArea(
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.only(left: 16, right: 16, bottom: 12),
+    return Column(
+      children: [
+        Container(
+          padding: EdgeInsets.only(
+            left: 16,
+            right: 16,
+            top: topPadding + 8,
+            bottom: 16,
+          ),
             decoration: BoxDecoration(
               color: isDark ? const Color(0xFF0A0A0A) : const Color(0xFFFAFAFA),
               border: Border(
@@ -77,8 +82,7 @@ class ChatHistoryScreen extends ConsumerWidget {
               ),
             ),
           ),
-        ],
-      ),
+      ],
     );
   }
 }

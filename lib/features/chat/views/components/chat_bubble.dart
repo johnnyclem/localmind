@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:gpt_markdown/gpt_markdown.dart';
 import 'package:localmind/l10n/app_localizations.dart';
+import 'package:localmind/core/theme/colors.dart';
 import '../../../../core/models/enums.dart';
 import '../../data/models/message.dart';
 import 'message_action_bar.dart';
@@ -128,6 +129,8 @@ class _UserBubble extends StatelessWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
+    final double maxBubbleWidth = 768;
+    final double availableWidth = MediaQuery.of(context).size.width * 0.75;
     return Align(
       alignment: AlignmentDirectional.centerEnd,
       child: Column(
@@ -135,7 +138,7 @@ class _UserBubble extends StatelessWidget {
         children: [
           Container(
             constraints: BoxConstraints(
-              maxWidth: MediaQuery.of(context).size.width * 0.75,
+              maxWidth: maxBubbleWidth < availableWidth ? maxBubbleWidth : availableWidth,
             ),
             margin: const EdgeInsetsDirectional.only(
               start: 48,
@@ -145,7 +148,7 @@ class _UserBubble extends StatelessWidget {
             ),
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              color: isDark ? const Color(0xFF3B82F6) : const Color(0xFF2563EB),
+              color: isDark ? AppColors.darkSurfaceCard : AppColors.lightSurface,
               borderRadius: BorderRadiusDirectional.only(
                 topStart: Radius.circular(18),
                 topEnd: Radius.circular(18),
@@ -169,10 +172,10 @@ class _UserBubble extends StatelessWidget {
                   child: _ThemedGptMarkdown(
                     content: message.content,
                     isDark: isDark,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 15,
-                      height: 1.4,
+                    style: TextStyle(
+                      color: isDark ? AppColors.darkPrimaryText : AppColors.lightPrimaryText,
+                      fontSize: 16,
+                      height: 1.6,
                     ),
                   ),
                 ),
@@ -189,8 +192,8 @@ class _UserBubble extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 11,
                     color: isDark
-                        ? const Color(0xFF666666)
-                        : const Color(0xFF999999),
+                        ? AppColors.darkMutedText
+                        : AppColors.lightMutedText,
                   ),
                 ),
                 if (message.status == MessageStatus.error) ...[
@@ -293,8 +296,8 @@ class _AssistantBubble extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 11,
                   color: isDark
-                      ? const Color(0xFF666666)
-                      : const Color(0xFF999999),
+                      ? AppColors.darkMutedText
+                      : AppColors.lightMutedText,
                 ),
               ),
               if (message.status == MessageStatus.error) ...[
@@ -466,10 +469,10 @@ class _ThemedGptMarkdown extends StatelessWidget {
       highlightColor: isDark
           ? const Color(0xFF334155)
           : const Color(0xFFDBEAFE),
-      linkColor: isDark ? const Color(0xFF60A5FA) : const Color(0xFF2563EB),
+      linkColor: isDark ? AppColors.darkAccent : AppColors.lightAccent,
       linkHoverColor: isDark
-          ? const Color(0xFF93C5FD)
-          : const Color(0xFF1D4ED8),
+          ? AppColors.darkAccent
+          : AppColors.lightAccent,
       hrLineColor: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
       hrLineThickness: 1.0,
       h1: style.copyWith(fontSize: 24, fontWeight: FontWeight.w700),
@@ -659,8 +662,8 @@ class _ToolBubble extends StatelessWidget {
                   Icons.build_outlined,
                   size: 14,
                   color: isDark
-                      ? const Color(0xFF9CA3AF)
-                      : const Color(0xFF6B7280),
+                      ? AppColors.darkMutedText
+                      : AppColors.lightMutedText,
                 ),
                 const SizedBox(width: 4),
                 Text(
@@ -671,8 +674,8 @@ class _ToolBubble extends StatelessWidget {
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
                     color: isDark
-                        ? const Color(0xFF9CA3AF)
-                        : const Color(0xFF6B7280),
+                        ? AppColors.darkMutedText
+                        : AppColors.lightMutedText,
                   ),
                 ),
               ],
@@ -832,13 +835,13 @@ class _ToolTimeline extends StatelessWidget {
       margin: const EdgeInsets.only(top: 8, bottom: 4),
       decoration: BoxDecoration(
         color: isDark
-            ? const Color(0xFF1E1E2E).withValues(alpha: 0.6)
-            : const Color(0xFFF5F7FF).withValues(alpha: 0.8),
+            ? AppColors.darkSurfaceInput
+            : AppColors.lightSurface,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: isDark
-              ? const Color(0xFF313244).withValues(alpha: 0.8)
-              : const Color(0xFFE0E5F5),
+              ? AppColors.darkBorder
+              : AppColors.lightBorder,
         ),
         boxShadow: [
           BoxShadow(
@@ -858,8 +861,8 @@ class _ToolTimeline extends StatelessWidget {
               border: Border(
                 bottom: BorderSide(
                   color: isDark
-                      ? const Color(0xFF313244).withValues(alpha: 0.5)
-                      : const Color(0xFFE0E5F5).withValues(alpha: 0.5),
+                      ? AppColors.darkBorder
+                      : AppColors.lightBorder,
                 ),
               ),
             ),
@@ -869,8 +872,8 @@ class _ToolTimeline extends StatelessWidget {
                   Icons.terminal_rounded,
                   size: 16,
                   color: isDark
-                      ? const Color(0xFFBAC2DE)
-                      : const Color(0xFF585B70),
+                      ? AppColors.darkMutedText
+                      : AppColors.lightMutedText,
                 ),
                 const SizedBox(width: 8),
                 Text(
@@ -880,15 +883,15 @@ class _ToolTimeline extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                     letterSpacing: 0.5,
                     color: isDark
-                      ? const Color(0xFFBAC2DE)
-                      : const Color(0xFF585B70),
+                      ? AppColors.darkMutedText
+                      : AppColors.lightMutedText,
                   ),
                 ),
                 const Spacer(),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(
-                    color: isDark ? const Color(0xFF313244) : const Color(0xFFE0E5F5),
+                    color: isDark ? AppColors.darkSurfaceCard : AppColors.lightBorder,
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(
@@ -987,7 +990,7 @@ class _ToolRowWidgetState extends State<_ToolRowWidget> {
       ToolEventStatus.completed => const Color(0xFF22C55E),
       ToolEventStatus.failed ||
       ToolEventStatus.rejected => const Color(0xFFEF4444),
-      ToolEventStatus.running => const Color(0xFF3B82F6),
+      ToolEventStatus.running => AppColors.darkAccent,
       ToolEventStatus.requested ||
       ToolEventStatus.approved => const Color(0xFFF59E0B),
     };
@@ -1086,7 +1089,7 @@ class _ToolRowWidgetState extends State<_ToolRowWidget> {
                       '${call.durationMs}ms',
                       style: TextStyle(
                         fontSize: 10,
-                        color: isDark ? const Color(0xFF6B7280) : const Color(0xFF9CA3AF),
+                        color: isDark ? AppColors.darkMutedText : AppColors.lightMutedText,
                       ),
                     ),
                   ],
@@ -1097,7 +1100,7 @@ class _ToolRowWidgetState extends State<_ToolRowWidget> {
                           ? Icons.keyboard_arrow_up_rounded
                           : Icons.keyboard_arrow_down_rounded,
                       size: 16,
-                      color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280),
+                       color: isDark ? AppColors.darkMutedText : AppColors.lightMutedText,
                     ),
                   ],
                 ],
@@ -1311,10 +1314,10 @@ class _AttachmentItem extends StatelessWidget {
       width: 160,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF2A2A2A) : const Color(0xFFF0F0F0),
+        color: isDark ? AppColors.darkSurfaceCard : AppColors.lightSurface,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isDark ? const Color(0xFF3A3A3A) : const Color(0xFFE5E5E5),
+            color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
         ),
       ),
       child: Row(
@@ -1323,7 +1326,7 @@ class _AttachmentItem extends StatelessWidget {
           Icon(
             Icons.insert_drive_file_outlined,
             size: 20,
-            color: isDark ? const Color(0xFF888888) : const Color(0xFF666666),
+            color: isDark ? AppColors.darkMutedText : AppColors.lightMutedText,
           ),
           const SizedBox(width: 8),
           Expanded(

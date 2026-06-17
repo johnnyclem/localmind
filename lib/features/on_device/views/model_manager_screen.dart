@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:localmind/l10n/app_localizations.dart';
-import '../../sidebar/sidebar_widget.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
 import '../../../core/models/enums.dart';
@@ -45,77 +44,122 @@ class OnDeviceModelManagerScreen extends ConsumerWidget {
       }
     });
 
-    return Scaffold(
-      drawer: const SidebarWidget(),
-      appBar: AppBar(title: Text(l10n.on_device_models_title)),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          _buildMemoryInfo(context, ref, deviceMemoryAsync),
-          if (engineState.status == OnDeviceEngineStatus.loaded)
-            Container(
-              padding: const EdgeInsets.all(12),
-              margin: const EdgeInsets.only(bottom: 16),
-              decoration: BoxDecoration(
-                color: Colors.green.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.green),
+    final topPadding = MediaQuery.of(context).padding.top;
+
+    return Column(
+      children: [
+        Container(
+          padding: EdgeInsets.only(
+            left: 16,
+            right: 16,
+            top: topPadding + 8,
+            bottom: 16,
+          ),
+            decoration: BoxDecoration(
+              color: theme.brightness == Brightness.dark
+                  ? const Color(0xFF0A0A0A)
+                  : const Color(0xFFFAFAFA),
+              border: Border(
+                bottom: BorderSide(
+                  color: theme.brightness == Brightness.dark
+                      ? const Color(0xFF2A2A2A)
+                      : const Color(0xFFE5E5E5),
+                ),
               ),
-              child: Row(
-                children: [
-                  const Icon(Icons.check_circle, color: Colors.green, size: 20),
-                  const SizedBox(width: 8),
-                  Expanded(
+            ),
+            child: Row(
+              children: [
+                Builder(
+                  builder: (context) => IconButton(
+                    icon: const Icon(Icons.menu),
+                    onPressed: () => Scaffold.of(context).openDrawer(),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  l10n.on_device_models_title,
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: theme.brightness == Brightness.dark
+                        ? Colors.white
+                        : Colors.black,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.all(16),
+              children: [
+                _buildMemoryInfo(context, ref, deviceMemoryAsync),
+                if (engineState.status == OnDeviceEngineStatus.loaded)
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    margin: const EdgeInsets.only(bottom: 16),
+                    decoration: BoxDecoration(
+                      color: Colors.green.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.green),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.check_circle, color: Colors.green, size: 20),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            l10n.model_loaded(
+                              engineState.loadedModelId ?? 'Unknown',
+                              engineState.backend?.name ?? 'CPU',
+                            ),
+                            style: const TextStyle(color: Colors.green),
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                else if (engineState.status == OnDeviceEngineStatus.loading)
+                  const Padding(
+                    padding: EdgeInsets.only(bottom: 16),
+                    child: LinearProgressIndicator(),
+                  )
+                else if (engineState.status == OnDeviceEngineStatus.error)
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    margin: const EdgeInsets.only(bottom: 16),
+                    decoration: BoxDecoration(
+                      color: Colors.red.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.red),
+                    ),
                     child: Text(
-                      l10n.model_loaded(
-                        engineState.loadedModelId ?? 'Unknown',
-                        engineState.backend?.name ?? 'CPU',
-                      ),
-                      style: const TextStyle(color: Colors.green),
+                      engineState.error ?? l10n.unknown_error,
+                      style: const TextStyle(color: Colors.red),
                     ),
                   ),
-                ],
-              ),
-            )
-          else if (engineState.status == OnDeviceEngineStatus.loading)
-            const Padding(
-              padding: EdgeInsets.only(bottom: 16),
-              child: LinearProgressIndicator(),
-            )
-          else if (engineState.status == OnDeviceEngineStatus.error)
-            Container(
-              padding: const EdgeInsets.all(12),
-              margin: const EdgeInsets.only(bottom: 16),
-              decoration: BoxDecoration(
-                color: Colors.red.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.red),
-              ),
-              child: Text(
-                engineState.error ?? l10n.unknown_error,
-                style: const TextStyle(color: Colors.red),
-              ),
-            ),
-          Text(
-            l10n.available_models,
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
+                Text(
+                  l10n.available_models,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                ...models.map(
+                  (model) => _ModelCard(
+                    model: model,
+                    theme: theme,
+                    downloadedAsync: downloadedAsync,
+                    downloadProgress: downloadProgress[model.id],
+                    engineState: engineState,
+                    deviceMemory: deviceMemoryAsync.value,
+                  ),
+                ),
+                const SizedBox(height: 24),
+              ],
             ),
           ),
-          const SizedBox(height: 12),
-          ...models.map(
-            (model) => _ModelCard(
-              model: model,
-              theme: theme,
-              downloadedAsync: downloadedAsync,
-              downloadProgress: downloadProgress[model.id],
-              engineState: engineState,
-              deviceMemory: deviceMemoryAsync.value,
-            ),
-          ),
-          const SizedBox(height: 24),
-        ],
-      ),
+      ],
     );
   }
 

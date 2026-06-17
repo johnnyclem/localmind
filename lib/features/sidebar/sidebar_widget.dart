@@ -5,6 +5,7 @@ import 'package:hugeicons/hugeicons.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
 import '../../core/routes/app_routes.dart';
+import '../../core/components/app_sizes.dart';
 import '../../l10n/app_localizations.dart';
 import '../chat/providers/chat_providers.dart';
 import 'components/active_server_indicator.dart';
@@ -32,7 +33,7 @@ class SidebarWidget extends ConsumerWidget {
     final isSettings = location.startsWith(AppRoutes.settings);
 
     return Container(
-      width: 300,
+      width: AppSizes.sidebarWidth,
       decoration: BoxDecoration(
         color: theme.scaffoldBackgroundColor,
         border: Directionality.of(context) == TextDirection.rtl

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
+import 'package:localmind/core/theme/colors.dart';
 
 class AudioPlayerWidget extends StatefulWidget {
   final String source;
@@ -84,10 +85,10 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
       constraints: const BoxConstraints(maxWidth: 280),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF2A2A2A) : const Color(0xFFF0F0F0),
+        color: isDark ? AppColors.darkSurfaceCard : AppColors.lightSurface,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isDark ? const Color(0xFF3A3A3A) : const Color(0xFFE5E5E5),
+          color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
         ),
       ),
       child: Row(

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
+import 'package:localmind/core/theme/colors.dart';
 
 import '../../../core/models/enums.dart';
 import '../../../core/routes/app_routes.dart';
@@ -347,7 +348,7 @@ class ActiveServerIndicator extends ConsumerWidget {
               HugeIcon(
                 icon: serverIcon ?? HugeIcons.strokeRoundedServerStack01,
                 size: 18,
-                color: isDark ? Colors.white70 : Colors.black87,
+                color: isDark ? AppColors.darkPrimaryText : AppColors.lightPrimaryText,
               ),
               const SizedBox(width: 10),
               Expanded(
@@ -359,7 +360,7 @@ class ActiveServerIndicator extends ConsumerWidget {
                       activeServer.name,
                       style: theme.textTheme.bodySmall?.copyWith(
                         fontWeight: FontWeight.w600,
-                        color: isDark ? Colors.white : Colors.black,
+                        color: isDark ? AppColors.darkPrimaryText : AppColors.lightPrimaryText,
                       ),
                       overflow: TextOverflow.ellipsis,
                       maxLines: 1,

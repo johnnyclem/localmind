@@ -50,7 +50,7 @@ const _languages = [
     flagAsset: 'assets/images/flag_it.png',
     countryCode: 'IT',
     shortText: 'It',
-    gradient: [Color(0xFF3B82F6), Color(0xFF1D4ED8)],
+    gradient: [Color(0xFF71717A), Color(0xFF52525B)],
   ),
   _LanguageOption(
     code: 'es',

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
+import 'package:localmind/core/theme/colors.dart';
 
 class DrawerNavItem extends StatelessWidget {
   const DrawerNavItem({
@@ -21,21 +22,20 @@ class DrawerNavItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final accent = isDark ? AppColors.darkAccent : AppColors.lightAccent;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(8),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           decoration: BoxDecoration(
             color: isSelected
-                ? (isDark 
-                    ? theme.colorScheme.primary.withAlpha(30) 
-                    : theme.colorScheme.primary.withAlpha(20))
+                ? accent.withAlpha(30)
                 : Colors.transparent,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(8),
           ),
           child: Row(
             children: [
@@ -43,10 +43,10 @@ class DrawerNavItem extends StatelessWidget {
                 icon: iconData,
                 size: 20,
                 color: isSelected
-                    ? theme.colorScheme.primary
-                    : (isDark ? Colors.white70 : Colors.black54),
+                    ? accent
+                    : (isDark ? AppColors.darkPrimaryText : AppColors.lightPrimaryText),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: 12),
               Expanded(
                 child: Text(
                   label,
@@ -54,8 +54,8 @@ class DrawerNavItem extends StatelessWidget {
                     fontSize: 14,
                     fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                     color: isSelected
-                        ? (isDark ? Colors.white : theme.colorScheme.primary)
-                        : (isDark ? Colors.white70 : Colors.black87),
+                        ? accent
+                        : (isDark ? AppColors.darkPrimaryText : AppColors.lightPrimaryText),
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -65,9 +65,7 @@ class DrawerNavItem extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                   decoration: BoxDecoration(
-                    color: isDark
-                        ? theme.colorScheme.primary.withAlpha(45)
-                        : theme.colorScheme.primary.withAlpha(20),
+                    color: accent.withAlpha(45),
                     borderRadius: BorderRadius.circular(999),
                   ),
                   child: Text(
@@ -77,8 +75,8 @@ class DrawerNavItem extends StatelessWidget {
                       fontWeight: FontWeight.w700,
                       letterSpacing: 0.3,
                       color: isSelected
-                          ? theme.colorScheme.primary
-                          : (isDark ? Colors.white : theme.colorScheme.primary),
+                          ? accent
+                          : (isDark ? AppColors.darkPrimaryText : accent),
                     ),
                   ),
                 ),

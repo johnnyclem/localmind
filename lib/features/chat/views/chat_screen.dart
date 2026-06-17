@@ -12,6 +12,7 @@ import '../../personas/providers/personas_providers.dart';
 import '../../servers/providers/server_providers.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
+import 'package:localmind/core/theme/colors.dart';
 import '../../../core/models/enums.dart';
 import '../../../core/providers/app_providers.dart';
 import '../../../core/routes/app_routes.dart';
@@ -544,8 +545,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
                       final p = personas[index];
                       final isSelected = p.id == currentPersonaId;
                       final accent = isDark
-                          ? const Color(0xFF3B82F6)
-                          : const Color(0xFF2563EB);
+                          ? AppColors.darkAccent
+                          : AppColors.lightAccent;
                       return ListTile(
                         leading: Text(
                           p.emoji,
@@ -566,8 +567,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
                                 style: TextStyle(
                                   fontSize: 12,
                                   color: isDark
-                                      ? const Color(0xFF888888)
-                                      : const Color(0xFF999999),
+                                      ? AppColors.darkMutedText
+                                      : AppColors.lightMutedText,
                                 ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
@@ -645,8 +646,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
                       final p = personas[index];
                       final isSelected = p.id == currentPersona?.id;
                       final accent = isDark
-                          ? const Color(0xFF3B82F6)
-                          : const Color(0xFF2563EB);
+                          ? AppColors.darkAccent
+                          : AppColors.lightAccent;
                       return ListTile(
                         leading: Text(
                           p.emoji,
@@ -667,8 +668,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
                                 style: TextStyle(
                                   fontSize: 12,
                                   color: isDark
-                                      ? const Color(0xFF888888)
-                                      : const Color(0xFF999999),
+                                      ? AppColors.darkMutedText
+                                      : AppColors.lightMutedText,
                                 ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
@@ -1001,12 +1002,12 @@ class _EmptyStateState extends State<_EmptyState>
                         vertical: 12,
                       ),
                       decoration: BoxDecoration(
-                        color: isDark ? const Color(0xFF1A1A1A) : Colors.white,
+                        color: isDark ? AppColors.darkBackground : AppColors.lightSurface,
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
                           color: isDark
-                              ? const Color(0xFF333333)
-                              : const Color(0xFFE5E5E5),
+                              ? AppColors.darkBorder
+                              : AppColors.lightBorder,
                         ),
                       ),
                       child: Row(
@@ -1050,12 +1051,12 @@ class _EmptyStateState extends State<_EmptyState>
                         vertical: 12,
                       ),
                       decoration: BoxDecoration(
-                        color: isDark ? const Color(0xFF1A1A1A) : Colors.white,
+                        color: isDark ? AppColors.darkBackground : AppColors.lightSurface,
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
                           color: isDark
-                              ? const Color(0xFF333333)
-                              : const Color(0xFFE5E5E5),
+                              ? AppColors.darkBorder
+                              : AppColors.lightBorder,
                         ),
                       ),
                       child: Row(
@@ -1159,12 +1160,12 @@ class _EmptyStateState extends State<_EmptyState>
                     label: Text(prompt),
                     onPressed: () => widget.onQuickPrompt(prompt),
                     backgroundColor: isDark
-                        ? const Color(0xFF2A2A2A)
-                        : const Color(0xFFF5F5F5),
+                        ? AppColors.darkSurfaceCard
+                        : AppColors.lightSurface,
                     side: BorderSide(
                       color: isDark
-                          ? const Color(0xFF3A3A3A)
-                          : const Color(0xFFE5E5E5),
+                          ? AppColors.darkBorder
+                          : AppColors.lightBorder,
                     ),
                   ),
                 );
@@ -1181,8 +1182,8 @@ class _EmptyStateState extends State<_EmptyState>
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
                       color: isDark
-                          ? const Color(0xFFA0A0A0)
-                          : const Color(0xFF666666),
+                          ? AppColors.darkMutedText
+                          : AppColors.lightMutedText,
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -1194,8 +1195,8 @@ class _EmptyStateState extends State<_EmptyState>
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
                         color: isDark
-                            ? const Color(0xFF3B82F6)
-                            : const Color(0xFF2563EB),
+                            ? AppColors.darkAccent
+                            : AppColors.lightAccent,
                       ),
                     ),
                   ),
@@ -1251,10 +1252,10 @@ class _RecentConversationItem extends ConsumerWidget {
         width: 300,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF1A1A1A) : const Color(0xFFF5F5F5),
+          color: isDark ? AppColors.darkBackground : AppColors.lightSurface,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: isDark ? const Color(0xFF2A2A2A) : const Color(0xFFE5E5E5),
+            color: isDark ? AppColors.darkSurfaceCard : AppColors.lightBorder,
           ),
         ),
         child: Row(
@@ -1262,7 +1263,7 @@ class _RecentConversationItem extends ConsumerWidget {
             Icon(
               Icons.chat_bubble_outline,
               size: 18,
-              color: isDark ? const Color(0xFF888888) : const Color(0xFF666666),
+              color: isDark ? AppColors.darkMutedText : AppColors.lightMutedText,
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -1285,8 +1286,8 @@ class _RecentConversationItem extends ConsumerWidget {
                       style: TextStyle(
                         fontSize: 12,
                         color: isDark
-                            ? const Color(0xFF888888)
-                            : const Color(0xFF666666),
+                            ? AppColors.darkMutedText
+                            : AppColors.lightMutedText,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -1299,7 +1300,7 @@ class _RecentConversationItem extends ConsumerWidget {
                   ? Icons.chevron_left
                   : Icons.chevron_right,
               size: 18,
-              color: isDark ? const Color(0xFF666666) : const Color(0xFF999999),
+              color: isDark ? AppColors.darkMutedText : AppColors.lightMutedText,
             ),
           ],
         ),
@@ -1622,7 +1623,7 @@ class _PersonaIndicator extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      color: isDark ? const Color(0xFF121212) : const Color(0xFFF9F9F9),
+      color: isDark ? AppColors.darkBackground : AppColors.lightSurface,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
         children: [

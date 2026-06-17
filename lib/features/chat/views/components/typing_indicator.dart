@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:localmind/core/theme/colors.dart';
 
 class TypingIndicator extends StatefulWidget {
   const TypingIndicator({super.key});
@@ -45,7 +46,7 @@ class _TypingIndicatorState extends State<TypingIndicator>
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    final dotColor = isDark ? const Color(0xFF888888) : const Color(0xFF666666);
+    final dotColor = isDark ? AppColors.darkMutedText : AppColors.lightMutedText;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -111,8 +112,8 @@ class _StreamingIndicatorState extends State<StreamingIndicator>
     final isDark = theme.brightness == Brightness.dark;
 
     final cursorColor = isDark
-        ? const Color(0xFF888888)
-        : const Color(0xFF666666);
+        ? AppColors.darkMutedText
+        : AppColors.lightMutedText;
 
     return AnimatedBuilder(
       animation: _cursorController,

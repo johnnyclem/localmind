@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gpt_markdown/gpt_markdown.dart';
 import 'package:localmind/l10n/app_localizations.dart';
+import 'package:localmind/core/theme/colors.dart';
 
 class ReasoningWidget extends StatefulWidget {
   final String? reasoningContent;
@@ -81,13 +82,13 @@ class _ReasoningWidgetState extends State<ReasoningWidget> with SingleTickerProv
       margin: const EdgeInsets.only(bottom: 12, top: 4),
       decoration: BoxDecoration(
         color: isDark
-            ? const Color(0xFF1E1E2E).withValues(alpha: 0.6)
-            : const Color(0xFFF5F7FF).withValues(alpha: 0.8),
+            ? AppColors.darkSurfaceInput
+            : AppColors.lightSurface,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: isDark
-              ? const Color(0xFF313244).withValues(alpha: 0.8)
-              : const Color(0xFFE0E5F5),
+              ? AppColors.darkBorder
+              : AppColors.lightBorder,
           width: 1.0,
         ),
         boxShadow: [
@@ -139,8 +140,8 @@ class _ReasoningWidgetState extends State<ReasoningWidget> with SingleTickerProv
                               Icons.psychology_outlined,
                               size: 18,
                               color: isDark
-                                  ? const Color(0xFFBAC2DE)
-                                  : const Color(0xFF585B70),
+                                  ? AppColors.darkMutedText
+                                  : AppColors.lightMutedText,
                             ),
                             const SizedBox(width: 8),
                             Text(
@@ -173,8 +174,8 @@ class _ReasoningWidgetState extends State<ReasoningWidget> with SingleTickerProv
                                 Icons.keyboard_arrow_down_rounded,
                                 size: 18,
                                 color: isDark
-                                    ? const Color(0xFF9399B2)
-                                    : const Color(0xFF7C7F93),
+                                    ? AppColors.darkMutedText
+                                    : AppColors.lightMutedText,
                               ),
                             ),
                           ],
@@ -193,8 +194,8 @@ class _ReasoningWidgetState extends State<ReasoningWidget> with SingleTickerProv
                               gptThemeData: GptMarkdownThemeData(
                                 brightness: isDark ? Brightness.dark : Brightness.light,
                                 highlightColor: isDark
-                                    ? const Color(0xFF313244)
-                                    : const Color(0xFFEFF1F5),
+                                    ? AppColors.darkBorder
+                                    : AppColors.lightBorder,
                                 linkColor: theme.colorScheme.primary,
                               ),
                               child: GptMarkdown(
@@ -202,8 +203,8 @@ class _ReasoningWidgetState extends State<ReasoningWidget> with SingleTickerProv
                                 style: TextStyle(
                                   fontSize: 13,
                                   color: isDark
-                                      ? const Color(0xFFCDD6F4).withValues(alpha: 0.95)
-                                      : const Color(0xFF4C4F69).withValues(alpha: 0.95),
+                                      ? AppColors.darkPrimaryText
+                                      : AppColors.lightPrimaryText,
                                   height: 1.5,
                                 ),
                               ),

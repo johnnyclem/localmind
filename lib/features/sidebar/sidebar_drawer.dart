@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/components/app_sizes.dart';
 import 'sidebar_widget.dart';
 
 class ConversationDrawer extends StatelessWidget {
@@ -6,6 +7,9 @@ class ConversationDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Drawer(child: SidebarWidget());
+    return SizedBox(
+      width: AppSizes.sidebarWidth,
+      child: const Drawer(child: SidebarWidget()),
+    );
   }
 }

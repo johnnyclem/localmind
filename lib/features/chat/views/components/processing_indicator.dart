@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:localmind/l10n/app_localizations.dart';
+import 'package:localmind/core/theme/colors.dart';
 
 class ProcessingIndicator extends StatelessWidget {
   const ProcessingIndicator({super.key});
@@ -18,7 +19,7 @@ class ProcessingIndicator extends StatelessWidget {
           child: CircularProgressIndicator(
             strokeWidth: 2,
             valueColor: AlwaysStoppedAnimation<Color>(
-              isDark ? Colors.grey[400]! : Colors.grey[600]!,
+              isDark ? AppColors.darkMutedText : AppColors.lightMutedText,
             ),
           ),
         ),
@@ -26,7 +27,7 @@ class ProcessingIndicator extends StatelessWidget {
         Text(
           l10n.processing,
           style: TextStyle(
-            color: isDark ? Colors.grey[400] : Colors.grey[600],
+            color: isDark ? AppColors.darkMutedText : AppColors.lightMutedText,
             fontSize: 14,
             fontStyle: FontStyle.italic,
           ),

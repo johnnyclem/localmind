@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:localmind/l10n/app_localizations.dart';
+import 'package:localmind/core/theme/colors.dart';
 import '../../chat/providers/chat_providers.dart';
 import '../data/models/model_info.dart';
 import '../../servers/providers/server_providers.dart';
@@ -62,7 +63,7 @@ class ModelPickerSheet extends ConsumerWidget {
       height: MediaQuery.of(context).size.height * 0.7,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1A1A1A) : Colors.white,
+        color: isDark ? AppColors.darkBackground : AppColors.lightSurface,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
       ),
       child: Column(
@@ -114,16 +115,16 @@ class ModelPickerSheet extends ConsumerWidget {
                               style: TextStyle(
                                 fontSize: 12,
                                 color: isDark
-                                    ? const Color(0xFF888888)
-                                    : const Color(0xFF999999),
+                                    ? AppColors.darkMutedText
+                                    : AppColors.lightMutedText,
                               ),
                             ),
                             const SizedBox(height: 4),
                             LinearProgressIndicator(
                               value: modelLoading.progress,
                               backgroundColor: isDark
-                                  ? const Color(0xFF333333)
-                                  : const Color(0xFFE0E0E0),
+                                  ? AppColors.darkBorder
+                                  : AppColors.lightBorder,
                             ),
                           ],
                         ),
@@ -150,8 +151,8 @@ class ModelPickerSheet extends ConsumerWidget {
                 style: TextStyle(
                   fontSize: 13,
                   color: isDark
-                      ? const Color(0xFF888888)
-                      : const Color(0xFF999999),
+                      ? AppColors.darkMutedText
+                      : AppColors.lightMutedText,
                 ),
               ),
             ),
@@ -210,7 +211,7 @@ class _NoServerState extends StatelessWidget {
           Icon(
             Icons.computer_outlined,
             size: 48,
-            color: isDark ? const Color(0xFF444444) : const Color(0xFFCCCCCC),
+            color: isDark ? AppColors.darkMutedText : AppColors.lightMutedText,
           ),
           const SizedBox(height: 16),
           Text(
@@ -226,7 +227,7 @@ class _NoServerState extends StatelessWidget {
             l10n.add_server_first,
             style: TextStyle(
               fontSize: 13,
-              color: isDark ? const Color(0xFF888888) : const Color(0xFF999999),
+              color: isDark ? AppColors.darkMutedText : AppColors.lightMutedText,
             ),
           ),
         ],
@@ -286,8 +287,8 @@ class _ModelList extends ConsumerWidget {
               style: TextStyle(
                 fontSize: 12,
                 color: isDark
-                    ? const Color(0xFF888888)
-                    : const Color(0xFF999999),
+                    ? AppColors.darkMutedText
+                    : AppColors.lightMutedText,
               ),
               textAlign: TextAlign.center,
             ),
@@ -336,8 +337,8 @@ class _ModelList extends ConsumerWidget {
               style: TextStyle(
                 fontSize: 14,
                 color: isDark
-                    ? const Color(0xFF888888)
-                    : const Color(0xFF999999),
+                    ? AppColors.darkMutedText
+                    : AppColors.lightMutedText,
               ),
             ),
           );
@@ -456,7 +457,7 @@ class _ModelTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final accent = isDark ? const Color(0xFF3B82F6) : const Color(0xFF2563EB);
+    final accent = isDark ? AppColors.darkAccent : AppColors.lightAccent;
 
     return InkWell(
       onTap: onTap,
@@ -538,8 +539,8 @@ class _ModelTile extends StatelessWidget {
                 Container(
                   width: 15,
                   height: 15,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFF4CAF50),
+                  decoration: BoxDecoration(
+                    color: isDark ? AppColors.darkAccent : AppColors.lightAccent,
                     shape: BoxShape.circle,
                   ),
                 ),
@@ -566,8 +567,8 @@ class _ModelTile extends StatelessWidget {
                 Icons.chevron_right,
                 size: 20,
                 color: isDark
-                    ? const Color(0xFF555555)
-                    : const Color(0xFFCCCCCC),
+                    ? AppColors.darkMutedText
+                    : AppColors.lightMutedText,
               ),
           ],
         ),
@@ -618,13 +619,13 @@ class _ThinkingIndicatorState extends State<_ThinkingIndicator>
               decoration: BoxDecoration(
                 color: widget.isDark
                     ? Color.lerp(
-                        const Color(0xFF888888),
-                        const Color(0xFF4CAF50),
+                        AppColors.darkMutedText,
+                        AppColors.darkAccent,
                         _controller.value,
                       )
                     : Color.lerp(
-                        const Color(0xFF999999),
-                        const Color(0xFF4CAF50),
+                        AppColors.lightMutedText,
+                        AppColors.darkAccent,
                         _controller.value,
                       ),
                 shape: BoxShape.circle,
@@ -638,8 +639,8 @@ class _ThinkingIndicatorState extends State<_ThinkingIndicator>
           style: TextStyle(
             fontSize: 12,
             color: widget.isDark
-                ? const Color(0xFF888888)
-                : const Color(0xFF999999),
+                ? AppColors.darkMutedText
+                : AppColors.lightMutedText,
           ),
         ),
       ],
@@ -657,17 +658,17 @@ class _MetadataChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF2A2A2A) : const Color(0xFFF0F0F0),
+        color: isDark ? AppColors.darkSurfaceCard : AppColors.lightSurface,
         borderRadius: BorderRadius.circular(4),
         border: Border.all(
-          color: isDark ? const Color(0xFF3A3A3A) : const Color(0xFFE0E0E0),
+          color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
         ),
       ),
       child: Text(
         label,
         style: TextStyle(
           fontSize: 11,
-          color: isDark ? const Color(0xFFAAAAAA) : const Color(0xFF777777),
+          color: isDark ? AppColors.darkMutedText : AppColors.lightMutedText,
         ),
       ),
     );
@@ -737,8 +738,8 @@ class _OnDeviceModelList extends ConsumerWidget {
               style: TextStyle(
                 fontSize: 14,
                 color: isDark
-                    ? const Color(0xFF888888)
-                    : const Color(0xFF999999),
+                    ? AppColors.darkMutedText
+                    : AppColors.lightMutedText,
               ),
             ),
           );
@@ -793,7 +794,7 @@ class _OnDeviceModelTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
-    final accent = isDark ? const Color(0xFF3B82F6) : const Color(0xFF2563EB);
+    final accent = isDark ? AppColors.darkAccent : AppColors.lightAccent;
     final downloadProgress = ref.watch(
       foregroundDownloadNotifierProvider,
     )[model.id];
@@ -843,8 +844,8 @@ class _OnDeviceModelTile extends ConsumerWidget {
                             color: isDownloaded
                                 ? (isDark ? Colors.white : Colors.black)
                                 : (isDark
-                                      ? const Color(0xFF555555)
-                                      : const Color(0xFF999999)),
+                                      ? AppColors.darkMutedText
+                                      : AppColors.lightMutedText),
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -904,8 +905,8 @@ class _OnDeviceModelTile extends ConsumerWidget {
                           LinearProgressIndicator(
                             value: downloadProgress?.progress ?? 0.0,
                             backgroundColor: isDark
-                                ? const Color(0xFF333333)
-                                : const Color(0xFFE0E0E0),
+                                ? AppColors.darkBorder
+                                : AppColors.lightBorder,
                           ),
                           const SizedBox(height: 2),
                           Text(
@@ -918,8 +919,8 @@ class _OnDeviceModelTile extends ConsumerWidget {
                             style: TextStyle(
                               fontSize: 10,
                               color: isDark
-                                  ? const Color(0xFF888888)
-                                  : const Color(0xFF999999),
+                                  ? AppColors.darkMutedText
+                                  : AppColors.lightMutedText,
                             ),
                           ),
                         ],
@@ -956,7 +957,7 @@ class _OnDeviceModelTile extends ConsumerWidget {
                 width: 10,
                 height: 10,
                 decoration: const BoxDecoration(
-                  color: Color(0xFF4CAF50),
+                  color: AppColors.darkAccent,
                   shape: BoxShape.circle,
                 ),
               ),
@@ -982,8 +983,8 @@ class _OnDeviceModelTile extends ConsumerWidget {
                   Icons.delete_outline,
                   size: 18,
                   color: isDark
-                      ? const Color(0xFF666666)
-                      : const Color(0xFF999999),
+                      ? AppColors.darkMutedText
+                      : AppColors.lightMutedText,
                 ),
                 tooltip: l10n.delete,
                 onPressed: () => _deleteModel(context, ref),
@@ -994,8 +995,8 @@ class _OnDeviceModelTile extends ConsumerWidget {
                   Icons.close,
                   size: 16,
                   color: isDark
-                      ? const Color(0xFF666666)
-                      : const Color(0xFF999999),
+                      ? AppColors.darkMutedText
+                      : AppColors.lightMutedText,
                 ),
                 tooltip: l10n.cancel,
                 onPressed: () => ref
@@ -1008,8 +1009,8 @@ class _OnDeviceModelTile extends ConsumerWidget {
                   Icons.cloud_download_outlined,
                   size: 18,
                   color: isDark
-                      ? const Color(0xFF555555)
-                      : const Color(0xFF999999),
+                      ? AppColors.darkMutedText
+                      : AppColors.lightMutedText,
                 ),
                 tooltip: l10n.download,
                 onPressed: () {
@@ -1024,8 +1025,8 @@ class _OnDeviceModelTile extends ConsumerWidget {
                 style: TextStyle(
                   fontSize: 11,
                   color: isDark
-                      ? const Color(0xFF666666)
-                      : const Color(0xFF999999),
+                      ? AppColors.darkMutedText
+                      : AppColors.lightMutedText,
                 ),
               ),
             ],

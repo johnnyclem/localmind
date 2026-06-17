@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:haptic_feedback/haptic_feedback.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:localmind/l10n/app_localizations.dart';
+import 'package:localmind/core/theme/colors.dart';
 
 import '../../../../core/models/enums.dart';
 import '../../../servers/providers/server_providers.dart';
@@ -103,6 +104,7 @@ class _ChatInputBarState extends ConsumerState<ChatInputBar>
 
   Widget _buildMicButton(bool isListening, ThemeData theme) {
     final l10n = AppLocalizations.of(context)!;
+    final isDark = theme.brightness == Brightness.dark;
     return AnimatedBuilder(
       animation: _micAnimController,
       builder: (context, child) {
@@ -134,7 +136,7 @@ class _ChatInputBarState extends ConsumerState<ChatInputBar>
                     ? HugeIcons.strokeRoundedVoice
                     : HugeIcons.strokeRoundedMic01,
                 color: isListening
-                    ? Colors.white
+                    ? (isDark ? Colors.white : Colors.black)
                     : theme.colorScheme.onSurface.withValues(alpha: 0.7),
                 size: 20,
               ),
@@ -306,18 +308,11 @@ class _ChatInputBarState extends ConsumerState<ChatInputBar>
         margin: const EdgeInsets.only(left: 20, right: 20, top: 8, bottom: 16),
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
         decoration: BoxDecoration(
-          color: theme.colorScheme.surface,
-          borderRadius: BorderRadius.circular(40),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.08),
-              blurRadius: 20,
-              offset: const Offset(0, 4),
-            ),
-          ],
+          color: isDark ? AppColors.darkSurfaceInput : AppColors.lightSurface,
+          borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: theme.colorScheme.outline,
-            width: 1.2,
+            color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
+            width: 1,
           ),
         ),
         child: Column(
@@ -350,8 +345,8 @@ class _ChatInputBarState extends ConsumerState<ChatInputBar>
                                   borderRadius: BorderRadius.circular(12),
                                   border: Border.all(
                                     color: isDark
-                                        ? const Color(0xFF333333)
-                                        : const Color(0xFFE0E0E0),
+                                        ? AppColors.darkBorder
+                                        : AppColors.lightBorder,
                                   ),
                                 ),
                                 child: ClipRRect(

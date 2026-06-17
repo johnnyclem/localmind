@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:localmind/core/theme/colors.dart';
 
 import '../../../l10n/app_localizations.dart';
 
@@ -31,7 +32,7 @@ class ConversationDrawerHeader extends ConsumerWidget {
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: isDark ? Colors.white : Colors.black,
+              color: isDark ? AppColors.darkPrimaryText : AppColors.lightPrimaryText,
             ),
           ),
         ],

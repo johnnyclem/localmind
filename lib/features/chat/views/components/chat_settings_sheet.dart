@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:localmind/l10n/app_localizations.dart';
+import 'package:localmind/core/theme/colors.dart';
 import '../../../../core/providers/app_providers.dart';
 import '../../../conversations/providers/conversation_providers.dart' as conv;
 import '../../providers/chat_mcp_providers.dart';
@@ -59,7 +60,7 @@ class _ChatSettingsSheetState extends ConsumerState<ChatSettingsSheet> {
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF121212) : Colors.white,
+        color: isDark ? AppColors.darkBackground : AppColors.lightSurface,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
         boxShadow: [
           BoxShadow(
@@ -80,8 +81,8 @@ class _ChatSettingsSheetState extends ConsumerState<ChatSettingsSheet> {
                 height: 4,
                 decoration: BoxDecoration(
                   color: isDark
-                      ? const Color(0xFF2A2A2A)
-                      : const Color(0xFFE5E5E5),
+                      ? AppColors.darkSurfaceCard
+                      : AppColors.lightBorder,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -339,13 +340,13 @@ class _ChatSettingsSheetState extends ConsumerState<ChatSettingsSheet> {
                       margin: const EdgeInsets.only(bottom: 8),
                       decoration: BoxDecoration(
                         color: isDark
-                            ? const Color(0xFF1E1E1E)
-                            : const Color(0xFFF9FAFB),
+                            ? AppColors.darkBackground
+                            : AppColors.lightSurface,
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
                           color: isDark
-                              ? const Color(0xFF2A2A2A)
-                              : const Color(0xFFE5E7EB),
+                              ? AppColors.darkSurfaceCard
+                              : AppColors.lightBorder,
                         ),
                       ),
                       child: ListTile(

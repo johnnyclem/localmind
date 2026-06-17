@@ -20,151 +20,151 @@ class ServerListScreen extends ConsumerWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final systemBottomInset = bottomSystemInset(context);
+    final topPadding = MediaQuery.of(context).padding.top;
 
-    return SafeArea(
-      child: Stack(
-        children: [
-          Column(
-            children: [
-              Container(
-                padding: const EdgeInsets.only(left: 16, right: 16, bottom: 12),
-                decoration: BoxDecoration(
-                  color: isDark
-                      ? const Color(0xFF0A0A0A)
-                      : const Color(0xFFFAFAFA),
-                  border: Border(
-                    bottom: BorderSide(
-                      color: isDark
-                          ? const Color(0xFF2A2A2A)
-                          : const Color(0xFFE5E5E5),
-                    ),
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Builder(
-                      builder: (context) => IconButton(
-                        icon: const Icon(Icons.menu),
-                        onPressed: () => Scaffold.of(context).openDrawer(),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      l10n.servers_title,
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: isDark ? Colors.white : Colors.black,
-                      ),
-                    ),
-                  ],
-                ),
+    return Stack(
+      children: [
+        Column(
+          children: [
+            Container(
+              padding: EdgeInsets.only(
+                left: 16,
+                right: 16,
+                top: topPadding + 8,
+                bottom: 16,
               ),
-
-              Expanded(
-                child: servers.when(
-                  data: (serverList) => serverList.isEmpty
-                      ? _buildEmptyState(context, l10n, theme)
-                      : RefreshIndicator(
-                          onRefresh: () async {
-                            for (final server in serverList) {
-                              await ref
-                                  .read(serversProvider.notifier)
-                                  .testConnection(
-                                    server.id,
-                                    ref.read(serverApiServiceProvider),
-                                  );
-                            }
-                          },
-                          child: ListView.builder(
-                            padding: EdgeInsets.fromLTRB(
-                              16,
-                              16,
-                              16,
-                              16 + systemBottomInset + 80,
-                            ),
-                            itemCount: serverList.length,
-                            itemBuilder: (context, index) {
-                              final server = serverList[index];
-                              final isOnDevice =
-                                  server.type == ServerType.onDevice;
-                              return Padding(
-                                padding: const EdgeInsets.only(bottom: 12),
-                                child: ServerCard(
-                                  server: server,
-                                  isActive: activeServer?.id == server.id,
-                                  onTap: () {
-                                    ref
-                                        .read(activeServerProvider.notifier)
-                                        .setActiveServer(server);
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(
-                                          l10n.switched_to_server(server.name),
-                                        ),
-                                        duration: const Duration(seconds: 2),
-                                      ),
-                                    );
-                                  },
-                                  onEdit: isOnDevice
-                                      ? null
-                                      : () => _showEditDialog(
-                                          context,
-                                          ref,
-                                          server,
-                                        ),
-                                  onDelete: isOnDevice
-                                      ? null
-                                      : () => _showDeleteConfirmation(
-                                          context,
-                                          ref,
-                                          l10n,
-                                          server,
-                                        ),
-                                  onSetDefault: () {
-                                    ref
-                                        .read(serversProvider.notifier)
-                                        .setDefault(server.id);
-                                  },
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                  loading: () =>
-                      const Center(child: CircularProgressIndicator()),
-                  error: (err, stack) => Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(
-                          Icons.error_outline,
-                          color: Colors.red,
-                          size: 48,
-                        ),
-                        const SizedBox(height: 16),
-                        Text(l10n.error_with_message(err.toString())),
-                        TextButton(
-                          onPressed: () => ref.invalidate(serversProvider),
-                          child: Text(l10n.retry),
-                        ),
-                      ],
-                    ),
+              decoration: BoxDecoration(
+                color: isDark
+                    ? const Color(0xFF0A0A0A)
+                    : const Color(0xFFFAFAFA),
+                border: Border(
+                  bottom: BorderSide(
+                    color: isDark
+                        ? const Color(0xFF2A2A2A)
+                        : const Color(0xFFE5E5E5),
                   ),
                 ),
               ),
-            ],
-          ),
-          PositionedDirectional(
-            bottom: 24,
-            end: 24,
-            child: FloatingActionButton(
-              onPressed: () => context.push(AppRoutes.addServer),
-              child: const Icon(Icons.add),
+              child: Row(
+                children: [
+                  Builder(
+                    builder: (context) => IconButton(
+                      icon: const Icon(Icons.menu),
+                      onPressed: () => Scaffold.of(context).openDrawer(),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    l10n.servers_title,
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: isDark ? Colors.white : Colors.black,
+                    ),
+                  ),
+                ],
+              ),
             ),
+
+            Expanded(
+              child: servers.when(
+                data: (serverList) => serverList.isEmpty
+                    ? _buildEmptyState(context, l10n, theme)
+                    : RefreshIndicator(
+                        onRefresh: () async {
+                          for (final server in serverList) {
+                            await ref
+                                .read(serversProvider.notifier)
+                                .testConnection(
+                                  server.id,
+                                  ref.read(serverApiServiceProvider),
+                                );
+                          }
+                        },
+                        child: ListView.builder(
+                          padding: EdgeInsets.fromLTRB(
+                            16,
+                            16,
+                            16,
+                            16 + systemBottomInset + 80,
+                          ),
+                          itemCount: serverList.length,
+                          itemBuilder: (context, index) {
+                            final server = serverList[index];
+                            final isOnDevice =
+                                server.type == ServerType.onDevice;
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 12),
+                              child: ServerCard(
+                                server: server,
+                                isActive: activeServer?.id == server.id,
+                                onTap: () {
+                                  ref
+                                      .read(activeServerProvider.notifier)
+                                      .setActiveServer(server);
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        l10n.switched_to_server(server.name),
+                                      ),
+                                      duration: const Duration(seconds: 2),
+                                    ),
+                                  );
+                                },
+                                onEdit: isOnDevice
+                                    ? null
+                                    : () =>
+                                          _showEditDialog(context, ref, server),
+                                onDelete: isOnDevice
+                                    ? null
+                                    : () => _showDeleteConfirmation(
+                                        context,
+                                        ref,
+                                        l10n,
+                                        server,
+                                      ),
+                                onSetDefault: () {
+                                  ref
+                                      .read(serversProvider.notifier)
+                                      .setDefault(server.id);
+                                },
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (err, stack) => Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        Icons.error_outline,
+                        color: Colors.red,
+                        size: 48,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(l10n.error_with_message(err.toString())),
+                      TextButton(
+                        onPressed: () => ref.invalidate(serversProvider),
+                        child: Text(l10n.retry),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+        PositionedDirectional(
+          bottom: 24,
+          end: 24,
+          child: FloatingActionButton(
+            onPressed: () => context.push(AppRoutes.addServer),
+            child: const Icon(Icons.add),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
