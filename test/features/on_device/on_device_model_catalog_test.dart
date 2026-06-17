@@ -27,13 +27,14 @@ void main() {
       expect(ids.length, OnDeviceModel.curatedModels.length);
     });
 
-    test('uses concrete downloadable bundle urls', () {
+    test('uses concrete downloadable LiteRT-LM bundle urls', () {
       for (final model in OnDeviceModel.curatedModels) {
         expect(model.huggingFaceUrl, startsWith('https://huggingface.co/'));
         expect(
           model.huggingFaceUrl,
-          anyOf(endsWith('.litertlm'), endsWith('.task')),
-          reason: '${model.id} must point to a LiteRT model bundle',
+          endsWith('.litertlm'),
+          reason:
+              '${model.id} must stay compatible with flutter_gemma_litertlm',
         );
         expect(model.fileName, isNotEmpty);
         expect(model.fileName, isNot(contains('/')));

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -1388,7 +1389,7 @@ class _MessageList extends StatelessWidget {
 
     return ListView.builder(
       controller: scrollController,
-      cacheExtent: 1000,
+      scrollCacheExtent: const ScrollCacheExtent.pixels(1000),
       padding: EdgeInsets.only(
         top: 16,
         bottom: 120 + (hasSmartReplies ? 64 : 0) + bottomInset,

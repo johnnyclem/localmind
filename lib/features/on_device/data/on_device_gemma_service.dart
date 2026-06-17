@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter_gemma/flutter_gemma.dart';
 import 'package:flutter_gemma/core/domain/model_source.dart';
+import 'package:flutter_gemma_litertlm/flutter_gemma_litertlm.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../../../core/logger/app_logger.dart';
@@ -20,6 +21,7 @@ class OnDeviceGemmaService {
 
   static Future<void> initialize({String? huggingFaceToken}) async {
     await FlutterGemma.initialize(
+      inferenceEngines: const [LiteRtLmEngine()],
       huggingFaceToken: huggingFaceToken,
       maxDownloadRetries: 10,
     );
@@ -60,7 +62,7 @@ class OnDeviceGemmaService {
     final installed = await FlutterGemma.listInstalledModels();
     final installedSet = installed.toSet();
     final installedIds = <String>[];
-    
+
     for (final model in OnDeviceModel.curatedModels) {
       if (installedSet.contains(model.fileName)) {
         installedIds.add(model.id);
@@ -118,7 +120,7 @@ class OnDeviceGemmaService {
       (m) => m.id == modelId,
       orElse: () => throw Exception('Model not found: $modelId'),
     );
-    
+
     final spec = InferenceModelSpec(
       name: model.fileName,
       modelSource: ModelSource.network(model.huggingFaceUrl),

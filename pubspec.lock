@@ -470,6 +470,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.0"
+  flutter_gemma_litertlm:
+    dependency: "direct main"
+    description:
+      name: flutter_gemma_litertlm
+      sha256: "6b801403f1f682b699dbf31b485bddba2692296a894b7f23f1c78f171fc62fa3"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.0"
   flutter_lints:
     dependency: "direct dev"
     description:
