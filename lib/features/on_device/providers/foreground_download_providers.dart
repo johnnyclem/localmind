@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/logger/app_logger.dart';
+import '../../../core/providers/review_prompt_providers.dart';
 import '../../../core/providers/storage_providers.dart';
 import '../data/models/download_progress_info.dart';
 import '../data/models/download_status.dart';
@@ -92,9 +93,11 @@ class ForegroundDownloadNotifier
           final elapsed = DateTime.now().difference(startTime).inSeconds;
           final total = model.fileSizeBytes;
           final received = ((progress / 100.0) * total).round();
-          
+
           final bytesPerSecond = elapsed > 0 ? (received / elapsed).round() : 0;
-          final etaSeconds = bytesPerSecond > 0 ? ((total - received) / bytesPerSecond).round() : null;
+          final etaSeconds = bytesPerSecond > 0
+              ? ((total - received) / bytesPerSecond).round()
+              : null;
 
           state = {
             ...state,
@@ -127,6 +130,13 @@ class ForegroundDownloadNotifier
         _saveState();
 
         ref.invalidate(downloadedModelsProvider);
+        try {
+          await ref
+              .read(reviewPromptServiceProvider)
+              .markModelDownloadCompleted(modelId);
+        } catch (e) {
+          Log.error('Failed to record model download review signal: $e');
+        }
         _removeCompletedDownload(modelId);
       }
     } catch (e) {

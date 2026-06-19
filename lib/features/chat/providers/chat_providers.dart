@@ -11,10 +11,12 @@ import 'package:localmind/features/conversations/providers/conversation_provider
     as conv;
 import 'package:localmind/features/models/data/models/model_info.dart';
 import 'package:localmind/features/personas/providers/personas_providers.dart';
+import 'package:localmind/features/servers/data/models/server.dart';
 import 'package:localmind/features/servers/providers/server_providers.dart';
 import './chat_mcp_providers.dart';
 
 import '../../../core/models/enums.dart';
+import '../../../core/providers/review_prompt_providers.dart';
 import '../../../core/providers/service_providers.dart';
 import '../../../core/providers/storage_providers.dart';
 import '../../on_device/providers/on_device_providers.dart';
@@ -881,7 +883,8 @@ class ChatNotifier extends Notifier<ChatState> {
                   // Check if content is empty - this happens when free models refuse or fail
                   final hasContent =
                       streamingMessage.content.isNotEmpty ||
-                      (streamingMessage.reasoningContent?.isNotEmpty ?? false) ||
+                      (streamingMessage.reasoningContent?.isNotEmpty ??
+                          false) ||
                       collectedToolCalls.isNotEmpty;
 
                   if (!hasContent) {
@@ -951,9 +954,7 @@ class ChatNotifier extends Notifier<ChatState> {
 
                             final result = await completer.future;
 
-                            state = state.copyWith(
-                              clearPendingApproval: true,
-                            );
+                            state = state.copyWith(clearPendingApproval: true);
 
                             return result;
                           },
@@ -1010,6 +1011,12 @@ class ChatNotifier extends Notifier<ChatState> {
                         );
                       }
                     }
+
+                    _maybeRequestReviewAfterSuccessfulCompletion(
+                      finalMessage: finalMessage,
+                      server: server,
+                      selectedModel: selectedModel,
+                    );
 
                     _chunkCount = 0;
                     _lastCheckpointTime = null;
@@ -1177,6 +1184,44 @@ class ChatNotifier extends Notifier<ChatState> {
     ref
         .read(conv.conversationsProvider.notifier)
         .renameConversation(_currentConversationId!, title);
+  }
+
+  void _maybeRequestReviewAfterSuccessfulCompletion({
+    required Message finalMessage,
+    required Server server,
+    required ModelInfo? selectedModel,
+  }) {
+    final modelId =
+        selectedModel?.id ??
+        (server.type == ServerType.onDevice
+            ? ref.read(onDeviceEngineProvider).loadedModelId
+            : null);
+
+    unawaited(
+      ref
+          .read(reviewPromptServiceProvider)
+          .maybeRequestReviewAfterSuccessfulChat(
+            assistantContent: finalMessage.content,
+            serverType: server.type,
+            modelId: modelId,
+            usedCustomPersona: _isUsingCustomPersona(),
+          )
+          .catchError((Object error, StackTrace stackTrace) {
+            Log.error('Review prompt request failed: $error');
+            return false;
+          }),
+    );
+  }
+
+  bool _isUsingCustomPersona() {
+    final activeConversation = ref.read(conv.activeConversationProvider);
+    final personaId = activeConversation?.personaId;
+    if (personaId == null) return false;
+
+    final personas = ref.read(personasNotifierProvider).value ?? [];
+    return personas.any(
+      (persona) => persona.id == personaId && !persona.isBuiltIn,
+    );
   }
 
   Future<void> cancelStream() async {

@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/logger/app_logger.dart';
 import '../../../core/models/enums.dart';
 import '../../../core/providers/chat_background_service_provider.dart';
+import '../../../core/providers/review_prompt_providers.dart';
 import '../data/models/on_device_model.dart';
 import '../data/notification_permission_service.dart';
 import '../data/on_device_gemma_service.dart';
@@ -118,6 +119,14 @@ class OnDeviceEngineNotifier extends Notifier<OnDeviceEngineState> {
       Log.info(
         'Model $modelId loaded successfully with ${effectiveBackend.name}',
       );
+
+      try {
+        await ref
+            .read(reviewPromptServiceProvider)
+            .markOnDeviceModelLoaded(modelId);
+      } catch (e) {
+        Log.error('Failed to record model load review signal: $e');
+      }
     } catch (e) {
       Log.error('Failed to load model $modelId: $e');
       state = state.copyWith(
