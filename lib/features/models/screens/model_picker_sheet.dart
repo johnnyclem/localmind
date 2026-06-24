@@ -2,8 +2,10 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:localmind/l10n/app_localizations.dart';
 import 'package:localmind/core/theme/colors.dart';
+import '../../../core/routes/app_routes.dart';
 import '../../chat/providers/chat_providers.dart';
 import '../data/models/model_info.dart';
 import '../../servers/providers/server_providers.dart';
@@ -46,11 +48,20 @@ class ModelPickerSheet extends ConsumerWidget {
     ref.listen(onDeviceEngineProvider, (prev, next) {
       if (next.status == OnDeviceEngineStatus.loaded &&
           prev?.status == OnDeviceEngineStatus.loading) {
+        final loadedId = next.loadedModelId;
+        final models = ref.read(onDeviceModelsProvider);
+        final loadedName = loadedId == null
+            ? 'Unknown'
+            : models
+                  .where((m) => m.id == loadedId)
+                  .map((m) => m.name)
+                  .followedBy([loadedId])
+                  .first;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
               l10n.model_loaded(
-                next.loadedModelId ?? 'Unknown',
+                loadedName,
                 next.backend?.name ?? 'CPU',
               ),
             ),
@@ -227,7 +238,9 @@ class _NoServerState extends StatelessWidget {
             l10n.add_server_first,
             style: TextStyle(
               fontSize: 13,
-              color: isDark ? AppColors.darkMutedText : AppColors.lightMutedText,
+              color: isDark
+                  ? AppColors.darkMutedText
+                  : AppColors.lightMutedText,
             ),
           ),
         ],
@@ -360,9 +373,7 @@ class _ModelList extends ConsumerWidget {
                 final activeServer = ref.read(activeServerProvider);
                 if (activeServer == null) return;
 
-                final supportsLoad =
-                    model.serverType == ServerType.lmStudio ||
-                    model.serverType == ServerType.ollama;
+                final supportsLoad = model.serverType == ServerType.lmStudio;
 
                 if (supportsLoad && !isLoaded) {
                   ref.read(modelLoadingProvider.notifier).setLoading(model.id);
@@ -540,7 +551,9 @@ class _ModelTile extends StatelessWidget {
                   width: 15,
                   height: 15,
                   decoration: BoxDecoration(
-                    color: isDark ? AppColors.darkAccent : AppColors.lightAccent,
+                    color: isDark
+                        ? AppColors.darkAccent
+                        : AppColors.lightAccent,
                     shape: BoxShape.circle,
                   ),
                 ),
@@ -870,6 +883,26 @@ class _OnDeviceModelTile extends ConsumerWidget {
                             ),
                           ),
                         ),
+                      if (model.isImported)
+                        Container(
+                          margin: const EdgeInsets.only(left: 6),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.blue.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: const Text(
+                            'Imported',
+                            style: TextStyle(
+                              fontSize: 9,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.blue,
+                            ),
+                          ),
+                        ),
                     ],
                   ),
                   if (!Platform.isIOS &&
@@ -935,6 +968,10 @@ class _OnDeviceModelTile extends ConsumerWidget {
                         label: model.fileSizeFormatted,
                         isDark: isDark,
                       ),
+                      if (model.format == OnDeviceModelFormat.gguf)
+                        _MetadataChip(label: 'GGUF', isDark: isDark),
+                      if (model.runtime == OnDeviceModelRuntime.llamaCpp)
+                        _MetadataChip(label: 'llama.cpp', isDark: isDark),
                       _MetadataChip(label: model.license, isDark: isDark),
                       _MetadataChip(
                         label: model.parameterLabel,
@@ -1013,10 +1050,24 @@ class _OnDeviceModelTile extends ConsumerWidget {
                       : AppColors.lightMutedText,
                 ),
                 tooltip: l10n.download,
-                onPressed: () {
-                  ref
+                onPressed: () async {
+                  final result = await ref
                       .read(foregroundDownloadNotifierProvider.notifier)
                       .startDownload(model.id);
+                  if (result == 'missing_huggingface_token' &&
+                      context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(l10n.model_missing_huggingface_token),
+                        duration: const Duration(seconds: 6),
+                        action: SnackBarAction(
+                          label: l10n.settings_title,
+                          onPressed: () =>
+                              context.push(AppRoutes.settings),
+                        ),
+                      ),
+                    );
+                  }
                 },
               ),
               const SizedBox(width: 4),
@@ -1059,8 +1110,17 @@ class _OnDeviceModelTile extends ConsumerWidget {
       parameterCount: double.tryParse(
         model.parameterLabel.replaceAll(RegExp(r'[^0-9\.]'), ''),
       ),
+      fileSize: model.fileSizeBytes,
+      quantization: model.format == OnDeviceModelFormat.gguf ? 'GGUF' : null,
+      architecture: model.runtime == OnDeviceModelRuntime.llamaCpp
+          ? 'llama.cpp'
+          : null,
       serverType: ServerType.onDevice,
       serverId: 'on-device',
+      modifiedAt: model.importedAt,
+      onDeviceRuntime: model.runtime,
+      onDeviceFormat: model.format,
+      localPath: model.localPath,
     );
 
     await engineNotifier.loadModel(model.id, settings.preferredBackend);
@@ -1115,8 +1175,17 @@ class _OnDeviceModelTile extends ConsumerWidget {
       parameterCount: double.tryParse(
         model.parameterLabel.replaceAll(RegExp(r'[^0-9\.]'), ''),
       ),
+      fileSize: model.fileSizeBytes,
+      quantization: model.format == OnDeviceModelFormat.gguf ? 'GGUF' : null,
+      architecture: model.runtime == OnDeviceModelRuntime.llamaCpp
+          ? 'llama.cpp'
+          : null,
       serverType: ServerType.onDevice,
       serverId: 'on-device',
+      modifiedAt: model.importedAt,
+      onDeviceRuntime: model.runtime,
+      onDeviceFormat: model.format,
+      localPath: model.localPath,
     );
 
     ref.read(selectedModelProvider.notifier).setModel(modelInfo);
@@ -1168,7 +1237,13 @@ class _OnDeviceModelTile extends ConsumerWidget {
         selectedModelNotifier.clear();
       }
 
-      await gemmaService.deleteModel(model.id);
+      if (model.isImported) {
+        await ref
+            .read(importedGgufModelsProvider.notifier)
+            .deleteModel(model.id);
+      } else {
+        await gemmaService.deleteModel(model.id);
+      }
       if (!context.mounted) return;
       ref.invalidate(downloadedModelsProvider);
     }

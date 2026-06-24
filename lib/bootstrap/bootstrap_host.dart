@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../app.dart';
+import '../core/providers/app_providers.dart';
 import '../core/providers/highlighter_provider.dart';
 import '../core/providers/storage_providers.dart';
 import '../core/storage/objectbox_store.dart';
@@ -66,7 +67,11 @@ class _BootstrapHostState extends State<BootstrapHost> {
       );
 
       _updateStage(BootstrapStage.initializingServices, 'Initializing services...');
-      await OnDeviceGemmaService.initialize();
+
+      final hfToken = container.read(
+        settingsProvider.select((s) => s.huggingFaceToken),
+      );
+      await OnDeviceGemmaService.initialize(huggingFaceToken: hfToken);
 
       // Migrate models from old custom download location in background to prevent cold start ANR
       OnDeviceGemmaService.migrateOldModels().catchError((e) {

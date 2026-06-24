@@ -5,11 +5,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/logger/app_logger.dart';
 import '../../../core/models/enums.dart';
+import '../../../core/providers/app_providers.dart';
 import '../../../core/providers/chat_background_service_provider.dart';
 import '../../../core/providers/review_prompt_providers.dart';
+import '../../../core/providers/storage_providers.dart';
+import '../data/imported_gguf_model_repository.dart';
 import '../data/models/on_device_model.dart';
 import '../data/notification_permission_service.dart';
 import '../data/on_device_gemma_service.dart';
+import '../data/on_device_llama_service.dart';
 
 final notificationPermissionServiceProvider =
     Provider<NotificationPermissionService>((ref) {
@@ -22,19 +26,37 @@ final onDeviceGemmaServiceProvider = Provider<OnDeviceGemmaService>((ref) {
   return service;
 });
 
+final onDeviceLlamaServiceProvider = Provider<OnDeviceLlamaService>((ref) {
+  final service = OnDeviceLlamaService();
+  ref.onDispose(() => service.dispose());
+  return service;
+});
+
+final importedGgufModelRepositoryProvider =
+    Provider<ImportedGgufModelRepository>((ref) {
+      return ImportedGgufModelRepository(ref.read(sharedPreferencesProvider));
+    });
+
+final importedGgufModelsProvider =
+    NotifierProvider<ImportedGgufModelsNotifier, List<OnDeviceModel>>(() {
+      return ImportedGgufModelsNotifier();
+    });
+
 final onDeviceEngineProvider =
     NotifierProvider<OnDeviceEngineNotifier, OnDeviceEngineState>(() {
       return OnDeviceEngineNotifier();
     });
 
 final onDeviceModelsProvider = Provider<List<OnDeviceModel>>((ref) {
-  return OnDeviceModel.curatedModels;
+  final imported = ref.watch(importedGgufModelsProvider);
+  return [...OnDeviceModel.curatedModels, ...imported];
 });
 
 final downloadedModelsProvider = FutureProvider<Set<String>>((ref) async {
   final gemmaService = ref.read(onDeviceGemmaServiceProvider);
   final installed = await gemmaService.getInstalledModelIds();
-  return installed.toSet();
+  final imported = ref.watch(importedGgufModelsProvider);
+  return {...installed, ...imported.map((model) => model.id)};
 });
 
 final onDeviceModelStateProvider =
@@ -46,30 +68,86 @@ final onDeviceModelStateProvider =
     });
 
 class OnDeviceEngineState {
+  static const _unset = Object();
+
   final OnDeviceEngineStatus status;
   final String? loadedModelId;
+  final OnDeviceModelRuntime? loadedRuntime;
   final PreferredBackend? backend;
   final String? error;
 
   const OnDeviceEngineState({
     this.status = OnDeviceEngineStatus.notLoaded,
     this.loadedModelId,
+    this.loadedRuntime,
     this.backend,
     this.error,
   });
 
   OnDeviceEngineState copyWith({
     OnDeviceEngineStatus? status,
-    String? loadedModelId,
-    PreferredBackend? backend,
-    String? error,
+    Object? loadedModelId = _unset,
+    Object? loadedRuntime = _unset,
+    Object? backend = _unset,
+    Object? error = _unset,
   }) {
     return OnDeviceEngineState(
       status: status ?? this.status,
-      loadedModelId: loadedModelId ?? this.loadedModelId,
-      backend: backend ?? this.backend,
-      error: error ?? this.error,
+      loadedModelId: identical(loadedModelId, _unset)
+          ? this.loadedModelId
+          : loadedModelId as String?,
+      loadedRuntime: identical(loadedRuntime, _unset)
+          ? this.loadedRuntime
+          : loadedRuntime as OnDeviceModelRuntime?,
+      backend: identical(backend, _unset)
+          ? this.backend
+          : backend as PreferredBackend?,
+      error: identical(error, _unset) ? this.error : error as String?,
     );
+  }
+}
+
+class ImportedGgufModelsNotifier extends Notifier<List<OnDeviceModel>> {
+  ImportedGgufModelRepository get _repository =>
+      ref.read(importedGgufModelRepositoryProvider);
+
+  @override
+  List<OnDeviceModel> build() {
+    return _repository.load().map((model) => model.toOnDeviceModel()).toList();
+  }
+
+  Future<void> importModel(String sourcePath) async {
+    final metadata = await _repository.importFromPath(sourcePath);
+    state = [...state, metadata.toOnDeviceModel()];
+  }
+
+  Future<void> deleteModel(String modelId) async {
+    await _repository.delete(modelId);
+    state = state.where((model) => model.id != modelId).toList();
+  }
+
+  /// Removes a single missing model from the list. Used when we try to load
+  /// a specific imported GGUF and discover its file is gone, so other valid
+  /// imports are not collateral damage.
+  Future<void> removeMissingModel(String modelId) async {
+    final hadModel = state.any((m) => m.id == modelId);
+    if (!hadModel) return;
+    await _repository.delete(modelId);
+    state = state.where((model) => model.id != modelId).toList();
+  }
+
+  /// Prunes any imported models whose backing files have disappeared from
+  /// disk. Intended to be called explicitly (e.g. when entering the model
+  /// manager screen) rather than from `build()` so it never runs against a
+  /// disposed provider container.
+  Future<void> pruneMissing() async {
+    final existing = await _repository.loadExisting();
+    final keptIds = existing.map((m) => m.id).toSet();
+    if (keptIds.length == state.length &&
+        state.every((m) => keptIds.contains(m.id))) {
+      return;
+    }
+    state = existing.map((m) => m.toOnDeviceModel()).toList();
   }
 }
 
@@ -81,38 +159,75 @@ class OnDeviceEngineNotifier extends Notifier<OnDeviceEngineState> {
 
   OnDeviceGemmaService get _gemmaService =>
       ref.read(onDeviceGemmaServiceProvider);
+  OnDeviceLlamaService get _llamaService =>
+      ref.read(onDeviceLlamaServiceProvider);
 
   Future<void> loadModel(String modelId, PreferredBackend backend) async {
-    state = state.copyWith(status: OnDeviceEngineStatus.loading, error: null);
+    final models = ref.read(onDeviceModelsProvider);
+    final model = models.firstWhere(
+      (m) => m.id == modelId,
+      orElse: () => throw Exception('Model not found: $modelId'),
+    );
+
+    state = state.copyWith(
+      status: OnDeviceEngineStatus.loading,
+      loadedModelId: modelId,
+      loadedRuntime: model.runtime,
+      error: null,
+    );
 
     // Protect the heavy native model-load from Android CPU throttling
     final bgService = ref.read(chatBackgroundServiceProvider);
     await bgService.start();
 
     try {
-      final model = OnDeviceModel.curatedModels.firstWhere(
-        (m) => m.id == modelId,
-        orElse: () => throw Exception('Model not found: $modelId'),
-      );
       final effectiveBackend = model.isCpuOnly ? PreferredBackend.cpu : backend;
 
       // Yield control to the event loop so the UI has time to draw the loading indicator
       // and stabilize before the native platform thread begins heavy model loading.
       await Future.delayed(const Duration(milliseconds: 100));
-      final isInstalled = await _gemmaService.isModelInstalled(modelId);
-      if (!isInstalled) {
-        state = state.copyWith(
-          status: OnDeviceEngineStatus.error,
-          error: 'Model not found. Please download it first.',
-        );
-        return;
-      }
+      if (model.runtime == OnDeviceModelRuntime.llamaCpp) {
+        final file = File(model.localPath ?? '');
+        if (!await file.exists()) {
+          await ref
+              .read(importedGgufModelsProvider.notifier)
+              .removeMissingModel(modelId);
+          state = state.copyWith(
+            status: OnDeviceEngineStatus.error,
+            loadedModelId: null,
+            loadedRuntime: null,
+            error: 'Imported GGUF file is missing. Please re-import it.',
+          );
+          return;
+        }
 
-      await _gemmaService.loadModel(modelId, effectiveBackend);
+        final settings = ref.read(settingsProvider);
+        await _gemmaService.unloadModel();
+        await _llamaService.loadModel(
+          model,
+          contextLength: settings.contextLength,
+          useGpu: !model.isCpuOnly && effectiveBackend == PreferredBackend.gpu,
+        );
+      } else {
+        final isInstalled = await _gemmaService.isModelInstalled(modelId);
+        if (!isInstalled) {
+          state = state.copyWith(
+            status: OnDeviceEngineStatus.error,
+            loadedModelId: null,
+            loadedRuntime: null,
+            error: 'Model not found. Please download it first.',
+          );
+          return;
+        }
+
+        await _llamaService.unloadModel();
+        await _gemmaService.loadModel(modelId, effectiveBackend);
+      }
 
       state = state.copyWith(
         status: OnDeviceEngineStatus.loaded,
         loadedModelId: modelId,
+        loadedRuntime: model.runtime,
         backend: effectiveBackend,
       );
 
@@ -131,6 +246,8 @@ class OnDeviceEngineNotifier extends Notifier<OnDeviceEngineState> {
       Log.error('Failed to load model $modelId: $e');
       state = state.copyWith(
         status: OnDeviceEngineStatus.error,
+        loadedModelId: null,
+        loadedRuntime: null,
         error: 'Failed to load model: ${e.toString()}',
       );
     } finally {
@@ -141,12 +258,20 @@ class OnDeviceEngineNotifier extends Notifier<OnDeviceEngineState> {
   Future<void> unloadModel() async {
     try {
       await _gemmaService.unloadModel();
-    } catch (_) {}
+    } catch (e) {
+      Log.error('Failed to unload gemma model: $e');
+    }
+    try {
+      await _llamaService.unloadModel();
+    } catch (e) {
+      Log.error('Failed to unload llama.cpp model: $e');
+    }
     state = const OnDeviceEngineState();
   }
 
   Future<void> disposeService() async {
     _gemmaService.dispose();
+    _llamaService.dispose();
     state = const OnDeviceEngineState();
   }
 }

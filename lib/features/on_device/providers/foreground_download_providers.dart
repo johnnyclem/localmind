@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/logger/app_logger.dart';
+import '../../../core/providers/app_providers.dart';
 import '../../../core/providers/review_prompt_providers.dart';
 import '../../../core/providers/storage_providers.dart';
 import '../data/models/download_progress_info.dart';
@@ -60,12 +61,21 @@ class ForegroundDownloadNotifier
     }
   }
 
-  Future<void> startDownload(String modelId) async {
+  Future<String?> startDownload(String modelId) async {
     final models = ref.read(onDeviceModelsProvider);
     final model = models.firstWhere(
       (m) => m.id == modelId,
       orElse: () => throw Exception('Model not found: $modelId'),
     );
+
+    if (model.requiresHuggingFaceToken) {
+      final hfToken = ref.read(
+        settingsProvider.select((s) => s.huggingFaceToken),
+      );
+      if (hfToken == null || hfToken.isEmpty) {
+        return 'missing_huggingface_token';
+      }
+    }
 
     _activeDownloads[modelId] = true;
     _downloadStartTimes[modelId] = DateTime.now();
@@ -82,10 +92,14 @@ class ForegroundDownloadNotifier
     _saveState();
 
     final gemmaService = ref.read(onDeviceGemmaServiceProvider);
+    final hfToken = ref.read(
+      settingsProvider.select((s) => s.huggingFaceToken),
+    );
 
     try {
       await gemmaService.installModel(
         model,
+        token: (hfToken != null && hfToken.isNotEmpty) ? hfToken : null,
         onProgress: (progress) {
           if (_activeDownloads[modelId] != true) return;
 
@@ -157,6 +171,7 @@ class ForegroundDownloadNotifier
       _activeDownloads.remove(modelId);
       _downloadStartTimes.remove(modelId);
     }
+    return null;
   }
 
   void _removeCompletedDownload(String modelId) {

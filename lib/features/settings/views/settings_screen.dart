@@ -235,6 +235,23 @@ class SettingsViews extends ConsumerWidget {
                         .read(settingsProvider.notifier)
                         .setSmartReplyEnabled(value),
                   ),
+                  _HuggingFaceTokenSetting(
+                    currentToken: settings.huggingFaceToken,
+                    onSave: (value) {
+                      ref
+                          .read(settingsProvider.notifier)
+                          .setHuggingFaceToken(value);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            value == null || value.isEmpty
+                                ? l10n.settings_huggingface_token_cleared
+                                : l10n.settings_huggingface_token_set,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
                   _SectionActionButton(
                     icon: Icons.phone_android_rounded,
                     label: l10n.manage_on_device_models,
@@ -1862,6 +1879,130 @@ class _InputShell extends StatelessWidget {
         border: Border.all(color: _outlineColor(context, alpha: 0.8)),
       ),
       child: child,
+    );
+  }
+}
+
+class _HuggingFaceTokenSetting extends StatelessWidget {
+  const _HuggingFaceTokenSetting({
+    required this.currentToken,
+    required this.onSave,
+  });
+
+  final String? currentToken;
+  final ValueChanged<String?> onSave;
+
+  bool get _hasToken => currentToken != null && currentToken!.isNotEmpty;
+
+  String _maskedToken(String token) {
+    if (token.length <= 6) return '••••••';
+    return '${token.substring(0, 4)}••••••${token.substring(token.length - 4)}';
+  }
+
+  Future<void> _editToken(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
+    final controller = TextEditingController(text: currentToken ?? '');
+    final result = await showDialog<String?>(
+      context: context,
+      builder: (ctx) {
+        return AlertDialog(
+          title: Text(l10n.edit_huggingface_token_dialog_title),
+          content: TextField(
+            controller: controller,
+            obscureText: true,
+            autofocus: true,
+            decoration: InputDecoration(
+              hintText: l10n.huggingface_token_dialog_hint,
+              border: const OutlineInputBorder(),
+            ),
+            onSubmitted: (v) => Navigator.of(ctx).pop(v.trim()),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: Text(l10n.cancel),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(''),
+              child: Text(l10n.clear_huggingface_token),
+            ),
+            TextButton(
+              onPressed: () =>
+                  Navigator.of(ctx).pop(controller.text.trim()),
+              child: Text(l10n.save),
+            ),
+          ],
+        );
+      },
+    );
+
+    controller.dispose();
+    if (result == null) return;
+    onSave(result.isEmpty ? null : result);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+
+    return _SettingPanel(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _SettingHeader(label: l10n.settings_huggingface_token),
+          const SizedBox(height: 6),
+          Text(
+            l10n.settings_huggingface_token_desc,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: _mutedColor(context),
+              height: 1.4,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(
+                child: _InputShell(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 12,
+                    ),
+                    child: Text(
+                      _hasToken
+                          ? _maskedToken(currentToken!)
+                          : '—',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontFamily: 'monospace',
+                        color: _hasToken
+                            ? theme.colorScheme.onSurface
+                            : _mutedColor(context),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              ShadButton.outline(
+                onPressed: () => _editToken(context),
+                child: Text(
+                  _hasToken
+                      ? l10n.edit
+                      : l10n.set_huggingface_token,
+                ),
+              ),
+              if (_hasToken) ...[
+                const SizedBox(width: 6),
+                ShadButton.outline(
+                  onPressed: () => onSave(null),
+                  child: Text(l10n.clear_huggingface_token),
+                ),
+              ],
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

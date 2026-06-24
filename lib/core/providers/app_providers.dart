@@ -102,6 +102,8 @@ class SettingsNotifier extends Notifier<AppSettings> {
       _update(state.copyWith(smartReplyEnabled: value));
   void setLocaleCode(String? value) =>
       _update(state.copyWith(localeCode: value));
+  void setHuggingFaceToken(String? value) =>
+      _update(state.copyWith(huggingFaceToken: value));
 
   Future<void> _update(AppSettings updated) async {
     state = updated;

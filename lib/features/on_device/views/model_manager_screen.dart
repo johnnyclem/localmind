@@ -1,12 +1,16 @@
 import 'dart:io';
 
+import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:localmind/l10n/app_localizations.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
 import '../../../core/models/enums.dart';
 import '../../../core/providers/app_providers.dart';
+import '../../../core/routes/app_routes.dart';
 import '../../on_device/data/models/on_device_model.dart';
 import '../../on_device/data/models/download_progress_info.dart';
 import '../../on_device/data/models/download_status.dart';
@@ -31,11 +35,19 @@ class OnDeviceModelManagerScreen extends ConsumerWidget {
     ref.listen(onDeviceEngineProvider, (prev, next) {
       if (next.status == OnDeviceEngineStatus.loaded &&
           prev?.status == OnDeviceEngineStatus.loading) {
+        final loadedId = next.loadedModelId;
+        final loadedName = loadedId == null
+            ? 'Unknown'
+            : models
+                  .where((m) => m.id == loadedId)
+                  .map((m) => m.name)
+                  .followedBy([loadedId])
+                  .first;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
               l10n.model_loaded(
-                next.loadedModelId ?? 'Unknown',
+                loadedName,
                 next.backend?.name ?? 'CPU',
               ),
             ),
@@ -55,28 +67,29 @@ class OnDeviceModelManagerScreen extends ConsumerWidget {
             top: topPadding + 8,
             bottom: 16,
           ),
-            decoration: BoxDecoration(
-              color: theme.brightness == Brightness.dark
-                  ? const Color(0xFF0A0A0A)
-                  : const Color(0xFFFAFAFA),
-              border: Border(
-                bottom: BorderSide(
-                  color: theme.brightness == Brightness.dark
-                      ? const Color(0xFF2A2A2A)
-                      : const Color(0xFFE5E5E5),
-                ),
+          decoration: BoxDecoration(
+            color: theme.brightness == Brightness.dark
+                ? const Color(0xFF0A0A0A)
+                : const Color(0xFFFAFAFA),
+            border: Border(
+              bottom: BorderSide(
+                color: theme.brightness == Brightness.dark
+                    ? const Color(0xFF2A2A2A)
+                    : const Color(0xFFE5E5E5),
               ),
             ),
-            child: Row(
-              children: [
-                Builder(
-                  builder: (context) => IconButton(
-                    icon: const Icon(Icons.menu),
-                    onPressed: () => Scaffold.of(context).openDrawer(),
-                  ),
+          ),
+          child: Row(
+            children: [
+              Builder(
+                builder: (context) => IconButton(
+                  icon: const Icon(Icons.menu),
+                  onPressed: () => Scaffold.of(context).openDrawer(),
                 ),
-                const SizedBox(width: 8),
-                Text(
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
                   l10n.on_device_models_title,
                   style: TextStyle(
                     fontSize: 20,
@@ -86,79 +99,103 @@ class OnDeviceModelManagerScreen extends ConsumerWidget {
                         : Colors.black,
                   ),
                 ),
-              ],
-            ),
+              ),
+              if (defaultTargetPlatform == TargetPlatform.android ||
+                  defaultTargetPlatform == TargetPlatform.iOS)
+                ShadButton.outline(
+                  size: ShadButtonSize.sm,
+                  onPressed: () => _importGguf(context, ref),
+                  child: const Text('Import GGUF'),
+                ),
+            ],
           ),
-          Expanded(
-            child: ListView(
-              padding: const EdgeInsets.all(16),
-              children: [
-                _buildMemoryInfo(context, ref, deviceMemoryAsync),
-                if (engineState.status == OnDeviceEngineStatus.loaded)
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    margin: const EdgeInsets.only(bottom: 16),
-                    decoration: BoxDecoration(
-                      color: Colors.green.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.green),
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.check_circle, color: Colors.green, size: 20),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            l10n.model_loaded(
-                              engineState.loadedModelId ?? 'Unknown',
-                              engineState.backend?.name ?? 'CPU',
-                            ),
-                            style: const TextStyle(color: Colors.green),
+        ),
+        Expanded(
+          child: ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              _buildMemoryInfo(context, ref, deviceMemoryAsync),
+              if (engineState.status == OnDeviceEngineStatus.loaded)
+                Builder(
+                  builder: (context) {
+                    final loadedId = engineState.loadedModelId;
+                    final loadedName = loadedId == null
+                        ? 'Unknown'
+                        : models
+                              .where((m) => m.id == loadedId)
+                              .map((m) => m.name)
+                              .followedBy([loadedId])
+                              .first;
+                    return Container(
+                      padding: const EdgeInsets.all(12),
+                      margin: const EdgeInsets.only(bottom: 16),
+                      decoration: BoxDecoration(
+                        color: Colors.green.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.green),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.check_circle,
+                            color: Colors.green,
+                            size: 20,
                           ),
-                        ),
-                      ],
-                    ),
-                  )
-                else if (engineState.status == OnDeviceEngineStatus.loading)
-                  const Padding(
-                    padding: EdgeInsets.only(bottom: 16),
-                    child: LinearProgressIndicator(),
-                  )
-                else if (engineState.status == OnDeviceEngineStatus.error)
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    margin: const EdgeInsets.only(bottom: 16),
-                    decoration: BoxDecoration(
-                      color: Colors.red.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.red),
-                    ),
-                    child: Text(
-                      engineState.error ?? l10n.unknown_error,
-                      style: const TextStyle(color: Colors.red),
-                    ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              l10n.model_loaded(
+                                loadedName,
+                                engineState.backend?.name ?? 'CPU',
+                              ),
+                              style: const TextStyle(color: Colors.green),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                )
+              else if (engineState.status == OnDeviceEngineStatus.loading)
+                const Padding(
+                  padding: EdgeInsets.only(bottom: 16),
+                  child: LinearProgressIndicator(),
+                )
+              else if (engineState.status == OnDeviceEngineStatus.error)
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  margin: const EdgeInsets.only(bottom: 16),
+                  decoration: BoxDecoration(
+                    color: Colors.red.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.red),
                   ),
-                Text(
-                  l10n.available_models,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                ...models.map(
-                  (model) => _ModelCard(
-                    model: model,
-                    theme: theme,
-                    downloadedAsync: downloadedAsync,
-                    downloadProgress: downloadProgress[model.id],
-                    engineState: engineState,
-                    deviceMemory: deviceMemoryAsync.value,
+                  child: Text(
+                    engineState.error ?? l10n.unknown_error,
+                    style: const TextStyle(color: Colors.red),
                   ),
                 ),
-                const SizedBox(height: 24),
-              ],
-            ),
+              Text(
+                l10n.available_models,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 12),
+              ...models.map(
+                (model) => _ModelCard(
+                  model: model,
+                  theme: theme,
+                  downloadedAsync: downloadedAsync,
+                  downloadProgress: downloadProgress[model.id],
+                  engineState: engineState,
+                  deviceMemory: deviceMemoryAsync.value,
+                ),
+              ),
+              const SizedBox(height: 24),
+            ],
           ),
+        ),
       ],
     );
   }
@@ -401,6 +438,36 @@ class OnDeviceModelManagerScreen extends ConsumerWidget {
     }
     return '$mb MB';
   }
+
+  Future<void> _importGguf(BuildContext context, WidgetRef ref) async {
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      final result = await FilePicker.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: const ['gguf'],
+      );
+      if (result == null || result.files.isEmpty) return;
+
+      final path = result.files.single.path;
+      if (path == null || !path.toLowerCase().endsWith('.gguf')) {
+        messenger.showSnackBar(
+          const SnackBar(
+            content: Text('Only GGUF models are supported for this import.'),
+          ),
+        );
+        return;
+      }
+
+      await ref.read(importedGgufModelsProvider.notifier).importModel(path);
+      messenger.showSnackBar(
+        const SnackBar(content: Text('GGUF model imported.')),
+      );
+    } catch (e) {
+      messenger.showSnackBar(
+        SnackBar(content: Text('Failed to import GGUF model: $e')),
+      );
+    }
+  }
 }
 
 class _MemoryStat extends StatelessWidget {
@@ -551,6 +618,25 @@ class _ModelCard extends ConsumerWidget {
                       ),
                     ),
                   ),
+                if (model.isImported)
+                  Container(
+                    margin: const EdgeInsets.only(left: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.blue.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Text(
+                      'Imported',
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: Colors.blue,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
               ],
             ),
             if (!Platform.isIOS &&
@@ -598,7 +684,7 @@ class _ModelCard extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 8),
-            _buildCapabilityChips(),
+            _buildCapabilityChips(context),
             const SizedBox(height: 8),
             Row(
               children: [
@@ -632,13 +718,18 @@ class _ModelCard extends ConsumerWidget {
     );
   }
 
-  Widget _buildCapabilityChips() {
+  Widget _buildCapabilityChips(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final chips = <String>[
+      if (model.format == OnDeviceModelFormat.gguf) 'GGUF',
+      if (model.runtime == OnDeviceModelRuntime.llamaCpp) 'llama.cpp',
       if (model.supportsFunctionCalling) 'Tools',
       if (model.supportsThinking) 'Thinking',
       if (model.supportsVision) 'Vision',
       model.languagesLabel,
       if (model.backendNote != null) model.backendNote!,
+      if (model.requiresHuggingFaceToken)
+        l10n.model_requires_huggingface_token,
     ];
 
     return Wrap(
@@ -866,9 +957,22 @@ class _ModelCard extends ConsumerWidget {
       }
     }
 
-    await ref
+    final result = await ref
         .read(foregroundDownloadNotifierProvider.notifier)
         .startDownload(model.id);
+
+    if (result == 'missing_huggingface_token' && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(l10n.model_missing_huggingface_token),
+          duration: const Duration(seconds: 6),
+          action: SnackBarAction(
+            label: l10n.settings_title,
+            onPressed: () => context.push(AppRoutes.settings),
+          ),
+        ),
+      );
+    }
   }
 
   Future<void> _loadModel(BuildContext context, WidgetRef ref) async {
@@ -950,8 +1054,14 @@ class _ModelCard extends ConsumerWidget {
         await ref.read(onDeviceEngineProvider.notifier).unloadModel();
       }
 
-      final gemmaService = ref.read(onDeviceGemmaServiceProvider);
-      await gemmaService.deleteModel(model.id);
+      if (model.isImported) {
+        await ref
+            .read(importedGgufModelsProvider.notifier)
+            .deleteModel(model.id);
+      } else {
+        final gemmaService = ref.read(onDeviceGemmaServiceProvider);
+        await gemmaService.deleteModel(model.id);
+      }
       ref.invalidate(downloadedModelsProvider);
     }
   }

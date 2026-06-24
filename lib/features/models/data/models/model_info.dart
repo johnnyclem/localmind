@@ -1,4 +1,5 @@
 import '../../../../core/models/enums.dart';
+import '../../../on_device/data/models/on_device_model.dart';
 
 class ModelInfo {
   final String id;
@@ -13,6 +14,9 @@ class ModelInfo {
   final String serverId;
   final DateTime? modifiedAt;
   final ModelStatus status;
+  final OnDeviceModelRuntime? onDeviceRuntime;
+  final OnDeviceModelFormat? onDeviceFormat;
+  final String? localPath;
 
   ModelInfo({
     required this.id,
@@ -27,6 +31,9 @@ class ModelInfo {
     required this.serverId,
     this.modifiedAt,
     this.status = ModelStatus.unloaded,
+    this.onDeviceRuntime,
+    this.onDeviceFormat,
+    this.localPath,
   });
 
   String get displayName {
@@ -73,6 +80,9 @@ class ModelInfo {
     String? serverId,
     DateTime? modifiedAt,
     ModelStatus? status,
+    OnDeviceModelRuntime? onDeviceRuntime,
+    OnDeviceModelFormat? onDeviceFormat,
+    String? localPath,
   }) {
     return ModelInfo(
       id: id ?? this.id,
@@ -87,6 +97,9 @@ class ModelInfo {
       serverId: serverId ?? this.serverId,
       modifiedAt: modifiedAt ?? this.modifiedAt,
       status: status ?? this.status,
+      onDeviceRuntime: onDeviceRuntime ?? this.onDeviceRuntime,
+      onDeviceFormat: onDeviceFormat ?? this.onDeviceFormat,
+      localPath: localPath ?? this.localPath,
     );
   }
 }

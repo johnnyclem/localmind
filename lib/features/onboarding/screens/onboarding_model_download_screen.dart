@@ -404,7 +404,7 @@ class _ModelCard extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 8),
-          _buildCapabilityChips(),
+          _buildCapabilityChips(context),
           const SizedBox(height: 8),
           Row(
             children: [
@@ -516,13 +516,16 @@ class _ModelCard extends ConsumerWidget {
     );
   }
 
-  Widget _buildCapabilityChips() {
+  Widget _buildCapabilityChips(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final chips = <String>[
       if (model.supportsFunctionCalling) 'Tools',
       if (model.supportsThinking) 'Thinking',
       if (model.supportsVision) 'Vision',
       model.languagesLabel,
       if (model.backendNote != null) model.backendNote!,
+      if (model.requiresHuggingFaceToken)
+        l10n.model_requires_huggingface_token,
     ];
 
     return Wrap(
@@ -563,9 +566,20 @@ class _ModelCard extends ConsumerWidget {
       }
     }
 
-    await ref
+    final result = await ref
         .read(foregroundDownloadNotifierProvider.notifier)
         .startDownload(model.id);
+
+    if (result == 'missing_huggingface_token' && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(context)!.model_missing_huggingface_token,
+          ),
+          duration: const Duration(seconds: 6),
+        ),
+      );
+    }
   }
 
   Future<bool> _showRamWarning(BuildContext context) async {

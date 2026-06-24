@@ -1629,35 +1629,17 @@ abstract class AppLocalizations {
   /// **'On-Device'**
   String get server_type_on_device;
 
-  /// On-device server type card subtitle
-  ///
-  /// In en, this message translates to:
-  /// **'NO SERVER NEEDED'**
-  String get server_type_on_device_sub;
-
   /// LM Studio server type card title
   ///
   /// In en, this message translates to:
   /// **'LM Studio'**
   String get server_type_lm_studio;
 
-  /// LM Studio server type card subtitle
-  ///
-  /// In en, this message translates to:
-  /// **'LOCAL API'**
-  String get server_type_lm_studio_sub;
-
   /// Ollama server type card title
   ///
   /// In en, this message translates to:
   /// **'Ollama'**
   String get server_type_ollama;
-
-  /// Ollama server type card subtitle
-  ///
-  /// In en, this message translates to:
-  /// **'CLI ENGINE'**
-  String get server_type_ollama_sub;
 
   /// OpenRouter server type card title
   ///
@@ -2691,6 +2673,84 @@ abstract class AppLocalizations {
   /// **'On-Device Models'**
   String get on_device_models_title;
 
+  /// Settings field label for an optional Hugging Face access token
+  ///
+  /// In en, this message translates to:
+  /// **'Hugging Face Token (Optional)'**
+  String get settings_huggingface_token;
+
+  /// Description for the Hugging Face token setting
+  ///
+  /// In en, this message translates to:
+  /// **'Required only for gated models (e.g. Gemma). Get a token at huggingface.co/settings/tokens.'**
+  String get settings_huggingface_token_desc;
+
+  /// Toast text after a Hugging Face token is saved
+  ///
+  /// In en, this message translates to:
+  /// **'Token saved'**
+  String get settings_huggingface_token_set;
+
+  /// Toast text after a Hugging Face token is cleared
+  ///
+  /// In en, this message translates to:
+  /// **'Token cleared'**
+  String get settings_huggingface_token_cleared;
+
+  /// Badge on a model that is gated on Hugging Face
+  ///
+  /// In en, this message translates to:
+  /// **'Requires a Hugging Face token'**
+  String get model_requires_huggingface_token;
+
+  /// Inline warning shown when a gated model download is attempted without a token
+  ///
+  /// In en, this message translates to:
+  /// **'This model is gated on Hugging Face. Add a token in Settings → On-Device Inference to download it.'**
+  String get model_missing_huggingface_token;
+
+  /// Button label to set/edit a Hugging Face token
+  ///
+  /// In en, this message translates to:
+  /// **'Set token'**
+  String get set_huggingface_token;
+
+  /// Button label to clear a saved Hugging Face token
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get clear_huggingface_token;
+
+  /// Title of the dialog for entering a Hugging Face token
+  ///
+  /// In en, this message translates to:
+  /// **'Hugging Face Access Token'**
+  String get edit_huggingface_token_dialog_title;
+
+  /// Placeholder for the Hugging Face token input field
+  ///
+  /// In en, this message translates to:
+  /// **'hf_…'**
+  String get huggingface_token_dialog_hint;
+
+  /// Short description for the Ollama server type
+  ///
+  /// In en, this message translates to:
+  /// **'Local AI engine. No API key required.'**
+  String get server_type_ollama_desc;
+
+  /// Short description for the On-Device server type
+  ///
+  /// In en, this message translates to:
+  /// **'Runs on your phone. Some models need a Hugging Face token.'**
+  String get server_type_on_device_desc;
+
+  /// Short description for the LM Studio server type
+  ///
+  /// In en, this message translates to:
+  /// **'Local API server. No API key required.'**
+  String get server_type_lm_studio_desc;
+
   /// Available models section title
   ///
   /// In en, this message translates to:
@@ -2838,7 +2898,7 @@ abstract class AppLocalizations {
   /// Ollama model unloaded status
   ///
   /// In en, this message translates to:
-  /// **'{name} will be unloaded once the keep-alive time passes'**
+  /// **'Unload requested for {name}. If Ollama is reachable, the model is released immediately.'**
   String model_unloaded_ollama(String name);
 
   /// Model unloaded success snackbar

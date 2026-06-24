@@ -2,6 +2,10 @@ import 'package:flutter_gemma/flutter_gemma.dart';
 
 import '../../../../core/models/enums.dart';
 
+enum OnDeviceModelRuntime { gemma, llamaCpp }
+
+enum OnDeviceModelFormat { litertlm, task, binary, gguf }
+
 class OnDeviceModel {
   final String id;
   final String name;
@@ -19,6 +23,12 @@ class OnDeviceModel {
   final String languagesLabel;
   final String? backendNote;
   final bool isCpuOnly;
+  final OnDeviceModelRuntime runtime;
+  final OnDeviceModelFormat format;
+  final String? localPath;
+  final DateTime? importedAt;
+  final bool isImported;
+  final bool requiresHuggingFaceToken;
 
   const OnDeviceModel({
     required this.id,
@@ -37,6 +47,12 @@ class OnDeviceModel {
     required this.languagesLabel,
     this.backendNote,
     this.isCpuOnly = false,
+    this.runtime = OnDeviceModelRuntime.gemma,
+    this.format = OnDeviceModelFormat.litertlm,
+    this.localPath,
+    this.importedAt,
+    this.isImported = false,
+    this.requiresHuggingFaceToken = false,
   });
 
   String get fileSizeFormatted {
@@ -48,7 +64,14 @@ class OnDeviceModel {
     return '${mb.toStringAsFixed(0)} MB';
   }
 
-  String get fileName => huggingFaceUrl.split('/').last;
+  String get fileName {
+    if (localPath != null && localPath!.isNotEmpty) {
+      return localPath!.split('/').last;
+    }
+    return huggingFaceUrl.split('/').last;
+  }
+
+  bool get isLlamaCpp => runtime == OnDeviceModelRuntime.llamaCpp;
 
   ModelType get flutterGemmaModelType {
     switch (id) {
@@ -161,6 +184,7 @@ class OnDeviceModel {
       fileSizeBytes: 3221225472,
       license: 'Gemma',
       description: 'On-device multimodal chat and image analysis.',
+      requiresHuggingFaceToken: true,
       minRamMb: 5120,
       parameterLabel: 'E2B',
       bestFor: 'On-device multimodal chat and image analysis',

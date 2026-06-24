@@ -115,9 +115,6 @@ final availableModelsProvider = FutureProvider.family<List<dynamic>, String>((
   ref,
   serverId,
 ) async {
-  final cached = _modelCache.get(serverId);
-  if (cached != null) return cached;
-
   final serversAsync = ref.watch(serversProvider);
   final servers = serversAsync.value ?? [];
   final server = servers.firstWhere(
@@ -127,7 +124,8 @@ final availableModelsProvider = FutureProvider.family<List<dynamic>, String>((
   final apiService = ref.watch(serverApiServiceProvider);
 
   if (server.type == ServerType.onDevice) {
-    final models = OnDeviceModel.curatedModels
+    final models = ref
+        .watch(onDeviceModelsProvider)
         .map(
           (m) => ModelInfo(
             id: m.id,
@@ -136,14 +134,26 @@ final availableModelsProvider = FutureProvider.family<List<dynamic>, String>((
             parameterCount: double.tryParse(
               m.parameterLabel.replaceAll(RegExp(r'[^0-9\.]'), ''),
             ),
+            fileSize: m.fileSizeBytes,
+            quantization: m.format == OnDeviceModelFormat.gguf ? 'GGUF' : null,
+            architecture: m.runtime == OnDeviceModelRuntime.llamaCpp
+                ? 'llama.cpp'
+                : null,
             serverType: ServerType.onDevice,
             serverId: server.id,
+            modifiedAt: m.importedAt,
+            onDeviceRuntime: m.runtime,
+            onDeviceFormat: m.format,
+            localPath: m.localPath,
           ),
         )
         .toList();
     _modelCache.put(serverId, models);
     return models;
   }
+
+  final cached = _modelCache.get(serverId);
+  if (cached != null) return cached;
 
   final models = await apiService.fetchModels(server);
   _modelCache.put(serverId, models);
@@ -306,7 +316,6 @@ class ActiveServerNotifier extends Notifier<Server?> {
     }
   }
 }
-
 
 class ConnectionStatusNotifier extends Notifier<ConnectionStatus> {
   @override

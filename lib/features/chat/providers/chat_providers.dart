@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 
+import 'package:dio/dio.dart';
 import '../../../core/logger/app_logger.dart';
 import '../../../core/services/message_save_service.dart';
 
@@ -21,6 +22,9 @@ import '../../../core/providers/service_providers.dart';
 import '../../../core/providers/storage_providers.dart';
 import '../../on_device/providers/on_device_providers.dart';
 import '../../on_device/data/on_device_chat_service.dart';
+import '../../on_device/data/on_device_gemma_service.dart';
+import '../../on_device/data/on_device_llama_service.dart';
+import '../../on_device/data/models/on_device_model.dart';
 import '../../../core/storage/entities.dart';
 import '../../../objectbox.g.dart';
 import '../../conversations/data/models/conversation.dart';
@@ -248,17 +252,16 @@ final chatServiceProvider = Provider<ChatService?>((ref) {
   if (server == null) {
     return null;
   }
-  final ChatService service;
-  if (server.type == ServerType.onDevice) {
-    final gemmaService = ref.read(onDeviceGemmaServiceProvider);
-    service = ChatService.forServer(
-      server.type,
-      ref.read(dioProvider),
-      onDeviceGemma: gemmaService,
-    );
-  } else {
-    service = ChatService.forServer(server.type, ref.read(dioProvider));
-  }
+  final loadedRuntime = ref.watch(
+    onDeviceEngineProvider.select((s) => s.loadedRuntime),
+  );
+  final service = createChatServiceForServer(
+    server: server,
+    dio: ref.read(dioProvider),
+    onDeviceGemmaService: ref.read(onDeviceGemmaServiceProvider),
+    onDeviceLlamaService: ref.read(onDeviceLlamaServiceProvider),
+    loadedOnDeviceRuntime: loadedRuntime,
+  );
 
   ref.onDispose(() {
     final s = service;
@@ -269,6 +272,28 @@ final chatServiceProvider = Provider<ChatService?>((ref) {
 
   return service;
 });
+
+ChatService createChatServiceForServer({
+  required Server server,
+  required Dio dio,
+  required OnDeviceGemmaService onDeviceGemmaService,
+  required OnDeviceLlamaService onDeviceLlamaService,
+  OnDeviceModelRuntime? loadedOnDeviceRuntime,
+}) {
+  if (server.type == ServerType.onDevice) {
+    if (loadedOnDeviceRuntime == OnDeviceModelRuntime.llamaCpp) {
+      return OnDeviceLlamaChatService(onDeviceLlamaService);
+    }
+
+    return ChatService.forServer(
+      server.type,
+      dio,
+      onDeviceGemma: onDeviceGemmaService,
+    );
+  }
+
+  return ChatService.forServer(server.type, dio);
+}
 
 final smartReplyServiceProvider = Provider<SmartReplyService>((ref) {
   final service = SmartReplyService();

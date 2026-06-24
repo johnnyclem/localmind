@@ -18,6 +18,37 @@ class TestInterceptor extends Interceptor {
   }
 }
 
+class RequestRecordingInterceptor extends Interceptor {
+  final List<RequestOptions> requests = [];
+  final int statusCode;
+  RequestRecordingInterceptor({this.statusCode = 200});
+
+  @override
+  void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
+    requests.add(options);
+    handler.resolve(
+      Response(
+        requestOptions: options,
+        statusCode: statusCode,
+        data: {'status': 'ok'},
+      ),
+    );
+  }
+}
+
+class FailingInterceptor extends Interceptor {
+  @override
+  void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
+    handler.reject(
+      DioException(
+        requestOptions: options,
+        type: DioExceptionType.connectionError,
+        message: 'connection refused',
+      ),
+    );
+  }
+}
+
 void main() {
   group('ServerApiService - OpenAI/llama.cpp model list parsing', () {
     late Server testServer;
@@ -222,6 +253,80 @@ void main() {
       expect(models, hasLength(1));
       expect(models.first.id, "Gemma-4-31B:IQ4_XS");
       expect(models.first.architecture, isNull);
+    });
+  });
+
+  group('ServerApiService - Ollama load behavior', () {
+    test('loadModel is a no-op for Ollama (does not POST /api/generate)', () async {
+      final ollamaServer = Server(
+        id: 'test-ollama',
+        name: 'Test Ollama',
+        type: ServerType.ollama,
+        host: 'localhost',
+        port: 11434,
+        createdAt: DateTime.now(),
+        lastConnectedAt: DateTime.now(),
+      );
+
+      final dio = Dio()..interceptors.add(RequestRecordingInterceptor());
+      final service = ServerApiService(dio);
+
+      await service.loadModel(ollamaServer, 'llama3.2:latest');
+      await service.loadModelWithInstanceId(ollamaServer, 'llama3.2:latest');
+
+      final recorder =
+          dio.interceptors.firstWhere((i) => i is RequestRecordingInterceptor)
+              as RequestRecordingInterceptor;
+      expect(recorder.requests, isEmpty,
+          reason: 'Ollama should not issue an explicit load request; '
+              'calling /api/generate without a prompt can trigger an '
+              'auto-pull of the model from the Ollama registry.');
+    });
+
+    test('unloadModel for Ollama posts keep_alive=0 and a valid payload', () async {
+      final ollamaServer = Server(
+        id: 'test-ollama',
+        name: 'Test Ollama',
+        type: ServerType.ollama,
+        host: 'localhost',
+        port: 11434,
+        createdAt: DateTime.now(),
+        lastConnectedAt: DateTime.now(),
+      );
+
+      final dio = Dio()..interceptors.add(RequestRecordingInterceptor());
+      final service = ServerApiService(dio);
+
+      await service.unloadModel(ollamaServer, 'llama3.2:latest');
+
+      final recorder =
+          dio.interceptors.firstWhere((i) => i is RequestRecordingInterceptor)
+              as RequestRecordingInterceptor;
+      expect(recorder.requests, hasLength(1));
+      expect(recorder.requests.first.path, endsWith('/api/generate'));
+      expect(recorder.requests.first.data, containsPair('keep_alive', 0));
+      expect(recorder.requests.first.data, containsPair('model', 'llama3.2:latest'));
+      expect(recorder.requests.first.data, containsPair('prompt', ''));
+    });
+
+    test('unloadModel for Ollama surfaces failures', () async {
+      final ollamaServer = Server(
+        id: 'test-ollama',
+        name: 'Test Ollama',
+        type: ServerType.ollama,
+        host: 'localhost',
+        port: 11434,
+        createdAt: DateTime.now(),
+        lastConnectedAt: DateTime.now(),
+      );
+
+      final dio = Dio()..interceptors.add(FailingInterceptor());
+      final service = ServerApiService(dio);
+
+      expect(
+        () => service.unloadModel(ollamaServer, 'llama3.2:latest'),
+        throwsA(isA<Exception>()),
+      );
     });
   });
 }

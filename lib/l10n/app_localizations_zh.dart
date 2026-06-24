@@ -805,19 +805,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get server_type_on_device => '设备端';
 
   @override
-  String get server_type_on_device_sub => '无需服务器';
-
-  @override
   String get server_type_lm_studio => 'LM Studio';
 
   @override
-  String get server_type_lm_studio_sub => '本地 API';
-
-  @override
   String get server_type_ollama => 'Ollama';
-
-  @override
-  String get server_type_ollama_sub => 'CLI 引擎';
 
   @override
   String get server_type_openrouter => 'OpenRouter';
@@ -1360,6 +1351,50 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get on_device_models_title => '设备端模型';
+
+  @override
+  String get settings_huggingface_token => 'Hugging Face Token (Optional)';
+
+  @override
+  String get settings_huggingface_token_desc =>
+      'Required only for gated models (e.g. Gemma). Get a token at huggingface.co/settings/tokens.';
+
+  @override
+  String get settings_huggingface_token_set => 'Token saved';
+
+  @override
+  String get settings_huggingface_token_cleared => 'Token cleared';
+
+  @override
+  String get model_requires_huggingface_token =>
+      'Requires a Hugging Face token';
+
+  @override
+  String get model_missing_huggingface_token =>
+      'This model is gated on Hugging Face. Add a token in Settings → On-Device Inference to download it.';
+
+  @override
+  String get set_huggingface_token => 'Set token';
+
+  @override
+  String get clear_huggingface_token => 'Clear';
+
+  @override
+  String get edit_huggingface_token_dialog_title => 'Hugging Face Access Token';
+
+  @override
+  String get huggingface_token_dialog_hint => 'hf_…';
+
+  @override
+  String get server_type_ollama_desc => 'Local AI engine. No API key required.';
+
+  @override
+  String get server_type_on_device_desc =>
+      'Runs on your phone. Some models need a Hugging Face token.';
+
+  @override
+  String get server_type_lm_studio_desc =>
+      'Local API server. No API key required.';
 
   @override
   String get available_models => '可用模型';

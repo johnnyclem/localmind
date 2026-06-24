@@ -150,7 +150,7 @@ class _OnboardingServerTypeScreenState
                               _buildServerCard(
                                 type: ServerType.onDevice,
                                 title: l10n.server_type_on_device,
-                                subtitle: l10n.server_type_on_device_sub,
+                                subtitle: l10n.server_type_on_device_desc,
                                 iconWidget: Icon(
                                   Icons.phone_android_rounded,
                                   color: _selectedType == ServerType.onDevice
@@ -162,7 +162,7 @@ class _OnboardingServerTypeScreenState
                               _buildServerCard(
                                 type: ServerType.lmStudio,
                                 title: l10n.server_type_lm_studio,
-                                subtitle: l10n.server_type_lm_studio_sub,
+                                subtitle: l10n.server_type_lm_studio_desc,
                                 iconWidget: Icon(
                                   Icons.terminal_rounded,
                                   color: _selectedType == ServerType.lmStudio
@@ -188,7 +188,7 @@ class _OnboardingServerTypeScreenState
                               _buildServerCard(
                                 type: ServerType.ollama,
                                 title: l10n.server_type_ollama,
-                                subtitle: l10n.server_type_ollama_sub,
+                                subtitle: l10n.server_type_ollama_desc,
                                 iconWidget: Icon(
                                   Icons.smart_toy_rounded,
                                   color: _selectedType == ServerType.ollama

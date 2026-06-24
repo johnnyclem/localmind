@@ -1140,25 +1140,13 @@
   "@server_type_on_device": {
     "description": "On-device server type card title"
   },
-  "server_type_on_device_sub": "NO SERVER NEEDED",
-  "@server_type_on_device_sub": {
-    "description": "On-device server type card subtitle"
-  },
   "server_type_lm_studio": "LM Studio",
   "@server_type_lm_studio": {
     "description": "LM Studio server type card title"
   },
-  "server_type_lm_studio_sub": "LOCAL API",
-  "@server_type_lm_studio_sub": {
-    "description": "LM Studio server type card subtitle"
-  },
   "server_type_ollama": "Ollama",
   "@server_type_ollama": {
     "description": "Ollama server type card title"
-  },
-  "server_type_ollama_sub": "CLI ENGINE",
-  "@server_type_ollama_sub": {
-    "description": "Ollama server type card subtitle"
   },
   "server_type_openrouter": "OpenRouter",
   "@server_type_openrouter": {
@@ -1950,6 +1938,58 @@
   "@on_device_models_title": {
     "description": "On-device model manager screen title"
   },
+  "settings_huggingface_token": "Hugging Face Token (Optional)",
+  "@settings_huggingface_token": {
+    "description": "Settings field label for an optional Hugging Face access token"
+  },
+  "settings_huggingface_token_desc": "Required only for gated models (e.g. Gemma). Get a token at huggingface.co/settings/tokens.",
+  "@settings_huggingface_token_desc": {
+    "description": "Description for the Hugging Face token setting"
+  },
+  "settings_huggingface_token_set": "Token saved",
+  "@settings_huggingface_token_set": {
+    "description": "Toast text after a Hugging Face token is saved"
+  },
+  "settings_huggingface_token_cleared": "Token cleared",
+  "@settings_huggingface_token_cleared": {
+    "description": "Toast text after a Hugging Face token is cleared"
+  },
+  "model_requires_huggingface_token": "Requires a Hugging Face token",
+  "@model_requires_huggingface_token": {
+    "description": "Badge on a model that is gated on Hugging Face"
+  },
+  "model_missing_huggingface_token": "This model is gated on Hugging Face. Add a token in Settings → On-Device Inference to download it.",
+  "@model_missing_huggingface_token": {
+    "description": "Inline warning shown when a gated model download is attempted without a token"
+  },
+  "set_huggingface_token": "Set token",
+  "@set_huggingface_token": {
+    "description": "Button label to set/edit a Hugging Face token"
+  },
+  "clear_huggingface_token": "Clear",
+  "@clear_huggingface_token": {
+    "description": "Button label to clear a saved Hugging Face token"
+  },
+  "edit_huggingface_token_dialog_title": "Hugging Face Access Token",
+  "@edit_huggingface_token_dialog_title": {
+    "description": "Title of the dialog for entering a Hugging Face token"
+  },
+  "huggingface_token_dialog_hint": "hf_…",
+  "@huggingface_token_dialog_hint": {
+    "description": "Placeholder for the Hugging Face token input field"
+  },
+  "server_type_ollama_desc": "Local AI engine. No API key required.",
+  "@server_type_ollama_desc": {
+    "description": "Short description for the Ollama server type"
+  },
+  "server_type_on_device_desc": "Runs on your phone. Some models need a Hugging Face token.",
+  "@server_type_on_device_desc": {
+    "description": "Short description for the On-Device server type"
+  },
+  "server_type_lm_studio_desc": "Local API server. No API key required.",
+  "@server_type_lm_studio_desc": {
+    "description": "Short description for the LM Studio server type"
+  },
   "available_models": "Available Models",
   "@available_models": {
     "description": "Available models section title"
@@ -2064,7 +2104,7 @@
       }
     }
   },
-  "model_unloaded_ollama": "{name} will be unloaded once the keep-alive time passes",
+  "model_unloaded_ollama": "Unload requested for {name}. If Ollama is reachable, the model is released immediately.",
   "@model_unloaded_ollama": {
     "description": "Ollama model unloaded status",
     "placeholders": {

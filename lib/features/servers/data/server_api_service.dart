@@ -110,12 +110,10 @@ class ServerApiService {
         }
         break;
       case ServerType.ollama:
-        await _dio.post(
-          server.loadModelEndpoint,
-          data: {'model': modelId},
-          options: Options(headers: _getAuthHeaders(server)),
-        );
-        break;
+        // Ollama auto-loads models on /api/chat. Calling /api/generate here
+        // would trigger an auto-pull (download) when the model is not already
+        // present on the Ollama server, which is not what the user wants.
+        return;
       case ServerType.openRouter:
       case ServerType.onDevice:
         break;
@@ -142,11 +140,9 @@ class ServerApiService {
           return null;
         }
       case ServerType.ollama:
-        await _dio.post(
-          server.loadModelEndpoint,
-          data: {'model': modelId},
-          options: Options(headers: _getAuthHeaders(server)),
-        );
+        // See note in loadModel: Ollama auto-loads on /api/chat, so we do not
+        // issue an explicit /api/generate load (which would auto-pull the
+        // model if missing on the remote).
         return null;
       case ServerType.openRouter:
       case ServerType.onDevice:
@@ -180,7 +176,11 @@ class ServerApiService {
       case ServerType.ollama:
         await _dio.post(
           server.unloadModelEndpoint,
-          data: {'model': modelId, 'keep_alive': 0},
+          data: {
+            'model': modelId,
+            'keep_alive': 0,
+            'prompt': '',
+          },
           options: Options(headers: _getAuthHeaders(server)),
         );
         break;
