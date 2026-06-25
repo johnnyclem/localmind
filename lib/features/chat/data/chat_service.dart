@@ -197,8 +197,7 @@ class LMStudioChatService implements ChatService {
           responseType: ResponseType.stream,
           headers: {
             'Content-Type': 'application/json',
-            if (server.apiKey != null)
-              'Authorization': 'Bearer ${server.apiKey}',
+            ...buildServerAuthHeaders(server),
           },
         ),
         cancelToken: _cancelToken,
@@ -246,7 +245,9 @@ class LMStudioChatService implements ChatService {
         type: ChatResponseType.error,
         content: _handleChatError(e),
       );
+      return;
     }
+    yield const ChatResponse(type: ChatResponseType.done);
   }
 
   Stream<ChatResponse> _handleSseEvent(
@@ -393,7 +394,7 @@ class LMStudioChatService implements ChatService {
         final error = json['error'] as Map<String, dynamic>?;
         if (error != null) {
           yield ChatResponse(
-            type: ChatResponseType.message,
+            type: ChatResponseType.error,
             content: 'Error: ${error['message'] ?? 'Unknown error'}',
           );
         }
@@ -466,15 +467,14 @@ class OpenAICompatibleChatService implements ChatService {
     _cancelToken = CancelToken();
     final toolAdapter = OpenAiToolAdapter();
 
-    final apiMessages = messages
-        .map((m) => {'role': _roleToString(m.role), 'content': m.content})
-        .toList();
+    final apiMessages = messages.map(_messageToApiMap).toList();
     // Strip trailing empty assistant messages to avoid "prefill incompatible
     // with enable_thinking" errors from servers running thinking models
     while (apiMessages.isNotEmpty &&
         apiMessages.last['role'] == 'assistant' &&
         (apiMessages.last['content'] == null ||
-            apiMessages.last['content']!.isEmpty)) {
+            (apiMessages.last['content'] is String &&
+                (apiMessages.last['content'] as String).isEmpty))) {
       apiMessages.removeLast();
     }
 
@@ -506,8 +506,7 @@ class OpenAICompatibleChatService implements ChatService {
           responseType: ResponseType.stream,
           headers: {
             'Content-Type': 'application/json',
-            if (server.apiKey != null)
-              'Authorization': 'Bearer ${server.apiKey}',
+            ...buildServerAuthHeaders(server),
           },
         ),
         cancelToken: _cancelToken,
@@ -574,8 +573,14 @@ class OpenAICompatibleChatService implements ChatService {
 
               // Check for errors in the response
               if (json['error'] != null) {
-                final error = json['error'] as Map<String, dynamic>;
-                final errorMsg = error['message'] ?? 'Unknown API error';
+                _timeoutTimer?.cancel();
+                final error = json['error'];
+                String errorMsg;
+                if (error is Map) {
+                  errorMsg = (error['message'] ?? 'Unknown API error') as String;
+                } else {
+                  errorMsg = error.toString();
+                }
                 Log.error('OpenAICompatible mid-stream error: $errorMsg');
                 yield ChatResponse(
                   type: ChatResponseType.error,
@@ -658,9 +663,11 @@ class OpenAICompatibleChatService implements ChatService {
         type: ChatResponseType.error,
         content: _handleChatError(e),
       );
+      return;
     }
 
     _timeoutTimer?.cancel();
+    yield const ChatResponse(type: ChatResponseType.done);
     Log.debug('OpenAICompatible: Stream ended');
   }
 
@@ -692,9 +699,7 @@ class OllamaChatService implements ChatService {
 
     final body = {
       'model': modelId,
-      'messages': messages
-          .map((m) => {'role': _roleToString(m.role), 'content': m.content})
-          .toList(),
+      'messages': messages.map(_messageToApiMap).toList(),
       'stream': true,
       'options': {
         'temperature': params.temperature,
@@ -714,7 +719,13 @@ class OllamaChatService implements ChatService {
       final response = await _dio.post<ResponseBody>(
         server.chatEndpoint,
         data: body,
-        options: Options(responseType: ResponseType.stream),
+        options: Options(
+          responseType: ResponseType.stream,
+          headers: {
+            'Content-Type': 'application/json',
+            ...buildServerAuthHeaders(server),
+          },
+        ),
         cancelToken: _cancelToken,
       );
 
@@ -765,7 +776,7 @@ class OllamaChatService implements ChatService {
                 return;
               }
             } catch (e) {
-              // ignore: empty_catches
+              Log.error('Ollama chunk parsing error: $e');
             }
           }
         }
@@ -776,7 +787,9 @@ class OllamaChatService implements ChatService {
         type: ChatResponseType.error,
         content: _handleChatError(e),
       );
+      return;
     }
+    yield const ChatResponse(type: ChatResponseType.done);
   }
 
   @override
@@ -807,9 +820,7 @@ class OpenRouterChatService implements ChatService {
 
     final body = {
       'model': modelId,
-      'messages': messages
-          .map((m) => {'role': _roleToString(m.role), 'content': m.content})
-          .toList(),
+      'messages': messages.map(_messageToApiMap).toList(),
       'temperature': params.temperature,
       'top_p': params.topP,
       'max_tokens': params.maxTokens,
@@ -835,7 +846,7 @@ class OpenRouterChatService implements ChatService {
           responseType: ResponseType.stream,
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': 'Bearer ${server.apiKey}',
+            ...buildServerAuthHeaders(server),
             'HTTP-Referer': 'https://localmind.app',
             'X-Title': 'LocalMind',
           },
@@ -904,8 +915,14 @@ class OpenRouterChatService implements ChatService {
 
               // Check for errors in the response
               if (json['error'] != null) {
-                final error = json['error'] as Map<String, dynamic>;
-                final errorMsg = error['message'] ?? 'Unknown API error';
+                _timeoutTimer?.cancel();
+                final error = json['error'];
+                String errorMsg;
+                if (error is Map) {
+                  errorMsg = (error['message'] ?? 'Unknown API error') as String;
+                } else {
+                  errorMsg = error.toString();
+                }
                 Log.error('OpenRouter mid-stream error: $errorMsg');
                 yield ChatResponse(
                   type: ChatResponseType.error,
@@ -993,9 +1010,11 @@ class OpenRouterChatService implements ChatService {
         type: ChatResponseType.error,
         content: _handleChatError(e),
       );
+      return;
     }
 
     _timeoutTimer?.cancel();
+    yield const ChatResponse(type: ChatResponseType.done);
     Log.debug('OpenRouter: Stream ended');
   }
 
@@ -1063,6 +1082,31 @@ String _roleToString(MessageRole role) {
     case MessageRole.tool:
       return 'tool';
   }
+}
+
+Map<String, dynamic> _messageToApiMap(Message m) {
+  final map = <String, dynamic>{
+    'role': _roleToString(m.role),
+    'content': m.content,
+  };
+  if (m.role == MessageRole.tool && m.toolCallId != null) {
+    map['tool_call_id'] = m.toolCallId;
+  }
+  if (m.role == MessageRole.assistant &&
+      m.toolCalls != null &&
+      m.toolCalls!.isNotEmpty) {
+    map['tool_calls'] = m.toolCalls!.map((tc) {
+      return {
+        'id': tc.id,
+        'type': 'function',
+        'function': {
+          'name': tc.toolName,
+          'arguments': jsonEncode(tc.arguments),
+        },
+      };
+    }).toList();
+  }
+  return map;
 }
 
 /// Returns the streaming-parsing adapter for a server type.

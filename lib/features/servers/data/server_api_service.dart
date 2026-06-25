@@ -15,7 +15,7 @@ class ServerApiService {
       final response = await _dio.get(
         server.modelsEndpoint,
         options: Options(
-          headers: _getAuthHeaders(server),
+          headers: buildServerAuthHeaders(server),
           validateStatus: (status) => status != null && status < 500,
         ),
       );
@@ -30,7 +30,7 @@ class ServerApiService {
     try {
       await _dio.head(
         server.baseUrl,
-        options: Options(headers: _getAuthHeaders(server)),
+        options: Options(headers: buildServerAuthHeaders(server)),
       );
       stopwatch.stop();
       return stopwatch.elapsedMilliseconds;
@@ -43,7 +43,7 @@ class ServerApiService {
     try {
       final response = await _dio.get(
         server.modelsEndpoint,
-        options: Options(headers: _getAuthHeaders(server)),
+        options: Options(headers: buildServerAuthHeaders(server)),
       );
 
       switch (server.type) {
@@ -71,7 +71,7 @@ class ServerApiService {
     try {
       final response = await _dio.get(
         server.runningModelsEndpoint,
-        options: Options(headers: _getAuthHeaders(server)),
+        options: Options(headers: buildServerAuthHeaders(server)),
       );
 
       switch (server.type) {
@@ -103,7 +103,7 @@ class ServerApiService {
           await _dio.post(
             server.loadModelEndpoint,
             data: {'model': modelId},
-            options: Options(headers: _getAuthHeaders(server)),
+            options: Options(headers: buildServerAuthHeaders(server)),
           );
         } catch (_) {
           // Not all OpenAI-compatible servers support this endpoint
@@ -133,7 +133,7 @@ class ServerApiService {
           final response = await _dio.post(
             server.loadModelEndpoint,
             data: {'model': modelId, 'echo_load_config': true},
-            options: Options(headers: _getAuthHeaders(server)),
+            options: Options(headers: buildServerAuthHeaders(server)),
           );
           return response.data['instance_id'] as String?;
         } catch (_) {
@@ -167,7 +167,7 @@ class ServerApiService {
           await _dio.post(
             server.unloadModelEndpoint,
             data: {'instance_id': instanceId ?? modelId},
-            options: Options(headers: _getAuthHeaders(server)),
+            options: Options(headers: buildServerAuthHeaders(server)),
           );
         } catch (_) {
           // Not all OpenAI-compatible servers support this endpoint
@@ -181,7 +181,7 @@ class ServerApiService {
             'keep_alive': 0,
             'prompt': '',
           },
-          options: Options(headers: _getAuthHeaders(server)),
+          options: Options(headers: buildServerAuthHeaders(server)),
         );
         break;
       case ServerType.openRouter:
@@ -192,8 +192,9 @@ class ServerApiService {
 
   Set<String> _parseRunningOpenAICompatibleModels(dynamic data) {
     final runningModels = <String>{};
+    if (data == null) return runningModels;
     final modelItems = data['models'] ?? data['data'];
-    if (modelItems != null && modelItems is List) {
+    if (modelItems is List) {
       for (final item in modelItems) {
         if (item is! Map) continue;
         final id = item['key']?.toString() ??
@@ -219,28 +220,25 @@ class ServerApiService {
 
   Set<String> _parseRunningOllamaModels(dynamic data) {
     final runningModels = <String>{};
-    if (data['models'] != null) {
-      for (final item in data['models']) {
-        runningModels.add(item['name'] as String? ?? '');
+    final models = data['models'];
+    if (models is List) {
+      for (final item in models) {
+        if (item is! Map) continue;
+        final name = item['name'];
+        if (name != null) runningModels.add(name.toString());
       }
     }
     return runningModels;
   }
 
-  Map<String, String>? _getAuthHeaders(Server server) {
-    if (server.apiKey != null && server.apiKey!.isNotEmpty) {
-      return {'Authorization': 'Bearer ${server.apiKey}'};
-    }
-    return null;
-  }
-
   List<ModelInfo> _parseOpenAICompatibleModels(dynamic data, Server server) {
     final List<ModelInfo> models = [];
+    if (data == null) return models;
 
     // Build a lookup from the OpenAI-style 'data' array for metadata
     // that may be missing from the 'models' array (e.g. llama.cpp)
     final Map<String, Map<String, dynamic>> metaById = {};
-    if (data['data'] != null && data['data'] is List) {
+    if (data['data'] is List) {
       for (final item in data['data']) {
         if (item is Map) {
           final id = item['id']?.toString() ?? '';
@@ -327,14 +325,17 @@ class ServerApiService {
 
   List<ModelInfo> _parseOllamaModels(dynamic data, Server server) {
     final List<ModelInfo> models = [];
-    if (data['models'] != null) {
-      for (final item in data['models']) {
-        final details = item['details'] ?? {};
+    final modelsData = data['models'];
+    if (modelsData is List) {
+      for (final item in modelsData) {
+        if (item is! Map) continue;
+        final detailsVal = item['details'];
+        final details = (detailsVal is Map) ? detailsVal : <String, dynamic>{};
         final paramSize = details['parameter_size'] as String? ?? '';
         models.add(
           ModelInfo(
-            id: item['name'] ?? '',
-            name: _formatModelName(item['name'] ?? ''),
+            id: item['name']?.toString() ?? '',
+            name: _formatModelName(item['name']?.toString() ?? ''),
             fileSize: item['size'] as int?,
             parameterCount: _parseParameterSize(paramSize),
             quantization: details['quantization_level'] as String?,
@@ -342,7 +343,7 @@ class ServerApiService {
             serverType: server.type,
             serverId: server.id,
             modifiedAt: item['modified_at'] != null
-                ? DateTime.tryParse(item['modified_at'])
+                ? DateTime.tryParse(item['modified_at']?.toString() ?? '')
                 : null,
           ),
         );
@@ -353,26 +354,28 @@ class ServerApiService {
 
   List<ModelInfo> _parseOpenRouterModels(dynamic data, Server server) {
     final List<ModelInfo> models = [];
-    if (data['data'] != null) {
-      for (final item in data['data']) {
-        final modality = item['architecture']?['modality'] as String?;
-        final isTextModel = modality == null ||
-            modality.isEmpty ||
-            !modality.contains('->') ||
-            modality.split('->').last.contains('text');
-        if (isTextModel) {
-          models.add(
-            ModelInfo(
-              id: item['id'] ?? '',
-              name: item['name'] ?? '',
-              description: item['description'] as String?,
-              contextLength: item['context_length'] as int?,
-              architecture: item['architecture']?['tokenizer'] as String?,
-              serverType: server.type,
-              serverId: server.id,
-            ),
-          );
-        }
+    if (data == null) return models;
+    final items = data['data'];
+    if (items is! List) return models;
+    for (final item in items) {
+      if (item is! Map) continue;
+      final modality = item['architecture']?['modality'] as String?;
+      final isTextModel = modality == null ||
+          modality.isEmpty ||
+          !modality.contains('->') ||
+          modality.split('->').last.contains('text');
+      if (isTextModel) {
+        models.add(
+          ModelInfo(
+            id: item['id']?.toString() ?? '',
+            name: item['name']?.toString() ?? '',
+            description: item['description'] as String?,
+            contextLength: item['context_length'] as int?,
+            architecture: item['architecture']?['tokenizer'] as String?,
+            serverType: server.type,
+            serverId: server.id,
+          ),
+        );
       }
     }
     return models;
@@ -390,7 +393,18 @@ class ServerApiService {
   }
 
   double? _parseParameterSize(String size) {
-    final cleaned = size.replaceAll('B', '').replaceAll('b', '').trim();
+    final cleaned = size.trim();
+    if (cleaned.endsWith('B') || cleaned.endsWith('b')) {
+      return double.tryParse(
+        cleaned.substring(0, cleaned.length - 1).trim(),
+      );
+    }
+    if (cleaned.endsWith('M') || cleaned.endsWith('m')) {
+      final val = double.tryParse(
+        cleaned.substring(0, cleaned.length - 1).trim(),
+      );
+      return val != null ? val / 1000 : null;
+    }
     return double.tryParse(cleaned);
   }
 

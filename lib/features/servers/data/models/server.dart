@@ -82,8 +82,21 @@ String buildServerBaseUrl(String host, int port, ServerType type) {
     return '';
   }
 
+  if (port <= 0) {
+    return 'http://$trimmedHost';
+  }
+
   final protocol = (port == 443) ? 'https' : 'http';
   return '$protocol://$trimmedHost:$port';
+}
+
+/// Authorization header for [server], or an empty map when no key is set so
+/// callers can spread it unconditionally into their headers map.
+Map<String, String> buildServerAuthHeaders(Server server) {
+  if (server.apiKey?.isNotEmpty ?? false) {
+    return {'Authorization': 'Bearer ${server.apiKey}'};
+  }
+  return const {};
 }
 
 class Server {
@@ -116,6 +129,8 @@ class Server {
   String get baseUrl {
     return buildServerBaseUrl(host, port, type);
   }
+
+  Map<String, String> get authHeaders => buildServerAuthHeaders(this);
 
   String get chatEndpoint {
     switch (type) {
