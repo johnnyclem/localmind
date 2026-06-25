@@ -1,35 +1,16 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
-import 'package:localmind/l10n/app_localizations.dart';
+import 'package:localmind/core/models/enums.dart';
 import 'package:localmind/core/theme/colors.dart';
-import '../../../core/routes/app_routes.dart';
-import '../../chat/providers/chat_providers.dart';
-import '../data/models/model_info.dart';
-import '../../servers/providers/server_providers.dart';
-import '../../../core/providers/app_providers.dart';
-import '../../../core/providers/service_providers.dart';
-import '../../../core/models/enums.dart';
-import '../../on_device/data/models/on_device_model.dart';
-import '../../on_device/data/models/download_status.dart';
-import '../../on_device/providers/on_device_providers.dart';
-import '../../on_device/providers/foreground_download_providers.dart';
-import '../../../core/providers/device_info_providers.dart';
-import '../../../core/device/device_memory_service.dart';
-
-final modelSearchQueryProvider = NotifierProvider<_ModelSearchNotifier, String>(
-  _ModelSearchNotifier.new,
-);
-
-class _ModelSearchNotifier extends Notifier<String> {
-  @override
-  String build() => '';
-
-  void setQuery(String q) => state = q;
-  void clear() => state = '';
-}
+import 'package:localmind/features/chat/providers/chat_providers.dart';
+import 'package:localmind/features/on_device/components/on_device_picker_section.dart';
+import 'package:localmind/features/on_device/providers/on_device_providers.dart';
+import 'package:localmind/features/servers/providers/server_providers.dart';
+import 'package:localmind/l10n/app_localizations.dart';
+import '../components/model_list.dart';
+import '../components/model_search_field.dart';
+import '../components/no_server_state.dart';
+import '../components/thinking_indicator.dart';
 
 class ModelPickerSheet extends ConsumerWidget {
   const ModelPickerSheet({super.key});
@@ -41,7 +22,6 @@ class ModelPickerSheet extends ConsumerWidget {
     final isDark = theme.brightness == Brightness.dark;
     final activeServer = ref.watch(activeServerProvider);
     final selectedModel = ref.watch(selectedModelProvider);
-    final searchQuery = ref.watch(modelSearchQueryProvider);
     final modelLoading = ref.watch(modelLoadingProvider);
     final isThinking = ref.watch(modelThinkingProvider);
 
@@ -70,6 +50,13 @@ class ModelPickerSheet extends ConsumerWidget {
       }
     });
 
+    final serversAsync = ref.watch(serversProvider);
+    final servers = serversAsync.value ?? [];
+    final currentServer =
+        servers.where((s) => s.id == activeServer?.id).firstOrNull;
+    final isOnDevice =
+        currentServer != null && currentServer.type == ServerType.onDevice;
+
     return Container(
       height: MediaQuery.of(context).size.height * 0.7,
       padding: const EdgeInsets.all(16),
@@ -91,68 +78,18 @@ class ModelPickerSheet extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Text(
-                          l10n.select_model_title,
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: isDark ? Colors.white : Colors.black,
-                          ),
-                        ),
-                        if (isThinking) ...[
-                          const SizedBox(width: 8),
-                          _ThinkingIndicator(isDark: isDark),
-                        ],
-                      ],
-                    ),
-                    if (modelLoading.isLoading)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 8),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              l10n.loading_model(
-                                modelLoading.modelId ?? 'model',
-                              ),
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: isDark
-                                    ? AppColors.darkMutedText
-                                    : AppColors.lightMutedText,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            LinearProgressIndicator(
-                              value: modelLoading.progress,
-                              backgroundColor: isDark
-                                  ? AppColors.darkBorder
-                                  : AppColors.lightBorder,
-                            ),
-                          ],
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-              if (activeServer != null)
-                IconButton(
-                  icon: const Icon(Icons.refresh, size: 20),
-                  onPressed: () {
+          _ModelPickerHeader(
+            isDark: isDark,
+            isThinking: isThinking,
+            modelLoading: modelLoading,
+            activeServer: activeServer,
+            serverId: activeServer?.id,
+            onRefresh: activeServer != null
+                ? () {
                     ref.invalidate(availableModelsProvider(activeServer.id));
                     ref.invalidate(loadedModelsProvider(activeServer));
-                  },
-                  tooltip: l10n.refresh_models,
-                ),
-            ],
+                  }
+                : null,
           ),
           if (activeServer != null)
             Padding(
@@ -161,1115 +98,131 @@ class ModelPickerSheet extends ConsumerWidget {
                 activeServer.name,
                 style: TextStyle(
                   fontSize: 13,
-                  color: isDark
-                      ? AppColors.darkMutedText
-                      : AppColors.lightMutedText,
+                  color: isDark ? AppColors.darkMutedText : AppColors.lightMutedText,
                 ),
               ),
             ),
           const SizedBox(height: 12),
-          TextField(
-            decoration: InputDecoration(
-              hintText: l10n.search_models_hint,
-              prefixIcon: const Icon(Icons.search, size: 20),
-              isDense: true,
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 10,
-              ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-              suffixIcon: searchQuery.isNotEmpty
-                  ? IconButton(
-                      icon: const Icon(Icons.clear, size: 18),
-                      onPressed: () =>
-                          ref.read(modelSearchQueryProvider.notifier).clear(),
-                    )
-                  : null,
-            ),
-            onChanged: (q) =>
-                ref.read(modelSearchQueryProvider.notifier).setQuery(q),
-          ),
+          const ModelSearchField(),
           const SizedBox(height: 12),
           Expanded(
             child: activeServer == null
-                ? _NoServerState(isDark: isDark)
-                : _ModelList(
-                    serverId: activeServer.id,
-                    selectedModelId: selectedModel?.id,
-                    searchQuery: searchQuery,
-                    isDark: isDark,
-                  ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _NoServerState extends StatelessWidget {
-  const _NoServerState({required this.isDark});
-  final bool isDark;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.computer_outlined,
-            size: 48,
-            color: isDark ? AppColors.darkMutedText : AppColors.lightMutedText,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            l10n.no_server_connected,
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-              color: isDark ? Colors.white : Colors.black,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            l10n.add_server_first,
-            style: TextStyle(
-              fontSize: 13,
-              color: isDark
-                  ? AppColors.darkMutedText
-                  : AppColors.lightMutedText,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ModelList extends ConsumerWidget {
-  const _ModelList({
-    required this.serverId,
-    required this.selectedModelId,
-    required this.searchQuery,
-    required this.isDark,
-  });
-
-  final String serverId;
-  final String? selectedModelId;
-  final String searchQuery;
-  final bool isDark;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context)!;
-    final serversAsync = ref.watch(serversProvider);
-    final servers = serversAsync.value ?? [];
-    final currentServer = servers.where((s) => s.id == serverId).firstOrNull;
-
-    if (currentServer != null && currentServer.type == ServerType.onDevice) {
-      return _OnDeviceModelList(
-        selectedModelId: selectedModelId,
-        isDark: isDark,
-      );
-    }
-
-    final modelsAsync = ref.watch(availableModelsProvider(serverId));
-
-    return modelsAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (err, _) => Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.error_outline, size: 48, color: Colors.red[400]),
-            const SizedBox(height: 16),
-            Text(
-              l10n.failed_load_models,
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-                color: isDark ? Colors.white : Colors.black,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              err.toString(),
-              style: TextStyle(
-                fontSize: 12,
-                color: isDark
-                    ? AppColors.darkMutedText
-                    : AppColors.lightMutedText,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-            OutlinedButton.icon(
-              onPressed: () =>
-                  ref.invalidate(availableModelsProvider(serverId)),
-              icon: const Icon(Icons.refresh),
-              label: Text(l10n.retry),
-            ),
-          ],
-        ),
-      ),
-      data: (models) {
-        final serversAsync = ref.watch(serversProvider);
-        final servers = serversAsync.value ?? [];
-        final activeServer = servers.where((s) => s.id == serverId).firstOrNull;
-        final loadedModelsAsync = activeServer != null
-            ? ref.watch(loadedModelsProvider(activeServer))
-            : const AsyncValue<Set<String>>.data(<String>{});
-
-        final loadedModels = loadedModelsAsync.maybeWhen(
-          data: (data) => data,
-          orElse: () => <String>{},
-        );
-
-        final modelList = models.cast<ModelInfo>();
-        final filtered = searchQuery.isEmpty
-            ? modelList
-            : modelList
-                  .where(
-                    (m) =>
-                        m.displayName.toLowerCase().contains(
-                          searchQuery.toLowerCase(),
-                        ) ||
-                        m.id.toLowerCase().contains(searchQuery.toLowerCase()),
-                  )
-                  .toList();
-
-        if (filtered.isEmpty) {
-          return Center(
-            child: Text(
-              searchQuery.isEmpty
-                  ? l10n.no_models_available
-                  : l10n.no_models_match(searchQuery),
-              style: TextStyle(
-                fontSize: 14,
-                color: isDark
-                    ? AppColors.darkMutedText
-                    : AppColors.lightMutedText,
-              ),
-            ),
-          );
-        }
-
-        return ListView.builder(
-          itemCount: filtered.length,
-          itemBuilder: (context, index) {
-            final model = filtered[index];
-            final isSelected = model.id == selectedModelId;
-            final isLoaded = loadedModels.contains(model.id);
-
-            return _ModelTile(
-              model: model,
-              isSelected: isSelected,
-              isLoaded: isLoaded,
-              isDark: isDark,
-              onTap: () async {
-                final activeServer = ref.read(activeServerProvider);
-                if (activeServer == null) return;
-
-                final supportsLoad = model.serverType == ServerType.lmStudio;
-
-                if (supportsLoad && !isLoaded) {
-                  ref.read(modelLoadingProvider.notifier).setLoading(model.id);
-
-                  try {
-                    final apiService = ref.read(serverApiServiceProvider);
-                    await apiService.loadModelWithInstanceId(
-                      activeServer,
-                      model.id,
-                    );
-
-                    ref.invalidate(loadedModelsProvider(activeServer));
-                    ref.read(modelLoadingProvider.notifier).setLoaded();
-                  } catch (e) {
-                    ref.read(modelLoadingProvider.notifier).setLoaded();
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(l10n.model_load_failed(e.toString())),
-                          backgroundColor: Colors.red,
-                        ),
-                      );
-                    }
-                    return;
-                  }
-                }
-
-                ref.read(selectedModelProvider.notifier).setModel(model);
-                if (context.mounted) {
-                  Navigator.pop(context);
-                }
-              },
-              onUnload: () async {
-                final activeServer = ref.read(activeServerProvider);
-                if (activeServer == null) return;
-
-                try {
-                  final apiService = ref.read(serverApiServiceProvider);
-                  await apiService.unloadModel(activeServer, model.id);
-                  ref.invalidate(loadedModelsProvider(activeServer));
-
-                  // If the model being unloaded is the currently selected one, clear it
-                  final selectedModel = ref.read(selectedModelProvider);
-                  if (selectedModel?.id == model.id) {
-                    ref.read(selectedModelProvider.notifier).clear();
-                  }
-
-                  if (context.mounted) {
-                    final message = activeServer.type == ServerType.ollama
-                        ? l10n.model_unloaded_ollama(model.name)
-                        : l10n.model_unloaded_success(model.name);
-                    ScaffoldMessenger.of(
-                      context,
-                    ).showSnackBar(SnackBar(content: Text(message)));
-                  }
-                } catch (e) {
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(l10n.model_unload_failed(e.toString())),
-                        backgroundColor: Colors.red,
+                ? NoServerState(isDark: isDark)
+                : isOnDevice
+                    ? OnDevicePickerSection(
+                        selectedModelId: selectedModel?.id,
+                        isDark: isDark,
+                      )
+                    : ModelList(
+                        serverId: activeServer.id,
+                        selectedModelId: selectedModel?.id,
+                        isDark: isDark,
                       ),
-                    );
-                  }
-                }
-              },
-            );
-          },
-        );
-      },
+          ),
+        ],
+      ),
     );
   }
 }
 
-class _ModelTile extends StatelessWidget {
-  const _ModelTile({
-    required this.model,
-    required this.isSelected,
-    required this.isLoaded,
+class _ModelPickerHeader extends StatelessWidget {
+  const _ModelPickerHeader({
     required this.isDark,
-    required this.onTap,
-    this.onUnload,
+    required this.isThinking,
+    required this.modelLoading,
+    required this.activeServer,
+    this.serverId,
+    this.onRefresh,
   });
 
-  final ModelInfo model;
-  final bool isSelected;
-  final bool isLoaded;
   final bool isDark;
-  final VoidCallback onTap;
-  final Future<void> Function()? onUnload;
+  final bool isThinking;
+  final dynamic modelLoading;
+  final dynamic activeServer;
+  final String? serverId;
+  final VoidCallback? onRefresh;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final accent = isDark ? AppColors.darkAccent : AppColors.lightAccent;
 
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(8),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-        margin: const EdgeInsets.only(bottom: 4),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? accent.withValues(alpha: 0.1)
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(8),
-          border: isSelected
-              ? Border.all(color: accent.withValues(alpha: 0.3))
-              : null,
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+    return Row(
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
                 children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          model.displayName,
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: isSelected
-                                ? FontWeight.w600
-                                : FontWeight.w500,
-                            color: isDark ? Colors.white : Colors.black,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
+                  Text(
+                    l10n.select_model_title,
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: isDark ? Colors.white : Colors.black,
+                    ),
                   ),
-                  const SizedBox(height: 4),
-                  Wrap(
-                    spacing: 6,
-                    runSpacing: 4,
-                    children: [
-                      if (model.parameterCountDisplay != null &&
-                          model.parameterCountDisplay!.isNotEmpty)
-                        _MetadataChip(
-                          label: model.parameterCountDisplay!,
-                          isDark: isDark,
-                        ),
-                      if (model.quantization != null &&
-                          model.quantization!.isNotEmpty)
-                        _MetadataChip(
-                          label: model.quantization!,
-                          isDark: isDark,
-                        ),
-                      if (model.formattedSize != null &&
-                          model.formattedSize!.isNotEmpty)
-                        _MetadataChip(
-                          label: model.formattedSize!,
-                          isDark: isDark,
-                        ),
-                      if (model.contextLength != null)
-                        _MetadataChip(
-                          label: l10n.context_chip(
-                            model.contextLength.toString(),
-                          ),
-                          isDark: isDark,
-                        ),
-                    ],
-                  ),
+                  if (isThinking) ...[
+                    const SizedBox(width: 8),
+                    ThinkingIndicator(isDark: isDark),
+                  ],
                 ],
               ),
-            ),
-            if (model.serverType == ServerType.lmStudio ||
-                model.serverType == ServerType.ollama) ...[
-              if (isLoaded) ...[
-                Container(
-                  width: 15,
-                  height: 15,
-                  decoration: BoxDecoration(
-                    color: isDark
-                        ? AppColors.darkAccent
-                        : AppColors.lightAccent,
-                    shape: BoxShape.circle,
+              if (modelLoading.isLoading)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: _ModelLoadingBar(
+                    isDark: isDark,
+                    modelId: modelLoading.modelId,
+                    progress: modelLoading.progress,
                   ),
                 ),
-              ],
-              if (isLoaded) ...[
-                IconButton(
-                  icon: Icon(
-                    Icons.power_settings_new_outlined,
-                    size: 18,
-                    color: Colors.red[400],
-                  ),
-                  onPressed: onUnload,
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                  tooltip: l10n.unload_from_server,
-                ),
-                const SizedBox(width: 8),
-              ],
             ],
-            if (isSelected)
-              Icon(Icons.check_circle, color: accent, size: 22)
-            else
-              Icon(
-                Icons.chevron_right,
-                size: 20,
-                color: isDark
-                    ? AppColors.darkMutedText
-                    : AppColors.lightMutedText,
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _ThinkingIndicator extends StatefulWidget {
-  const _ThinkingIndicator({required this.isDark});
-  final bool isDark;
-
-  @override
-  State<_ThinkingIndicator> createState() => _ThinkingIndicatorState();
-}
-
-class _ThinkingIndicatorState extends State<_ThinkingIndicator>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: 1500),
-      vsync: this,
-    )..repeat();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        AnimatedBuilder(
-          animation: _controller,
-          builder: (context, child) {
-            return Container(
-              width: 6,
-              height: 6,
-              decoration: BoxDecoration(
-                color: widget.isDark
-                    ? Color.lerp(
-                        AppColors.darkMutedText,
-                        AppColors.darkAccent,
-                        _controller.value,
-                      )
-                    : Color.lerp(
-                        AppColors.lightMutedText,
-                        AppColors.darkAccent,
-                        _controller.value,
-                      ),
-                shape: BoxShape.circle,
-              ),
-            );
-          },
-        ),
-        const SizedBox(width: 4),
-        Text(
-          l10n.thinking,
-          style: TextStyle(
-            fontSize: 12,
-            color: widget.isDark
-                ? AppColors.darkMutedText
-                : AppColors.lightMutedText,
           ),
         ),
+        if (onRefresh != null)
+          IconButton(
+            icon: const Icon(Icons.refresh, size: 20),
+            onPressed: onRefresh,
+            tooltip: l10n.refresh_models,
+          ),
       ],
     );
   }
 }
 
-class _MetadataChip extends StatelessWidget {
-  const _MetadataChip({required this.label, required this.isDark});
-  final String label;
+class _ModelLoadingBar extends StatelessWidget {
+  const _ModelLoadingBar({
+    required this.isDark,
+    required this.modelId,
+    this.progress,
+  });
+
   final bool isDark;
+  final String? modelId;
+  final double? progress;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-      decoration: BoxDecoration(
-        color: isDark ? AppColors.darkSurfaceCard : AppColors.lightSurface,
-        borderRadius: BorderRadius.circular(4),
-        border: Border.all(
-          color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
-        ),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          fontSize: 11,
-          color: isDark ? AppColors.darkMutedText : AppColors.lightMutedText,
-        ),
-      ),
-    );
-  }
-}
-
-class _OnDeviceModelList extends ConsumerWidget {
-  const _OnDeviceModelList({
-    required this.selectedModelId,
-    required this.isDark,
-  });
-
-  final String? selectedModelId;
-  final bool isDark;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
-    final curatedModels = ref.watch(onDeviceModelsProvider);
-    final downloadedAsync = ref.watch(downloadedModelsProvider);
-    final engineState = ref.watch(onDeviceEngineProvider);
-    final searchQuery = ref.watch(modelSearchQueryProvider);
-    final deviceMemoryAsync = ref.watch(deviceMemoryProvider);
 
-    return downloadedAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (err, _) => Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.error_outline, size: 48, color: Colors.red[400]),
-            const SizedBox(height: 16),
-            Text(
-              l10n.failed_load_models,
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-                color: isDark ? Colors.white : Colors.black,
-              ),
-            ),
-            const SizedBox(height: 16),
-            OutlinedButton.icon(
-              onPressed: () => ref.invalidate(downloadedModelsProvider),
-              icon: const Icon(Icons.refresh),
-              label: Text(l10n.retry),
-            ),
-          ],
-        ),
-      ),
-      data: (downloadedIds) {
-        final filtered = searchQuery.isEmpty
-            ? curatedModels
-            : curatedModels
-                  .where(
-                    (m) => m.name.toLowerCase().contains(
-                      searchQuery.toLowerCase(),
-                    ),
-                  )
-                  .toList();
-
-        if (filtered.isEmpty) {
-          return Center(
-            child: Text(
-              searchQuery.isEmpty
-                  ? l10n.no_models_available
-                  : l10n.no_models_match(searchQuery),
-              style: TextStyle(
-                fontSize: 14,
-                color: isDark
-                    ? AppColors.darkMutedText
-                    : AppColors.lightMutedText,
-              ),
-            ),
-          );
-        }
-
-        return ListView.builder(
-          itemCount: filtered.length,
-          itemBuilder: (context, index) {
-            final model = filtered[index];
-            final isDownloaded = downloadedIds.contains(model.id);
-            final isLoaded = engineState.loadedModelId == model.id;
-            final isCurrentlyLoading =
-                engineState.status == OnDeviceEngineStatus.loading &&
-                engineState.loadedModelId == model.id;
-            final isSelected = selectedModelId == model.id;
-
-            return _OnDeviceModelTile(
-              model: model,
-              isDownloaded: isDownloaded,
-              isLoaded: isLoaded,
-              isCurrentlyLoading: isCurrentlyLoading,
-              isSelected: isSelected,
-              isDark: isDark,
-              deviceMemory: deviceMemoryAsync.value,
-            );
-          },
-        );
-      },
-    );
-  }
-}
-
-class _OnDeviceModelTile extends ConsumerWidget {
-  const _OnDeviceModelTile({
-    required this.model,
-    required this.isDownloaded,
-    required this.isLoaded,
-    required this.isCurrentlyLoading,
-    required this.isSelected,
-    required this.isDark,
-    this.deviceMemory,
-  });
-
-  final OnDeviceModel model;
-  final bool isDownloaded;
-  final bool isLoaded;
-  final bool isCurrentlyLoading;
-  final bool isSelected;
-  final bool isDark;
-  final DeviceMemoryInfo? deviceMemory;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context)!;
-    final accent = isDark ? AppColors.darkAccent : AppColors.lightAccent;
-    final downloadProgress = ref.watch(
-      foregroundDownloadNotifierProvider,
-    )[model.id];
-    final isDownloading =
-        downloadProgress != null &&
-        (downloadProgress.status == DownloadStatus.running ||
-            downloadProgress.status == DownloadStatus.pending);
-    final isPaused = downloadProgress?.status == DownloadStatus.paused;
-
-    return InkWell(
-      onTap: () {
-        if (isLoaded) {
-          _selectModel(context, ref);
-        } else if (isDownloaded && !isCurrentlyLoading && !isDownloading) {
-          _loadModel(context, ref);
-        }
-      },
-      borderRadius: BorderRadius.circular(8),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-        margin: const EdgeInsets.only(bottom: 4),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? accent.withValues(alpha: 0.1)
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(8),
-          border: isSelected
-              ? Border.all(color: accent.withValues(alpha: 0.3))
-              : null,
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          model.name,
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: isSelected
-                                ? FontWeight.w600
-                                : FontWeight.w500,
-                            color: isDownloaded
-                                ? (isDark ? Colors.white : Colors.black)
-                                : (isDark
-                                      ? AppColors.darkMutedText
-                                      : AppColors.lightMutedText),
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      if (model.isRecommended)
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 6,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: accent.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Text(
-                            l10n.recommended,
-                            style: TextStyle(
-                              fontSize: 9,
-                              fontWeight: FontWeight.bold,
-                              color: accent,
-                            ),
-                          ),
-                        ),
-                      if (model.isImported)
-                        Container(
-                          margin: const EdgeInsets.only(left: 6),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 6,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.blue.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: const Text(
-                            'Imported',
-                            style: TextStyle(
-                              fontSize: 9,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.blue,
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                  if (!Platform.isIOS &&
-                      deviceMemory != null &&
-                      deviceMemory!.isOversized(model.minRamMb))
-                    Padding(
-                      padding: const EdgeInsets.only(top: 2),
-                      child: Row(
-                        children: [
-                          const Icon(
-                            Icons.warning_amber_rounded,
-                            color: Colors.orange,
-                            size: 12,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            l10n.may_be_large,
-                            style: TextStyle(
-                              fontSize: 10,
-                              color: Colors.orange,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  if (isDownloading || isPaused)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 6),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          LinearProgressIndicator(
-                            value: downloadProgress?.progress ?? 0.0,
-                            backgroundColor: isDark
-                                ? AppColors.darkBorder
-                                : AppColors.lightBorder,
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            isPaused
-                                ? l10n.paused_progress(
-                                    ((downloadProgress?.progress ?? 0) * 100)
-                                        .toStringAsFixed(0),
-                                  )
-                                : '${l10n.downloading_status} ${((downloadProgress?.progress ?? 0) * 100).toStringAsFixed(0)}%',
-                            style: TextStyle(
-                              fontSize: 10,
-                              color: isDark
-                                  ? AppColors.darkMutedText
-                                  : AppColors.lightMutedText,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  const SizedBox(height: 4),
-                  Wrap(
-                    spacing: 6,
-                    runSpacing: 4,
-                    children: [
-                      _MetadataChip(
-                        label: model.fileSizeFormatted,
-                        isDark: isDark,
-                      ),
-                      if (model.format == OnDeviceModelFormat.gguf)
-                        _MetadataChip(label: 'GGUF', isDark: isDark),
-                      if (model.runtime == OnDeviceModelRuntime.llamaCpp)
-                        _MetadataChip(label: 'llama.cpp', isDark: isDark),
-                      _MetadataChip(label: model.license, isDark: isDark),
-                      _MetadataChip(
-                        label: model.parameterLabel,
-                        isDark: isDark,
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 8),
-            if (isCurrentlyLoading) ...[
-              const SizedBox(
-                width: 16,
-                height: 16,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              ),
-            ] else if (isLoaded) ...[
-              Container(
-                width: 10,
-                height: 10,
-                decoration: const BoxDecoration(
-                  color: AppColors.darkAccent,
-                  shape: BoxShape.circle,
-                ),
-              ),
-              const SizedBox(width: 8),
-              _IconButton(
-                icon: Icon(
-                  Icons.power_settings_new_outlined,
-                  size: 18,
-                  color: Colors.red[400],
-                ),
-                tooltip: l10n.unload,
-                onPressed: () => _unloadModel(context, ref),
-              ),
-            ] else if (isDownloaded) ...[
-              _IconButton(
-                icon: Icon(Icons.play_arrow, size: 20, color: accent),
-                tooltip: l10n.load,
-                onPressed: () => _loadModel(context, ref),
-              ),
-              const SizedBox(width: 4),
-              _IconButton(
-                icon: Icon(
-                  Icons.delete_outline,
-                  size: 18,
-                  color: isDark
-                      ? AppColors.darkMutedText
-                      : AppColors.lightMutedText,
-                ),
-                tooltip: l10n.delete,
-                onPressed: () => _deleteModel(context, ref),
-              ),
-            ] else if (isDownloading) ...[
-              _IconButton(
-                icon: Icon(
-                  Icons.close,
-                  size: 16,
-                  color: isDark
-                      ? AppColors.darkMutedText
-                      : AppColors.lightMutedText,
-                ),
-                tooltip: l10n.cancel,
-                onPressed: () => ref
-                    .read(foregroundDownloadNotifierProvider.notifier)
-                    .cancelDownload(model.id),
-              ),
-            ] else ...[
-              _IconButton(
-                icon: Icon(
-                  Icons.cloud_download_outlined,
-                  size: 18,
-                  color: isDark
-                      ? AppColors.darkMutedText
-                      : AppColors.lightMutedText,
-                ),
-                tooltip: l10n.download,
-                onPressed: () async {
-                  final result = await ref
-                      .read(foregroundDownloadNotifierProvider.notifier)
-                      .startDownload(model.id);
-                  if (result == 'missing_huggingface_token' &&
-                      context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(l10n.model_missing_huggingface_token),
-                        duration: const Duration(seconds: 6),
-                        action: SnackBarAction(
-                          label: l10n.settings_title,
-                          onPressed: () =>
-                              context.push(AppRoutes.settings),
-                        ),
-                      ),
-                    );
-                  }
-                },
-              ),
-              const SizedBox(width: 4),
-              Text(
-                l10n.not_downloaded,
-                style: TextStyle(
-                  fontSize: 11,
-                  color: isDark
-                      ? AppColors.darkMutedText
-                      : AppColors.lightMutedText,
-                ),
-              ),
-            ],
-            if (isDownloaded && isSelected && isLoaded) ...[
-              const SizedBox(width: 4),
-              Icon(Icons.check_circle, color: accent, size: 22),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _loadModel(BuildContext context, WidgetRef ref) async {
-    final settings = ref.read(settingsProvider);
-    final engineNotifier = ref.read(onDeviceEngineProvider.notifier);
-
-    if (!Platform.isIOS && deviceMemory != null) {
-      if (!deviceMemory!.hasEnoughRam(model.minRamMb)) {
-        final proceed = await _showRamWarning(context);
-        if (!context.mounted) return;
-        if (!proceed) return;
-      }
-    }
-
-    final modelInfo = ModelInfo(
-      id: model.id,
-      name: model.name,
-      description: model.description,
-      parameterCount: double.tryParse(
-        model.parameterLabel.replaceAll(RegExp(r'[^0-9\.]'), ''),
-      ),
-      fileSize: model.fileSizeBytes,
-      quantization: model.format == OnDeviceModelFormat.gguf ? 'GGUF' : null,
-      architecture: model.runtime == OnDeviceModelRuntime.llamaCpp
-          ? 'llama.cpp'
-          : null,
-      serverType: ServerType.onDevice,
-      serverId: 'on-device',
-      modifiedAt: model.importedAt,
-      onDeviceRuntime: model.runtime,
-      onDeviceFormat: model.format,
-      localPath: model.localPath,
-    );
-
-    await engineNotifier.loadModel(model.id, settings.preferredBackend);
-    if (!context.mounted) return;
-
-    final engineState = ref.read(onDeviceEngineProvider);
-    if (engineState.loadedModelId == model.id) {
-      ref.read(selectedModelProvider.notifier).setModel(modelInfo);
-      Navigator.pop(context);
-    }
-  }
-
-  Future<bool> _showRamWarning(BuildContext context) async {
-    final l10n = AppLocalizations.of(context)!;
-    final result = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Row(
-          children: [
-            const Icon(Icons.warning_amber_rounded, color: Colors.orange),
-            const SizedBox(width: 8),
-            Text(l10n.ram_warning),
-          ],
-        ),
-        content: Text(
-          l10n.ram_warning_body_load(
-            deviceMemory!.availableMemoryFormatted,
-            '${model.minRamMb ~/ 1024 + 1}',
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          l10n.loading_model(modelId ?? 'model'),
+          style: TextStyle(
+            fontSize: 12,
+            color: isDark ? AppColors.darkMutedText : AppColors.lightMutedText,
           ),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(l10n.cancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            style: TextButton.styleFrom(foregroundColor: Colors.orange),
-            child: Text(l10n.proceed_anyway),
-          ),
-        ],
-      ),
-    );
-    return result ?? false;
-  }
-
-  void _selectModel(BuildContext context, WidgetRef ref) {
-    final modelInfo = ModelInfo(
-      id: model.id,
-      name: model.name,
-      description: model.description,
-      parameterCount: double.tryParse(
-        model.parameterLabel.replaceAll(RegExp(r'[^0-9\.]'), ''),
-      ),
-      fileSize: model.fileSizeBytes,
-      quantization: model.format == OnDeviceModelFormat.gguf ? 'GGUF' : null,
-      architecture: model.runtime == OnDeviceModelRuntime.llamaCpp
-          ? 'llama.cpp'
-          : null,
-      serverType: ServerType.onDevice,
-      serverId: 'on-device',
-      modifiedAt: model.importedAt,
-      onDeviceRuntime: model.runtime,
-      onDeviceFormat: model.format,
-      localPath: model.localPath,
-    );
-
-    ref.read(selectedModelProvider.notifier).setModel(modelInfo);
-    Navigator.pop(context);
-  }
-
-  void _unloadModel(BuildContext context, WidgetRef ref) async {
-    final engineNotifier = ref.read(onDeviceEngineProvider.notifier);
-    await engineNotifier.unloadModel();
-    if (!context.mounted) return;
-
-    final selectedModel = ref.read(selectedModelProvider);
-    if (selectedModel?.id == model.id) {
-      ref.read(selectedModelProvider.notifier).clear();
-    }
-  }
-
-  void _deleteModel(BuildContext context, WidgetRef ref) async {
-    final l10n = AppLocalizations.of(context)!;
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.delete_model_title),
-        content: Text(l10n.delete_model_body(model.name)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(l10n.cancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: Text(l10n.delete),
-          ),
-        ],
-      ),
-    );
-
-    if (confirm == true) {
-      if (!context.mounted) return;
-
-      final engineState = ref.read(onDeviceEngineProvider);
-      final engineNotifier = ref.read(onDeviceEngineProvider.notifier);
-      final selectedModelNotifier = ref.read(selectedModelProvider.notifier);
-      final gemmaService = ref.read(onDeviceGemmaServiceProvider);
-
-      if (engineState.loadedModelId == model.id) {
-        await engineNotifier.unloadModel();
-        if (!context.mounted) return;
-        selectedModelNotifier.clear();
-      }
-
-      if (model.isImported) {
-        await ref
-            .read(importedGgufModelsProvider.notifier)
-            .deleteModel(model.id);
-      } else {
-        await gemmaService.deleteModel(model.id);
-      }
-      if (!context.mounted) return;
-      ref.invalidate(downloadedModelsProvider);
-    }
-  }
-}
-
-class _IconButton extends StatelessWidget {
-  const _IconButton({
-    required this.icon,
-    required this.tooltip,
-    required this.onPressed,
-  });
-
-  final Widget icon;
-  final String tooltip;
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return Tooltip(
-      message: tooltip,
-      child: InkWell(
-        onTap: onPressed,
-        borderRadius: BorderRadius.circular(4),
-        child: Padding(padding: const EdgeInsets.all(4), child: icon),
-      ),
+        const SizedBox(height: 4),
+        LinearProgressIndicator(
+          value: progress,
+          backgroundColor:
+              isDark ? AppColors.darkBorder : AppColors.lightBorder,
+        ),
+      ],
     );
   }
 }

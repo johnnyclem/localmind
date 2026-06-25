@@ -1,0 +1,61 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:localmind/core/providers/app_providers.dart';
+import 'package:localmind/features/conversations/providers/conversation_providers.dart'
+    as conv;
+import 'package:localmind/features/personas/providers/personas_providers.dart';
+import '../data/models/chat_parameters.dart';
+
+final chatParamsProvider = Provider<ChatParameters>((ref) {
+  final settings = ref.watch(settingsProvider);
+  final activeConv = ref.watch(conv.activeConversationProvider);
+
+  double temperature = settings.temperature;
+  double topP = settings.topP;
+  int maxTokens = settings.maxTokens;
+  int contextLength = settings.contextLength;
+
+  if (activeConv?.temperature != null) {
+    temperature = activeConv!.temperature!;
+  }
+  if (activeConv?.topP != null) {
+    topP = activeConv!.topP!;
+  }
+  if (activeConv?.maxTokens != null) {
+    maxTokens = activeConv!.maxTokens!;
+  }
+  if (activeConv?.contextLength != null) {
+    contextLength = activeConv!.contextLength!;
+  }
+
+  String? systemPrompt;
+  if (activeConv?.personaId != null) {
+    final personaId = activeConv!.personaId;
+    try {
+      final personasAsync = ref.read(personasNotifierProvider);
+      final personas = personasAsync.value ?? [];
+      final persona = personas.firstWhere(
+        (p) => p.id == personaId,
+        orElse: () => throw Exception('Persona not found'),
+      );
+      systemPrompt = persona.systemPrompt;
+      if (persona.preferredParams != null) {
+        final params = persona.preferredParams as Map<String, dynamic>;
+        if (params['temperature'] != null) {
+          temperature = (params['temperature'] as num).toDouble();
+        }
+        if (params['topP'] != null) topP = (params['topP'] as num).toDouble();
+        if (params['maxTokens'] != null) {
+          maxTokens = (params['maxTokens'] as num).toInt();
+        }
+      }
+    } catch (_) {}
+  }
+
+  return ChatParameters(
+    temperature: temperature,
+    topP: topP,
+    maxTokens: maxTokens,
+    contextLength: contextLength,
+    systemPrompt: systemPrompt,
+  );
+});
