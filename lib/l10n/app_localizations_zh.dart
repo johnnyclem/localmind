@@ -2455,19 +2455,16 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   @override
   String get server_type_on_device => '裝置端';
 
-  @override
   String get server_type_on_device_sub => '無需伺服器';
 
   @override
   String get server_type_lm_studio => 'LM Studio';
 
-  @override
   String get server_type_lm_studio_sub => '本機 API';
 
   @override
   String get server_type_ollama => 'Ollama';
 
-  @override
   String get server_type_ollama_sub => 'CLI 引擎';
 
   @override

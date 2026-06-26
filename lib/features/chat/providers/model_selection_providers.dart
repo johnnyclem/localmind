@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:localmind/core/models/enums.dart';
 import 'package:localmind/core/providers/service_providers.dart';
 import 'package:localmind/features/models/data/models/model_info.dart';
-import 'package:localmind/features/servers/data/models/server.dart';
 import 'package:localmind/features/servers/providers/server_providers.dart';
 import 'package:localmind/features/on_device/providers/on_device_providers.dart';
 

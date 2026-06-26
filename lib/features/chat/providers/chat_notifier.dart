@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 
-import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:localmind/core/logger/app_logger.dart';
 import 'package:localmind/core/models/enums.dart';
@@ -22,7 +21,6 @@ import 'package:localmind/features/servers/data/models/server.dart';
 import 'package:localmind/features/servers/providers/server_providers.dart';
 import 'package:localmind/objectbox.g.dart';
 import '../data/chat_service.dart';
-import '../data/models/chat_parameters.dart';
 import '../data/models/message.dart' hide ToolCallData;
 import '../data/tools/tool_definition.dart';
 import '../data/tools/tool_execution_loop.dart';
@@ -559,141 +557,139 @@ class ChatNotifier extends Notifier<ChatState> {
                 final streamConvId = assistantMessage.conversationId;
                 final isCurrentContext = _currentConversationId == streamConvId;
                 final streamingMessage = streamingAssistantMessage;
-                if (streamingMessage != null) {
-                  final hasContent =
-                      streamingMessage.content.isNotEmpty ||
-                      (streamingMessage.reasoningContent?.isNotEmpty ??
-                          false) ||
-                      collectedToolCalls.isNotEmpty;
+                final hasContent =
+                    streamingMessage.content.isNotEmpty ||
+                    (streamingMessage.reasoningContent?.isNotEmpty ??
+                        false) ||
+                    collectedToolCalls.isNotEmpty;
 
-                  if (!hasContent) {
-                    final errorMessage = streamingMessage.copyWith(
-                      status: MessageStatus.error,
-                      errorMessage:
-                          'Model failed to respond. This may happen with free tier models that refuse certain prompts or when the service is busy.',
-                      isProcessing: false,
+                if (!hasContent) {
+                  final errorMessage = streamingMessage.copyWith(
+                    status: MessageStatus.error,
+                    errorMessage:
+                        'Model failed to respond. This may happen with free tier models that refuse certain prompts or when the service is busy.',
+                    isProcessing: false,
+                  );
+                  await _saveMessage(errorMessage);
+                  if (isCurrentContext) {
+                    _replaceMessageInState(
+                      errorMessage,
+                      clearStreaming: true,
                     );
-                    await _saveMessage(errorMessage);
-                    if (isCurrentContext) {
-                      _replaceMessageInState(
-                        errorMessage,
-                        clearStreaming: true,
-                      );
-                      state = state.copyWith(
-                        isStreaming: false,
-                        errorMessage: errorMessage.errorMessage,
-                      );
-                    }
-                    ref.read(isStreamingProvider.notifier).setStreaming(false);
-                    _latestStreamingMessage = null;
-                  } else {
-                    var finalMessage = streamingMessage.copyWith(
-                      status: MessageStatus.complete,
-                      isProcessing: false,
+                    state = state.copyWith(
+                      isStreaming: false,
+                      errorMessage: errorMessage.errorMessage,
                     );
-
-                    if (mcpConfig.enabled && collectedToolCalls.isNotEmpty) {
-                      try {
-                        final registry = ref.read(toolRegistryProvider);
-                        final adapter = createAdapterForServerType(server.type);
-
-                        final dedupedCalls = <String, ToolCallData>{};
-                        for (final tc in collectedToolCalls) {
-                          dedupedCalls[tc.tool] = tc;
-                        }
-
-                        final preParsedCalls = dedupedCalls.values
-                            .map(
-                              (tc) => ParsedToolCall(
-                                id: tc.tool,
-                                name: tc.tool,
-                                arguments: tc.arguments,
-                              ),
-                            )
-                            .toList();
-
-                        final loop = ToolExecutionLoop(
-                          adapter: adapter,
-                          registry: registry,
-                          onRequestApproval: (call) async {
-                            final completer = Completer<bool>();
-                            state = state.copyWith(
-                              pendingToolApproval: PendingToolApproval(
-                                toolCall: call,
-                                completer: completer,
-                              ),
-                            );
-
-                            final result = await completer.future;
-
-                            state = state.copyWith(clearPendingApproval: true);
-
-                            return result;
-                          },
-                        );
-
-                        final loopResult = await loop.run(
-                          initialUserMessage: content,
-                          assistantContent: streamingAssistantMessage.content,
-                          preParsedCalls: preParsedCalls,
-                        );
-
-                        if (loopResult.events.isNotEmpty) {
-                          finalMessage = finalMessage.copyWith(
-                            toolSessionId: loop.sessionId,
-                            toolEvents: loopResult.events,
-                          );
-                        }
-                      } catch (e) {
-                        Log.error('Tool execution loop failed: $e');
-                      }
-                    }
-
-                    await _saveMessage(finalMessage);
-                    if (isCurrentContext) {
-                      _replaceMessageInState(
-                        finalMessage,
-                        clearStreaming: true,
-                      );
-                      state = state.copyWith(isStreaming: false);
-                    }
-                    ref.read(isStreamingProvider.notifier).setStreaming(false);
-                    _latestStreamingMessage = null;
-                    if (_currentConversationId != null) {
-                      final preview = finalMessage.content.length > 100
-                          ? '${finalMessage.content.substring(0, 100)}...'
-                          : finalMessage.content;
-                      await ref
-                          .read(conv.conversationsProvider.notifier)
-                          .updatePreview(
-                            _currentConversationId!,
-                            preview,
-                            DateTime.now(),
-                          );
-
-                      final userMessage = state.messages
-                          .where((m) => m.role == MessageRole.user)
-                          .firstOrNull;
-                      if (userMessage != null &&
-                          userMessage.content.length > 10) {
-                        _autoGenerateTitle(
-                          userMessage.content,
-                          finalMessage.content,
-                        );
-                      }
-                    }
-
-                    _maybeRequestReviewAfterSuccessfulCompletion(
-                      finalMessage: finalMessage,
-                      server: server,
-                      selectedModel: selectedModel,
-                    );
-
-                    _chunkCount = 0;
-                    _lastCheckpointTime = null;
-                    _lastSavedContentLength = 0;
-                    _lastSavedReasoningLength = 0;
                   }
+                  ref.read(isStreamingProvider.notifier).setStreaming(false);
+                  _latestStreamingMessage = null;
+                } else {
+                  var finalMessage = streamingMessage.copyWith(
+                    status: MessageStatus.complete,
+                    isProcessing: false,
+                  );
+
+                  if (mcpConfig.enabled && collectedToolCalls.isNotEmpty) {
+                    try {
+                      final registry = ref.read(toolRegistryProvider);
+                      final adapter = createAdapterForServerType(server.type);
+
+                      final dedupedCalls = <String, ToolCallData>{};
+                      for (final tc in collectedToolCalls) {
+                        dedupedCalls[tc.tool] = tc;
+                      }
+
+                      final preParsedCalls = dedupedCalls.values
+                          .map(
+                            (tc) => ParsedToolCall(
+                              id: tc.tool,
+                              name: tc.tool,
+                              arguments: tc.arguments,
+                            ),
+                          )
+                          .toList();
+
+                      final loop = ToolExecutionLoop(
+                        adapter: adapter,
+                        registry: registry,
+                        onRequestApproval: (call) async {
+                          final completer = Completer<bool>();
+                          state = state.copyWith(
+                            pendingToolApproval: PendingToolApproval(
+                              toolCall: call,
+                              completer: completer,
+                            ),
+                          );
+
+                          final result = await completer.future;
+
+                          state = state.copyWith(clearPendingApproval: true);
+
+                          return result;
+                        },
+                      );
+
+                      final loopResult = await loop.run(
+                        initialUserMessage: content,
+                        assistantContent: streamingAssistantMessage.content,
+                        preParsedCalls: preParsedCalls,
+                      );
+
+                      if (loopResult.events.isNotEmpty) {
+                        finalMessage = finalMessage.copyWith(
+                          toolSessionId: loop.sessionId,
+                          toolEvents: loopResult.events,
+                        );
+                      }
+                    } catch (e) {
+                      Log.error('Tool execution loop failed: $e');
+                    }
+                  }
+
+                  await _saveMessage(finalMessage);
+                  if (isCurrentContext) {
+                    _replaceMessageInState(
+                      finalMessage,
+                      clearStreaming: true,
+                    );
+                    state = state.copyWith(isStreaming: false);
+                  }
+                  ref.read(isStreamingProvider.notifier).setStreaming(false);
+                  _latestStreamingMessage = null;
+                  if (_currentConversationId != null) {
+                    final preview = finalMessage.content.length > 100
+                        ? '${finalMessage.content.substring(0, 100)}...'
+                        : finalMessage.content;
+                    await ref
+                        .read(conv.conversationsProvider.notifier)
+                        .updatePreview(
+                          _currentConversationId!,
+                          preview,
+                          DateTime.now(),
+                        );
+
+                    final userMessage = state.messages
+                        .where((m) => m.role == MessageRole.user)
+                        .firstOrNull;
+                    if (userMessage != null &&
+                        userMessage.content.length > 10) {
+                      _autoGenerateTitle(
+                        userMessage.content,
+                        finalMessage.content,
+                      );
+                    }
+                  }
+
+                  _maybeRequestReviewAfterSuccessfulCompletion(
+                    finalMessage: finalMessage,
+                    server: server,
+                    selectedModel: selectedModel,
+                  );
+
+                  _chunkCount = 0;
+                  _lastCheckpointTime = null;
+                  _lastSavedContentLength = 0;
+                  _lastSavedReasoningLength = 0;
                 }
               },
               onError: (error) async {

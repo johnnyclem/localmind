@@ -6,8 +6,6 @@ import 'package:localmind/core/providers/app_providers.dart';
 import 'package:localmind/features/conversations/providers/conversation_providers.dart'
     as conv;
 import 'package:localmind/features/servers/providers/server_providers.dart';
-import '../data/chat_service.dart';
-import '../data/smart_reply_service.dart';
 import 'chat_notifier.dart';
 import 'chat_params_providers.dart';
 import 'chat_service_providers.dart';

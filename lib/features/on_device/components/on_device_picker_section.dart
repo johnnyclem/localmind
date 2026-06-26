@@ -7,7 +7,6 @@ import 'package:localmind/core/device/device_memory_service.dart';
 import 'package:localmind/core/models/enums.dart';
 import 'package:localmind/core/providers/app_providers.dart';
 import 'package:localmind/core/providers/device_info_providers.dart';
-import 'package:localmind/core/providers/service_providers.dart';
 import 'package:localmind/core/theme/colors.dart';
 import 'package:localmind/features/chat/providers/model_selection_providers.dart';
 import 'package:localmind/features/models/data/models/model_info.dart';

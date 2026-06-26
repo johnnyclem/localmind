@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:localmind/features/chat/providers/model_loading_providers.dart';
 import 'package:localmind/core/models/enums.dart';
-import 'package:localmind/core/providers/app_providers.dart';
 import 'package:localmind/core/providers/service_providers.dart';
 import 'package:localmind/core/theme/colors.dart';
 import 'package:localmind/features/chat/providers/model_selection_providers.dart';

@@ -283,7 +283,6 @@ class _ChatBody extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final isLoading = ref.watch(chatProvider.select((s) => s.isLoading));

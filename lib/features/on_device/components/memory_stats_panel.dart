@@ -190,7 +190,7 @@ class _MemoryPanelContent extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      l10n.ram_used('${(usagePercent * 100).toStringAsFixed(0)}'),
+                      l10n.ram_used((usagePercent * 100).toStringAsFixed(0)),
                       style: theme.textTheme.labelSmall?.copyWith(
                         fontWeight: FontWeight.w600,
                       ),
