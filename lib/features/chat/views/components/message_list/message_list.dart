@@ -132,7 +132,11 @@ class _MessageList extends StatelessWidget {
         if (streamingMessage != null &&
             isStreaming &&
             index == allMessages.length) {
-          return ChatBubble(message: streamingMessage!, isStreaming: true);
+          return ChatBubble(
+            key: ValueKey(streamingMessage!.id),
+            message: streamingMessage!,
+            isStreaming: true,
+          );
         }
 
         final message = allMessages[index];
