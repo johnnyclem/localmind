@@ -82,35 +82,93 @@ class OnDevicePickerSection extends ConsumerWidget {
                   : l10n.no_models_match(searchQuery),
               style: TextStyle(
                 fontSize: 14,
-                color: isDark ? AppColors.darkMutedText : AppColors.lightMutedText,
+                color: isDark
+                    ? AppColors.darkMutedText
+                    : AppColors.lightMutedText,
               ),
             ),
           );
         }
 
-        return ListView.builder(
-          itemCount: filtered.length,
-          itemBuilder: (context, index) {
-            final model = filtered[index];
-            final isDownloaded = downloadedIds.contains(model.id);
-            final isLoaded = engineState.loadedModelId == model.id;
-            final isCurrentlyLoading =
-                engineState.status == OnDeviceEngineStatus.loading &&
-                engineState.loadedModelId == model.id;
-            final isSelected = selectedModelId == model.id;
-
-            return _OnDeviceModelTile(
-              model: model,
-              isDownloaded: isDownloaded,
-              isLoaded: isLoaded,
-              isCurrentlyLoading: isCurrentlyLoading,
-              isSelected: isSelected,
-              isDark: isDark,
-              deviceMemory: deviceMemoryAsync.value,
+        final importedModels =
+            filtered.where((model) => model.isImported).toList()..sort(
+              (a, b) => (b.importedAt ?? DateTime.fromMillisecondsSinceEpoch(0))
+                  .compareTo(
+                    a.importedAt ?? DateTime.fromMillisecondsSinceEpoch(0),
+                  ),
             );
-          },
+        final downloadableModels = filtered
+            .where((model) => !model.isImported)
+            .toList();
+
+        Widget buildTile(OnDeviceModel model) {
+          final isDownloaded = downloadedIds.contains(model.id);
+          final isLoaded = engineState.loadedModelId == model.id;
+          final isCurrentlyLoading =
+              engineState.status == OnDeviceEngineStatus.loading &&
+              engineState.loadedModelId == model.id;
+          final isSelected = selectedModelId == model.id;
+
+          return _OnDeviceModelTile(
+            model: model,
+            isDownloaded: isDownloaded,
+            isLoaded: isLoaded,
+            isCurrentlyLoading: isCurrentlyLoading,
+            isSelected: isSelected,
+            isDark: isDark,
+            deviceMemory: deviceMemoryAsync.value,
+          );
+        }
+
+        return ListView(
+          children: [
+            if (importedModels.isNotEmpty) ...[
+              const SizedBox(height: 4),
+              const _PickerSectionLabel(
+                title: 'Imported GGUF',
+                subtitle: 'Already available on this device',
+              ),
+              ...importedModels.map(buildTile),
+              const SizedBox(height: 8),
+            ],
+            if (downloadableModels.isNotEmpty) ...[
+              _PickerSectionLabel(
+                title: l10n.available_models,
+                subtitle: 'Curated on-device models',
+              ),
+              ...downloadableModels.map(buildTile),
+            ],
+          ],
         );
       },
+    );
+  }
+}
+
+class _PickerSectionLabel extends StatelessWidget {
+  const _PickerSectionLabel({required this.title, required this.subtitle});
+
+  final String title;
+  final String subtitle;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final muted = isDark ? AppColors.darkMutedText : AppColors.lightMutedText;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(4, 0, 4, 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+          ),
+          const SizedBox(height: 2),
+          Text(subtitle, style: TextStyle(fontSize: 11, color: muted)),
+        ],
+      ),
     );
   }
 }
@@ -224,9 +282,9 @@ class _OnDeviceModelTile extends ConsumerWidget {
                             color: Colors.blue.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(4),
                           ),
-                          child: const Text(
-                            'Imported',
-                            style: TextStyle(
+                          child: Text(
+                            model.importedSourceLabel ?? 'Imported',
+                            style: const TextStyle(
                               fontSize: 9,
                               fontWeight: FontWeight.bold,
                               color: Colors.blue,
@@ -302,11 +360,13 @@ class _OnDeviceModelTile extends ConsumerWidget {
                         MetadataChip(label: 'GGUF', isDark: isDark),
                       if (model.runtime == OnDeviceModelRuntime.llamaCpp)
                         MetadataChip(label: 'llama.cpp', isDark: isDark),
-                      MetadataChip(label: model.license, isDark: isDark),
-                      MetadataChip(
-                        label: model.parameterLabel,
-                        isDark: isDark,
-                      ),
+                      if (!model.isImported)
+                        MetadataChip(label: model.license, isDark: isDark),
+                      if (!model.isImported)
+                        MetadataChip(
+                          label: model.parameterLabel,
+                          isDark: isDark,
+                        ),
                     ],
                   ),
                 ],
@@ -349,7 +409,9 @@ class _OnDeviceModelTile extends ConsumerWidget {
                 icon: Icon(
                   Icons.delete_outline,
                   size: 18,
-                  color: isDark ? AppColors.darkMutedText : AppColors.lightMutedText,
+                  color: isDark
+                      ? AppColors.darkMutedText
+                      : AppColors.lightMutedText,
                 ),
                 tooltip: l10n.delete,
                 onPressed: () => _deleteModel(context, ref),
@@ -359,7 +421,9 @@ class _OnDeviceModelTile extends ConsumerWidget {
                 icon: Icon(
                   Icons.close,
                   size: 16,
-                  color: isDark ? AppColors.darkMutedText : AppColors.lightMutedText,
+                  color: isDark
+                      ? AppColors.darkMutedText
+                      : AppColors.lightMutedText,
                 ),
                 tooltip: l10n.cancel,
                 onPressed: () => ref
@@ -371,7 +435,9 @@ class _OnDeviceModelTile extends ConsumerWidget {
                 icon: Icon(
                   Icons.cloud_download_outlined,
                   size: 18,
-                  color: isDark ? AppColors.darkMutedText : AppColors.lightMutedText,
+                  color: isDark
+                      ? AppColors.darkMutedText
+                      : AppColors.lightMutedText,
                 ),
                 tooltip: l10n.download,
                 onPressed: () async {
@@ -398,7 +464,9 @@ class _OnDeviceModelTile extends ConsumerWidget {
                 l10n.not_downloaded,
                 style: TextStyle(
                   fontSize: 11,
-                  color: isDark ? AppColors.darkMutedText : AppColors.lightMutedText,
+                  color: isDark
+                      ? AppColors.darkMutedText
+                      : AppColors.lightMutedText,
                 ),
               ),
             ],

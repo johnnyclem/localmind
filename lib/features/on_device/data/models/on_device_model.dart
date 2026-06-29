@@ -6,6 +6,8 @@ enum OnDeviceModelRuntime { gemma, llamaCpp }
 
 enum OnDeviceModelFormat { litertlm, task, binary, gguf }
 
+enum OnDeviceImportedSource { localFile, huggingFace }
+
 class OnDeviceModel {
   final String id;
   final String name;
@@ -28,6 +30,7 @@ class OnDeviceModel {
   final String? localPath;
   final DateTime? importedAt;
   final bool isImported;
+  final OnDeviceImportedSource? importedSource;
   final bool requiresHuggingFaceToken;
 
   const OnDeviceModel({
@@ -52,6 +55,7 @@ class OnDeviceModel {
     this.localPath,
     this.importedAt,
     this.isImported = false,
+    this.importedSource,
     this.requiresHuggingFaceToken = false,
   });
 
@@ -72,6 +76,23 @@ class OnDeviceModel {
   }
 
   bool get isLlamaCpp => runtime == OnDeviceModelRuntime.llamaCpp;
+
+  bool get isImportedFromLocalFile =>
+      importedSource == OnDeviceImportedSource.localFile;
+
+  bool get isImportedFromHuggingFace =>
+      importedSource == OnDeviceImportedSource.huggingFace;
+
+  String? get importedSourceLabel {
+    switch (importedSource) {
+      case OnDeviceImportedSource.localFile:
+        return 'Local file';
+      case OnDeviceImportedSource.huggingFace:
+        return 'Hugging Face';
+      case null:
+        return null;
+    }
+  }
 
   ModelType get flutterGemmaModelType {
     switch (id) {

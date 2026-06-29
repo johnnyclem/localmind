@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:localmind/features/on_device/data/imported_gguf_model_repository.dart';
 import 'package:localmind/features/on_device/data/models/on_device_model.dart';
@@ -14,7 +15,7 @@ void main() {
   }) async {
     SharedPreferences.setMockInitialValues(initialValues);
     final prefs = await SharedPreferences.getInstance();
-    return ImportedGgufModelRepository(prefs);
+    return ImportedGgufModelRepository(prefs, Dio());
   }
 
   group('ImportedGgufModelMetadata', () {
@@ -26,6 +27,7 @@ void main() {
         filePath: '/tmp/Tiny-Llama.Q4.gguf',
         fileSizeBytes: 1234,
         importedAt: importedAt,
+        source: OnDeviceImportedSource.localFile,
       );
 
       final restored = ImportedGgufModelMetadata.fromJson(
@@ -43,7 +45,27 @@ void main() {
       expect(model.localPath, metadata.filePath);
       expect(model.fileName, 'Tiny-Llama.Q4.gguf');
       expect(model.isImported, isTrue);
+      expect(model.importedSource, OnDeviceImportedSource.localFile);
       expect(model.isLlamaCpp, isTrue);
+    });
+
+    test('estimates imported GGUF RAM requirement from file size', () {
+      final metadata = ImportedGgufModelMetadata(
+        id: 'gguf-large',
+        name: 'Large GGUF',
+        filePath: '/tmp/Large.gguf',
+        fileSizeBytes: 6 * 1024 * 1024 * 1024,
+        importedAt: DateTime.utc(2026, 6, 21, 12),
+        source: OnDeviceImportedSource.huggingFace,
+        sourceUrl:
+            'https://huggingface.co/example/repo/resolve/main/Large.gguf',
+      );
+
+      final model = metadata.toOnDeviceModel();
+
+      expect(model.minRamMb, greaterThan(2048));
+      expect(model.importedSource, OnDeviceImportedSource.huggingFace);
+      expect(model.huggingFaceUrl, metadata.sourceUrl);
     });
   });
 
@@ -117,6 +139,28 @@ void main() {
       expect(existing.map((model) => model.id), ['gguf-kept']);
       expect(repository.load().map((model) => model.id), ['gguf-kept']);
     });
+
+    test('rejects non-Hugging Face GGUF URLs before downloading', () async {
+      final repository = await createRepository();
+
+      expect(
+        () => repository.importFromHuggingFaceUrl(
+          'https://huggingface.co.evil.example/org/repo/resolve/main/model.gguf',
+        ),
+        throwsA(isA<FormatException>()),
+      );
+    });
+
+    test('requires HTTPS for Hugging Face GGUF imports', () async {
+      final repository = await createRepository();
+
+      expect(
+        () => repository.importFromHuggingFaceUrl(
+          'http://huggingface.co/org/repo/resolve/main/model.gguf',
+        ),
+        throwsA(isA<FormatException>()),
+      );
+    });
   });
 }
 
@@ -130,5 +174,6 @@ ImportedGgufModelMetadata _metadata({
     filePath: filePath,
     fileSizeBytes: 42,
     importedAt: DateTime.utc(2026, 6, 21),
+    source: OnDeviceImportedSource.localFile,
   );
 }

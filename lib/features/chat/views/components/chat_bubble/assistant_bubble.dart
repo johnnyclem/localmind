@@ -90,7 +90,9 @@ class AssistantBubble extends StatelessWidget {
                 _formatTime(message.createdAt),
                 style: TextStyle(
                   fontSize: 11,
-                  color: isDark ? AppColors.darkMutedText : AppColors.lightMutedText,
+                  color: isDark
+                      ? AppColors.darkMutedText
+                      : AppColors.lightMutedText,
                 ),
               ),
               if (message.status == MessageStatus.error) ...[
@@ -168,22 +170,82 @@ class _StreamingContentState extends State<_StreamingContent> {
 
   @override
   Widget build(BuildContext context) {
-    return MarkdownBodyContent(
-      content: _visibleContent,
-      isDark: widget.isDark,
-    );
+    return MarkdownBodyContent(content: _visibleContent, isDark: widget.isDark);
   }
 }
 
-class _StreamingIndicator extends StatelessWidget {
+class _StreamingIndicator extends StatefulWidget {
   const _StreamingIndicator();
 
   @override
+  State<_StreamingIndicator> createState() => _StreamingIndicatorState();
+}
+
+class _StreamingIndicatorState extends State<_StreamingIndicator>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final List<Animation<double>> _animations;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 1100),
+      vsync: this,
+    )..repeat();
+
+    _animations = List.generate(3, (index) {
+      return Tween<double>(begin: 0, end: 1).animate(
+        CurvedAnimation(
+          parent: _controller,
+          curve: Interval(
+            index * 0.2,
+            0.6 + index * 0.2,
+            curve: Curves.easeInOut,
+          ),
+        ),
+      );
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return const SizedBox(
-      width: 12,
-      height: 12,
-      child: CircularProgressIndicator(strokeWidth: 2),
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final dotColor = isDark
+        ? AppColors.darkMutedText
+        : AppColors.lightMutedText;
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: List.generate(3, (index) {
+        return AnimatedBuilder(
+          animation: _animations[index],
+          builder: (context, child) {
+            return Container(
+              margin: EdgeInsets.only(right: index == 2 ? 0 : 4),
+              child: Transform.translate(
+                offset: Offset(0, -2.5 * _animations[index].value),
+                child: Container(
+                  width: 5,
+                  height: 5,
+                  decoration: BoxDecoration(
+                    color: dotColor.withValues(
+                      alpha: 0.35 + 0.65 * _animations[index].value,
+                    ),
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      }),
     );
   }
 }

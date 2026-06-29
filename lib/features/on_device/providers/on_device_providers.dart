@@ -1,6 +1,7 @@
 import 'dart:io';
 
-import 'package:flutter_gemma/flutter_gemma.dart';
+import 'package:dio/dio.dart';
+import 'package:flutter_gemma/flutter_gemma.dart' show PreferredBackend;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/logger/app_logger.dart';
@@ -8,6 +9,7 @@ import '../../../core/models/enums.dart';
 import '../../../core/providers/app_providers.dart';
 import '../../../core/providers/chat_background_service_provider.dart';
 import '../../../core/providers/review_prompt_providers.dart';
+import '../../../core/providers/service_providers.dart';
 import '../../../core/providers/storage_providers.dart';
 import '../data/imported_gguf_model_repository.dart';
 import '../data/models/on_device_model.dart';
@@ -34,7 +36,10 @@ final onDeviceLlamaServiceProvider = Provider<OnDeviceLlamaService>((ref) {
 
 final importedGgufModelRepositoryProvider =
     Provider<ImportedGgufModelRepository>((ref) {
-      return ImportedGgufModelRepository(ref.read(sharedPreferencesProvider));
+      return ImportedGgufModelRepository(
+        ref.read(sharedPreferencesProvider),
+        ref.read(dioProvider),
+      );
     });
 
 final importedGgufModelsProvider =
@@ -108,17 +113,46 @@ class OnDeviceEngineState {
 }
 
 class ImportedGgufModelsNotifier extends Notifier<List<OnDeviceModel>> {
+  bool _hasScheduledInitialPrune = false;
+
   ImportedGgufModelRepository get _repository =>
       ref.read(importedGgufModelRepositoryProvider);
 
   @override
   List<OnDeviceModel> build() {
+    if (!_hasScheduledInitialPrune) {
+      _hasScheduledInitialPrune = true;
+      Future.microtask(() async {
+        if (ref.mounted) {
+          await pruneMissing();
+        }
+      });
+    }
     return _repository.load().map((model) => model.toOnDeviceModel()).toList();
   }
 
-  Future<void> importModel(String sourcePath) async {
+  Future<OnDeviceModel> importModel(String sourcePath) async {
     final metadata = await _repository.importFromPath(sourcePath);
-    state = [...state, metadata.toOnDeviceModel()];
+    final model = metadata.toOnDeviceModel();
+    state = [...state, model];
+    return model;
+  }
+
+  Future<OnDeviceModel> importModelFromHuggingFaceUrl(
+    String sourceUrl, {
+    String? huggingFaceToken,
+    void Function(int receivedBytes, int totalBytes)? onProgress,
+    CancelToken? cancelToken,
+  }) async {
+    final metadata = await _repository.importFromHuggingFaceUrl(
+      sourceUrl,
+      token: huggingFaceToken,
+      onProgress: onProgress,
+      cancelToken: cancelToken,
+    );
+    final model = metadata.toOnDeviceModel();
+    state = [...state, model];
+    return model;
   }
 
   Future<void> deleteModel(String modelId) async {
@@ -142,6 +176,8 @@ class ImportedGgufModelsNotifier extends Notifier<List<OnDeviceModel>> {
   /// disposed provider container.
   Future<void> pruneMissing() async {
     final existing = await _repository.loadExisting();
+    if (!ref.mounted) return;
+
     final keptIds = existing.map((m) => m.id).toSet();
     if (keptIds.length == state.length &&
         state.every((m) => keptIds.contains(m.id))) {

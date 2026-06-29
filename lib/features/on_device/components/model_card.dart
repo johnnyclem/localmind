@@ -71,11 +71,7 @@ class ModelCard extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _ModelCardHeader(
-              model: model,
-              theme: theme,
-              l10n: l10n,
-            ),
+            _ModelCardHeader(model: model, theme: theme, l10n: l10n),
             if (!Platform.isIOS &&
                 deviceMemory != null &&
                 deviceMemory!.isOversized(model.minRamMb))
@@ -161,7 +157,7 @@ class _ModelCardHeader extends StatelessWidget {
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
-              'Imported',
+              model.importedSourceLabel ?? 'Imported',
               style: theme.textTheme.labelSmall?.copyWith(
                 color: Colors.blue,
                 fontWeight: FontWeight.bold,
@@ -190,7 +186,11 @@ class _MemoryWarningBadge extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 14),
+          const Icon(
+            Icons.warning_amber_rounded,
+            color: Colors.orange,
+            size: 14,
+          ),
           const SizedBox(width: 6),
           Text(
             l10n.may_be_large,
@@ -220,7 +220,9 @@ class _CapabilityChips extends StatelessWidget {
       if (model.supportsThinking) 'Thinking',
       if (model.supportsVision) 'Vision',
       model.languagesLabel,
-      if (model.backendNote != null) model.backendNote!,
+      if (model.backendNote != null &&
+          model.backendNote!.toLowerCase() != 'llama.cpp')
+        model.backendNote!,
       if (model.requiresHuggingFaceToken) l10n.model_requires_huggingface_token,
     ];
 
@@ -254,26 +256,82 @@ class _CapabilityChips extends StatelessWidget {
 }
 
 class _ModelMetaRow extends StatelessWidget {
-  const _ModelMetaRow({required this.model, required this.theme, required this.l10n});
+  const _ModelMetaRow({
+    required this.model,
+    required this.theme,
+    required this.l10n,
+  });
   final OnDeviceModel model;
   final ThemeData theme;
   final AppLocalizations l10n;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(model.fileSizeFormatted, style: theme.textTheme.labelMedium),
-        const SizedBox(width: 12),
-        Text(model.license, style: theme.textTheme.labelMedium),
-        const SizedBox(width: 12),
-        Text(
-          l10n.ram_min_required('${model.minRamMb ~/ 1024 + 1}'),
-          style: theme.textTheme.labelMedium?.copyWith(
-            color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
-          ),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            _MetaPill(label: model.fileSizeFormatted, theme: theme),
+            if (!model.isImported)
+              _MetaPill(label: model.license, theme: theme),
+            _MetaPill(
+              label: l10n.ram_min_required('${model.minRamMb ~/ 1024 + 1}'),
+              theme: theme,
+              muted: true,
+            ),
+          ],
         ),
+        if (model.isImported) ...[
+          const SizedBox(height: 8),
+          Text(
+            model.fileName,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.58),
+            ),
+          ),
+        ],
       ],
+    );
+  }
+}
+
+class _MetaPill extends StatelessWidget {
+  const _MetaPill({
+    required this.label,
+    required this.theme,
+    this.muted = false,
+  });
+
+  final String label;
+  final ThemeData theme;
+  final bool muted;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = muted
+        ? theme.colorScheme.onSurface.withValues(alpha: 0.62)
+        : theme.colorScheme.onSurface;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest.withValues(
+          alpha: 0.45,
+        ),
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        label,
+        style: theme.textTheme.labelSmall?.copyWith(
+          color: color,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
     );
   }
 }
@@ -395,7 +453,8 @@ class _DownloadedActions extends ConsumerWidget {
         else if (isLoaded)
           ShadButton.outline(
             size: ShadButtonSize.sm,
-            onPressed: () => ref.read(onDeviceEngineProvider.notifier).unloadModel(),
+            onPressed: () =>
+                ref.read(onDeviceEngineProvider.notifier).unloadModel(),
             child: Text(l10n.unload),
           )
         else
@@ -487,7 +546,9 @@ class _DownloadingActions extends ConsumerWidget {
                     child: LinearProgressIndicator(
                       value: downloadProgress?.progress ?? 0.0,
                       minHeight: 6,
-                      backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.1),
+                      backgroundColor: theme.colorScheme.primary.withValues(
+                        alpha: 0.1,
+                      ),
                       valueColor: AlwaysStoppedAnimation<Color>(
                         theme.colorScheme.primary,
                       ),
@@ -499,7 +560,8 @@ class _DownloadingActions extends ConsumerWidget {
                     children: [
                       Text(
                         l10n.download_progress(
-                          ((downloadProgress?.progress ?? 0) * 100).toStringAsFixed(1),
+                          ((downloadProgress?.progress ?? 0) * 100)
+                              .toStringAsFixed(1),
                           downloadProgress?.speedFormatted ?? '0 B/s',
                         ),
                         style: theme.textTheme.labelSmall?.copyWith(

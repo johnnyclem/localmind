@@ -21,6 +21,7 @@ void main() {
         filePath: '/tmp/imported.gguf',
         fileSizeBytes: 4096,
         importedAt: DateTime.utc(2026, 6, 21),
+        source: OnDeviceImportedSource.localFile,
       );
       SharedPreferences.setMockInitialValues({
         storageKey: json.encode([metadata.toJson()]),
@@ -39,6 +40,7 @@ void main() {
       expect(imported.format, OnDeviceModelFormat.gguf);
       expect(imported.localPath, metadata.filePath);
       expect(imported.isImported, isTrue);
+      expect(imported.importedSource, OnDeviceImportedSource.localFile);
     },
   );
 
@@ -51,6 +53,7 @@ void main() {
         filePath: '/tmp/downloaded.gguf',
         fileSizeBytes: 4096,
         importedAt: DateTime.utc(2026, 6, 21),
+        source: OnDeviceImportedSource.localFile,
       );
       SharedPreferences.setMockInitialValues({
         storageKey: json.encode([metadata.toJson()]),
