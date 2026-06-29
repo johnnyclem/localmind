@@ -513,6 +513,9 @@ class _OnDeviceModelTile extends ConsumerWidget {
       onDeviceRuntime: model.runtime,
       onDeviceFormat: model.format,
       localPath: model.localPath,
+      supportsVision: model.supportsVision,
+      supportsReasoning: model.supportsThinking,
+      supportsToolUse: model.supportsFunctionCalling,
     );
 
     await engineNotifier.loadModel(model.id, settings.preferredBackend);
@@ -578,6 +581,9 @@ class _OnDeviceModelTile extends ConsumerWidget {
       onDeviceRuntime: model.runtime,
       onDeviceFormat: model.format,
       localPath: model.localPath,
+      supportsVision: model.supportsVision,
+      supportsReasoning: model.supportsThinking,
+      supportsToolUse: model.supportsFunctionCalling,
     );
 
     ref.read(selectedModelProvider.notifier).setModel(modelInfo);

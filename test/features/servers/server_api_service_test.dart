@@ -134,6 +134,60 @@ void main() {
       expect(model.architecture, "llama");
     });
 
+    test('parses model capabilities from LM Studio models array', () async {
+      final mockData = {
+        "models": [
+          {
+            "key": "google/gemma-4-e2b",
+            "display_name": "Gemma 4 E2B",
+            "capabilities": {
+              "vision": true,
+              "trained_for_tool_use": true,
+            },
+          },
+          {
+            "key": "mistralai/ministral-3-14b-reasoning",
+            "display_name": "Ministral 3 14B Reasoning",
+            "capabilities": {
+              "vision": true,
+              "trained_for_tool_use": true,
+              "reasoning": {
+                "allowed_options": ["off", "on"],
+                "default": "on",
+              },
+            },
+          },
+          {
+            "key": "mradermacher/kimi-vl-a3b-thinking-2506-i1",
+            "display_name": "Kimi VL A3B Thinking 2506 I1",
+            "capabilities": {
+              "vision": false,
+              "trained_for_tool_use": false,
+            },
+          },
+        ],
+      };
+
+      final dio = Dio()..interceptors.add(TestInterceptor(mockData));
+      final service = ServerApiService(dio);
+
+      final models = await service.fetchModels(testServer);
+
+      expect(models, hasLength(3));
+
+      expect(models[0].supportsVision, isTrue);
+      expect(models[0].supportsToolUse, isTrue);
+      expect(models[0].supportsReasoning, isFalse);
+
+      expect(models[1].supportsVision, isTrue);
+      expect(models[1].supportsToolUse, isTrue);
+      expect(models[1].supportsReasoning, isTrue);
+
+      expect(models[2].supportsVision, isFalse);
+      expect(models[2].supportsToolUse, isFalse);
+      expect(models[2].supportsReasoning, isFalse);
+    });
+
     test('handles running models with fallback data array (llama.cpp)', () async {
       final mockData = {
         "object": "list",

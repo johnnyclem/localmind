@@ -145,6 +145,9 @@ final availableModelsProvider = FutureProvider.family<List<dynamic>, String>((
             onDeviceRuntime: m.runtime,
             onDeviceFormat: m.format,
             localPath: m.localPath,
+            supportsVision: m.supportsVision,
+            supportsReasoning: m.supportsThinking,
+            supportsToolUse: m.supportsFunctionCalling,
           ),
         )
         .toList();

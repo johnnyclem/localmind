@@ -3,6 +3,7 @@ import 'package:localmind/core/models/enums.dart';
 import 'package:localmind/core/theme/colors.dart';
 import 'package:localmind/features/models/data/models/model_info.dart';
 import 'package:localmind/l10n/app_localizations.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
 import 'metadata_chip.dart';
 
 class ModelTile extends StatelessWidget {
@@ -65,6 +66,12 @@ class ModelTile extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
+                      if (model.supportsVision ||
+                          model.supportsReasoning ||
+                          model.supportsToolUse) ...[
+                        const SizedBox(width: 8),
+                        _ModelCapabilityIcons(model: model, isDark: isDark),
+                      ],
                     ],
                   ),
                   const SizedBox(height: 4),
@@ -139,6 +146,68 @@ class ModelTile extends StatelessWidget {
               ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _ModelCapabilityIcons extends StatelessWidget {
+  const _ModelCapabilityIcons({
+    required this.model,
+    required this.isDark,
+  });
+
+  final ModelInfo model;
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = isDark ? AppColors.darkMutedText : AppColors.lightMutedText;
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (model.supportsVision)
+          _CapabilityIcon(
+            icon: LucideIcons.eye,
+            tooltip: 'Vision',
+            color: color,
+          ),
+        if (model.supportsReasoning)
+          _CapabilityIcon(
+            icon: LucideIcons.brain,
+            tooltip: 'Reasoning',
+            color: color,
+          ),
+        if (model.supportsToolUse)
+          _CapabilityIcon(
+            icon: LucideIcons.hammer,
+            tooltip: 'Tool use',
+            color: color,
+          ),
+      ],
+    );
+  }
+}
+
+class _CapabilityIcon extends StatelessWidget {
+  const _CapabilityIcon({
+    required this.icon,
+    required this.tooltip,
+    required this.color,
+  });
+
+  final IconData icon;
+  final String tooltip;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 4),
+      child: Tooltip(
+        message: tooltip,
+        child: Icon(icon, size: 14, color: color),
       ),
     );
   }

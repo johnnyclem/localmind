@@ -17,6 +17,9 @@ class ModelInfo {
   final OnDeviceModelRuntime? onDeviceRuntime;
   final OnDeviceModelFormat? onDeviceFormat;
   final String? localPath;
+  final bool supportsVision;
+  final bool supportsReasoning;
+  final bool supportsToolUse;
 
   ModelInfo({
     required this.id,
@@ -34,6 +37,9 @@ class ModelInfo {
     this.onDeviceRuntime,
     this.onDeviceFormat,
     this.localPath,
+    this.supportsVision = false,
+    this.supportsReasoning = false,
+    this.supportsToolUse = false,
   });
 
   String get displayName {
@@ -83,6 +89,9 @@ class ModelInfo {
     OnDeviceModelRuntime? onDeviceRuntime,
     OnDeviceModelFormat? onDeviceFormat,
     String? localPath,
+    bool? supportsVision,
+    bool? supportsReasoning,
+    bool? supportsToolUse,
   }) {
     return ModelInfo(
       id: id ?? this.id,
@@ -100,6 +109,9 @@ class ModelInfo {
       onDeviceRuntime: onDeviceRuntime ?? this.onDeviceRuntime,
       onDeviceFormat: onDeviceFormat ?? this.onDeviceFormat,
       localPath: localPath ?? this.localPath,
+      supportsVision: supportsVision ?? this.supportsVision,
+      supportsReasoning: supportsReasoning ?? this.supportsReasoning,
+      supportsToolUse: supportsToolUse ?? this.supportsToolUse,
     );
   }
 }

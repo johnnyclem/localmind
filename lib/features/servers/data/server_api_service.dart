@@ -282,6 +282,8 @@ class ServerApiService {
           archName = archValue;
         }
 
+        final capabilities = _parseModelCapabilities(item['capabilities']);
+
         models.add(
           ModelInfo(
             id: id,
@@ -297,6 +299,9 @@ class ServerApiService {
             architecture: archName,
             serverType: server.type,
             serverId: server.id,
+            supportsVision: capabilities.supportsVision,
+            supportsReasoning: capabilities.supportsReasoning,
+            supportsToolUse: capabilities.supportsToolUse,
           ),
         );
       }
@@ -310,6 +315,27 @@ class ServerApiService {
     if (value is double) return value.toInt();
     if (value is String) return int.tryParse(value);
     return null;
+  }
+
+  ({
+    bool supportsVision,
+    bool supportsReasoning,
+    bool supportsToolUse,
+  }) _parseModelCapabilities(dynamic raw) {
+    if (raw is! Map) {
+      return (
+        supportsVision: false,
+        supportsReasoning: false,
+        supportsToolUse: false,
+      );
+    }
+
+    final reasoning = raw['reasoning'];
+    return (
+      supportsVision: raw['vision'] == true,
+      supportsReasoning: reasoning is Map && reasoning.isNotEmpty,
+      supportsToolUse: raw['trained_for_tool_use'] == true,
+    );
   }
 
   double? _paramCountFromMeta(dynamic nParams) {
