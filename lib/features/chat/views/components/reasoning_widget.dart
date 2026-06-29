@@ -17,7 +17,8 @@ class ReasoningWidget extends StatefulWidget {
   State<ReasoningWidget> createState() => _ReasoningWidgetState();
 }
 
-class _ReasoningWidgetState extends State<ReasoningWidget> with SingleTickerProviderStateMixin {
+class _ReasoningWidgetState extends State<ReasoningWidget>
+    with SingleTickerProviderStateMixin {
   late bool _isExpanded;
   late AnimationController _animationController;
   late Animation<double> _expandAnimation;
@@ -78,17 +79,23 @@ class _ReasoningWidgetState extends State<ReasoningWidget> with SingleTickerProv
       return const SizedBox.shrink();
     }
 
+    final reasoningTextColor = Color.lerp(
+      isDark ? AppColors.darkPrimaryText : AppColors.lightPrimaryText,
+      isDark ? AppColors.darkMutedText : AppColors.lightMutedText,
+      0.35,
+    )!;
+
+    final reasoningHighlightColor = isDark
+        ? AppColors.darkSurface.withValues(alpha: 0.9)
+        : const Color(0xFFF4F4F5);
+
     return Container(
       margin: const EdgeInsets.only(bottom: 12, top: 4),
       decoration: BoxDecoration(
-        color: isDark
-            ? AppColors.darkSurfaceInput
-            : AppColors.lightSurface,
+        color: isDark ? AppColors.darkSurfaceInput : AppColors.lightSurface,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isDark
-              ? AppColors.darkBorder
-              : AppColors.lightBorder,
+          color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
           width: 1.0,
         ),
         boxShadow: [
@@ -101,123 +108,97 @@ class _ReasoningWidgetState extends State<ReasoningWidget> with SingleTickerProv
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(11),
-        child: IntrinsicHeight(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Accent glowing line
-              Container(
-                width: 4,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      theme.colorScheme.primary,
-                      theme.colorScheme.secondary,
-                    ],
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                  ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header Row
+            InkWell(
+              onTap: _toggleExpand,
+              borderRadius: BorderRadius.circular(11),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 12,
                 ),
-              ),
-              Expanded(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                child: Row(
                   children: [
-                    // Header Row
-                    InkWell(
-                      onTap: _toggleExpand,
-                      borderRadius: const BorderRadius.only(
-                        topRight: Radius.circular(11),
-                        bottomRight: Radius.circular(11),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                        child: Row(
-                          children: [
-                            // Brain / thinking icon
-                            Icon(
-                              Icons.psychology_outlined,
-                              size: 18,
-                              color: isDark
-                                  ? AppColors.darkMutedText
-                                  : AppColors.lightMutedText,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              l10n.thinking,
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                                letterSpacing: 0.3,
-                                color: isDark
-                                    ? const Color(0xFFBAC2DE)
-                                    : const Color(0xFF585B70),
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            if (widget.isStreaming) ...[
-                              SizedBox(
-                                width: 10,
-                                height: 10,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 1.5,
-                                  color: theme.colorScheme.primary,
-                                ),
-                              ),
-                            ],
-                            const Spacer(),
-                            // Expand Icon with rotation
-                            RotationTransition(
-                              turns: Tween(begin: 0.0, end: 0.5).animate(_expandAnimation),
-                              child: Icon(
-                                Icons.keyboard_arrow_down_rounded,
-                                size: 18,
-                                color: isDark
-                                    ? AppColors.darkMutedText
-                                    : AppColors.lightMutedText,
-                              ),
-                            ),
-                          ],
-                        ),
+                    Icon(
+                      Icons.psychology_outlined,
+                      size: 18,
+                      color: isDark
+                          ? AppColors.darkMutedText
+                          : AppColors.lightMutedText,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      l10n.thinking,
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 0.3,
+                        color: isDark
+                            ? AppColors.darkMutedText
+                            : AppColors.lightMutedText,
                       ),
                     ),
-                    // Expandable content
-                    SizeTransition(
-                      sizeFactor: _expandAnimation,
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            GptMarkdownTheme(
-                              gptThemeData: GptMarkdownThemeData(
-                                brightness: isDark ? Brightness.dark : Brightness.light,
-                                highlightColor: isDark
-                                    ? AppColors.darkBorder
-                                    : AppColors.lightBorder,
-                                linkColor: theme.colorScheme.primary,
-                              ),
-                              child: GptMarkdown(
-                                widget.reasoningContent ?? '',
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  color: isDark
-                                      ? AppColors.darkPrimaryText
-                                      : AppColors.lightPrimaryText,
-                                  height: 1.5,
-                                ),
-                              ),
-                            ),
-                          ],
+                    const SizedBox(width: 8),
+                    if (widget.isStreaming) ...[
+                      SizedBox(
+                        width: 10,
+                        height: 10,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 1.5,
+                          color: theme.colorScheme.primary,
+                        ),
+                      ),
+                    ],
+                    const Spacer(),
+                    RotationTransition(
+                      turns: Tween(
+                        begin: 0.0,
+                        end: 0.5,
+                      ).animate(_expandAnimation),
+                      child: Icon(
+                        Icons.keyboard_arrow_down_rounded,
+                        size: 18,
+                        color: isDark
+                            ? AppColors.darkMutedText
+                            : AppColors.lightMutedText,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            // Expandable content
+            SizeTransition(
+              sizeFactor: _expandAnimation,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    GptMarkdownTheme(
+                      gptThemeData: GptMarkdownThemeData(
+                        brightness: isDark ? Brightness.dark : Brightness.light,
+                        highlightColor: reasoningHighlightColor,
+                        linkColor: theme.colorScheme.primary,
+                      ),
+                      child: GptMarkdown(
+                        widget.reasoningContent ?? '',
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: reasoningTextColor,
+                          height: 1.5,
                         ),
                       ),
                     ),
                   ],
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
