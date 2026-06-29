@@ -1353,48 +1353,45 @@ class AppLocalizationsZh extends AppLocalizations {
   String get on_device_models_title => '设备端模型';
 
   @override
-  String get settings_huggingface_token => 'Hugging Face Token (Optional)';
+  String get settings_huggingface_token => 'Hugging Face 令牌（可选）';
 
   @override
   String get settings_huggingface_token_desc =>
-      'Required only for gated models (e.g. Gemma). Get a token at huggingface.co/settings/tokens.';
+      '仅对受限模型必需（例如 Gemma）。可在 huggingface.co/settings/tokens 获取令牌。';
 
   @override
-  String get settings_huggingface_token_set => 'Token saved';
+  String get settings_huggingface_token_set => '令牌已保存';
 
   @override
-  String get settings_huggingface_token_cleared => 'Token cleared';
+  String get settings_huggingface_token_cleared => '令牌已清除';
 
   @override
-  String get model_requires_huggingface_token =>
-      'Requires a Hugging Face token';
+  String get model_requires_huggingface_token => '需要 Hugging Face 令牌';
 
   @override
   String get model_missing_huggingface_token =>
-      'This model is gated on Hugging Face. Add a token in Settings → On-Device Inference to download it.';
+      '此模型在 Hugging Face 上受限。请在“设置 → 设备端推理”中添加令牌后再下载。';
 
   @override
-  String get set_huggingface_token => 'Set token';
+  String get set_huggingface_token => '设置令牌';
 
   @override
-  String get clear_huggingface_token => 'Clear';
+  String get clear_huggingface_token => '清除';
 
   @override
-  String get edit_huggingface_token_dialog_title => 'Hugging Face Access Token';
+  String get edit_huggingface_token_dialog_title => 'Hugging Face 访问令牌';
 
   @override
   String get huggingface_token_dialog_hint => 'hf_…';
 
   @override
-  String get server_type_ollama_desc => 'Local AI engine. No API key required.';
+  String get server_type_ollama_desc => '本地 AI 引擎。无需 API 密钥。';
 
   @override
-  String get server_type_on_device_desc =>
-      'Runs on your phone. Some models need a Hugging Face token.';
+  String get server_type_on_device_desc => '在您的手机上运行。某些模型需要 Hugging Face 令牌。';
 
   @override
-  String get server_type_lm_studio_desc =>
-      'Local API server. No API key required.';
+  String get server_type_lm_studio_desc => '本地 API 服务器。无需 API 密钥。';
 
   @override
   String get available_models => '可用模型';
@@ -1653,6 +1650,279 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get tts_other_services_background_note => '注意：其他TTS服务支持后台播放（原生音频格式）。';
+
+  @override
+  String get gguf_imported_models_title => 'Imported GGUF models';
+
+  @override
+  String get gguf_imported_models_empty_subtitle =>
+      'Import a GGUF from your device or add one from Hugging Face. Imported models run locally with llama.cpp.';
+
+  @override
+  String get gguf_imported_models_ready =>
+      'imported models ready for local inference.';
+
+  @override
+  String get gguf_curated_models_subtitle =>
+      'Curated on-device models you can download and manage inside LocalMind.';
+
+  @override
+  String get gguf_only_supported =>
+      'Only GGUF models are supported for this import.';
+
+  @override
+  String get gguf_imported_from_local_file => 'imported from local file.';
+
+  @override
+  String get gguf_import_failed => 'Failed to import GGUF model';
+
+  @override
+  String get gguf_imported_from_huggingface => 'imported from Hugging Face.';
+
+  @override
+  String get gguf_import_canceled => 'GGUF import canceled.';
+
+  @override
+  String get gguf_enter_huggingface_url => 'Enter a Hugging Face GGUF URL.';
+
+  @override
+  String get gguf_only_official_huggingface_urls =>
+      'Only official Hugging Face GGUF URLs are supported.';
+
+  @override
+  String get gguf_use_https_url =>
+      'Use an HTTPS Hugging Face URL for GGUF import.';
+
+  @override
+  String get gguf_url_must_point_to_file =>
+      'The Hugging Face URL must point directly to a .gguf file.';
+
+  @override
+  String get gguf_unable_to_detect_file_name =>
+      'Unable to determine the GGUF file name.';
+
+  @override
+  String get gguf_download_empty =>
+      'The downloaded GGUF file was empty or missing.';
+
+  @override
+  String get gguf_selected_file_missing =>
+      'Selected model file does not exist.';
+
+  @override
+  String get gguf_import_action => 'Import GGUF';
+
+  @override
+  String get gguf_overview_title => 'Bring your own GGUF models';
+
+  @override
+  String get gguf_overview_subtitle =>
+      'Import a .gguf from local storage or download one straight from Hugging Face. Imported models stay on this device and load with llama.cpp.';
+
+  @override
+  String get gguf_imported_count_label => 'imported';
+
+  @override
+  String get gguf_local_files_label => 'local files';
+
+  @override
+  String get gguf_huggingface_label => 'Hugging Face';
+
+  @override
+  String get gguf_import_local_title => 'Import local GGUF';
+
+  @override
+  String get gguf_import_local_subtitle => 'Copy a .gguf file from this device';
+
+  @override
+  String get gguf_import_huggingface_title => 'Import from Hugging Face';
+
+  @override
+  String get gguf_import_huggingface_subtitle =>
+      'Paste a GGUF URL or repo path';
+
+  @override
+  String get gguf_no_imported_title => 'No imported GGUF models yet';
+
+  @override
+  String get gguf_no_imported_subtitle =>
+      'You can bring your own GGUF file from device storage or paste a Hugging Face URL or repo path that points to a .gguf file.';
+
+  @override
+  String get gguf_import_huggingface_dialog_title =>
+      'Import GGUF from Hugging Face';
+
+  @override
+  String get gguf_import_huggingface_dialog_subtitle =>
+      'Paste a direct GGUF URL or a Hugging Face repo path like `owner/repo/blob/main/model.gguf`. Blob links are converted automatically.';
+
+  @override
+  String get gguf_url_or_repo_path => 'GGUF URL or repo path';
+
+  @override
+  String get paste => 'Paste';
+
+  @override
+  String get gguf_browse => 'Browse GGUFs';
+
+  @override
+  String get gguf_huggingface_token_ready => 'Hugging Face token ready';
+
+  @override
+  String get gguf_huggingface_token_optional =>
+      'Token optional but recommended';
+
+  @override
+  String get gguf_huggingface_token_ready_desc =>
+      'Your saved token will be used automatically for gated or private repositories.';
+
+  @override
+  String get gguf_huggingface_token_optional_desc =>
+      'Requires a Hugging Face token. Add one in Settings if this GGUF is gated or private.';
+
+  @override
+  String get gguf_downloading => 'Downloading GGUF';
+
+  @override
+  String get gguf_preparing => 'Preparing';
+
+  @override
+  String get gguf_preparing_download => 'Preparing download...';
+
+  @override
+  String get gguf_cancel_import => 'Cancel import';
+
+  @override
+  String get clipboard_empty => 'Clipboard is empty.';
+
+  @override
+  String get could_not_open_huggingface => 'Could not open Hugging Face.';
+
+  @override
+  String get gguf_paste_url_error =>
+      'Paste a Hugging Face GGUF URL or repo path.';
+
+  @override
+  String get gguf_blob_link => 'Blob link';
+
+  @override
+  String get gguf_repository_label => 'Repository';
+
+  @override
+  String get gguf_detected_path_label => 'Detected path';
+
+  @override
+  String get gguf_imported_section_label => 'Imported GGUF';
+
+  @override
+  String get gguf_already_available => 'Already available on this device';
+
+  @override
+  String get gguf_curated_models_short => 'Curated on-device models';
+
+  @override
+  String get execute_tool_title => 'Execute Tool';
+
+  @override
+  String get execute_tool_request_desc =>
+      'The model is requesting to execute the following tool:';
+
+  @override
+  String get reject => 'Reject';
+
+  @override
+  String get approve => 'Approve';
+
+  @override
+  String get server_type_help =>
+      'Pick the provider before filling connection details.';
+
+  @override
+  String get server_identity_title => 'Identity';
+
+  @override
+  String get server_identity_desc =>
+      'Name this server and choose how it appears in the list.';
+
+  @override
+  String get server_connection_title => 'Connection';
+
+  @override
+  String get server_connection_desc =>
+      'Use the address and port exposed by your server.';
+
+  @override
+  String get server_authentication_title => 'Authentication';
+
+  @override
+  String get server_authentication_required_desc =>
+      'OpenRouter requires an API key before testing.';
+
+  @override
+  String get server_authentication_optional_desc =>
+      'Leave the API key empty if this server does not require one.';
+
+  @override
+  String get mcp_tools_title => 'MCP Tools';
+
+  @override
+  String get available_tools => 'Available tools';
+
+  @override
+  String get unable_load_tools => 'Unable to load tools';
+
+  @override
+  String get no_tools_registered => 'No tools registered';
+
+  @override
+  String get no_tools_registered_desc =>
+      'Enable the example MCP server or add MCP integrations from chat settings.';
+
+  @override
+  String get example_mcp_server_title => 'Example MCP server';
+
+  @override
+  String get example_mcp_server_desc =>
+      'Registers example.echo and example.word_count through the same MCP tool provider used by external servers.';
+
+  @override
+  String get disable_example_server => 'Disable example server';
+
+  @override
+  String get enable_example_server => 'Enable example server';
+
+  @override
+  String get built_in_label => 'Built-in';
+
+  @override
+  String get highlights_label => 'Highlights';
+
+  @override
+  String get built_with_label => 'Built with';
+
+  @override
+  String get local_label => 'Local';
+
+  @override
+  String get gguf_format_label => 'GGUF';
+
+  @override
+  String get tool_status_requested => 'Requested';
+
+  @override
+  String get tool_status_approved => 'Approved';
+
+  @override
+  String get tool_status_rejected => 'Rejected';
+
+  @override
+  String get tool_status_running => 'Running';
+
+  @override
+  String get tool_status_done => 'Done';
+
+  @override
+  String get tool_status_failed => 'Failed';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -3004,6 +3274,47 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get on_device_models_title => '裝置端模型';
 
   @override
+  String get settings_huggingface_token => 'Hugging Face 權杖（選用）';
+
+  @override
+  String get settings_huggingface_token_desc =>
+      '僅限受限制模型需要（例如 Gemma）。可在 huggingface.co/settings/tokens 取得權杖。';
+
+  @override
+  String get settings_huggingface_token_set => '權杖已儲存';
+
+  @override
+  String get settings_huggingface_token_cleared => '權杖已清除';
+
+  @override
+  String get model_requires_huggingface_token => '需要 Hugging Face 權杖';
+
+  @override
+  String get model_missing_huggingface_token =>
+      '此模型在 Hugging Face 上受限制。請在「設定 → 裝置端推論」中加入權杖後再下載。';
+
+  @override
+  String get set_huggingface_token => '設定權杖';
+
+  @override
+  String get clear_huggingface_token => '清除';
+
+  @override
+  String get edit_huggingface_token_dialog_title => 'Hugging Face 存取權杖';
+
+  @override
+  String get huggingface_token_dialog_hint => 'hf_…';
+
+  @override
+  String get server_type_ollama_desc => '本機 AI 引擎。不需要 API 金鑰。';
+
+  @override
+  String get server_type_on_device_desc => '在您的手機上執行。某些模型需要 Hugging Face 權杖。';
+
+  @override
+  String get server_type_lm_studio_desc => '本機 API 伺服器。不需要 API 金鑰。';
+
+  @override
   String get available_models => '可用模型';
 
   @override
@@ -3261,4 +3572,277 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   @override
   String get tts_other_services_background_note =>
       '注意：其他 TTS 服務支援背景播放（原生音訊格式）。';
+
+  @override
+  String get gguf_imported_models_title => 'Imported GGUF models';
+
+  @override
+  String get gguf_imported_models_empty_subtitle =>
+      'Import a GGUF from your device or add one from Hugging Face. Imported models run locally with llama.cpp.';
+
+  @override
+  String get gguf_imported_models_ready =>
+      'imported models ready for local inference.';
+
+  @override
+  String get gguf_curated_models_subtitle =>
+      'Curated on-device models you can download and manage inside LocalMind.';
+
+  @override
+  String get gguf_only_supported =>
+      'Only GGUF models are supported for this import.';
+
+  @override
+  String get gguf_imported_from_local_file => 'imported from local file.';
+
+  @override
+  String get gguf_import_failed => 'Failed to import GGUF model';
+
+  @override
+  String get gguf_imported_from_huggingface => 'imported from Hugging Face.';
+
+  @override
+  String get gguf_import_canceled => 'GGUF import canceled.';
+
+  @override
+  String get gguf_enter_huggingface_url => 'Enter a Hugging Face GGUF URL.';
+
+  @override
+  String get gguf_only_official_huggingface_urls =>
+      'Only official Hugging Face GGUF URLs are supported.';
+
+  @override
+  String get gguf_use_https_url =>
+      'Use an HTTPS Hugging Face URL for GGUF import.';
+
+  @override
+  String get gguf_url_must_point_to_file =>
+      'The Hugging Face URL must point directly to a .gguf file.';
+
+  @override
+  String get gguf_unable_to_detect_file_name =>
+      'Unable to determine the GGUF file name.';
+
+  @override
+  String get gguf_download_empty =>
+      'The downloaded GGUF file was empty or missing.';
+
+  @override
+  String get gguf_selected_file_missing =>
+      'Selected model file does not exist.';
+
+  @override
+  String get gguf_import_action => 'Import GGUF';
+
+  @override
+  String get gguf_overview_title => 'Bring your own GGUF models';
+
+  @override
+  String get gguf_overview_subtitle =>
+      'Import a .gguf from local storage or download one straight from Hugging Face. Imported models stay on this device and load with llama.cpp.';
+
+  @override
+  String get gguf_imported_count_label => 'imported';
+
+  @override
+  String get gguf_local_files_label => 'local files';
+
+  @override
+  String get gguf_huggingface_label => 'Hugging Face';
+
+  @override
+  String get gguf_import_local_title => 'Import local GGUF';
+
+  @override
+  String get gguf_import_local_subtitle => 'Copy a .gguf file from this device';
+
+  @override
+  String get gguf_import_huggingface_title => 'Import from Hugging Face';
+
+  @override
+  String get gguf_import_huggingface_subtitle =>
+      'Paste a GGUF URL or repo path';
+
+  @override
+  String get gguf_no_imported_title => 'No imported GGUF models yet';
+
+  @override
+  String get gguf_no_imported_subtitle =>
+      'You can bring your own GGUF file from device storage or paste a Hugging Face URL or repo path that points to a .gguf file.';
+
+  @override
+  String get gguf_import_huggingface_dialog_title =>
+      'Import GGUF from Hugging Face';
+
+  @override
+  String get gguf_import_huggingface_dialog_subtitle =>
+      'Paste a direct GGUF URL or a Hugging Face repo path like `owner/repo/blob/main/model.gguf`. Blob links are converted automatically.';
+
+  @override
+  String get gguf_url_or_repo_path => 'GGUF URL or repo path';
+
+  @override
+  String get paste => 'Paste';
+
+  @override
+  String get gguf_browse => 'Browse GGUFs';
+
+  @override
+  String get gguf_huggingface_token_ready => 'Hugging Face token ready';
+
+  @override
+  String get gguf_huggingface_token_optional =>
+      'Token optional but recommended';
+
+  @override
+  String get gguf_huggingface_token_ready_desc =>
+      'Your saved token will be used automatically for gated or private repositories.';
+
+  @override
+  String get gguf_huggingface_token_optional_desc =>
+      'Requires a Hugging Face token. Add one in Settings if this GGUF is gated or private.';
+
+  @override
+  String get gguf_downloading => 'Downloading GGUF';
+
+  @override
+  String get gguf_preparing => 'Preparing';
+
+  @override
+  String get gguf_preparing_download => 'Preparing download...';
+
+  @override
+  String get gguf_cancel_import => 'Cancel import';
+
+  @override
+  String get clipboard_empty => 'Clipboard is empty.';
+
+  @override
+  String get could_not_open_huggingface => 'Could not open Hugging Face.';
+
+  @override
+  String get gguf_paste_url_error =>
+      'Paste a Hugging Face GGUF URL or repo path.';
+
+  @override
+  String get gguf_blob_link => 'Blob link';
+
+  @override
+  String get gguf_repository_label => 'Repository';
+
+  @override
+  String get gguf_detected_path_label => 'Detected path';
+
+  @override
+  String get gguf_imported_section_label => 'Imported GGUF';
+
+  @override
+  String get gguf_already_available => 'Already available on this device';
+
+  @override
+  String get gguf_curated_models_short => 'Curated on-device models';
+
+  @override
+  String get execute_tool_title => 'Execute Tool';
+
+  @override
+  String get execute_tool_request_desc =>
+      'The model is requesting to execute the following tool:';
+
+  @override
+  String get reject => 'Reject';
+
+  @override
+  String get approve => 'Approve';
+
+  @override
+  String get server_type_help =>
+      'Pick the provider before filling connection details.';
+
+  @override
+  String get server_identity_title => 'Identity';
+
+  @override
+  String get server_identity_desc =>
+      'Name this server and choose how it appears in the list.';
+
+  @override
+  String get server_connection_title => 'Connection';
+
+  @override
+  String get server_connection_desc =>
+      'Use the address and port exposed by your server.';
+
+  @override
+  String get server_authentication_title => 'Authentication';
+
+  @override
+  String get server_authentication_required_desc =>
+      'OpenRouter requires an API key before testing.';
+
+  @override
+  String get server_authentication_optional_desc =>
+      'Leave the API key empty if this server does not require one.';
+
+  @override
+  String get mcp_tools_title => 'MCP Tools';
+
+  @override
+  String get available_tools => 'Available tools';
+
+  @override
+  String get unable_load_tools => 'Unable to load tools';
+
+  @override
+  String get no_tools_registered => 'No tools registered';
+
+  @override
+  String get no_tools_registered_desc =>
+      'Enable the example MCP server or add MCP integrations from chat settings.';
+
+  @override
+  String get example_mcp_server_title => 'Example MCP server';
+
+  @override
+  String get example_mcp_server_desc =>
+      'Registers example.echo and example.word_count through the same MCP tool provider used by external servers.';
+
+  @override
+  String get disable_example_server => 'Disable example server';
+
+  @override
+  String get enable_example_server => 'Enable example server';
+
+  @override
+  String get built_in_label => 'Built-in';
+
+  @override
+  String get highlights_label => 'Highlights';
+
+  @override
+  String get built_with_label => 'Built with';
+
+  @override
+  String get local_label => 'Local';
+
+  @override
+  String get gguf_format_label => 'GGUF';
+
+  @override
+  String get tool_status_requested => 'Requested';
+
+  @override
+  String get tool_status_approved => 'Approved';
+
+  @override
+  String get tool_status_rejected => 'Rejected';
+
+  @override
+  String get tool_status_running => 'Running';
+
+  @override
+  String get tool_status_done => 'Done';
+
+  @override
+  String get tool_status_failed => 'Failed';
 }

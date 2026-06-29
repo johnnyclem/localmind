@@ -124,9 +124,9 @@ class OnDevicePickerSection extends ConsumerWidget {
           children: [
             if (importedModels.isNotEmpty) ...[
               const SizedBox(height: 4),
-              const _PickerSectionLabel(
-                title: 'Imported GGUF',
-                subtitle: 'Already available on this device',
+              _PickerSectionLabel(
+                title: l10n.gguf_imported_section_label,
+                subtitle: l10n.gguf_already_available,
               ),
               ...importedModels.map(buildTile),
               const SizedBox(height: 8),
@@ -134,7 +134,7 @@ class OnDevicePickerSection extends ConsumerWidget {
             if (downloadableModels.isNotEmpty) ...[
               _PickerSectionLabel(
                 title: l10n.available_models,
-                subtitle: 'Curated on-device models',
+                subtitle: l10n.gguf_curated_models_short,
               ),
               ...downloadableModels.map(buildTile),
             ],
@@ -357,7 +357,10 @@ class _OnDeviceModelTile extends ConsumerWidget {
                         isDark: isDark,
                       ),
                       if (model.format == OnDeviceModelFormat.gguf)
-                        MetadataChip(label: 'GGUF', isDark: isDark),
+                        MetadataChip(
+                          label: l10n.gguf_format_label,
+                          isDark: isDark,
+                        ),
                       if (model.runtime == OnDeviceModelRuntime.llamaCpp)
                         MetadataChip(label: 'llama.cpp', isDark: isDark),
                       if (!model.isImported)

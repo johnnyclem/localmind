@@ -284,7 +284,7 @@ class _AddServerScreenState extends ConsumerState<AddServerScreen> {
             _buildSectionCard(
               context,
               title: l10n.server_type_label,
-              subtitle: 'Pick the provider before filling connection details.',
+              subtitle: l10n.server_type_help,
               child: ServerTypeSelector(
                 selectedType: _selectedType,
                 onChanged: _onTypeChanged,
@@ -293,9 +293,8 @@ class _AddServerScreenState extends ConsumerState<AddServerScreen> {
             const SizedBox(height: 12),
             _buildSectionCard(
               context,
-              title: 'Identity',
-              subtitle:
-                  'Name this server and choose how it appears in the list.',
+              title: l10n.server_identity_title,
+              subtitle: l10n.server_identity_desc,
               child: Column(
                 children: [
                   GestureDetector(
@@ -384,8 +383,8 @@ class _AddServerScreenState extends ConsumerState<AddServerScreen> {
               const SizedBox(height: 12),
               _buildSectionCard(
                 context,
-                title: 'Connection',
-                subtitle: 'Use the address and port exposed by your server.',
+                title: l10n.server_connection_title,
+                subtitle: l10n.server_connection_desc,
                 child: Column(
                   children: [
                     TextFormField(
@@ -419,10 +418,10 @@ class _AddServerScreenState extends ConsumerState<AddServerScreen> {
             const SizedBox(height: 12),
             _buildSectionCard(
               context,
-              title: 'Authentication',
+              title: l10n.server_authentication_title,
               subtitle: _requiresMandatoryApiKey
-                  ? 'OpenRouter requires an API key before testing.'
-                  : 'Leave the API key empty if this server does not require one.',
+                  ? l10n.server_authentication_required_desc
+                  : l10n.server_authentication_optional_desc,
               child: TextFormField(
                 controller: _apiKeyController,
                 decoration: InputDecoration(

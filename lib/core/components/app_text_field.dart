@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:localmind/l10n/app_localizations.dart';
 
 import 'app_sizes.dart';
 
@@ -112,10 +113,11 @@ class AppDialog {
     required BuildContext context,
     required String title,
     String? message,
-    String confirmLabel = 'Confirm',
-    String cancelLabel = 'Cancel',
+    String? confirmLabel,
+    String? cancelLabel,
     bool destructive = false,
   }) {
+    final l10n = AppLocalizations.of(context)!;
     return showDialog<T>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -124,14 +126,14 @@ class AppDialog {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: Text(cancelLabel),
+            child: Text(cancelLabel ?? l10n.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true as T),
             style: destructive
                 ? TextButton.styleFrom(foregroundColor: Colors.red)
                 : null,
-            child: Text(confirmLabel),
+            child: Text(confirmLabel ?? l10n.confirm),
           ),
         ],
       ),
@@ -143,8 +145,9 @@ class AppDialog {
     required String title,
     String? initialValue,
     String? hintText,
-    String confirmLabel = 'Save',
+    String? confirmLabel,
   }) {
+    final l10n = AppLocalizations.of(context)!;
     final controller = TextEditingController(text: initialValue);
     return showDialog<String>(
       context: context,
@@ -161,11 +164,11 @@ class AppDialog {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, controller.text.trim()),
-            child: Text(confirmLabel),
+            child: Text(confirmLabel ?? l10n.save),
           ),
         ],
       ),

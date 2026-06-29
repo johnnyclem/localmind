@@ -2,6 +2,7 @@ import "package:localmind/core/theme/colors.dart";
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
+import 'package:localmind/l10n/app_localizations.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
 import '../../chat/data/mcp_server_manager.dart';
@@ -47,6 +48,7 @@ class _McpToolsScreenState extends ConsumerState<McpToolsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final manager = ref.watch(mcpServerManagerProvider);
@@ -62,95 +64,94 @@ class _McpToolsScreenState extends ConsumerState<McpToolsScreen> {
             top: topPadding + 8,
             bottom: 16,
           ),
-            decoration: BoxDecoration(
-              color: isDark ? const Color(0xFF0A0A0A) : const Color(0xFFFAFAFA),
-              border: Border(
-                bottom: BorderSide(
-                  color: isDark
-                      ? const Color(0xFF2A2A2A)
-                      : const Color(0xFFE5E5E5),
-                ),
+          decoration: BoxDecoration(
+            color: isDark ? const Color(0xFF0A0A0A) : const Color(0xFFFAFAFA),
+            border: Border(
+              bottom: BorderSide(
+                color: isDark
+                    ? const Color(0xFF2A2A2A)
+                    : const Color(0xFFE5E5E5),
               ),
             ),
-            child: Row(
+          ),
+          child: Row(
+            children: [
+              Builder(
+                builder: (context) => IconButton(
+                  icon: const Icon(Icons.menu),
+                  onPressed: () => Scaffold.of(context).openDrawer(),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                l10n.mcp_tools_title,
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: isDark ? Colors.white : Colors.black,
+                ),
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          child: RefreshIndicator(
+            onRefresh: () async => _refreshTools(),
+            child: ListView(
+              padding: const EdgeInsets.all(16),
               children: [
-                Builder(
-                  builder: (context) => IconButton(
-                    icon: const Icon(Icons.menu),
-                    onPressed: () => Scaffold.of(context).openDrawer(),
+                _ExampleServerPanel(
+                  enabled: hasExampleServer,
+                  onToggle: _toggleExampleServer,
+                ),
+                const SizedBox(height: 20),
+                Text(
+                  l10n.available_tools,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
-                const SizedBox(width: 8),
-                Text(
-                  'MCP Tools',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: isDark ? Colors.white : Colors.black,
-                  ),
+                const SizedBox(height: 12),
+                FutureBuilder<List<ToolDefinition>>(
+                  future: _toolsFuture,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(
+                        child: Padding(
+                          padding: EdgeInsets.all(32),
+                          child: CircularProgressIndicator(),
+                        ),
+                      );
+                    }
+
+                    if (snapshot.hasError) {
+                      return _StatusPanel(
+                        icon: Icons.error_outline,
+                        title: l10n.unable_load_tools,
+                        body: snapshot.error.toString(),
+                      );
+                    }
+
+                    final tools = snapshot.data ?? const <ToolDefinition>[];
+                    if (tools.isEmpty) {
+                      return _StatusPanel(
+                        icon: Icons.extension_outlined,
+                        title: l10n.no_tools_registered,
+                        body: l10n.no_tools_registered_desc,
+                      );
+                    }
+
+                    return Column(
+                      children: tools
+                          .map((tool) => _ToolRow(tool: tool))
+                          .toList(growable: false),
+                    );
+                  },
                 ),
               ],
             ),
           ),
-          Expanded(
-            child: RefreshIndicator(
-              onRefresh: () async => _refreshTools(),
-              child: ListView(
-                padding: const EdgeInsets.all(16),
-                children: [
-                  _ExampleServerPanel(
-                    enabled: hasExampleServer,
-                    onToggle: _toggleExampleServer,
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    'Available tools',
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  FutureBuilder<List<ToolDefinition>>(
-                    future: _toolsFuture,
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const Center(
-                          child: Padding(
-                            padding: EdgeInsets.all(32),
-                            child: CircularProgressIndicator(),
-                          ),
-                        );
-                      }
-
-                      if (snapshot.hasError) {
-                        return _StatusPanel(
-                          icon: Icons.error_outline,
-                          title: 'Unable to load tools',
-                          body: snapshot.error.toString(),
-                        );
-                      }
-
-                      final tools = snapshot.data ?? const <ToolDefinition>[];
-                      if (tools.isEmpty) {
-                        return const _StatusPanel(
-                          icon: Icons.extension_outlined,
-                          title: 'No tools registered',
-                          body:
-                              'Enable the example MCP server or add MCP integrations from chat settings.',
-                        );
-                      }
-
-                      return Column(
-                        children: tools
-                            .map((tool) => _ToolRow(tool: tool))
-                            .toList(growable: false),
-                      );
-                    },
-                  ),
-                ],
-              ),
-            ),
-          ),
+        ),
       ],
     );
   }
@@ -164,6 +165,7 @@ class _ExampleServerPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
@@ -202,14 +204,14 @@ class _ExampleServerPanel extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Example MCP server',
+                      l10n.example_mcp_server_title,
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w700,
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Registers example.echo and example.word_count through the same MCP tool provider used by external servers.',
+                      l10n.example_mcp_server_desc,
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
                       ),
@@ -224,7 +226,9 @@ class _ExampleServerPanel extends StatelessWidget {
             onPressed: onToggle,
             leading: Icon(enabled ? Icons.power_settings_new : Icons.add),
             child: Text(
-              enabled ? 'Disable example server' : 'Enable example server',
+              enabled
+                  ? l10n.disable_example_server
+                  : l10n.enable_example_server,
             ),
           ),
         ],
@@ -241,6 +245,7 @@ class _ToolRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final isMcp = tool.providerType == ToolProviderType.mcp;
     final isDark = theme.brightness == Brightness.dark;
 
@@ -290,7 +295,7 @@ class _ToolRow extends StatelessWidget {
                   runSpacing: 8,
                   children: [
                     _ToolBadge(
-                      label: isMcp ? 'MCP' : 'Built-in',
+                      label: isMcp ? 'MCP' : l10n.built_in_label,
                       color: isMcp
                           ? theme.colorScheme.primary
                           : theme.colorScheme.outline,

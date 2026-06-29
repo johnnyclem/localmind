@@ -3,6 +3,7 @@ import 'package:localmind/core/theme/colors.dart';
 import 'package:localmind/features/chat/data/tools/tool_event.dart';
 import 'package:localmind/features/chat/data/tools/tool_definition.dart';
 import 'package:localmind/features/chat/data/models/grouped_tool_call.dart';
+import 'package:localmind/l10n/app_localizations.dart';
 import 'tool_inline_badge.dart';
 
 class ToolRowWidget extends StatefulWidget {
@@ -27,7 +28,8 @@ class _ToolRowWidgetState extends State<ToolRowWidget> {
   @override
   void initState() {
     super.initState();
-    _isExpanded = widget.call.status == ToolEventStatus.running ||
+    _isExpanded =
+        widget.call.status == ToolEventStatus.running ||
         widget.call.status == ToolEventStatus.failed ||
         widget.call.status == ToolEventStatus.requested ||
         widget.call.status == ToolEventStatus.approved;
@@ -50,27 +52,31 @@ class _ToolRowWidgetState extends State<ToolRowWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final call = widget.call;
     final isDark = widget.isDark;
     final isMcpTool = call.providerType == ToolProviderType.mcp;
 
     final iconColor = switch (call.status) {
       ToolEventStatus.completed => const Color(0xFF22C55E),
-      ToolEventStatus.failed || ToolEventStatus.rejected => const Color(0xFFEF4444),
+      ToolEventStatus.failed ||
+      ToolEventStatus.rejected => const Color(0xFFEF4444),
       ToolEventStatus.running => AppColors.darkAccent,
-      ToolEventStatus.requested || ToolEventStatus.approved => const Color(0xFFF59E0B),
+      ToolEventStatus.requested ||
+      ToolEventStatus.approved => const Color(0xFFF59E0B),
     };
 
     final statusLabel = switch (call.status) {
-      ToolEventStatus.requested => 'Requested',
-      ToolEventStatus.approved => 'Approved',
-      ToolEventStatus.rejected => 'Rejected',
-      ToolEventStatus.running => 'Running',
-      ToolEventStatus.completed => 'Done',
-      ToolEventStatus.failed => 'Failed',
+      ToolEventStatus.requested => l10n.tool_status_requested,
+      ToolEventStatus.approved => l10n.tool_status_approved,
+      ToolEventStatus.rejected => l10n.tool_status_rejected,
+      ToolEventStatus.running => l10n.tool_status_running,
+      ToolEventStatus.completed => l10n.tool_status_done,
+      ToolEventStatus.failed => l10n.tool_status_failed,
     };
 
-    final showCodeBlock = (call.arguments != null && call.arguments!.isNotEmpty) ||
+    final showCodeBlock =
+        (call.arguments != null && call.arguments!.isNotEmpty) ||
         (call.result != null && call.result!.isNotEmpty) ||
         (call.error != null && call.error!.isNotEmpty);
 
@@ -94,8 +100,10 @@ class _ToolRowWidgetState extends State<ToolRowWidget> {
                   else
                     Icon(
                       switch (call.status) {
-                        ToolEventStatus.requested => Icons.hourglass_empty_rounded,
-                        ToolEventStatus.approved => Icons.check_circle_outline_rounded,
+                        ToolEventStatus.requested =>
+                          Icons.hourglass_empty_rounded,
+                        ToolEventStatus.approved =>
+                          Icons.check_circle_outline_rounded,
                         ToolEventStatus.rejected => Icons.block_flipped,
                         ToolEventStatus.running => Icons.cached_rounded,
                         ToolEventStatus.completed => Icons.check_circle_rounded,
@@ -124,26 +132,41 @@ class _ToolRowWidgetState extends State<ToolRowWidget> {
                         if (isMcpTool) ...[
                           InlineToolBadge(
                             label: 'MCP',
-                            backgroundColor: Colors.purple.withValues(alpha: isDark ? 0.2 : 0.1),
-                            textColor: isDark ? const Color(0xFFC084FC) : const Color(0xFF7E22CE),
+                            backgroundColor: Colors.purple.withValues(
+                              alpha: isDark ? 0.2 : 0.1,
+                            ),
+                            textColor: isDark
+                                ? const Color(0xFFC084FC)
+                                : const Color(0xFF7E22CE),
                           ),
-                        ] else if (call.providerType == ToolProviderType.lmStudioServer) ...[
+                        ] else if (call.providerType ==
+                            ToolProviderType.lmStudioServer) ...[
                           InlineToolBadge(
                             label: 'LM Studio',
-                            backgroundColor: Colors.orange.withValues(alpha: isDark ? 0.2 : 0.1),
-                            textColor: isDark ? const Color(0xFFF97316) : const Color(0xFFC2410C),
+                            backgroundColor: Colors.orange.withValues(
+                              alpha: isDark ? 0.2 : 0.1,
+                            ),
+                            textColor: isDark
+                                ? const Color(0xFFF97316)
+                                : const Color(0xFFC2410C),
                           ),
                         ] else ...[
                           InlineToolBadge(
-                            label: 'LOCAL',
-                            backgroundColor: Colors.blue.withValues(alpha: isDark ? 0.2 : 0.1),
-                            textColor: isDark ? const Color(0xFF60A5FA) : const Color(0xFF1D4ED8),
+                            label: l10n.local_label,
+                            backgroundColor: Colors.blue.withValues(
+                              alpha: isDark ? 0.2 : 0.1,
+                            ),
+                            textColor: isDark
+                                ? const Color(0xFF60A5FA)
+                                : const Color(0xFF1D4ED8),
                           ),
                         ],
                         const SizedBox(width: 6),
                         InlineToolBadge(
                           label: statusLabel,
-                          backgroundColor: iconColor.withValues(alpha: isDark ? 0.15 : 0.1),
+                          backgroundColor: iconColor.withValues(
+                            alpha: isDark ? 0.15 : 0.1,
+                          ),
                           textColor: iconColor,
                         ),
                       ],
@@ -155,7 +178,9 @@ class _ToolRowWidgetState extends State<ToolRowWidget> {
                       '${call.durationMs}ms',
                       style: TextStyle(
                         fontSize: 10,
-                        color: isDark ? AppColors.darkMutedText : AppColors.lightMutedText,
+                        color: isDark
+                            ? AppColors.darkMutedText
+                            : AppColors.lightMutedText,
                       ),
                     ),
                   ],
@@ -166,7 +191,9 @@ class _ToolRowWidgetState extends State<ToolRowWidget> {
                           ? Icons.keyboard_arrow_up_rounded
                           : Icons.keyboard_arrow_down_rounded,
                       size: 16,
-                      color: isDark ? AppColors.darkMutedText : AppColors.lightMutedText,
+                      color: isDark
+                          ? AppColors.darkMutedText
+                          : AppColors.lightMutedText,
                     ),
                   ],
                 ],
@@ -180,22 +207,29 @@ class _ToolRowWidgetState extends State<ToolRowWidget> {
                 width: double.infinity,
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF1F5F9),
+                  color: isDark
+                      ? const Color(0xFF0F172A)
+                      : const Color(0xFFF1F5F9),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                    color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
+                    color: isDark
+                        ? const Color(0xFF1E293B)
+                        : const Color(0xFFE2E8F0),
                   ),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if (call.arguments != null && call.arguments!.isNotEmpty) ...[
+                    if (call.arguments != null &&
+                        call.arguments!.isNotEmpty) ...[
                       Text(
                         'Arguments:',
                         style: TextStyle(
                           fontSize: 9,
                           fontWeight: FontWeight.bold,
-                          color: isDark ? const Color(0xFF38BDF8) : const Color(0xFF0284C7),
+                          color: isDark
+                              ? const Color(0xFF38BDF8)
+                              : const Color(0xFF0284C7),
                           fontFamily: 'monospace',
                         ),
                       ),
@@ -204,7 +238,9 @@ class _ToolRowWidgetState extends State<ToolRowWidget> {
                         widget.formatArgs(call.arguments!),
                         style: TextStyle(
                           fontSize: 10.5,
-                          color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF475569),
+                          color: isDark
+                              ? const Color(0xFFCBD5E1)
+                              : const Color(0xFF475569),
                           fontFamily: 'monospace',
                           height: 1.3,
                         ),
@@ -218,7 +254,9 @@ class _ToolRowWidgetState extends State<ToolRowWidget> {
                         style: TextStyle(
                           fontSize: 9,
                           fontWeight: FontWeight.bold,
-                          color: isDark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A),
+                          color: isDark
+                              ? const Color(0xFF4ADE80)
+                              : const Color(0xFF16A34A),
                           fontFamily: 'monospace',
                         ),
                       ),
@@ -227,7 +265,9 @@ class _ToolRowWidgetState extends State<ToolRowWidget> {
                         call.result!,
                         style: TextStyle(
                           fontSize: 10.5,
-                          color: isDark ? const Color(0xFFF8FAFC) : const Color(0xFF0F172A),
+                          color: isDark
+                              ? const Color(0xFFF8FAFC)
+                              : const Color(0xFF0F172A),
                           fontFamily: 'monospace',
                           height: 1.3,
                         ),
@@ -241,7 +281,9 @@ class _ToolRowWidgetState extends State<ToolRowWidget> {
                         style: TextStyle(
                           fontSize: 9,
                           fontWeight: FontWeight.bold,
-                          color: isDark ? const Color(0xFFF87171) : const Color(0xFFDC2626),
+                          color: isDark
+                              ? const Color(0xFFF87171)
+                              : const Color(0xFFDC2626),
                           fontFamily: 'monospace',
                         ),
                       ),
@@ -250,7 +292,9 @@ class _ToolRowWidgetState extends State<ToolRowWidget> {
                         call.error!,
                         style: TextStyle(
                           fontSize: 10.5,
-                          color: isDark ? const Color(0xFFFCA5A5) : const Color(0xFF991B1B),
+                          color: isDark
+                              ? const Color(0xFFFCA5A5)
+                              : const Color(0xFF991B1B),
                           fontFamily: 'monospace',
                           height: 1.3,
                         ),
@@ -297,11 +341,7 @@ class _AnimatedRunningIconState extends State<_AnimatedRunningIcon>
   Widget build(BuildContext context) {
     return RotationTransition(
       turns: _controller,
-      child: Icon(
-        Icons.cached_rounded,
-        size: 14,
-        color: widget.color,
-      ),
+      child: Icon(Icons.cached_rounded, size: 14, color: widget.color),
     );
   }
 }

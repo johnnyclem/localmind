@@ -76,10 +76,10 @@ class _OnDeviceModelManagerScreenState
               ),
               const SizedBox(height: 4),
               _SectionHeader(
-                title: 'Imported GGUF models',
+                title: l10n.gguf_imported_models_title,
                 subtitle: importedModels.isEmpty
-                    ? 'Import a GGUF from your device or add one from Hugging Face. Imported models run locally with llama.cpp.'
-                    : '${importedModels.length} imported model${importedModels.length == 1 ? '' : 's'} ready for local inference.',
+                    ? l10n.gguf_imported_models_empty_subtitle
+                    : '${importedModels.length} ${l10n.gguf_imported_models_ready}',
               ),
               if (importedModels.isEmpty)
                 _EmptyImportedModelsCard(
@@ -99,8 +99,7 @@ class _OnDeviceModelManagerScreenState
               const SizedBox(height: 8),
               _SectionHeader(
                 title: l10n.available_models,
-                subtitle:
-                    'Curated on-device models you can download and manage inside LocalMind.',
+                subtitle: l10n.gguf_curated_models_subtitle,
               ),
               const SizedBox(height: 4),
               ...curatedModels.map(
@@ -121,6 +120,7 @@ class _OnDeviceModelManagerScreenState
 
   Future<void> _importLocalGguf(BuildContext context) async {
     final messenger = ScaffoldMessenger.of(context);
+    final l10n = AppLocalizations.of(context)!;
     try {
       final result = await FilePicker.pickFiles(
         type: FileType.custom,
@@ -131,9 +131,7 @@ class _OnDeviceModelManagerScreenState
       final path = result.files.single.path;
       if (path == null || !path.toLowerCase().endsWith('.gguf')) {
         messenger.showSnackBar(
-          const SnackBar(
-            content: Text('Only GGUF models are supported for this import.'),
-          ),
+          SnackBar(content: Text(l10n.gguf_only_supported)),
         );
         return;
       }
@@ -142,17 +140,24 @@ class _OnDeviceModelManagerScreenState
           .read(importedGgufModelsProvider.notifier)
           .importModel(path);
       messenger.showSnackBar(
-        SnackBar(content: Text('${model.name} imported from local file.')),
+        SnackBar(
+          content: Text('${model.name} ${l10n.gguf_imported_from_local_file}'),
+        ),
       );
     } catch (e) {
       messenger.showSnackBar(
-        SnackBar(content: Text('Failed to import GGUF model: $e')),
+        SnackBar(
+          content: Text(
+            '${l10n.gguf_import_failed}: ${_friendlyErrorForL10n(l10n, e)}',
+          ),
+        ),
       );
     }
   }
 
   Future<void> _importFromHuggingFace(BuildContext context) async {
     final messenger = ScaffoldMessenger.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final importedModel = await showDialog<OnDeviceModel>(
       context: context,
       barrierDismissible: false,
@@ -162,9 +167,40 @@ class _OnDeviceModelManagerScreenState
     if (!mounted || importedModel == null) return;
     messenger.showSnackBar(
       SnackBar(
-        content: Text('${importedModel.name} imported from Hugging Face.'),
+        content: Text(
+          '${importedModel.name} ${l10n.gguf_imported_from_huggingface}',
+        ),
       ),
     );
+  }
+
+  String _friendlyErrorForL10n(AppLocalizations l10n, Object error) {
+    final message = error.toString();
+    final normalized = message
+        .replaceFirst('HttpException: ', '')
+        .replaceFirst('FormatException: ', '')
+        .replaceFirst('FileSystemException: ', '');
+
+    switch (normalized) {
+      case 'GGUF import canceled.':
+        return l10n.gguf_import_canceled;
+      case 'Enter a Hugging Face GGUF URL.':
+        return l10n.gguf_enter_huggingface_url;
+      case 'Only official Hugging Face GGUF URLs are supported.':
+        return l10n.gguf_only_official_huggingface_urls;
+      case 'Use an HTTPS Hugging Face URL for GGUF import.':
+        return l10n.gguf_use_https_url;
+      case 'The Hugging Face URL must point directly to a .gguf file.':
+        return l10n.gguf_url_must_point_to_file;
+      case 'Unable to determine the GGUF file name.':
+        return l10n.gguf_unable_to_detect_file_name;
+      case 'The downloaded GGUF file was empty or missing.':
+        return l10n.gguf_download_empty;
+      case 'Selected model file does not exist':
+        return l10n.gguf_selected_file_missing;
+      default:
+        return normalized;
+    }
   }
 }
 
@@ -228,7 +264,7 @@ class _ManagerHeader extends StatelessWidget {
           if (defaultTargetPlatform == TargetPlatform.android ||
               defaultTargetPlatform == TargetPlatform.iOS)
             PopupMenuButton<_ImportAction>(
-              tooltip: 'Import GGUF',
+              tooltip: l10n.gguf_import_action,
               onSelected: (value) {
                 switch (value) {
                   case _ImportAction.localFile:
@@ -237,23 +273,23 @@ class _ManagerHeader extends StatelessWidget {
                     onImportFromHuggingFace();
                 }
               },
-              itemBuilder: (context) => const [
+              itemBuilder: (context) => [
                 PopupMenuItem<_ImportAction>(
                   value: _ImportAction.localFile,
                   child: ListTile(
                     contentPadding: EdgeInsets.zero,
-                    leading: Icon(Icons.folder_open_outlined),
-                    title: Text('Import local GGUF'),
-                    subtitle: Text('Copy a .gguf file from this device'),
+                    leading: const Icon(Icons.folder_open_outlined),
+                    title: Text(l10n.gguf_import_local_title),
+                    subtitle: Text(l10n.gguf_import_local_subtitle),
                   ),
                 ),
                 PopupMenuItem<_ImportAction>(
                   value: _ImportAction.huggingFace,
                   child: ListTile(
                     contentPadding: EdgeInsets.zero,
-                    leading: Icon(Icons.cloud_download_outlined),
-                    title: Text('Import from Hugging Face'),
-                    subtitle: Text('Paste a GGUF URL or repo path'),
+                    leading: const Icon(Icons.cloud_download_outlined),
+                    title: Text(l10n.gguf_import_huggingface_title),
+                    subtitle: Text(l10n.gguf_import_huggingface_subtitle),
                   ),
                 ),
               ],
@@ -277,7 +313,7 @@ class _ManagerHeader extends StatelessWidget {
                       color: theme.colorScheme.primary,
                     ),
                     const SizedBox(width: 8),
-                    const Text('Import GGUF'),
+                    Text(l10n.gguf_import_action),
                   ],
                 ),
               ),
@@ -302,6 +338,7 @@ class _ImportOverviewCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final localImports = importedModels
         .where((model) => model.isImportedFromLocalFile)
         .length;
@@ -342,14 +379,14 @@ class _ImportOverviewCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Bring your own GGUF models',
+                      l10n.gguf_overview_title,
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Import a .gguf from local storage or download one straight from Hugging Face. Imported models stay on this device and load with llama.cpp.',
+                      l10n.gguf_overview_subtitle,
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.onSurface.withValues(
                           alpha: 0.7,
@@ -368,15 +405,16 @@ class _ImportOverviewCard extends StatelessWidget {
             children: [
               _SummaryPill(
                 icon: Icons.layers_outlined,
-                label: '${importedModels.length} imported',
+                label:
+                    '${importedModels.length} ${l10n.gguf_imported_count_label}',
               ),
               _SummaryPill(
                 icon: Icons.folder_open_outlined,
-                label: '$localImports local files',
+                label: '$localImports ${l10n.gguf_local_files_label}',
               ),
               _SummaryPill(
                 icon: Icons.cloud_download_outlined,
-                label: '$huggingFaceImports Hugging Face',
+                label: '$huggingFaceImports ${l10n.gguf_huggingface_label}',
               ),
             ],
           ),
@@ -388,12 +426,12 @@ class _ImportOverviewCard extends StatelessWidget {
               OutlinedButton.icon(
                 onPressed: onImportLocalGguf,
                 icon: const Icon(Icons.folder_open_outlined),
-                label: const Text('Import local GGUF'),
+                label: Text(l10n.gguf_import_local_title),
               ),
               OutlinedButton.icon(
                 onPressed: onImportFromHuggingFace,
                 icon: const Icon(Icons.cloud_download_outlined),
-                label: const Text('Import from Hugging Face'),
+                label: Text(l10n.gguf_import_huggingface_title),
               ),
             ],
           ),
@@ -483,6 +521,7 @@ class _EmptyImportedModelsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(18),
@@ -497,14 +536,14 @@ class _EmptyImportedModelsCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'No imported GGUF models yet',
+            l10n.gguf_no_imported_title,
             style: theme.textTheme.titleSmall?.copyWith(
               fontWeight: FontWeight.w700,
             ),
           ),
           const SizedBox(height: 6),
           Text(
-            'You can bring your own GGUF file from device storage or paste a Hugging Face URL or repo path that points to a .gguf file.',
+            l10n.gguf_no_imported_subtitle,
             style: theme.textTheme.bodySmall?.copyWith(
               color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
             ),
@@ -517,12 +556,12 @@ class _EmptyImportedModelsCard extends StatelessWidget {
               OutlinedButton.icon(
                 onPressed: onImportLocalGguf,
                 icon: const Icon(Icons.folder_open_outlined),
-                label: const Text('Import local GGUF'),
+                label: Text(l10n.gguf_import_local_title),
               ),
               OutlinedButton.icon(
                 onPressed: onImportFromHuggingFace,
                 icon: const Icon(Icons.cloud_download_outlined),
-                label: const Text('Import from Hugging Face'),
+                label: Text(l10n.gguf_import_huggingface_title),
               ),
             ],
           ),
@@ -594,7 +633,7 @@ class _HuggingFaceGgufImportDialogState
             ),
           ),
           const SizedBox(width: 12),
-          const Expanded(child: Text('Import GGUF from Hugging Face')),
+          Expanded(child: Text(l10n.gguf_import_huggingface_dialog_title)),
         ],
       ),
       content: SizedBox(
@@ -605,7 +644,7 @@ class _HuggingFaceGgufImportDialogState
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Paste a direct GGUF URL or a Hugging Face repo path like `owner/repo/blob/main/model.gguf`. Blob links are converted automatically.',
+                l10n.gguf_import_huggingface_dialog_subtitle,
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.onSurface.withValues(alpha: 0.72),
                 ),
@@ -631,7 +670,7 @@ class _HuggingFaceGgufImportDialogState
                   }
                 },
                 decoration: InputDecoration(
-                  labelText: 'GGUF URL or repo path',
+                  labelText: l10n.gguf_url_or_repo_path,
                   hintText:
                       'owner/repo/blob/main/model.gguf\nhttps://huggingface.co/owner/repo/resolve/main/model.gguf',
                   border: const OutlineInputBorder(),
@@ -646,21 +685,21 @@ class _HuggingFaceGgufImportDialogState
                   OutlinedButton.icon(
                     onPressed: _isImporting ? null : _pasteFromClipboard,
                     icon: const Icon(Icons.content_paste_rounded, size: 18),
-                    label: const Text('Paste'),
+                    label: Text(l10n.paste),
                   ),
                   OutlinedButton.icon(
                     onPressed: _isImporting || input.isEmpty
                         ? null
                         : _clearInput,
                     icon: const Icon(Icons.close_rounded, size: 18),
-                    label: const Text('Clear'),
+                    label: Text(l10n.clear_huggingface_token),
                   ),
                   OutlinedButton.icon(
                     onPressed: _isImporting
                         ? null
                         : () => _openHuggingFace(context),
                     icon: const Icon(Icons.open_in_new_rounded, size: 18),
-                    label: const Text('Browse GGUFs'),
+                    label: Text(l10n.gguf_browse),
                   ),
                 ],
               ),
@@ -698,8 +737,8 @@ class _HuggingFaceGgufImportDialogState
                         children: [
                           Text(
                             hasHuggingFaceToken
-                                ? 'Hugging Face token ready'
-                                : 'Token optional but recommended',
+                                ? l10n.gguf_huggingface_token_ready
+                                : l10n.gguf_huggingface_token_optional,
                             style: theme.textTheme.labelLarge?.copyWith(
                               fontWeight: FontWeight.w700,
                             ),
@@ -707,8 +746,8 @@ class _HuggingFaceGgufImportDialogState
                           const SizedBox(height: 4),
                           Text(
                             hasHuggingFaceToken
-                                ? 'Your saved token will be used automatically for gated or private repositories.'
-                                : '${l10n.model_requires_huggingface_token} Add one in Settings if this GGUF is gated or private.',
+                                ? l10n.gguf_huggingface_token_ready_desc
+                                : l10n.gguf_huggingface_token_optional_desc,
                             style: theme.textTheme.bodySmall,
                           ),
                         ],
@@ -736,7 +775,7 @@ class _HuggingFaceGgufImportDialogState
                         children: [
                           Expanded(
                             child: Text(
-                              preview?.fileName ?? 'Downloading GGUF',
+                              preview?.fileName ?? l10n.gguf_downloading,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: theme.textTheme.labelLarge?.copyWith(
@@ -758,7 +797,7 @@ class _HuggingFaceGgufImportDialogState
                             ),
                             child: Text(
                               progress == null
-                                  ? 'Preparing'
+                                  ? l10n.gguf_preparing
                                   : '${(progress * 100).toStringAsFixed(1)}%',
                               style: theme.textTheme.labelMedium?.copyWith(
                                 color: theme.colorScheme.primary,
@@ -774,7 +813,7 @@ class _HuggingFaceGgufImportDialogState
                       Text(
                         progress != null
                             ? '${_formatBytes(_receivedBytes)} / ${_formatBytes(_totalBytes)}'
-                            : 'Preparing download...',
+                            : l10n.gguf_preparing_download,
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: theme.colorScheme.onSurface.withValues(
                             alpha: 0.70,
@@ -832,12 +871,12 @@ class _HuggingFaceGgufImportDialogState
                   Navigator.of(context).pop();
                 }
               : () => Navigator.of(context).pop(),
-          child: Text(_isImporting ? 'Cancel import' : l10n.cancel),
+          child: Text(_isImporting ? l10n.gguf_cancel_import : l10n.cancel),
         ),
         ElevatedButton.icon(
           onPressed: _isImporting || input.isEmpty ? null : _startImport,
           icon: const Icon(Icons.download_rounded, size: 18),
-          label: const Text('Import GGUF'),
+          label: Text(l10n.gguf_import_action),
         ),
       ],
     );
@@ -848,9 +887,9 @@ class _HuggingFaceGgufImportDialogState
     final text = data?.text?.trim();
     if (!mounted) return;
     if (text == null || text.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Clipboard is empty.')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(AppLocalizations.of(context)!.clipboard_empty)),
+      );
       return;
     }
     setState(() {
@@ -874,7 +913,11 @@ class _HuggingFaceGgufImportDialogState
     );
     if (!launched && context.mounted) {
       messenger.showSnackBar(
-        const SnackBar(content: Text('Could not open Hugging Face.')),
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(context)!.could_not_open_huggingface,
+          ),
+        ),
       );
     }
   }
@@ -883,7 +926,7 @@ class _HuggingFaceGgufImportDialogState
     final sourceUrl = _urlController.text.trim();
     if (sourceUrl.isEmpty) {
       setState(() {
-        _error = 'Paste a Hugging Face GGUF URL or repo path.';
+        _error = AppLocalizations.of(context)!.gguf_paste_url_error;
       });
       return;
     }
@@ -928,17 +971,33 @@ class _HuggingFaceGgufImportDialogState
   }
 
   String _friendlyError(Object error) {
+    final l10n = AppLocalizations.of(context)!;
     final message = error.toString();
-    if (message.startsWith('HttpException: ')) {
-      return message.substring('HttpException: '.length);
+    final normalized = message
+        .replaceFirst('HttpException: ', '')
+        .replaceFirst('FormatException: ', '')
+        .replaceFirst('Exception: ', '')
+        .replaceFirst('FileSystemException: ', '');
+    switch (normalized) {
+      case 'GGUF import canceled.':
+        return l10n.gguf_import_canceled;
+      case 'Enter a Hugging Face GGUF URL.':
+        return l10n.gguf_enter_huggingface_url;
+      case 'Only official Hugging Face GGUF URLs are supported.':
+        return l10n.gguf_only_official_huggingface_urls;
+      case 'Use an HTTPS Hugging Face URL for GGUF import.':
+        return l10n.gguf_use_https_url;
+      case 'The Hugging Face URL must point directly to a .gguf file.':
+        return l10n.gguf_url_must_point_to_file;
+      case 'Unable to determine the GGUF file name.':
+        return l10n.gguf_unable_to_detect_file_name;
+      case 'The downloaded GGUF file was empty or missing.':
+        return l10n.gguf_download_empty;
+      case 'Selected model file does not exist':
+        return l10n.gguf_selected_file_missing;
+      default:
+        return normalized;
     }
-    if (message.startsWith('FormatException: ')) {
-      return message.substring('FormatException: '.length);
-    }
-    if (message.startsWith('Exception: ')) {
-      return message.substring('Exception: '.length);
-    }
-    return message;
   }
 
   String _formatBytes(int bytes) {
@@ -960,6 +1019,7 @@ class _ImportPreviewCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     return Container(
       width: double.infinity,
@@ -985,7 +1045,7 @@ class _ImportPreviewCard extends StatelessWidget {
                     ? Icons.sync_alt_rounded
                     : Icons.link_rounded,
                 label: preview.isBlobLink
-                    ? 'Blob link'
+                    ? l10n.gguf_blob_link
                     : preview.inputStyleLabel,
               ),
               if (preview.fileName != null)
@@ -997,10 +1057,13 @@ class _ImportPreviewCard extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           if (preview.repoPath != null)
-            _PreviewRow(label: 'Repository', value: preview.repoPath!),
+            _PreviewRow(
+              label: l10n.gguf_repository_label,
+              value: preview.repoPath!,
+            ),
           if (preview.normalizedDisplay != null)
             _PreviewRow(
-              label: 'Detected path',
+              label: l10n.gguf_detected_path_label,
               value: preview.normalizedDisplay!,
             ),
         ],

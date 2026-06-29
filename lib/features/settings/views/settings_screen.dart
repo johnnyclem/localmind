@@ -736,7 +736,7 @@ class _AboutPanel extends StatelessWidget {
                 .toList(),
           ),
           const SizedBox(height: 12),
-          _AboutLabel(label: 'Highlights'),
+          _AboutLabel(label: l10n.highlights_label),
           const SizedBox(height: 8),
           Wrap(
             spacing: 6,
@@ -751,7 +751,7 @@ class _AboutPanel extends StatelessWidget {
                 .toList(),
           ),
           const SizedBox(height: 12),
-          _AboutLabel(label: 'Built with'),
+          _AboutLabel(label: l10n.built_with_label),
           const SizedBox(height: 8),
           Wrap(
             spacing: 6,
@@ -1927,8 +1927,7 @@ class _HuggingFaceTokenSetting extends StatelessWidget {
               child: Text(l10n.clear_huggingface_token),
             ),
             TextButton(
-              onPressed: () =>
-                  Navigator.of(ctx).pop(controller.text.trim()),
+              onPressed: () => Navigator.of(ctx).pop(controller.text.trim()),
               child: Text(l10n.save),
             ),
           ],
@@ -1970,9 +1969,7 @@ class _HuggingFaceTokenSetting extends StatelessWidget {
                       vertical: 12,
                     ),
                     child: Text(
-                      _hasToken
-                          ? _maskedToken(currentToken!)
-                          : '—',
+                      _hasToken ? _maskedToken(currentToken!) : '—',
                       style: theme.textTheme.bodyMedium?.copyWith(
                         fontFamily: 'monospace',
                         color: _hasToken
@@ -1986,11 +1983,7 @@ class _HuggingFaceTokenSetting extends StatelessWidget {
               const SizedBox(width: 10),
               ShadButton.outline(
                 onPressed: () => _editToken(context),
-                child: Text(
-                  _hasToken
-                      ? l10n.edit
-                      : l10n.set_huggingface_token,
-                ),
+                child: Text(_hasToken ? l10n.edit : l10n.set_huggingface_token),
               ),
               if (_hasToken) ...[
                 const SizedBox(width: 6),

@@ -3218,6 +3218,498 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Note: The other TTS services support background playback as native audio.'**
   String get tts_other_services_background_note;
+
+  /// No description provided for @gguf_imported_models_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Imported GGUF models'**
+  String get gguf_imported_models_title;
+
+  /// No description provided for @gguf_imported_models_empty_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Import a GGUF from your device or add one from Hugging Face. Imported models run locally with llama.cpp.'**
+  String get gguf_imported_models_empty_subtitle;
+
+  /// No description provided for @gguf_imported_models_ready.
+  ///
+  /// In en, this message translates to:
+  /// **'imported models ready for local inference.'**
+  String get gguf_imported_models_ready;
+
+  /// No description provided for @gguf_curated_models_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Curated on-device models you can download and manage inside LocalMind.'**
+  String get gguf_curated_models_subtitle;
+
+  /// No description provided for @gguf_only_supported.
+  ///
+  /// In en, this message translates to:
+  /// **'Only GGUF models are supported for this import.'**
+  String get gguf_only_supported;
+
+  /// No description provided for @gguf_imported_from_local_file.
+  ///
+  /// In en, this message translates to:
+  /// **'imported from local file.'**
+  String get gguf_imported_from_local_file;
+
+  /// No description provided for @gguf_import_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to import GGUF model'**
+  String get gguf_import_failed;
+
+  /// No description provided for @gguf_imported_from_huggingface.
+  ///
+  /// In en, this message translates to:
+  /// **'imported from Hugging Face.'**
+  String get gguf_imported_from_huggingface;
+
+  /// No description provided for @gguf_import_canceled.
+  ///
+  /// In en, this message translates to:
+  /// **'GGUF import canceled.'**
+  String get gguf_import_canceled;
+
+  /// No description provided for @gguf_enter_huggingface_url.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a Hugging Face GGUF URL.'**
+  String get gguf_enter_huggingface_url;
+
+  /// No description provided for @gguf_only_official_huggingface_urls.
+  ///
+  /// In en, this message translates to:
+  /// **'Only official Hugging Face GGUF URLs are supported.'**
+  String get gguf_only_official_huggingface_urls;
+
+  /// No description provided for @gguf_use_https_url.
+  ///
+  /// In en, this message translates to:
+  /// **'Use an HTTPS Hugging Face URL for GGUF import.'**
+  String get gguf_use_https_url;
+
+  /// No description provided for @gguf_url_must_point_to_file.
+  ///
+  /// In en, this message translates to:
+  /// **'The Hugging Face URL must point directly to a .gguf file.'**
+  String get gguf_url_must_point_to_file;
+
+  /// No description provided for @gguf_unable_to_detect_file_name.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to determine the GGUF file name.'**
+  String get gguf_unable_to_detect_file_name;
+
+  /// No description provided for @gguf_download_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'The downloaded GGUF file was empty or missing.'**
+  String get gguf_download_empty;
+
+  /// No description provided for @gguf_selected_file_missing.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected model file does not exist.'**
+  String get gguf_selected_file_missing;
+
+  /// No description provided for @gguf_import_action.
+  ///
+  /// In en, this message translates to:
+  /// **'Import GGUF'**
+  String get gguf_import_action;
+
+  /// No description provided for @gguf_overview_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Bring your own GGUF models'**
+  String get gguf_overview_title;
+
+  /// No description provided for @gguf_overview_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Import a .gguf from local storage or download one straight from Hugging Face. Imported models stay on this device and load with llama.cpp.'**
+  String get gguf_overview_subtitle;
+
+  /// No description provided for @gguf_imported_count_label.
+  ///
+  /// In en, this message translates to:
+  /// **'imported'**
+  String get gguf_imported_count_label;
+
+  /// No description provided for @gguf_local_files_label.
+  ///
+  /// In en, this message translates to:
+  /// **'local files'**
+  String get gguf_local_files_label;
+
+  /// No description provided for @gguf_huggingface_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Hugging Face'**
+  String get gguf_huggingface_label;
+
+  /// No description provided for @gguf_import_local_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Import local GGUF'**
+  String get gguf_import_local_title;
+
+  /// No description provided for @gguf_import_local_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy a .gguf file from this device'**
+  String get gguf_import_local_subtitle;
+
+  /// No description provided for @gguf_import_huggingface_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Import from Hugging Face'**
+  String get gguf_import_huggingface_title;
+
+  /// No description provided for @gguf_import_huggingface_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste a GGUF URL or repo path'**
+  String get gguf_import_huggingface_subtitle;
+
+  /// No description provided for @gguf_no_imported_title.
+  ///
+  /// In en, this message translates to:
+  /// **'No imported GGUF models yet'**
+  String get gguf_no_imported_title;
+
+  /// No description provided for @gguf_no_imported_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You can bring your own GGUF file from device storage or paste a Hugging Face URL or repo path that points to a .gguf file.'**
+  String get gguf_no_imported_subtitle;
+
+  /// No description provided for @gguf_import_huggingface_dialog_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Import GGUF from Hugging Face'**
+  String get gguf_import_huggingface_dialog_title;
+
+  /// No description provided for @gguf_import_huggingface_dialog_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste a direct GGUF URL or a Hugging Face repo path like `owner/repo/blob/main/model.gguf`. Blob links are converted automatically.'**
+  String get gguf_import_huggingface_dialog_subtitle;
+
+  /// No description provided for @gguf_url_or_repo_path.
+  ///
+  /// In en, this message translates to:
+  /// **'GGUF URL or repo path'**
+  String get gguf_url_or_repo_path;
+
+  /// No description provided for @paste.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste'**
+  String get paste;
+
+  /// No description provided for @gguf_browse.
+  ///
+  /// In en, this message translates to:
+  /// **'Browse GGUFs'**
+  String get gguf_browse;
+
+  /// No description provided for @gguf_huggingface_token_ready.
+  ///
+  /// In en, this message translates to:
+  /// **'Hugging Face token ready'**
+  String get gguf_huggingface_token_ready;
+
+  /// No description provided for @gguf_huggingface_token_optional.
+  ///
+  /// In en, this message translates to:
+  /// **'Token optional but recommended'**
+  String get gguf_huggingface_token_optional;
+
+  /// No description provided for @gguf_huggingface_token_ready_desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Your saved token will be used automatically for gated or private repositories.'**
+  String get gguf_huggingface_token_ready_desc;
+
+  /// No description provided for @gguf_huggingface_token_optional_desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Requires a Hugging Face token. Add one in Settings if this GGUF is gated or private.'**
+  String get gguf_huggingface_token_optional_desc;
+
+  /// No description provided for @gguf_downloading.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading GGUF'**
+  String get gguf_downloading;
+
+  /// No description provided for @gguf_preparing.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing'**
+  String get gguf_preparing;
+
+  /// No description provided for @gguf_preparing_download.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing download...'**
+  String get gguf_preparing_download;
+
+  /// No description provided for @gguf_cancel_import.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel import'**
+  String get gguf_cancel_import;
+
+  /// No description provided for @clipboard_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'Clipboard is empty.'**
+  String get clipboard_empty;
+
+  /// No description provided for @could_not_open_huggingface.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open Hugging Face.'**
+  String get could_not_open_huggingface;
+
+  /// No description provided for @gguf_paste_url_error.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste a Hugging Face GGUF URL or repo path.'**
+  String get gguf_paste_url_error;
+
+  /// No description provided for @gguf_blob_link.
+  ///
+  /// In en, this message translates to:
+  /// **'Blob link'**
+  String get gguf_blob_link;
+
+  /// No description provided for @gguf_repository_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Repository'**
+  String get gguf_repository_label;
+
+  /// No description provided for @gguf_detected_path_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Detected path'**
+  String get gguf_detected_path_label;
+
+  /// No description provided for @gguf_imported_section_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Imported GGUF'**
+  String get gguf_imported_section_label;
+
+  /// No description provided for @gguf_already_available.
+  ///
+  /// In en, this message translates to:
+  /// **'Already available on this device'**
+  String get gguf_already_available;
+
+  /// No description provided for @gguf_curated_models_short.
+  ///
+  /// In en, this message translates to:
+  /// **'Curated on-device models'**
+  String get gguf_curated_models_short;
+
+  /// No description provided for @execute_tool_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Execute Tool'**
+  String get execute_tool_title;
+
+  /// No description provided for @execute_tool_request_desc.
+  ///
+  /// In en, this message translates to:
+  /// **'The model is requesting to execute the following tool:'**
+  String get execute_tool_request_desc;
+
+  /// No description provided for @reject.
+  ///
+  /// In en, this message translates to:
+  /// **'Reject'**
+  String get reject;
+
+  /// No description provided for @approve.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve'**
+  String get approve;
+
+  /// No description provided for @server_type_help.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick the provider before filling connection details.'**
+  String get server_type_help;
+
+  /// No description provided for @server_identity_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Identity'**
+  String get server_identity_title;
+
+  /// No description provided for @server_identity_desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Name this server and choose how it appears in the list.'**
+  String get server_identity_desc;
+
+  /// No description provided for @server_connection_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Connection'**
+  String get server_connection_title;
+
+  /// No description provided for @server_connection_desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Use the address and port exposed by your server.'**
+  String get server_connection_desc;
+
+  /// No description provided for @server_authentication_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Authentication'**
+  String get server_authentication_title;
+
+  /// No description provided for @server_authentication_required_desc.
+  ///
+  /// In en, this message translates to:
+  /// **'OpenRouter requires an API key before testing.'**
+  String get server_authentication_required_desc;
+
+  /// No description provided for @server_authentication_optional_desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave the API key empty if this server does not require one.'**
+  String get server_authentication_optional_desc;
+
+  /// No description provided for @mcp_tools_title.
+  ///
+  /// In en, this message translates to:
+  /// **'MCP Tools'**
+  String get mcp_tools_title;
+
+  /// No description provided for @available_tools.
+  ///
+  /// In en, this message translates to:
+  /// **'Available tools'**
+  String get available_tools;
+
+  /// No description provided for @unable_load_tools.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load tools'**
+  String get unable_load_tools;
+
+  /// No description provided for @no_tools_registered.
+  ///
+  /// In en, this message translates to:
+  /// **'No tools registered'**
+  String get no_tools_registered;
+
+  /// No description provided for @no_tools_registered_desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable the example MCP server or add MCP integrations from chat settings.'**
+  String get no_tools_registered_desc;
+
+  /// No description provided for @example_mcp_server_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Example MCP server'**
+  String get example_mcp_server_title;
+
+  /// No description provided for @example_mcp_server_desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Registers example.echo and example.word_count through the same MCP tool provider used by external servers.'**
+  String get example_mcp_server_desc;
+
+  /// No description provided for @disable_example_server.
+  ///
+  /// In en, this message translates to:
+  /// **'Disable example server'**
+  String get disable_example_server;
+
+  /// No description provided for @enable_example_server.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable example server'**
+  String get enable_example_server;
+
+  /// No description provided for @built_in_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Built-in'**
+  String get built_in_label;
+
+  /// No description provided for @highlights_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Highlights'**
+  String get highlights_label;
+
+  /// No description provided for @built_with_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Built with'**
+  String get built_with_label;
+
+  /// No description provided for @local_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Local'**
+  String get local_label;
+
+  /// No description provided for @gguf_format_label.
+  ///
+  /// In en, this message translates to:
+  /// **'GGUF'**
+  String get gguf_format_label;
+
+  /// No description provided for @tool_status_requested.
+  ///
+  /// In en, this message translates to:
+  /// **'Requested'**
+  String get tool_status_requested;
+
+  /// No description provided for @tool_status_approved.
+  ///
+  /// In en, this message translates to:
+  /// **'Approved'**
+  String get tool_status_approved;
+
+  /// No description provided for @tool_status_rejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejected'**
+  String get tool_status_rejected;
+
+  /// No description provided for @tool_status_running.
+  ///
+  /// In en, this message translates to:
+  /// **'Running'**
+  String get tool_status_running;
+
+  /// No description provided for @tool_status_done.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get tool_status_done;
+
+  /// No description provided for @tool_status_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed'**
+  String get tool_status_failed;
 }
 
 class _AppLocalizationsDelegate
