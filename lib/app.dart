@@ -259,36 +259,46 @@ class AppShell extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final location = GoRouterState.of(context).uri.path;
+    final isHome = location == AppRoutes.home;
 
-    return ShadResponsiveBuilder(
-      builder: (context, breakpoint) {
-        final isDesktop = breakpoint >= ShadTheme.of(context).breakpoints.md;
-
-        if (isDesktop) {
-          return Scaffold(
-            body: Row(
-              children: [
-                const SidebarWidget(),
-                VerticalDivider(
-                  width: 1,
-                  thickness: 1,
-                  color: isDark
-                      ? const Color(0xFF1A1A1A)
-                      : const Color(0xFFE5E5E5),
-                ),
-                Expanded(
-                  child: child,
-                ),
-              ],
-            ),
-          );
+    return PopScope(
+      canPop: isHome,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop && !isHome) {
+          context.go(AppRoutes.home);
         }
-
-        return Scaffold(
-          body: child,
-          drawer: const ConversationDrawer(),
-        );
       },
+      child: ShadResponsiveBuilder(
+        builder: (context, breakpoint) {
+          final isDesktop = breakpoint >= ShadTheme.of(context).breakpoints.md;
+
+          if (isDesktop) {
+            return Scaffold(
+              body: Row(
+                children: [
+                  const SidebarWidget(),
+                  VerticalDivider(
+                    width: 1,
+                    thickness: 1,
+                    color: isDark
+                        ? const Color(0xFF1A1A1A)
+                        : const Color(0xFFE5E5E5),
+                  ),
+                  Expanded(
+                    child: child,
+                  ),
+                ],
+              ),
+            );
+          }
+
+          return Scaffold(
+            body: child,
+            drawer: const ConversationDrawer(),
+          );
+        },
+      ),
     );
   }
 }

@@ -47,13 +47,11 @@ class _ChatSettingsSheetState extends ConsumerState<ChatSettingsSheet> {
     final temperature = activeConv?.temperature ?? settings.temperature;
     final topP = activeConv?.topP ?? settings.topP;
     final maxTokens = activeConv?.maxTokens ?? settings.maxTokens;
-    final contextLength = activeConv?.contextLength ?? settings.contextLength;
 
     final hasOverrides =
         activeConv?.temperature != null ||
         activeConv?.topP != null ||
-        activeConv?.maxTokens != null ||
-        activeConv?.contextLength != null;
+        activeConv?.maxTokens != null;
 
     final isGloballyEnabled = settings.mcpEnabled;
 
@@ -120,7 +118,6 @@ class _ChatSettingsSheetState extends ConsumerState<ChatSettingsSheet> {
                     temperature,
                     topP,
                     maxTokens,
-                    contextLength,
                     activeConv?.id,
                     isDark,
                   ),
@@ -169,7 +166,6 @@ class _ChatSettingsSheetState extends ConsumerState<ChatSettingsSheet> {
     double temperature,
     double topP,
     int maxTokens,
-    int contextLength,
     String? conversationId,
     bool isDark,
   ) {
@@ -199,30 +195,12 @@ class _ChatSettingsSheetState extends ConsumerState<ChatSettingsSheet> {
             isDark: isDark,
           ),
           const SizedBox(height: 24),
-          Row(
-            children: [
-              Expanded(
-                child: _ParamInput(
-                  label: l10n.max_tokens,
-                  value: maxTokens,
-                  description: l10n.max_tokens_desc,
-                  onChanged: (v) =>
-                      _updateParam(ref, conversationId, maxTokens: v),
-                  isDark: isDark,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: _ParamInput(
-                  label: l10n.context_length,
-                  value: contextLength,
-                  description: l10n.context_length_desc,
-                  onChanged: (v) =>
-                      _updateParam(ref, conversationId, contextLength: v),
-                  isDark: isDark,
-                ),
-              ),
-            ],
+          _ParamInput(
+            label: l10n.max_tokens,
+            value: maxTokens,
+            description: l10n.max_tokens_desc,
+            onChanged: (v) => _updateParam(ref, conversationId, maxTokens: v),
+            isDark: isDark,
           ),
         ],
       ),
@@ -440,7 +418,6 @@ class _ChatSettingsSheetState extends ConsumerState<ChatSettingsSheet> {
           clearTemperature: true,
           clearTopP: true,
           clearMaxTokens: true,
-          clearContextLength: true,
         );
   }
 }

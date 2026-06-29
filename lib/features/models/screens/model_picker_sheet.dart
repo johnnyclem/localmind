@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:localmind/core/models/enums.dart';
+import 'package:localmind/core/providers/service_providers.dart';
 import 'package:localmind/core/theme/colors.dart';
 import 'package:localmind/features/chat/providers/chat_providers.dart';
 import 'package:localmind/features/on_device/components/on_device_picker_section.dart';
 import 'package:localmind/features/on_device/providers/on_device_providers.dart';
 import 'package:localmind/features/servers/providers/server_providers.dart';
 import 'package:localmind/l10n/app_localizations.dart';
+import '../components/model_context_length_section.dart';
 import '../components/model_list.dart';
 import '../components/model_search_field.dart';
 import '../components/no_server_state.dart';
@@ -57,6 +59,14 @@ class ModelPickerSheet extends ConsumerWidget {
     final isOnDevice =
         currentServer != null && currentServer.type == ServerType.onDevice;
 
+    final loadedModelsAsync = activeServer != null
+        ? ref.watch(loadedModelsProvider(activeServer))
+        : const AsyncValue<Set<String>>.data(<String>{});
+    final loadedCount = loadedModelsAsync.maybeWhen(
+      data: (models) => models.length,
+      orElse: () => 0,
+    );
+
     return Container(
       height: MediaQuery.of(context).size.height * 0.7,
       padding: const EdgeInsets.all(16),
@@ -82,13 +92,16 @@ class ModelPickerSheet extends ConsumerWidget {
             isDark: isDark,
             isThinking: isThinking,
             modelLoading: modelLoading,
+            loadedCount: loadedCount,
             activeServer: activeServer,
-            serverId: activeServer?.id,
             onRefresh: activeServer != null
                 ? () {
                     ref.invalidate(availableModelsProvider(activeServer.id));
                     ref.invalidate(loadedModelsProvider(activeServer));
                   }
+                : null,
+            onUnloadAll: activeServer != null && loadedCount > 0
+                ? () => _unloadAllModels(context, ref, activeServer)
                 : null,
           ),
           if (activeServer != null)
@@ -102,6 +115,8 @@ class ModelPickerSheet extends ConsumerWidget {
                 ),
               ),
             ),
+          const SizedBox(height: 12),
+          ModelContextLengthSection(isDark: isDark),
           const SizedBox(height: 12),
           const ModelSearchField(),
           const SizedBox(height: 12),
@@ -123,6 +138,43 @@ class ModelPickerSheet extends ConsumerWidget {
       ),
     );
   }
+
+  Future<void> _unloadAllModels(
+    BuildContext context,
+    WidgetRef ref,
+    dynamic activeServer,
+  ) async {
+    final l10n = AppLocalizations.of(context)!;
+
+    try {
+      if (activeServer.type == ServerType.onDevice) {
+        await ref.read(onDeviceEngineProvider.notifier).unloadModel();
+      } else {
+        final loadedInstances =
+            await ref.read(loadedModelsProvider(activeServer).future);
+        final apiService = ref.read(serverApiServiceProvider);
+        await apiService.unloadAllInstances(activeServer, loadedInstances);
+      }
+
+      ref.invalidate(loadedModelsProvider(activeServer));
+      ref.read(selectedModelProvider.notifier).clear();
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.all_models_unloaded)),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l10n.model_unload_failed(e.toString())),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
 }
 
 class _ModelPickerHeader extends StatelessWidget {
@@ -130,17 +182,19 @@ class _ModelPickerHeader extends StatelessWidget {
     required this.isDark,
     required this.isThinking,
     required this.modelLoading,
+    required this.loadedCount,
     required this.activeServer,
-    this.serverId,
     this.onRefresh,
+    this.onUnloadAll,
   });
 
   final bool isDark;
   final bool isThinking;
   final dynamic modelLoading;
+  final int loadedCount;
   final dynamic activeServer;
-  final String? serverId;
   final VoidCallback? onRefresh;
+  final VoidCallback? onUnloadAll;
 
   @override
   Widget build(BuildContext context) {
@@ -162,6 +216,32 @@ class _ModelPickerHeader extends StatelessWidget {
                       color: isDark ? Colors.white : Colors.black,
                     ),
                   ),
+                  if (loadedCount > 0) ...[
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: (isDark
+                                ? AppColors.darkAccent
+                                : AppColors.lightAccent)
+                            .withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Text(
+                        l10n.loaded_models_count(loadedCount),
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: isDark
+                              ? AppColors.darkAccent
+                              : AppColors.lightAccent,
+                        ),
+                      ),
+                    ),
+                  ],
                   if (isThinking) ...[
                     const SizedBox(width: 8),
                     ThinkingIndicator(isDark: isDark),
@@ -180,6 +260,16 @@ class _ModelPickerHeader extends StatelessWidget {
             ],
           ),
         ),
+        if (onUnloadAll != null)
+          TextButton.icon(
+            onPressed: onUnloadAll,
+            icon: const Icon(Icons.power_settings_new_outlined, size: 16),
+            label: Text(l10n.unload_all_models),
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.red[400],
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+            ),
+          ),
         if (onRefresh != null)
           IconButton(
             icon: const Icon(Icons.refresh, size: 20),

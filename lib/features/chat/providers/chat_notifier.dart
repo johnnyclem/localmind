@@ -930,8 +930,9 @@ class ChatNotifier extends Notifier<ChatState> {
         (m) => m.role == MessageRole.assistant,
       );
       if (lastAssistantIndex > 0) {
-        final userMessage = messages[lastAssistantIndex - 1];
-        final messagesToRemove = messages.sublist(lastAssistantIndex);
+        final userMessageIndex = lastAssistantIndex - 1;
+        final userMessage = messages[userMessageIndex];
+        final messagesToRemove = messages.sublist(userMessageIndex);
         final db = ref.read(databaseProvider);
 
         for (final msg in messagesToRemove) {
@@ -943,7 +944,7 @@ class ChatNotifier extends Notifier<ChatState> {
         }
 
         state = state.copyWith(
-          messages: messages.sublist(0, lastAssistantIndex),
+          messages: messages.sublist(0, userMessageIndex),
           clearStreaming: true,
         );
 
@@ -966,9 +967,10 @@ class ChatNotifier extends Notifier<ChatState> {
 
     if (messageIndex > 0 &&
         state.messages[messageIndex - 1].role == MessageRole.user) {
-      final userMessage = state.messages[messageIndex - 1];
+      final userMessageIndex = messageIndex - 1;
+      final userMessage = state.messages[userMessageIndex];
 
-      final messagesToRemove = state.messages.sublist(messageIndex);
+      final messagesToRemove = state.messages.sublist(userMessageIndex);
       final db = ref.read(databaseProvider);
 
       for (final msg in messagesToRemove) {
@@ -980,7 +982,7 @@ class ChatNotifier extends Notifier<ChatState> {
       }
 
       state = state.copyWith(
-        messages: state.messages.sublist(0, messageIndex),
+        messages: state.messages.sublist(0, userMessageIndex),
         clearStreaming: true,
       );
 
@@ -988,6 +990,87 @@ class ChatNotifier extends Notifier<ChatState> {
         userMessage.content,
         attachments: userMessage.attachmentPaths?.map((p) => File(p)).toList(),
       );
+    }
+  }
+
+  Future<void> editAssistantMessage(String messageId, String newContent) async {
+    final messageIndex = state.messages.indexWhere((m) => m.id == messageId);
+    if (messageIndex == -1) return;
+
+    final message = state.messages[messageIndex];
+    if (message.role != MessageRole.assistant) return;
+    if (newContent.trim().isEmpty) return;
+    if (newContent == message.content) return;
+
+    final updated = message.copyWith(content: newContent);
+    await _saveMessage(updated);
+    _replaceMessageInState(updated);
+  }
+
+  Future<void> branchFromMessage(String messageId) async {
+    final messageIndex = state.messages.indexWhere((m) => m.id == messageId);
+    if (messageIndex == -1) return;
+
+    final activeConv = ref.read(conv.activeConversationProvider);
+    if (activeConv == null) return;
+
+    final messagesToCopy = state.messages.sublist(0, messageIndex + 1);
+    final branchTitle = activeConv.title.length > 40
+        ? '${activeConv.title.substring(0, 40)}...'
+        : activeConv.title;
+
+    final newConversation = await ref
+        .read(conv.conversationsProvider.notifier)
+        .createConversation(
+          title: '$branchTitle (branch)',
+          personaId: activeConv.personaId,
+          systemPrompt: activeConv.systemPrompt,
+          serverId: activeConv.serverId,
+          modelId: activeConv.modelId,
+          mcpEnabled: activeConv.mcpEnabled,
+        );
+
+    if (activeConv.temperature != null ||
+        activeConv.topP != null ||
+        activeConv.maxTokens != null ||
+        activeConv.contextLength != null) {
+      await ref.read(conv.conversationsProvider.notifier).updateChatParams(
+            newConversation.id,
+            temperature: activeConv.temperature,
+            topP: activeConv.topP,
+            maxTokens: activeConv.maxTokens,
+            contextLength: activeConv.contextLength,
+          );
+    }
+
+    for (final msg in messagesToCopy) {
+      final copied = msg.copyWith(
+        id: generateUuid(),
+        conversationId: newConversation.id,
+      );
+      await _saveMessage(copied);
+    }
+
+    final lastMessage = messagesToCopy.last;
+    final preview = lastMessage.content.length > 100
+        ? '${lastMessage.content.substring(0, 100)}...'
+        : lastMessage.content;
+
+    await ref.read(conv.conversationsProvider.notifier).updatePreview(
+          newConversation.id,
+          preview,
+          DateTime.now(),
+          messageCount: messagesToCopy.length,
+        );
+
+    final refreshedConversations = ref.read(conv.conversationsProvider).value;
+    final branchedConversation = refreshedConversations?.firstWhere(
+      (c) => c.id == newConversation.id,
+      orElse: () => newConversation,
+    );
+
+    if (branchedConversation != null) {
+      await loadConversation(branchedConversation);
     }
   }
 

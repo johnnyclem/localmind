@@ -17,6 +17,9 @@ class AssistantBubble extends StatelessWidget {
     this.onCopy,
     this.onRetry,
     this.onDelete,
+    this.onEdit,
+    this.onBranch,
+    this.onModelTap,
     this.isStreaming = false,
   });
 
@@ -24,12 +27,17 @@ class AssistantBubble extends StatelessWidget {
   final VoidCallback? onCopy;
   final VoidCallback? onRetry;
   final VoidCallback? onDelete;
+  final VoidCallback? onEdit;
+  final VoidCallback? onBranch;
+  final VoidCallback? onModelTap;
   final bool isStreaming;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final muted =
+        isDark ? AppColors.darkMutedText : AppColors.lightMutedText;
 
     return Container(
       width: double.infinity,
@@ -37,6 +45,24 @@ class AssistantBubble extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          if (message.modelId != null &&
+              message.modelId!.isNotEmpty &&
+              !isStreaming)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 6),
+              child: InkWell(
+                onTap: onModelTap,
+                borderRadius: BorderRadius.circular(4),
+                child: Text(
+                  message.modelId!,
+                  style: TextStyle(
+                    fontFamily: 'monospace',
+                    fontSize: 11,
+                    color: muted,
+                  ),
+                ),
+              ),
+            ),
           if (message.reasoningContent != null &&
               message.reasoningContent!.isNotEmpty)
             ReasoningWidget(
@@ -88,12 +114,7 @@ class AssistantBubble extends StatelessWidget {
             children: [
               Text(
                 _formatTime(message.createdAt),
-                style: TextStyle(
-                  fontSize: 11,
-                  color: isDark
-                      ? AppColors.darkMutedText
-                      : AppColors.lightMutedText,
-                ),
+                style: TextStyle(fontSize: 11, color: muted),
               ),
               if (message.status == MessageStatus.error) ...[
                 const SizedBox(width: 4),
@@ -109,6 +130,8 @@ class AssistantBubble extends StatelessWidget {
                   onCopy: onCopy,
                   onRetry: onRetry,
                   onDelete: onDelete,
+                  onEdit: onEdit,
+                  onBranch: onBranch,
                 ),
             ],
           ),

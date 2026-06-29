@@ -2925,6 +2925,48 @@ abstract class AppLocalizations {
   /// **'{ctx} ctx'**
   String context_chip(String ctx);
 
+  /// Button to unload all loaded models
+  ///
+  /// In en, this message translates to:
+  /// **'Unload all'**
+  String get unload_all_models;
+
+  /// Count of currently loaded models
+  ///
+  /// In en, this message translates to:
+  /// **'{count} loaded'**
+  String loaded_models_count(int count);
+
+  /// Snackbar after unloading all models
+  ///
+  /// In en, this message translates to:
+  /// **'All models unloaded'**
+  String get all_models_unloaded;
+
+  /// Branch conversation from a message
+  ///
+  /// In en, this message translates to:
+  /// **'Branch chat'**
+  String get branch_chat;
+
+  /// Branch chat option description
+  ///
+  /// In en, this message translates to:
+  /// **'Start a new conversation from this message'**
+  String get branch_chat_desc;
+
+  /// Description shown when editing an assistant message
+  ///
+  /// In en, this message translates to:
+  /// **'Edit the assistant response text.'**
+  String get edit_assistant_message_desc;
+
+  /// Tooltip for switching to the model used in a message
+  ///
+  /// In en, this message translates to:
+  /// **'Switch to {modelName}'**
+  String switch_to_model(String modelName);
+
   /// Download notification title
   ///
   /// In en, this message translates to:
@@ -3710,6 +3752,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Failed'**
   String get tool_status_failed;
+
+  /// Long-press menu option to favorite a model
+  ///
+  /// In en, this message translates to:
+  /// **'Toggle favorite'**
+  String get model_favorite_toggle;
+
+  /// Label for model note text field
+  ///
+  /// In en, this message translates to:
+  /// **'Note'**
+  String get model_note_label;
+
+  /// Hint for model note text field
+  ///
+  /// In en, this message translates to:
+  /// **'Add a note about this model…'**
+  String get model_note_hint;
+
+  /// Setting to unload every loaded model instance before loading another
+  ///
+  /// In en, this message translates to:
+  /// **'Unload all models before loading a new one'**
+  String get unload_models_before_load;
+
+  /// Export conversations and personas to a JSON file
+  ///
+  /// In en, this message translates to:
+  /// **'Export all data'**
+  String get export_all_data;
+
+  /// Import conversations and personas from a JSON backup
+  ///
+  /// In en, this message translates to:
+  /// **'Import all data'**
+  String get import_all_data;
+
+  /// Snackbar after exporting backup
+  ///
+  /// In en, this message translates to:
+  /// **'Backup exported successfully'**
+  String get export_data_success;
+
+  /// Snackbar after importing backup
+  ///
+  /// In en, this message translates to:
+  /// **'Backup imported successfully'**
+  String get import_data_success;
+
+  /// Snackbar when import fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to import backup: {error}'**
+  String import_data_failed(String error);
+
+  /// Confirmation message before importing backup
+  ///
+  /// In en, this message translates to:
+  /// **'Import conversations and custom personas from this backup? Existing items with the same IDs will be updated.'**
+  String get import_data_confirm;
 }
 
 class _AppLocalizationsDelegate

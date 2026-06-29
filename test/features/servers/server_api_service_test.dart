@@ -230,7 +230,7 @@ void main() {
       final lmStudioServer = testServer.copyWith(type: ServerType.lmStudio);
       final running = await service.fetchRunningModels(lmStudioServer);
 
-      expect(running, contains("active-model-lm"));
+      expect(running, contains("inst_1"));
       expect(running, isNot(contains("inactive-model-lm")));
     });
 

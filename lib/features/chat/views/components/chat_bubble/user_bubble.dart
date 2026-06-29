@@ -13,12 +13,14 @@ class UserBubble extends StatelessWidget {
     this.onCopy,
     this.onDelete,
     this.onEdit,
+    this.onBranch,
   });
 
   final Message message;
   final VoidCallback? onCopy;
   final VoidCallback? onDelete;
   final VoidCallback? onEdit;
+  final VoidCallback? onBranch;
 
   @override
   Widget build(BuildContext context) {
@@ -100,6 +102,7 @@ class UserBubble extends StatelessWidget {
                   onCopy: onCopy,
                   onDelete: onDelete,
                   onEdit: onEdit,
+                  onBranch: onBranch,
                 ),
               ],
             ),

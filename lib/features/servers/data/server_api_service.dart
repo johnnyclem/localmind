@@ -120,7 +120,11 @@ class ServerApiService {
     }
   }
 
-  Future<String?> loadModelWithInstanceId(Server server, String modelId) async {
+  Future<String?> loadModelWithInstanceId(
+    Server server,
+    String modelId, {
+    int? contextLength,
+  }) async {
     if (server.type == ServerType.openRouter ||
         server.type == ServerType.onDevice) {
       return null;
@@ -130,23 +134,47 @@ class ServerApiService {
       case ServerType.lmStudio:
       case ServerType.openAICompatible:
         try {
+          final payload = <String, dynamic>{
+            'model': modelId,
+            'echo_load_config': true,
+          };
+          if (contextLength != null) {
+            payload['context_length'] = contextLength;
+          }
           final response = await _dio.post(
             server.loadModelEndpoint,
-            data: {'model': modelId, 'echo_load_config': true},
+            data: payload,
             options: Options(headers: buildServerAuthHeaders(server)),
           );
+          _throwIfErrorResponse(response.data);
           return response.data['instance_id'] as String?;
-        } catch (_) {
-          return null;
+        } on DioException catch (e) {
+          throw Exception(_extractApiErrorMessage(e.response?.data) ?? e.message);
         }
       case ServerType.ollama:
-        // See note in loadModel: Ollama auto-loads on /api/chat, so we do not
-        // issue an explicit /api/generate load (which would auto-pull the
-        // model if missing on the remote).
         return null;
       case ServerType.openRouter:
       case ServerType.onDevice:
         return null;
+    }
+  }
+
+  Future<void> unloadAllInstances(Server server, Set<String> instanceIds) async {
+    for (final instanceId in instanceIds) {
+      await unloadModel(server, instanceId, instanceId: instanceId);
+    }
+  }
+
+  Future<void> unloadInstancesForModelKey(
+    Server server,
+    String modelKey,
+    Set<String> instanceIds,
+  ) async {
+    final targets = instanceIds
+        .where((id) => id == modelKey || id.startsWith('$modelKey:'))
+        .toList();
+    for (final instanceId in targets) {
+      await unloadModel(server, modelKey, instanceId: instanceId);
     }
   }
 
@@ -205,8 +233,12 @@ class ServerApiService {
 
         final loadedInstances = item['loaded_instances'];
         if (loadedInstances is List) {
-          if (loadedInstances.isNotEmpty) {
-            runningModels.add(id);
+          for (final instance in loadedInstances) {
+            if (instance is! Map) continue;
+            final instanceId = instance['id']?.toString();
+            if (instanceId != null && instanceId.isNotEmpty) {
+              runningModels.add(instanceId);
+            }
           }
         } else {
           // Servers without loaded_instances (e.g. llama.cpp) always have
@@ -440,6 +472,25 @@ class ServerApiService {
     final match = regex.firstMatch(paramsString);
     if (match != null) {
       return double.tryParse(match.group(1) ?? '');
+    }
+    return null;
+  }
+
+  void _throwIfErrorResponse(dynamic data) {
+    final message = _extractApiErrorMessage(data);
+    if (message != null) {
+      throw Exception(message);
+    }
+  }
+
+  String? _extractApiErrorMessage(dynamic data) {
+    if (data is! Map) return null;
+    final error = data['error'];
+    if (error is Map) {
+      final type = error['type']?.toString();
+      final message = error['message']?.toString();
+      if (type != null && message != null) return '$type: $message';
+      return message ?? type;
     }
     return null;
   }

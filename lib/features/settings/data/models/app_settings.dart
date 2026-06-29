@@ -40,6 +40,7 @@ class AppSettings {
   final bool smartReplyEnabled;
   final String? localeCode;
   final String? huggingFaceToken;
+  final bool unloadModelsBeforeLoad;
 
   AppSettings({
     this.temperature = 0.7,
@@ -71,6 +72,7 @@ class AppSettings {
     this.smartReplyEnabled = true,
     this.localeCode,
     this.huggingFaceToken,
+    this.unloadModelsBeforeLoad = false,
   });
 
   AppSettings copyWith({
@@ -103,6 +105,7 @@ class AppSettings {
     bool? smartReplyEnabled,
     Object? localeCode = _unset,
     Object? huggingFaceToken = _unset,
+    bool? unloadModelsBeforeLoad,
   }) {
     return AppSettings(
       temperature: temperature ?? this.temperature,
@@ -144,6 +147,8 @@ class AppSettings {
       huggingFaceToken: identical(huggingFaceToken, _unset)
           ? this.huggingFaceToken
           : huggingFaceToken as String?,
+      unloadModelsBeforeLoad:
+          unloadModelsBeforeLoad ?? this.unloadModelsBeforeLoad,
     );
   }
 
@@ -178,6 +183,7 @@ class AppSettings {
       'smartReplyEnabled': smartReplyEnabled,
       'localeCode': localeCode,
       'huggingFaceToken': huggingFaceToken,
+      'unloadModelsBeforeLoad': unloadModelsBeforeLoad,
     };
   }
 
@@ -212,6 +218,7 @@ class AppSettings {
       smartReplyEnabled: map['smartReplyEnabled'] ?? true,
       localeCode: map['localeCode'] as String?,
       huggingFaceToken: map['huggingFaceToken'] as String?,
+      unloadModelsBeforeLoad: map['unloadModelsBeforeLoad'] ?? false,
     );
   }
 

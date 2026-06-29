@@ -15,6 +15,7 @@ class MessageActionBar extends ConsumerStatefulWidget {
     this.onDelete,
     this.onEdit,
     this.onShare,
+    this.onBranch,
   });
 
   final String content;
@@ -23,6 +24,7 @@ class MessageActionBar extends ConsumerStatefulWidget {
   final VoidCallback? onDelete;
   final VoidCallback? onEdit;
   final VoidCallback? onShare;
+  final VoidCallback? onBranch;
 
   @override
   ConsumerState<MessageActionBar> createState() => _MessageActionBarState();
@@ -197,6 +199,16 @@ class _MessageActionBarState extends ConsumerState<MessageActionBar> {
                 onTap: () {
                   Navigator.of(context).pop();
                   widget.onShare?.call();
+                },
+              ),
+            if (widget.onBranch != null)
+              ListTile(
+                leading: const Icon(Icons.call_split),
+                title: Text(sheetL10n.branch_chat),
+                subtitle: Text(sheetL10n.branch_chat_desc),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  widget.onBranch?.call();
                 },
               ),
             ListTile(

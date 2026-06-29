@@ -166,7 +166,6 @@ class LMStudioChatService implements ChatService {
       'temperature': params.temperature,
       'top_p': params.topP,
       'max_output_tokens': params.maxTokens,
-      'context_length': params.contextLength,
       'stream': true,
       'store': true,
     };
@@ -393,9 +392,11 @@ class LMStudioChatService implements ChatService {
       case 'error':
         final error = json['error'] as Map<String, dynamic>?;
         if (error != null) {
+          final type = error['type']?.toString();
+          final message = error['message']?.toString() ?? 'Unknown error';
           yield ChatResponse(
             type: ChatResponseType.error,
-            content: 'Error: ${error['message'] ?? 'Unknown error'}',
+            content: type != null ? '$type: $message' : message,
           );
         }
         break;

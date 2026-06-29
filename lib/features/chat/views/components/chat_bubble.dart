@@ -15,6 +15,8 @@ class ChatBubble extends StatelessWidget {
     this.onRetry,
     this.onDelete,
     this.onEdit,
+    this.onBranch,
+    this.onModelTap,
     this.isStreaming = false,
   });
 
@@ -23,6 +25,8 @@ class ChatBubble extends StatelessWidget {
   final VoidCallback? onRetry;
   final VoidCallback? onDelete;
   final VoidCallback? onEdit;
+  final VoidCallback? onBranch;
+  final VoidCallback? onModelTap;
   final bool isStreaming;
 
   @override
@@ -40,6 +44,7 @@ class ChatBubble extends StatelessWidget {
             onCopy: onCopy,
             onDelete: onDelete,
             onEdit: onEdit,
+            onBranch: onBranch,
           ),
         );
       case MessageRole.assistant:
@@ -50,6 +55,9 @@ class ChatBubble extends StatelessWidget {
             onCopy: onCopy,
             onRetry: onRetry,
             onDelete: onDelete,
+            onEdit: onEdit,
+            onBranch: onBranch,
+            onModelTap: onModelTap,
             isStreaming: isStreaming,
           ),
         );

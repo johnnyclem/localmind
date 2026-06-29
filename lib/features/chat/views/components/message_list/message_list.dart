@@ -14,6 +14,9 @@ class MessageList extends StatelessWidget {
     required this.onRetry,
     required this.onDelete,
     required this.onEdit,
+    required this.onEditAssistant,
+    required this.onBranch,
+    required this.onModelPicker,
     this.hasSmartReplies = false,
     this.bottomInset = 0,
   });
@@ -24,6 +27,9 @@ class MessageList extends StatelessWidget {
   final void Function(String) onRetry;
   final void Function(String) onDelete;
   final void Function(String messageId, String currentContent) onEdit;
+  final void Function(String messageId, String currentContent) onEditAssistant;
+  final void Function(String messageId) onBranch;
+  final VoidCallback onModelPicker;
   final bool hasSmartReplies;
   final double bottomInset;
 
@@ -36,6 +42,9 @@ class MessageList extends StatelessWidget {
       onRetry: onRetry,
       onDelete: onDelete,
       onEdit: onEdit,
+      onEditAssistant: onEditAssistant,
+      onBranch: onBranch,
+      onModelPicker: onModelPicker,
       hasSmartReplies: hasSmartReplies,
       bottomInset: bottomInset,
     );
@@ -50,6 +59,9 @@ class _MessageListConsumer extends ConsumerWidget {
     required this.onRetry,
     required this.onDelete,
     required this.onEdit,
+    required this.onEditAssistant,
+    required this.onBranch,
+    required this.onModelPicker,
     this.hasSmartReplies = false,
     this.bottomInset = 0,
   });
@@ -60,6 +72,9 @@ class _MessageListConsumer extends ConsumerWidget {
   final void Function(String) onRetry;
   final void Function(String) onDelete;
   final void Function(String messageId, String currentContent) onEdit;
+  final void Function(String messageId, String currentContent) onEditAssistant;
+  final void Function(String messageId) onBranch;
+  final VoidCallback onModelPicker;
   final bool hasSmartReplies;
   final double bottomInset;
 
@@ -77,6 +92,9 @@ class _MessageListConsumer extends ConsumerWidget {
       onRetry: onRetry,
       onDelete: onDelete,
       onEdit: onEdit,
+      onEditAssistant: onEditAssistant,
+      onBranch: onBranch,
+      onModelPicker: onModelPicker,
       hasSmartReplies: hasSmartReplies,
       bottomInset: bottomInset,
     );
@@ -92,6 +110,9 @@ class _MessageList extends StatelessWidget {
     required this.onRetry,
     required this.onDelete,
     required this.onEdit,
+    required this.onEditAssistant,
+    required this.onBranch,
+    required this.onModelPicker,
     this.hasSmartReplies = false,
     this.bottomInset = 0,
   });
@@ -103,6 +124,9 @@ class _MessageList extends StatelessWidget {
   final void Function(String) onRetry;
   final void Function(String) onDelete;
   final void Function(String messageId, String currentContent) onEdit;
+  final void Function(String messageId, String currentContent) onEditAssistant;
+  final void Function(String messageId) onBranch;
+  final VoidCallback onModelPicker;
   final bool hasSmartReplies;
   final double bottomInset;
 
@@ -136,6 +160,7 @@ class _MessageList extends StatelessWidget {
             key: ValueKey(streamingMessage!.id),
             message: streamingMessage!,
             isStreaming: true,
+            onModelTap: onModelPicker,
           );
         }
 
@@ -151,7 +176,11 @@ class _MessageList extends StatelessWidget {
           onDelete: () => onDelete(message.id),
           onEdit: message.role == MessageRole.user
               ? () => onEdit(message.id, message.content)
-              : null,
+              : message.role == MessageRole.assistant
+                  ? () => onEditAssistant(message.id, message.content)
+                  : null,
+          onBranch: () => onBranch(message.id),
+          onModelTap: onModelPicker,
         );
       },
     );

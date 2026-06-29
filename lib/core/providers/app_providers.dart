@@ -104,6 +104,8 @@ class SettingsNotifier extends Notifier<AppSettings> {
       _update(state.copyWith(localeCode: value));
   void setHuggingFaceToken(String? value) =>
       _update(state.copyWith(huggingFaceToken: value));
+  void setUnloadModelsBeforeLoad(bool value) =>
+      _update(state.copyWith(unloadModelsBeforeLoad: value));
 
   Future<void> _update(AppSettings updated) async {
     state = updated;

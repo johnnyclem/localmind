@@ -1501,6 +1501,31 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
+  String get unload_all_models => 'Unload all';
+
+  @override
+  String loaded_models_count(int count) {
+    return '$count loaded';
+  }
+
+  @override
+  String get all_models_unloaded => 'All models unloaded';
+
+  @override
+  String get branch_chat => 'Branch chat';
+
+  @override
+  String get branch_chat_desc => 'Start a new conversation from this message';
+
+  @override
+  String get edit_assistant_message_desc => 'Edit the assistant response text.';
+
+  @override
+  String switch_to_model(String modelName) {
+    return 'Switch to $modelName';
+  }
+
+  @override
   String download_notification_title(String modelName) {
     return '$modelName をダウンロード中...';
   }
@@ -1930,4 +1955,38 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get tool_status_failed => 'Failed';
+
+  @override
+  String get model_favorite_toggle => 'Toggle favorite';
+
+  @override
+  String get model_note_label => 'Note';
+
+  @override
+  String get model_note_hint => 'Add a note about this model…';
+
+  @override
+  String get unload_models_before_load =>
+      'Unload all models before loading a new one';
+
+  @override
+  String get export_all_data => 'Export all data';
+
+  @override
+  String get import_all_data => 'Import all data';
+
+  @override
+  String get export_data_success => 'Backup exported successfully';
+
+  @override
+  String get import_data_success => 'Backup imported successfully';
+
+  @override
+  String import_data_failed(String error) {
+    return 'Failed to import backup: $error';
+  }
+
+  @override
+  String get import_data_confirm =>
+      'Import conversations and custom personas from this backup? Existing items with the same IDs will be updated.';
 }

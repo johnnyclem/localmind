@@ -3,19 +3,32 @@ import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:localmind/l10n/app_localizations.dart';
 
 class EditMessageDialog extends StatefulWidget {
-  const EditMessageDialog({super.key, required this.initialContent});
+  const EditMessageDialog({
+    super.key,
+    required this.initialContent,
+    this.description,
+    this.saveLabel,
+  });
 
   final String initialContent;
+  final String? description;
+  final String? saveLabel;
 
   static Future<String?> show(
     BuildContext context, {
     required String initialContent,
+    String? description,
+    String? saveLabel,
   }) {
     return showModalBottomSheet<String>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => EditMessageDialog(initialContent: initialContent),
+      builder: (context) => EditMessageDialog(
+        initialContent: initialContent,
+        description: description,
+        saveLabel: saveLabel,
+      ),
     );
   }
 
@@ -122,7 +135,7 @@ class _EditMessageDialogState extends State<EditMessageDialog> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  l10n.edit_message_desc,
+                  widget.description ?? l10n.edit_message_desc,
                   style: TextStyle(fontSize: 12, color: hintColor),
                 ),
                 const SizedBox(height: 16),
@@ -136,7 +149,7 @@ class _EditMessageDialogState extends State<EditMessageDialog> {
                     const SizedBox(width: 8),
                     ShadButton(
                       onPressed: _save,
-                      child: Text(l10n.save_regenerate),
+                      child: Text(widget.saveLabel ?? l10n.save_regenerate),
                     ),
                   ],
                 ),

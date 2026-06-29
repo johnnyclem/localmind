@@ -14,7 +14,10 @@ class ModelTile extends StatelessWidget {
     required this.isLoaded,
     required this.isDark,
     required this.onTap,
+    this.onLongPress,
     this.onUnload,
+    this.isFavorite = false,
+    this.note,
   });
 
   final ModelInfo model;
@@ -22,7 +25,10 @@ class ModelTile extends StatelessWidget {
   final bool isLoaded;
   final bool isDark;
   final VoidCallback onTap;
+  final VoidCallback? onLongPress;
   final Future<void> Function()? onUnload;
+  final bool isFavorite;
+  final String? note;
 
   @override
   Widget build(BuildContext context) {
@@ -31,6 +37,7 @@ class ModelTile extends StatelessWidget {
 
     return InkWell(
       onTap: onTap,
+      onLongPress: onLongPress,
       borderRadius: BorderRadius.circular(8),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
@@ -52,6 +59,10 @@ class ModelTile extends StatelessWidget {
                 children: [
                   Row(
                     children: [
+                      if (isFavorite) ...[
+                        Icon(Icons.star, size: 16, color: Colors.amber[600]),
+                        const SizedBox(width: 6),
+                      ],
                       Expanded(
                         child: Text(
                           model.displayName,
@@ -74,6 +85,20 @@ class ModelTile extends StatelessWidget {
                       ],
                     ],
                   ),
+                  if (note != null && note!.isNotEmpty) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      note!,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: isDark
+                            ? AppColors.darkMutedText
+                            : AppColors.lightMutedText,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
                   const SizedBox(height: 4),
                   Wrap(
                     spacing: 6,
@@ -109,32 +134,21 @@ class ModelTile extends StatelessWidget {
                 ],
               ),
             ),
-            if (model.serverType == ServerType.lmStudio ||
-                model.serverType == ServerType.ollama) ...[
-              if (isLoaded) ...[
-                Container(
-                  width: 15,
-                  height: 15,
-                  decoration: BoxDecoration(
-                    color: isDark ? AppColors.darkAccent : AppColors.lightAccent,
-                    shape: BoxShape.circle,
-                  ),
+            if ((model.serverType == ServerType.lmStudio ||
+                    model.serverType == ServerType.ollama) &&
+                isLoaded) ...[
+              IconButton(
+                icon: Icon(
+                  Icons.power_settings_new_outlined,
+                  size: 18,
+                  color: Colors.red[400],
                 ),
-              ],
-              if (isLoaded) ...[
-                IconButton(
-                  icon: Icon(
-                    Icons.power_settings_new_outlined,
-                    size: 18,
-                    color: Colors.red[400],
-                  ),
-                  onPressed: onUnload,
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                  tooltip: l10n.unload_from_server,
-                ),
-                const SizedBox(width: 8),
-              ],
+                onPressed: onUnload,
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+                tooltip: l10n.unload_from_server,
+              ),
+              const SizedBox(width: 8),
             ],
             if (isSelected)
               Icon(Icons.check_circle, color: accent, size: 22)
