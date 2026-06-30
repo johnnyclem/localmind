@@ -22,7 +22,7 @@ final _entities = <obx_int.ModelEntity>[
   obx_int.ModelEntity(
     id: const obx_int.IdUid(1, 6060443518060866028),
     name: 'ConversationEntity',
-    lastPropertyId: const obx_int.IdUid(20, 6746128880040296628),
+    lastPropertyId: const obx_int.IdUid(23, 3122805731877931734),
     flags: 0,
     properties: <obx_int.ModelProperty>[
       obx_int.ModelProperty(
@@ -146,6 +146,24 @@ final _entities = <obx_int.ModelEntity>[
         type: 9,
         flags: 0,
       ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(21, 4372897463643655414),
+        name: 'isTemporary',
+        type: 1,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(22, 2980396196878246454),
+        name: 'isArchived',
+        type: 1,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(23, 3122805731877931734),
+        name: 'characterCount',
+        type: 6,
+        flags: 0,
+      ),
     ],
     relations: <obx_int.ModelRelation>[],
     backlinks: <obx_int.ModelBacklink>[
@@ -159,7 +177,7 @@ final _entities = <obx_int.ModelEntity>[
   obx_int.ModelEntity(
     id: const obx_int.IdUid(2, 196881068437544233),
     name: 'MessageEntity',
-    lastPropertyId: const obx_int.IdUid(24, 5960797950716320436),
+    lastPropertyId: const obx_int.IdUid(28, 8162956617579414275),
     flags: 0,
     properties: <obx_int.ModelProperty>[
       obx_int.ModelProperty(
@@ -308,6 +326,30 @@ final _entities = <obx_int.ModelEntity>[
       obx_int.ModelProperty(
         id: const obx_int.IdUid(24, 5960797950716320436),
         name: 'parentMessageId',
+        type: 9,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(25, 1552629421552033386),
+        name: 'inputTokenCount',
+        type: 6,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(26, 1965067209419994290),
+        name: 'tokensPerSecond',
+        type: 8,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(27, 7785830711210478899),
+        name: 'ttftMs',
+        type: 6,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(28, 8162956617579414275),
+        name: 'stopReason',
         type: 9,
         flags: 0,
       ),
@@ -737,7 +779,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
         final folderIdOffset = object.folderId == null
             ? null
             : fbb.writeString(object.folderId!);
-        fbb.startTable(21);
+        fbb.startTable(24);
         fbb.addInt64(0, object.internalId);
         fbb.addOffset(1, idOffset);
         fbb.addOffset(2, titleOffset);
@@ -758,6 +800,9 @@ obx_int.ModelDefinition getObjectBoxModel() {
         fbb.addOffset(17, smartRepliesJsonOffset);
         fbb.addOffset(18, smartRepliesLastMessageIdOffset);
         fbb.addOffset(19, folderIdOffset);
+        fbb.addBool(20, object.isTemporary);
+        fbb.addBool(21, object.isArchived);
+        fbb.addInt64(22, object.characterCount);
         fbb.finish(fbb.endTable());
         return object.internalId;
       },
@@ -843,6 +888,24 @@ obx_int.ModelDefinition getObjectBoxModel() {
         final folderIdParam = const fb.StringReader(
           asciiOptimization: true,
         ).vTableGetNullable(buffer, rootOffset, 42);
+        final isTemporaryParam = const fb.BoolReader().vTableGet(
+          buffer,
+          rootOffset,
+          44,
+          false,
+        );
+        final isArchivedParam = const fb.BoolReader().vTableGet(
+          buffer,
+          rootOffset,
+          46,
+          false,
+        );
+        final characterCountParam = const fb.Int64Reader().vTableGet(
+          buffer,
+          rootOffset,
+          48,
+          0,
+        );
         final object = ConversationEntity(
           internalId: internalIdParam,
           id: idParam,
@@ -864,6 +927,9 @@ obx_int.ModelDefinition getObjectBoxModel() {
           smartRepliesJson: smartRepliesJsonParam,
           smartRepliesLastMessageId: smartRepliesLastMessageIdParam,
           folderId: folderIdParam,
+          isTemporary: isTemporaryParam,
+          isArchived: isArchivedParam,
+          characterCount: characterCountParam,
         );
         obx_int.InternalToManyAccess.setRelInfo<ConversationEntity>(
           object.messages,
@@ -919,7 +985,10 @@ obx_int.ModelDefinition getObjectBoxModel() {
         final parentMessageIdOffset = object.parentMessageId == null
             ? null
             : fbb.writeString(object.parentMessageId!);
-        fbb.startTable(25);
+        final stopReasonOffset = object.stopReason == null
+            ? null
+            : fbb.writeString(object.stopReason!);
+        fbb.startTable(29);
         fbb.addInt64(0, object.internalId);
         fbb.addOffset(1, idOffset);
         fbb.addInt64(2, object.conversation.targetId);
@@ -944,6 +1013,10 @@ obx_int.ModelDefinition getObjectBoxModel() {
         fbb.addInt64(21, object.threadOrder);
         fbb.addBool(22, object.isActiveVariant);
         fbb.addOffset(23, parentMessageIdOffset);
+        fbb.addInt64(24, object.inputTokenCount);
+        fbb.addFloat64(25, object.tokensPerSecond);
+        fbb.addInt64(26, object.ttftMs);
+        fbb.addOffset(27, stopReasonOffset);
         fbb.finish(fbb.endTable());
         return object.internalId;
       },
@@ -988,6 +1061,24 @@ obx_int.ModelDefinition getObjectBoxModel() {
           rootOffset,
           22,
         );
+        final inputTokenCountParam = const fb.Int64Reader().vTableGetNullable(
+          buffer,
+          rootOffset,
+          52,
+        );
+        final tokensPerSecondParam = const fb.Float64Reader().vTableGetNullable(
+          buffer,
+          rootOffset,
+          54,
+        );
+        final ttftMsParam = const fb.Int64Reader().vTableGetNullable(
+          buffer,
+          rootOffset,
+          56,
+        );
+        final stopReasonParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGetNullable(buffer, rootOffset, 58);
         final errorMessageParam = const fb.StringReader(
           asciiOptimization: true,
         ).vTableGetNullable(buffer, rootOffset, 24);
@@ -1054,6 +1145,10 @@ obx_int.ModelDefinition getObjectBoxModel() {
           statusIndex: statusIndexParam,
           modelId: modelIdParam,
           tokenCount: tokenCountParam,
+          inputTokenCount: inputTokenCountParam,
+          tokensPerSecond: tokensPerSecondParam,
+          ttftMs: ttftMsParam,
+          stopReason: stopReasonParam,
           errorMessage: errorMessageParam,
           attachmentPathsJson: attachmentPathsJsonParam,
           generationTimeMs: generationTimeMsParam,
@@ -1598,6 +1693,21 @@ class ConversationEntity_ {
     _entities[0].properties[19],
   );
 
+  /// See [ConversationEntity.isTemporary].
+  static final isTemporary = obx.QueryBooleanProperty<ConversationEntity>(
+    _entities[0].properties[20],
+  );
+
+  /// See [ConversationEntity.isArchived].
+  static final isArchived = obx.QueryBooleanProperty<ConversationEntity>(
+    _entities[0].properties[21],
+  );
+
+  /// See [ConversationEntity.characterCount].
+  static final characterCount = obx.QueryIntegerProperty<ConversationEntity>(
+    _entities[0].properties[22],
+  );
+
   /// see [ConversationEntity.messages]
   static final messages =
       obx.QueryBacklinkToMany<MessageEntity, ConversationEntity>(
@@ -1726,6 +1836,26 @@ class MessageEntity_ {
   /// See [MessageEntity.parentMessageId].
   static final parentMessageId = obx.QueryStringProperty<MessageEntity>(
     _entities[1].properties[23],
+  );
+
+  /// See [MessageEntity.inputTokenCount].
+  static final inputTokenCount = obx.QueryIntegerProperty<MessageEntity>(
+    _entities[1].properties[24],
+  );
+
+  /// See [MessageEntity.tokensPerSecond].
+  static final tokensPerSecond = obx.QueryDoubleProperty<MessageEntity>(
+    _entities[1].properties[25],
+  );
+
+  /// See [MessageEntity.ttftMs].
+  static final ttftMs = obx.QueryIntegerProperty<MessageEntity>(
+    _entities[1].properties[26],
+  );
+
+  /// See [MessageEntity.stopReason].
+  static final stopReason = obx.QueryStringProperty<MessageEntity>(
+    _entities[1].properties[27],
   );
 }
 

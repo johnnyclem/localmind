@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:localmind/core/components/list_filter_button.dart';
 import 'package:localmind/l10n/app_localizations.dart';
 import '../providers/conversation_providers.dart';
 import 'components/conversation_folder_bar.dart';
@@ -60,6 +61,30 @@ class ChatHistoryScreen extends ConsumerWidget {
                   ),
                 ),
                 const Spacer(),
+                ListFilterButton<HistoryListFilter>(
+                  tooltip: l10n.filter_title,
+                  selected: ref.watch(historyListFilterProvider),
+                  onChanged: (filter) => ref
+                      .read(historyListFilterProvider.notifier)
+                      .setFilter(filter),
+                  options: [
+                    ListFilterOption(
+                      value: HistoryListFilter.all,
+                      label: l10n.all_chats,
+                      icon: Icons.view_list_rounded,
+                    ),
+                    ListFilterOption(
+                      value: HistoryListFilter.pinned,
+                      label: l10n.filter_pinned,
+                      icon: Icons.push_pin_outlined,
+                    ),
+                    ListFilterOption(
+                      value: HistoryListFilter.archived,
+                      label: l10n.filter_archived,
+                      icon: Icons.archive_outlined,
+                    ),
+                  ],
+                ),
               ],
             ),
           ),

@@ -8,6 +8,7 @@ import 'package:localmind/core/models/enums.dart';
 import 'package:localmind/core/providers/app_providers.dart';
 import 'package:localmind/core/providers/review_prompt_providers.dart';
 import 'package:localmind/core/providers/chat_background_service_provider.dart';
+import 'package:localmind/core/providers/service_providers.dart';
 import 'package:localmind/core/providers/storage_providers.dart';
 import 'package:localmind/core/services/message_save_service.dart';
 import 'package:localmind/core/storage/entities.dart';
@@ -22,6 +23,7 @@ import 'package:localmind/features/servers/providers/server_providers.dart';
 import 'package:localmind/objectbox.g.dart';
 import '../data/chat_service.dart';
 import '../data/models/message.dart' hide ToolCallData;
+import '../data/title_generation_service.dart';
 import '../data/tools/tool_definition.dart';
 import '../data/tools/tool_execution_loop.dart';
 import '../data/tools/adapters/tool_transport_adapter.dart' show ParsedToolCall;
@@ -47,6 +49,7 @@ class ChatState {
   final String? errorMessage;
   final Message? streamingMessage;
   final PendingToolApproval? pendingToolApproval;
+  final bool isTemporary;
 
   const ChatState({
     this.messages = const [],
@@ -56,6 +59,7 @@ class ChatState {
     this.errorMessage,
     this.streamingMessage,
     this.pendingToolApproval,
+    this.isTemporary = false,
   });
 
   ChatState copyWith({
@@ -66,6 +70,7 @@ class ChatState {
     String? errorMessage,
     Message? streamingMessage,
     PendingToolApproval? pendingToolApproval,
+    bool? isTemporary,
     bool clearError = false,
     bool clearStreaming = false,
     bool clearPendingApproval = false,
@@ -82,6 +87,7 @@ class ChatState {
       pendingToolApproval: clearPendingApproval
           ? null
           : (pendingToolApproval ?? this.pendingToolApproval),
+      isTemporary: isTemporary ?? this.isTemporary,
     );
   }
 }
@@ -104,6 +110,60 @@ class ChatNotifier extends Notifier<ChatState> {
   int _lastSavedReasoningLength = 0;
 
   MessageSaveService? _saveService;
+  bool _pendingTemporaryChat = false;
+  String? _ephemeralConversationId;
+  ChatStats? _streamStats;
+  DateTime? _streamStartTime;
+  DateTime? _firstTokenTime;
+
+  String? get _activeConversationId =>
+      _currentConversationId ?? _ephemeralConversationId;
+
+  bool get _isInMemoryChat => state.isTemporary;
+
+  void _resetStreamMetrics() {
+    _streamStats = null;
+    _streamStartTime = DateTime.now();
+    _firstTokenTime = null;
+  }
+
+  void _noteFirstToken() {
+    _firstTokenTime ??= DateTime.now();
+  }
+
+  Message _finalizeStreamMessage(Message msg, {String? stopReason}) {
+    final stats = _streamStats;
+    final start = _streamStartTime;
+    final firstToken = _firstTokenTime;
+    final now = DateTime.now();
+
+    int? ttftMs;
+    if (firstToken != null && start != null) {
+      ttftMs = firstToken.difference(start).inMilliseconds;
+    } else if (stats?.timeToFirstTokenSeconds != null) {
+      ttftMs = (stats!.timeToFirstTokenSeconds! * 1000).round();
+    }
+
+    int? genMs;
+    if (start != null) {
+      genMs = now.difference(start).inMilliseconds;
+    }
+
+    double? tps = stats?.tokensPerSecond;
+    final outputTokens = stats?.totalOutputTokens;
+    if (tps == null && outputTokens != null && genMs != null && genMs > 0) {
+      tps = outputTokens / (genMs / 1000);
+    }
+
+    return msg.copyWith(
+      tokenCount: outputTokens ?? msg.tokenCount,
+      inputTokenCount: stats?.inputTokens ?? msg.inputTokenCount,
+      tokensPerSecond: tps ?? msg.tokensPerSecond,
+      generationTimeMs: genMs ?? msg.generationTimeMs,
+      ttftMs: ttftMs ?? msg.ttftMs,
+      stopReason: stopReason ?? msg.stopReason,
+    );
+  }
 
   void approveTool(bool approved) {
     final pending = state.pendingToolApproval;
@@ -161,6 +221,7 @@ class ChatNotifier extends Notifier<ChatState> {
         allMessages: messages,
         messages: MessageVariants.resolveActiveTimeline(messages),
         isLoading: false,
+        isTemporary: conversation.isTemporary,
       );
       ref
           .read(conv.activeConversationProvider.notifier)
@@ -272,8 +333,11 @@ class ChatNotifier extends Notifier<ChatState> {
   }
 
   Future<void> startNewConversation() async {
-    await cancelStream();
+    _abortStreamImmediately();
+
     _currentConversationId = null;
+    _ephemeralConversationId = null;
+    _pendingTemporaryChat = false;
     ref.read(smartReplyServiceProvider).reset();
     state = const ChatState();
     ref
@@ -284,6 +348,61 @@ class ChatNotifier extends Notifier<ChatState> {
     ref
         .read(chatMcpConfigProvider.notifier)
         .setEnabled(settings.newChatMcpEnabled);
+  }
+
+  void _abortStreamImmediately() {
+    _uiUpdateTimer?.cancel();
+    _uiUpdateTimer = null;
+    _clearPendingApproval();
+
+    final subscription = _streamSubscription;
+    _streamSubscription = null;
+    if (subscription != null) {
+      unawaited(subscription.cancel());
+    }
+
+    ref.read(chatServiceProvider)?.cancelStream();
+    ref.read(chatBackgroundServiceProvider).stop();
+    ref.read(isStreamingProvider.notifier).setStreaming(false);
+
+    _chunkCount = 0;
+    _lastCheckpointTime = null;
+    _lastSavedContentLength = 0;
+    _lastSavedReasoningLength = 0;
+
+    final convId = _currentConversationId;
+    final streamingMessage = _latestStreamingMessage ?? state.streamingMessage;
+    _latestStreamingMessage = null;
+
+    if (streamingMessage != null && convId != null) {
+      unawaited(_persistCancelledMessageInBackground(streamingMessage, convId));
+    }
+  }
+
+  Future<void> _persistCancelledMessageInBackground(
+    Message streamingMessage,
+    String conversationId,
+  ) async {
+    try {
+      final finalMessage = _finalizeStreamMessage(
+        streamingMessage.copyWith(
+          conversationId: conversationId,
+          status: MessageStatus.cancelled,
+          isProcessing: false,
+        ),
+        stopReason: 'cancelled',
+      );
+      await _saveService?.flush();
+      await _saveMessage(finalMessage);
+    } catch (e) {
+      Log.error('Failed to persist cancelled stream message: $e');
+    }
+  }
+
+  void setTemporaryMode(bool enabled) {
+    if (state.messages.isNotEmpty && enabled != state.isTemporary) return;
+    _pendingTemporaryChat = enabled;
+    state = state.copyWith(isTemporary: enabled);
   }
 
   String generateUuid() {
@@ -333,6 +452,7 @@ class ChatNotifier extends Notifier<ChatState> {
   }
 
   Future<void> checkpointStreamingMessage({bool flush = false}) async {
+    if (_isInMemoryChat) return;
     final latest = _latestStreamingMessage ?? state.streamingMessage;
     if (latest == null) return;
 
@@ -368,36 +488,51 @@ class ChatNotifier extends Notifier<ChatState> {
 
     final trimmedContent = content.trim();
 
-    if (_currentConversationId == null) {
-      final selectedPersona = ref.read(selectedPersonaProvider);
-      final titleSource = trimmedContent.isNotEmpty
-          ? trimmedContent
-          : (attachments?.isNotEmpty == true
-              ? attachments!.first.path.split(Platform.pathSeparator).last
-              : 'New chat');
-      final conversation = await ref
-          .read(conv.conversationsProvider.notifier)
-          .createConversation(
-            title: titleSource.length > 50
-                ? '${titleSource.substring(0, 50)}...'
-                : titleSource,
-            serverId: server.id,
-            modelId: selectedModel?.id,
-            personaId: selectedPersona?.id,
-            systemPrompt: selectedPersona?.systemPrompt,
-            mcpEnabled: settings.newChatMcpEnabled,
-          );
-      _currentConversationId = conversation.id;
-      ref
-          .read(conv.activeConversationProvider.notifier)
-          .setActiveConversation(conversation);
+    if (_currentConversationId == null && _ephemeralConversationId == null) {
+      final isTemp = state.isTemporary || _pendingTemporaryChat;
+      if (isTemp) {
+        _ephemeralConversationId = generateUuid();
+        _pendingTemporaryChat = false;
+        state = state.copyWith(isTemporary: true);
+      } else {
+        final titleService = ref.read(titleGenerationServiceProvider);
+        final String initialTitle;
+        if (settings.autoGenerateTitle) {
+          initialTitle = 'New Chat';
+        } else {
+          final titleSource = trimmedContent.isNotEmpty
+              ? trimmedContent
+              : (attachments?.isNotEmpty == true
+                  ? attachments!.first.path.split(Platform.pathSeparator).last
+                  : 'New Chat');
+          initialTitle = titleService.truncateFirstMessageTitle(titleSource);
+        }
+        final conversation = await ref
+            .read(conv.conversationsProvider.notifier)
+            .createConversation(
+              title: initialTitle,
+              serverId: server.id,
+              modelId: selectedModel?.id,
+              personaId: ref.read(selectedPersonaProvider)?.id,
+              systemPrompt: ref.read(selectedPersonaProvider)?.systemPrompt,
+              mcpEnabled: settings.newChatMcpEnabled,
+              isTemporary: false,
+            );
+        _currentConversationId = conversation.id;
+        ref
+            .read(conv.activeConversationProvider.notifier)
+            .setActiveConversation(conversation);
 
-      ref
-          .read(chatMcpConfigProvider.notifier)
-          .setEnabled(settings.newChatMcpEnabled);
+        ref
+            .read(chatMcpConfigProvider.notifier)
+            .setEnabled(settings.newChatMcpEnabled);
 
-      ref.read(selectedPersonaProvider.notifier).clear();
+        ref.read(selectedPersonaProvider.notifier).clear();
+      }
     }
+
+    final convId = _activeConversationId;
+    if (convId == null) return;
 
     final List<String> savedPaths = [];
     if (attachments != null && attachments.isNotEmpty) {
@@ -424,7 +559,7 @@ class ChatNotifier extends Notifier<ChatState> {
 
     final userMessage = Message(
       id: generateUuid(),
-      conversationId: _currentConversationId!,
+      conversationId: convId,
       role: MessageRole.user,
       content: trimmedContent,
       createdAt: DateTime.now(),
@@ -440,7 +575,7 @@ class ChatNotifier extends Notifier<ChatState> {
     final assistantMessageId = generateUuid();
     var assistantMessage = Message(
       id: assistantMessageId,
-      conversationId: _currentConversationId!,
+      conversationId: convId,
       role: MessageRole.assistant,
       content: '',
       createdAt: DateTime.now(),
@@ -468,6 +603,7 @@ class ChatNotifier extends Notifier<ChatState> {
 
     ref.read(chatBackgroundServiceProvider).start();
 
+    _resetStreamMetrics();
     _resetCheckpointMetrics();
     _updateSavedMetrics(assistantMessage);
 
@@ -529,6 +665,9 @@ class ChatNotifier extends Notifier<ChatState> {
 
                 switch (response.type) {
                   case ChatResponseType.message:
+                    if (response.content?.isNotEmpty ?? false) {
+                      _noteFirstToken();
+                    }
                     streamingAssistantMessage = streamingAssistantMessage
                         .copyWith(
                           content:
@@ -540,7 +679,8 @@ class ChatNotifier extends Notifier<ChatState> {
 
                     _chunkCount++;
 
-                    if (_shouldCheckpointSave(streamingAssistantMessage)) {
+                    if (!_isInMemoryChat &&
+                        _shouldCheckpointSave(streamingAssistantMessage)) {
                       _saveService?.enqueue(streamingAssistantMessage);
                       _updateSavedMetrics(streamingAssistantMessage);
                       _resetCheckpointMetrics();
@@ -549,6 +689,9 @@ class ChatNotifier extends Notifier<ChatState> {
                     stateNeedsUpdate = true;
                     break;
                   case ChatResponseType.reasoning:
+                    if (response.reasoningContent?.isNotEmpty ?? false) {
+                      _noteFirstToken();
+                    }
                     reasoningContent += response.reasoningContent ?? '';
                     streamingAssistantMessage = streamingAssistantMessage
                         .copyWith(
@@ -559,7 +702,8 @@ class ChatNotifier extends Notifier<ChatState> {
 
                     _chunkCount++;
 
-                    if (_shouldCheckpointSave(streamingAssistantMessage)) {
+                    if (!_isInMemoryChat &&
+                        _shouldCheckpointSave(streamingAssistantMessage)) {
                       _saveService?.enqueue(streamingAssistantMessage);
                       _updateSavedMetrics(streamingAssistantMessage);
                       _resetCheckpointMetrics();
@@ -610,18 +754,23 @@ class ChatNotifier extends Notifier<ChatState> {
                     break;
                   case ChatResponseType.invalidToolCall:
                   case ChatResponseType.done:
+                    if (response.stats != null) {
+                      _streamStats = response.stats;
+                    }
                     break;
                 }
               },
               onDone: () async {
-                _uiUpdateTimer?.cancel();
-                _uiUpdateTimer = null;
-                updateUiState();
+              _uiUpdateTimer?.cancel();
+              _uiUpdateTimer = null;
+              updateUiState();
 
+              if (!_isInMemoryChat) {
                 await _saveService?.flush();
-                ref.read(chatBackgroundServiceProvider).stop();
-                final streamConvId = assistantMessage.conversationId;
-                final isCurrentContext = _currentConversationId == streamConvId;
+              }
+              ref.read(chatBackgroundServiceProvider).stop();
+              final streamConvId = assistantMessage.conversationId;
+              final isCurrentContext = _activeConversationId == streamConvId;
                 final streamingMessage = streamingAssistantMessage;
                 final hasContent =
                     streamingMessage.content.isNotEmpty ||
@@ -650,9 +799,12 @@ class ChatNotifier extends Notifier<ChatState> {
                   ref.read(isStreamingProvider.notifier).setStreaming(false);
                   _latestStreamingMessage = null;
                 } else {
-                  var finalMessage = streamingMessage.copyWith(
-                    status: MessageStatus.complete,
-                    isProcessing: false,
+                  var finalMessage = _finalizeStreamMessage(
+                    streamingMessage.copyWith(
+                      status: MessageStatus.complete,
+                      isProcessing: false,
+                    ),
+                    stopReason: 'complete',
                   );
 
                   if (mcpConfig.enabled && collectedToolCalls.isNotEmpty) {
@@ -722,27 +874,28 @@ class ChatNotifier extends Notifier<ChatState> {
                   }
                   ref.read(isStreamingProvider.notifier).setStreaming(false);
                   _latestStreamingMessage = null;
-                  if (_currentConversationId != null) {
+                    if (_currentConversationId != null) {
                     final preview = finalMessage.content.length > 100
                         ? '${finalMessage.content.substring(0, 100)}...'
                         : finalMessage.content;
+                    final totalChars = state.messages.fold<int>(
+                      0,
+                      (sum, message) => sum + message.content.length,
+                    );
                     await ref
                         .read(conv.conversationsProvider.notifier)
                         .updatePreview(
                           _currentConversationId!,
                           preview,
                           DateTime.now(),
+                          characterCount: totalChars,
                         );
 
                     final userMessage = state.messages
                         .where((m) => m.role == MessageRole.user)
                         .firstOrNull;
-                    if (userMessage != null &&
-                        userMessage.content.length > 10) {
-                      _autoGenerateTitle(
-                        userMessage.content,
-                        finalMessage.content,
-                      );
+                    if (userMessage != null) {
+                      _maybeAutoGenerateTitleAfterFirstReply();
                     }
                   }
 
@@ -900,22 +1053,132 @@ class ChatNotifier extends Notifier<ChatState> {
     return result;
   }
 
-  void _autoGenerateTitle(String userContent, String assistantContent) {
+  void _maybeAutoGenerateTitleAfterFirstReply() {
+    if (_currentConversationId == null || _isInMemoryChat) return;
+
     final settings = ref.read(settingsProvider);
     if (!settings.autoGenerateTitle) return;
-    if (_currentConversationId == null) return;
 
     final activeConv = ref.read(conv.activeConversationProvider);
-    if (activeConv == null) return;
-    if (activeConv.title != 'New Chat') return;
+    if (activeConv == null || activeConv.title != 'New Chat') return;
 
-    final title = userContent.length > 40
-        ? '${userContent.substring(0, 40)}...'
-        : userContent;
+    final assistantCount = state.messages
+        .where((m) => m.role == MessageRole.assistant)
+        .length;
+    if (assistantCount != 1) return;
 
-    ref
+    unawaited(_generateAndApplyTitle(_currentConversationId!));
+  }
+
+  Future<void> _generateAndApplyTitle(String conversationId) async {
+    final title = await generateTitleWithAi(conversationId);
+    if (title == null || title.isEmpty || title == 'New Chat') return;
+
+    await ref
         .read(conv.conversationsProvider.notifier)
-        .renameConversation(_currentConversationId!, title);
+        .renameConversation(conversationId, title);
+  }
+
+  Future<String?> generateTitleWithAi(String conversationId) async {
+    final messages = await _loadMessagesForConversation(conversationId);
+    if (messages.isEmpty) return null;
+
+    final timeline = MessageVariants.resolveActiveTimeline(messages);
+    if (timeline.isEmpty) return null;
+
+    final conversation = ref
+        .read(conv.conversationsProvider)
+        .value
+        ?.where((c) => c.id == conversationId)
+        .firstOrNull;
+
+    final server = _resolveServerForTitle(conversation);
+    final modelId = _resolveModelIdForTitle(conversation);
+    final titleService = ref.read(titleGenerationServiceProvider);
+
+    if (server == null || modelId == null) {
+      return _fallbackTitleFromMessages(timeline, titleService);
+    }
+
+    final chatService = _resolveChatServiceForTitle(server);
+    if (chatService == null) {
+      return _fallbackTitleFromMessages(timeline, titleService);
+    }
+
+    final generated = await titleService.generateTitleWithLLM(
+      chatService: chatService,
+      server: server,
+      modelId: modelId,
+      messages: timeline,
+      params: ref.read(chatParamsProvider),
+    );
+
+    if (generated != null && generated.isNotEmpty) {
+      return generated;
+    }
+    return _fallbackTitleFromMessages(timeline, titleService);
+  }
+
+  Future<List<Message>> _loadMessagesForConversation(
+    String conversationId,
+  ) async {
+    if (_currentConversationId == conversationId && state.allMessages.isNotEmpty) {
+      return MessageVariants.resolveActiveTimeline(state.allMessages);
+    }
+
+    final db = ref.read(databaseProvider);
+    final loaded = await db.store.runInTransactionAsync(
+      TxMode.read,
+      _loadMessagesInBackground,
+      conversationId,
+    );
+    return MessageVariants.resolveActiveTimeline(loaded);
+  }
+
+  Server? _resolveServerForTitle(Conversation? conversation) {
+    if (conversation?.serverId != null) {
+      final servers = ref.read(serversProvider).value ?? [];
+      for (final server in servers) {
+        if (server.id == conversation!.serverId) {
+          return server;
+        }
+      }
+    }
+    return ref.read(activeServerProvider);
+  }
+
+  String? _resolveModelIdForTitle(Conversation? conversation) {
+    return conversation?.modelId ?? ref.read(selectedModelProvider)?.id;
+  }
+
+  ChatService? _resolveChatServiceForTitle(Server server) {
+    final active = ref.read(activeServerProvider);
+    if (active?.id == server.id) {
+      return ref.read(chatServiceProvider);
+    }
+
+    return createChatServiceForServer(
+      server: server,
+      dio: ref.read(dioProvider),
+      onDeviceGemmaService: ref.read(onDeviceGemmaServiceProvider),
+      onDeviceLlamaService: ref.read(onDeviceLlamaServiceProvider),
+      loadedOnDeviceRuntime: ref.read(
+        onDeviceEngineProvider.select((s) => s.loadedRuntime),
+      ),
+    );
+  }
+
+  String _fallbackTitleFromMessages(
+    List<Message> messages,
+    TitleGenerationService titleService,
+  ) {
+    final userMessage = messages
+        .where((m) => m.role == MessageRole.user)
+        .firstOrNull;
+    if (userMessage == null || userMessage.content.trim().isEmpty) {
+      return 'New Chat';
+    }
+    return titleService.truncateFirstMessageTitle(userMessage.content);
   }
 
   void _maybeRequestReviewAfterSuccessfulCompletion({
@@ -974,9 +1237,12 @@ class ChatNotifier extends Notifier<ChatState> {
 
     final streamingMessage = _latestStreamingMessage ?? state.streamingMessage;
     if (streamingMessage != null) {
-      final finalMessage = streamingMessage.copyWith(
-        status: MessageStatus.cancelled,
-        isProcessing: false,
+      final finalMessage = _finalizeStreamMessage(
+        streamingMessage.copyWith(
+          status: MessageStatus.cancelled,
+          isProcessing: false,
+        ),
+        stopReason: 'cancelled',
       );
       await _saveMessage(finalMessage);
       _replaceMessageInState(finalMessage, clearStreaming: true);
@@ -1211,7 +1477,7 @@ class ChatNotifier extends Notifier<ChatState> {
       void updateUiState() {
         if (!stateNeedsUpdate) return;
         stateNeedsUpdate = false;
-        if (_currentConversationId == assistantMessage.conversationId) {
+        if (_activeConversationId == assistantMessage.conversationId) {
           state = state.copyWith(streamingMessage: streamingAssistantMessage);
         }
       }
@@ -1232,12 +1498,15 @@ class ChatNotifier extends Notifier<ChatState> {
           )
           .listen(
             (response) async {
-              if (_currentConversationId != assistantMessage.conversationId) {
+              if (_activeConversationId != assistantMessage.conversationId) {
                 return;
               }
 
               switch (response.type) {
                 case ChatResponseType.message:
+                  if (response.content?.isNotEmpty ?? false) {
+                    _noteFirstToken();
+                  }
                   streamingAssistantMessage = streamingAssistantMessage
                       .copyWith(
                         content:
@@ -1247,7 +1516,8 @@ class ChatNotifier extends Notifier<ChatState> {
                       );
                   _latestStreamingMessage = streamingAssistantMessage;
                   _chunkCount++;
-                  if (_shouldCheckpointSave(streamingAssistantMessage)) {
+                  if (!_isInMemoryChat &&
+                      _shouldCheckpointSave(streamingAssistantMessage)) {
                     _saveService?.enqueue(streamingAssistantMessage);
                     _updateSavedMetrics(streamingAssistantMessage);
                     _resetCheckpointMetrics();
@@ -1255,6 +1525,9 @@ class ChatNotifier extends Notifier<ChatState> {
                   stateNeedsUpdate = true;
                   break;
                 case ChatResponseType.reasoning:
+                  if (response.reasoningContent?.isNotEmpty ?? false) {
+                    _noteFirstToken();
+                  }
                   reasoningContent += response.reasoningContent ?? '';
                   streamingAssistantMessage = streamingAssistantMessage
                       .copyWith(
@@ -1263,7 +1536,8 @@ class ChatNotifier extends Notifier<ChatState> {
                       );
                   _latestStreamingMessage = streamingAssistantMessage;
                   _chunkCount++;
-                  if (_shouldCheckpointSave(streamingAssistantMessage)) {
+                  if (!_isInMemoryChat &&
+                      _shouldCheckpointSave(streamingAssistantMessage)) {
                     _saveService?.enqueue(streamingAssistantMessage);
                     _updateSavedMetrics(streamingAssistantMessage);
                     _resetCheckpointMetrics();
@@ -1280,10 +1554,13 @@ class ChatNotifier extends Notifier<ChatState> {
                 case ChatResponseType.error:
                   _uiUpdateTimer?.cancel();
                   _uiUpdateTimer = null;
-                  streamingAssistantMessage = streamingAssistantMessage.copyWith(
-                    status: MessageStatus.error,
-                    errorMessage: response.content,
-                    isProcessing: false,
+                  streamingAssistantMessage = _finalizeStreamMessage(
+                    streamingAssistantMessage.copyWith(
+                      status: MessageStatus.error,
+                      errorMessage: response.content,
+                      isProcessing: false,
+                    ),
+                    stopReason: 'error',
                   );
                   await _saveMessage(streamingAssistantMessage);
                   _replaceMessageInAll(
@@ -1294,6 +1571,11 @@ class ChatNotifier extends Notifier<ChatState> {
                   ref.read(isStreamingProvider.notifier).setStreaming(false);
                   ref.read(chatBackgroundServiceProvider).stop();
                   break;
+                case ChatResponseType.done:
+                  if (response.stats != null) {
+                    _streamStats = response.stats;
+                  }
+                  break;
                 default:
                   break;
               }
@@ -1301,9 +1583,12 @@ class ChatNotifier extends Notifier<ChatState> {
             onDone: () async {
               _uiUpdateTimer?.cancel();
               _uiUpdateTimer = null;
-              final finalMessage = streamingAssistantMessage.copyWith(
-                status: MessageStatus.complete,
-                isProcessing: false,
+              final finalMessage = _finalizeStreamMessage(
+                streamingAssistantMessage.copyWith(
+                  status: MessageStatus.complete,
+                  isProcessing: false,
+                ),
+                stopReason: 'complete',
               );
               await _saveMessage(finalMessage);
               _replaceMessageInAll(finalMessage, clearStreaming: true);
@@ -1429,6 +1714,10 @@ class ChatNotifier extends Notifier<ChatState> {
           preview,
           DateTime.now(),
           messageCount: messagesToCopy.length,
+          characterCount: messagesToCopy.fold<int>(
+            0,
+            (sum, message) => sum + message.content.length,
+          ),
         );
 
     final refreshedConversations = ref.read(conv.conversationsProvider).value;
@@ -1528,6 +1817,7 @@ class ChatNotifier extends Notifier<ChatState> {
   }
 
   Future<void> _saveMessage(Message message) async {
+    if (_isInMemoryChat) return;
     final db = ref.read(databaseProvider);
     await db.store.runInTransactionAsync(
       TxMode.write,
@@ -1567,7 +1857,7 @@ class ChatNotifier extends Notifier<ChatState> {
 
   Future<void> clearConversation() async {
     final db = ref.read(databaseProvider);
-    if (_currentConversationId != null) {
+    if (_currentConversationId != null && !_isInMemoryChat) {
       final query = db.messageBox
           .query(MessageEntity_.conversationUid.equals(_currentConversationId!))
           .build();
@@ -1575,10 +1865,23 @@ class ChatNotifier extends Notifier<ChatState> {
       query.close();
     }
     _currentConversationId = null;
+    _ephemeralConversationId = null;
+    _pendingTemporaryChat = false;
     state = const ChatState();
+    ref
+        .read(conv.activeConversationProvider.notifier)
+        .setActiveConversation(null);
   }
 
   void clearError() {
     state = state.copyWith(clearError: true);
   }
 }
+
+final hasActiveChatSessionProvider = Provider<bool>((ref) {
+  final chat = ref.watch(chatProvider);
+  final activeConv = ref.watch(conv.activeConversationProvider);
+  return chat.messages.isNotEmpty ||
+      chat.isStreaming ||
+      activeConv != null;
+});

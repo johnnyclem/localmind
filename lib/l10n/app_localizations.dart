@@ -12,6 +12,7 @@ import 'app_localizations_es.dart';
 import 'app_localizations_hi.dart';
 import 'app_localizations_it.dart';
 import 'app_localizations_ja.dart';
+import 'app_localizations_ru.dart';
 import 'app_localizations_zh.dart';
 
 // ignore_for_file: type=lint
@@ -107,6 +108,7 @@ abstract class AppLocalizations {
     Locale('hi'),
     Locale('it'),
     Locale('ja'),
+    Locale('ru'),
     Locale('zh'),
     Locale('zh', 'TW'),
   ];
@@ -1224,7 +1226,7 @@ abstract class AppLocalizations {
   /// Tooltip for attach button
   ///
   /// In en, this message translates to:
-  /// **'Attach images'**
+  /// **'Attach images or text'**
   String get attach_images_tooltip;
 
   /// Tooltip for start listening button
@@ -4077,6 +4079,24 @@ abstract class AppLocalizations {
   /// **'Strip formatting like **bold** before reading aloud'**
   String get tts_process_markdown_desc;
 
+  /// No description provided for @tts_skip_seconds.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip interval'**
+  String get tts_skip_seconds;
+
+  /// No description provided for @tts_skip_seconds_desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Forward and rewind jump size during playback'**
+  String get tts_skip_seconds_desc;
+
+  /// No description provided for @tts_skip_seconds_value.
+  ///
+  /// In en, this message translates to:
+  /// **'{seconds}s'**
+  String tts_skip_seconds_value(int seconds);
+
   /// No description provided for @preview_system_prompts.
   ///
   /// In en, this message translates to:
@@ -4106,6 +4126,300 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Need ideas? Try one of the quick prompts.'**
   String get welcome_message_4;
+
+  /// No description provided for @temporary_chat.
+  ///
+  /// In en, this message translates to:
+  /// **'Temporary chat'**
+  String get temporary_chat;
+
+  /// No description provided for @temporary_chat_desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Chats aren\'t saved to history.'**
+  String get temporary_chat_desc;
+
+  /// No description provided for @temporary_chat_banner.
+  ///
+  /// In en, this message translates to:
+  /// **'Temporary chat — not saved to history'**
+  String get temporary_chat_banner;
+
+  /// No description provided for @temporary_chat_save_warning_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Save message in temporary chat?'**
+  String get temporary_chat_save_warning_title;
+
+  /// No description provided for @temporary_chat_save_warning_body.
+  ///
+  /// In en, this message translates to:
+  /// **'This chat is temporary and hidden from history. The saved message will still appear in Saved Messages.'**
+  String get temporary_chat_save_warning_body;
+
+  /// No description provided for @save_to_history.
+  ///
+  /// In en, this message translates to:
+  /// **'Save to history'**
+  String get save_to_history;
+
+  /// No description provided for @share_conversation.
+  ///
+  /// In en, this message translates to:
+  /// **'Share conversation'**
+  String get share_conversation;
+
+  /// No description provided for @download_tts_audio.
+  ///
+  /// In en, this message translates to:
+  /// **'Download audio'**
+  String get download_tts_audio;
+
+  /// No description provided for @tts_download_unavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Download is only available for Piper and Kitten TTS'**
+  String get tts_download_unavailable;
+
+  /// No description provided for @tts_download_no_audio.
+  ///
+  /// In en, this message translates to:
+  /// **'No audio available to download yet'**
+  String get tts_download_no_audio;
+
+  /// No description provided for @tts_download_success.
+  ///
+  /// In en, this message translates to:
+  /// **'Audio saved'**
+  String get tts_download_success;
+
+  /// No description provided for @return_to_chat.
+  ///
+  /// In en, this message translates to:
+  /// **'Return to chat'**
+  String get return_to_chat;
+
+  /// No description provided for @return_to_temp_chat.
+  ///
+  /// In en, this message translates to:
+  /// **'Return to temporary chat'**
+  String get return_to_temp_chat;
+
+  /// No description provided for @insert_saved_message.
+  ///
+  /// In en, this message translates to:
+  /// **'Insert saved message'**
+  String get insert_saved_message;
+
+  /// No description provided for @insert_saved_message_desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a saved message to add to your input'**
+  String get insert_saved_message_desc;
+
+  /// No description provided for @model_info.
+  ///
+  /// In en, this message translates to:
+  /// **'Model info'**
+  String get model_info;
+
+  /// No description provided for @model_name.
+  ///
+  /// In en, this message translates to:
+  /// **'Model name'**
+  String get model_name;
+
+  /// No description provided for @model_identifier.
+  ///
+  /// In en, this message translates to:
+  /// **'Identifier'**
+  String get model_identifier;
+
+  /// No description provided for @not_available.
+  ///
+  /// In en, this message translates to:
+  /// **'Not available'**
+  String get not_available;
+
+  /// No description provided for @save_message_folders.
+  ///
+  /// In en, this message translates to:
+  /// **'Save message'**
+  String get save_message_folders;
+
+  /// No description provided for @remove_from_saved.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from saved'**
+  String get remove_from_saved;
+
+  /// No description provided for @message_already_saved.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved'**
+  String get message_already_saved;
+
+  /// No description provided for @stream_ttft.
+  ///
+  /// In en, this message translates to:
+  /// **'Time to first token'**
+  String get stream_ttft;
+
+  /// No description provided for @stream_tokens_per_sec.
+  ///
+  /// In en, this message translates to:
+  /// **'Tokens per second'**
+  String get stream_tokens_per_sec;
+
+  /// No description provided for @stream_stop_reason.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop reason'**
+  String get stream_stop_reason;
+
+  /// No description provided for @stream_input_tokens.
+  ///
+  /// In en, this message translates to:
+  /// **'Input tokens'**
+  String get stream_input_tokens;
+
+  /// No description provided for @stream_output_tokens.
+  ///
+  /// In en, this message translates to:
+  /// **'Output tokens'**
+  String get stream_output_tokens;
+
+  /// No description provided for @stream_generation_time.
+  ///
+  /// In en, this message translates to:
+  /// **'Generation time'**
+  String get stream_generation_time;
+
+  /// No description provided for @attach_image.
+  ///
+  /// In en, this message translates to:
+  /// **'Image'**
+  String get attach_image;
+
+  /// No description provided for @attach_text_document.
+  ///
+  /// In en, this message translates to:
+  /// **'Text document'**
+  String get attach_text_document;
+
+  /// No description provided for @add_attachment.
+  ///
+  /// In en, this message translates to:
+  /// **'Add attachment'**
+  String get add_attachment;
+
+  /// No description provided for @photo_permission_denied.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo access is required to attach images'**
+  String get photo_permission_denied;
+
+  /// No description provided for @characters_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Characters'**
+  String get characters_label;
+
+  /// No description provided for @exit_temporary_chat_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Exit temporary chat?'**
+  String get exit_temporary_chat_title;
+
+  /// No description provided for @exit_temporary_chat_body.
+  ///
+  /// In en, this message translates to:
+  /// **'This will discard the current temporary chat and return to a new chat.'**
+  String get exit_temporary_chat_body;
+
+  /// No description provided for @saved_message_temp_snap_unavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'This message was saved from a temporary chat and can\'t be opened in its original conversation.'**
+  String get saved_message_temp_snap_unavailable;
+
+  /// No description provided for @filter_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter'**
+  String get filter_title;
+
+  /// No description provided for @filter_pinned.
+  ///
+  /// In en, this message translates to:
+  /// **'Pinned'**
+  String get filter_pinned;
+
+  /// No description provided for @filter_archived.
+  ///
+  /// In en, this message translates to:
+  /// **'Archived'**
+  String get filter_archived;
+
+  /// No description provided for @filter_temp_chats.
+  ///
+  /// In en, this message translates to:
+  /// **'Temporary chats'**
+  String get filter_temp_chats;
+
+  /// No description provided for @filter_user_messages.
+  ///
+  /// In en, this message translates to:
+  /// **'User messages'**
+  String get filter_user_messages;
+
+  /// No description provided for @filter_assistant_messages.
+  ///
+  /// In en, this message translates to:
+  /// **'Assistant messages'**
+  String get filter_assistant_messages;
+
+  /// No description provided for @archive_chat.
+  ///
+  /// In en, this message translates to:
+  /// **'Archive'**
+  String get archive_chat;
+
+  /// No description provided for @unarchive_chat.
+  ///
+  /// In en, this message translates to:
+  /// **'Unarchive'**
+  String get unarchive_chat;
+
+  /// No description provided for @conversation_message_count.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 message} other{{count} messages}}'**
+  String conversation_message_count(int count);
+
+  /// No description provided for @conversation_character_count.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} chars'**
+  String conversation_character_count(int count);
+
+  /// No description provided for @generate_title_with_ai.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate with AI'**
+  String get generate_title_with_ai;
+
+  /// No description provided for @generating_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Generating...'**
+  String get generating_title;
+
+  /// No description provided for @generate_title_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not generate a title'**
+  String get generate_title_failed;
 }
 
 class _AppLocalizationsDelegate
@@ -4126,6 +4440,7 @@ class _AppLocalizationsDelegate
     'hi',
     'it',
     'ja',
+    'ru',
     'zh',
   ].contains(locale.languageCode);
 
@@ -4162,6 +4477,8 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
       return AppLocalizationsIt();
     case 'ja':
       return AppLocalizationsJa();
+    case 'ru':
+      return AppLocalizationsRu();
     case 'zh':
       return AppLocalizationsZh();
   }

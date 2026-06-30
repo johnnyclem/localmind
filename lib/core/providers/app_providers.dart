@@ -100,6 +100,8 @@ class SettingsNotifier extends Notifier<AppSettings> {
       _update(state.copyWith(autoSpeakEnabled: value));
   void setTtsProcessMarkdown(bool value) =>
       _update(state.copyWith(ttsProcessMarkdown: value));
+  void setTtsSkipSeconds(int value) =>
+      _update(state.copyWith(ttsSkipSeconds: value));
   void setSmartReplyEnabled(bool value) =>
       _update(state.copyWith(smartReplyEnabled: value));
   void setLocaleCode(String? value) =>

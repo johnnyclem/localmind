@@ -5,7 +5,7 @@
   "entities": [
     {
       "id": "1:6060443518060866028",
-      "lastPropertyId": "20:6746128880040296628",
+      "lastPropertyId": "23:3122805731877931734",
       "name": "ConversationEntity",
       "properties": [
         {
@@ -110,13 +110,28 @@
           "id": "20:6746128880040296628",
           "name": "folderId",
           "type": 9
+        },
+        {
+          "id": "21:4372897463643655414",
+          "name": "isTemporary",
+          "type": 1
+        },
+        {
+          "id": "22:2980396196878246454",
+          "name": "isArchived",
+          "type": 1
+        },
+        {
+          "id": "23:3122805731877931734",
+          "name": "characterCount",
+          "type": 6
         }
       ],
       "relations": []
     },
     {
       "id": "2:196881068437544233",
-      "lastPropertyId": "24:5960797950716320436",
+      "lastPropertyId": "28:8162956617579414275",
       "name": "MessageEntity",
       "properties": [
         {
@@ -245,6 +260,26 @@
         {
           "id": "24:5960797950716320436",
           "name": "parentMessageId",
+          "type": 9
+        },
+        {
+          "id": "25:1552629421552033386",
+          "name": "inputTokenCount",
+          "type": 6
+        },
+        {
+          "id": "26:1965067209419994290",
+          "name": "tokensPerSecond",
+          "type": 8
+        },
+        {
+          "id": "27:7785830711210478899",
+          "name": "ttftMs",
+          "type": 6
+        },
+        {
+          "id": "28:8162956617579414275",
+          "name": "stopReason",
           "type": 9
         }
       ],

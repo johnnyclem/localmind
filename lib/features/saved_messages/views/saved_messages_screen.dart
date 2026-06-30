@@ -4,12 +4,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:localmind/core/models/enums.dart';
 import 'package:localmind/core/routes/app_routes.dart';
+import 'package:localmind/core/components/list_filter_button.dart';
 import 'package:localmind/l10n/app_localizations.dart';
 import '../../chat/providers/chat_providers.dart';
 import '../../conversations/data/models/conversation.dart';
 import '../../conversations/providers/conversation_providers.dart';
 import '../providers/saved_message_providers.dart';
 import 'components/saved_message_folder_bar.dart';
+import 'components/saved_message_folder_sheet.dart';
+import 'components/saved_message_tile.dart';
 
 class SavedMessagesScreen extends ConsumerWidget {
   const SavedMessagesScreen({super.key});
@@ -58,6 +61,36 @@ class SavedMessagesScreen extends ConsumerWidget {
                   color: isDark ? Colors.white : Colors.black,
                 ),
               ),
+              const Spacer(),
+              ListFilterButton<SavedMessageListFilter>(
+                tooltip: l10n.filter_title,
+                selected: ref.watch(savedMessageListFilterProvider),
+                onChanged: (filter) => ref
+                    .read(savedMessageListFilterProvider.notifier)
+                    .setFilter(filter),
+                options: [
+                  ListFilterOption(
+                    value: SavedMessageListFilter.all,
+                    label: l10n.all_chats,
+                    icon: Icons.view_list_rounded,
+                  ),
+                  ListFilterOption(
+                    value: SavedMessageListFilter.tempChats,
+                    label: l10n.filter_temp_chats,
+                    icon: Icons.bolt_outlined,
+                  ),
+                  ListFilterOption(
+                    value: SavedMessageListFilter.user,
+                    label: l10n.filter_user_messages,
+                    icon: Icons.person_outline,
+                  ),
+                  ListFilterOption(
+                    value: SavedMessageListFilter.assistant,
+                    label: l10n.filter_assistant_messages,
+                    icon: Icons.auto_awesome_outlined,
+                  ),
+                ],
+              ),
             ],
           ),
         ),
@@ -76,115 +109,71 @@ class SavedMessagesScreen extends ConsumerWidget {
                 );
               }
               return ListView.separated(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.only(bottom: 8),
                 itemCount: messages.length,
-                separatorBuilder: (_, _) => const SizedBox(height: 8),
+                separatorBuilder: (_, __) => Divider(
+                  height: 1,
+                  color: isDark
+                      ? const Color(0xFF2A2A2A)
+                      : const Color(0xFFE5E5E5),
+                ),
                 itemBuilder: (context, index) {
                   final saved = messages[index];
                   final role = MessageRole.values[saved.roleIndex];
-                  return Card(
-                    child: ListTile(
-                      leading: Icon(
-                        role == MessageRole.user
-                            ? Icons.person_outline
-                            : Icons.smart_toy_outlined,
-                      ),
-                      title: Text(
-                        saved.conversationTitle,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      subtitle: Text(
-                        saved.content,
-                        maxLines: 3,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      isThreeLine: true,
-                      onTap: () async {
-                        final conversations =
-                            ref.read(conversationsProvider).value ?? [];
-                        Conversation? conversation;
-                        for (final conv in conversations) {
-                          if (conv.id == saved.conversationId) {
-                            conversation = conv;
-                            break;
-                          }
+                  return SavedMessageTile(
+                    saved: saved,
+                    isUser: role == MessageRole.user,
+                    onTap: () async {
+                      if (saved.conversationId.isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(l10n.saved_message_temp_snap_unavailable),
+                          ),
+                        );
+                        return;
+                      }
+                      final conversations =
+                          ref.read(conversationsProvider).value ?? [];
+                      Conversation? conversation;
+                      for (final conv in conversations) {
+                        if (conv.id == saved.conversationId) {
+                          conversation = conv;
+                          break;
                         }
-                        if (conversation == null) return;
+                      }
+                      if (conversation == null) return;
 
-                        ref
-                            .read(scrollToMessageIdProvider.notifier)
-                            .scrollTo(saved.sourceMessageId);
-                        await ref
-                            .read(chatProvider.notifier)
-                            .loadConversation(conversation);
-                        if (context.mounted) {
-                          if (Scaffold.maybeOf(context)?.isDrawerOpen ?? false) {
-                            Navigator.pop(context);
-                          }
-                          context.go(AppRoutes.home);
+                      ref
+                          .read(scrollToMessageIdProvider.notifier)
+                          .scrollTo(saved.sourceMessageId);
+                      await ref
+                          .read(chatProvider.notifier)
+                          .loadConversation(conversation);
+                      if (context.mounted) {
+                        if (Scaffold.maybeOf(context)?.isDrawerOpen ?? false) {
+                          Navigator.pop(context);
                         }
-                      },
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.copy_outlined, size: 20),
-                            tooltip: l10n.copy,
-                            onPressed: () async {
-                              await Clipboard.setData(
-                                ClipboardData(text: saved.content),
-                              );
-                              if (context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(l10n.copied_to_clipboard),
-                                  ),
-                                );
-                              }
-                            },
-                          ),
-                          PopupMenuButton<String>(
-                            onSelected: (value) async {
-                              if (value == 'delete') {
-                                await ref
-                                    .read(savedMessagesProvider.notifier)
-                                    .deleteSavedMessage(saved.id);
-                              } else if (value.startsWith('folder:')) {
-                                final folderId = value.substring(7);
-                                await ref
-                                    .read(savedMessagesProvider.notifier)
-                                    .moveToFolder(
-                                      saved.id,
-                                      folderId.isEmpty ? null : folderId,
-                                    );
-                              }
-                            },
-                            itemBuilder: (context) {
-                              final folders =
-                                  ref.read(savedMessageFoldersProvider).value ??
-                                  [];
-                              return [
-                                ...folders.map(
-                                  (folder) => PopupMenuItem(
-                                    value: 'folder:${folder.id}',
-                                    child: Text(folder.name),
-                                  ),
-                                ),
-                                PopupMenuItem(
-                                  value: 'folder:',
-                                  child: Text(l10n.unfiled_chats),
-                                ),
-                                PopupMenuItem(
-                                  value: 'delete',
-                                  child: Text(l10n.delete),
-                                ),
-                              ];
-                            },
-                          ),
-                        ],
-                      ),
+                        context.go(AppRoutes.home);
+                      }
+                    },
+                    onCopy: () async {
+                      await Clipboard.setData(
+                        ClipboardData(text: saved.content),
+                      );
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(l10n.copied_to_clipboard)),
+                        );
+                      }
+                    },
+                    onMoveToFolder: () => showSavedMessageMoveToFolderSheet(
+                      context,
+                      ref,
+                      saved.id,
                     ),
+                    onDelete: () => ref
+                        .read(savedMessagesProvider.notifier)
+                        .deleteSavedMessage(saved.id),
                   );
                 },
               );

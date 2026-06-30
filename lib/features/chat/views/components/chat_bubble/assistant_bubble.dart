@@ -23,8 +23,10 @@ class AssistantBubble extends StatelessWidget {
     this.onBranch,
     this.onContinue,
     this.onModelTap,
+    this.onModelLongPress,
     this.onCycleVariant,
     this.onSave,
+    this.onShare,
     this.allMessages = const [],
     this.isStreaming = false,
   });
@@ -38,7 +40,9 @@ class AssistantBubble extends StatelessWidget {
   final VoidCallback? onBranch;
   final VoidCallback? onContinue;
   final void Function(Message message)? onSave;
+  final VoidCallback? onShare;
   final VoidCallback? onModelTap;
+  final VoidCallback? onModelLongPress;
   final void Function(int direction)? onCycleVariant;
   final bool isStreaming;
 
@@ -60,9 +64,8 @@ class AssistantBubble extends StatelessWidget {
               !isStreaming)
             Padding(
               padding: const EdgeInsets.only(bottom: 6),
-              child: InkWell(
-                onTap: onModelTap,
-                borderRadius: BorderRadius.circular(4),
+              child: GestureDetector(
+                onLongPress: onModelLongPress,
                 child: Text(
                   message.modelId!,
                   style: TextStyle(
@@ -156,9 +159,14 @@ class AssistantBubble extends StatelessWidget {
                   content: message.content.isEmpty
                       ? AppLocalizations.of(context)!.no_response
                       : message.content,
-                  tokenCount: message.tokenCount,
                   messageId: message.id,
                   conversationId: message.conversationId,
+                  tokenCount: message.tokenCount,
+                  inputTokenCount: message.inputTokenCount,
+                  generationTimeMs: message.generationTimeMs,
+                  ttftMs: message.ttftMs,
+                  tokensPerSecond: message.tokensPerSecond,
+                  stopReason: message.stopReason,
                   onCopy: onCopy,
                   onRetry: onRetry,
                   onDelete: onDelete,
@@ -166,6 +174,7 @@ class AssistantBubble extends StatelessWidget {
                   onBranch: onBranch,
                   onContinue: onContinue,
                   onSave: () => onSave?.call(message),
+                  onShare: onShare,
                 ),
             ],
           ),

@@ -32,6 +32,9 @@ class SidebarWidget extends ConsumerWidget {
     final isLocalModels = location.startsWith(AppRoutes.onDeviceModels);
     final isTtsModels = location.startsWith(AppRoutes.ttsModels);
     final isSettings = location.startsWith(AppRoutes.settings);
+    final isHome = location == AppRoutes.home || location == '/';
+    final hasActiveChat = ref.watch(hasActiveChatSessionProvider);
+    final isTemporary = ref.watch(chatProvider.select((s) => s.isTemporary));
 
     return Container(
       width: AppSizes.sidebarWidth,
@@ -62,6 +65,36 @@ class SidebarWidget extends ConsumerWidget {
                 child: Text(l10n.nav_new_chat),
               ),
             ),
+
+            if (hasActiveChat)
+              Padding(
+                padding: EdgeInsets.fromLTRB(16, 0, 16, isHome ? 8 : 8),
+                child: isTemporary
+                    ? ShadButton.outline(
+                        width: double.infinity,
+                        leading: const Icon(Icons.arrow_back, size: 18),
+                        onPressed: () {
+                          if (!isHome) context.go(AppRoutes.home);
+                          if (Scaffold.maybeOf(context)?.isDrawerOpen ??
+                              false) {
+                            Navigator.pop(context);
+                          }
+                        },
+                        child: Text(l10n.return_to_temp_chat),
+                      )
+                    : ShadButton.secondary(
+                        width: double.infinity,
+                        leading: const Icon(Icons.arrow_back, size: 18),
+                        onPressed: () {
+                          if (!isHome) context.go(AppRoutes.home);
+                          if (Scaffold.maybeOf(context)?.isDrawerOpen ??
+                              false) {
+                            Navigator.pop(context);
+                          }
+                        },
+                        child: Text(l10n.return_to_chat),
+                      ),
+              ),
 
             const SidebarSearchButton(),
             const SizedBox(height: 8),

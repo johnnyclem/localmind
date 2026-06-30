@@ -824,7 +824,7 @@
   "@stop_generation_tooltip": {
     "description": "Tooltip for stop button"
   },
-  "attach_images_tooltip": "Attach images",
+  "attach_images_tooltip": "Attach images or text",
   "@attach_images_tooltip": {
     "description": "Tooltip for attach button"
   },
@@ -2593,9 +2593,82 @@
   "export_conversation": "Export conversation",
   "tts_process_markdown": "Process markdown for speech",
   "tts_process_markdown_desc": "Strip formatting like **bold** before reading aloud",
+  "tts_skip_seconds": "Skip interval",
+  "tts_skip_seconds_desc": "Forward and rewind jump size during playback",
+  "tts_skip_seconds_value": "{seconds}s",
+  "@tts_skip_seconds_value": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
   "preview_system_prompts": "Preview system prompts",
   "welcome_message_1": "What can I help you with today?",
   "welcome_message_2": "Ask me anything — I'm ready when you are.",
   "welcome_message_3": "Start a conversation below.",
-  "welcome_message_4": "Need ideas? Try one of the quick prompts."
+  "welcome_message_4": "Need ideas? Try one of the quick prompts.",
+  "temporary_chat": "Temporary chat",
+  "temporary_chat_desc": "Chats aren't saved to history.",
+  "temporary_chat_banner": "Temporary chat — not saved to history",
+  "temporary_chat_save_warning_title": "Save message in temporary chat?",
+  "temporary_chat_save_warning_body": "This chat is temporary and hidden from history. The saved message will still appear in Saved Messages.",
+  "save_to_history": "Save to history",
+  "share_conversation": "Share conversation",
+  "download_tts_audio": "Download audio",
+  "tts_download_unavailable": "Download is only available for Piper and Kitten TTS",
+  "tts_download_no_audio": "No audio available to download yet",
+  "tts_download_success": "Audio saved",
+  "return_to_chat": "Return to chat",
+  "return_to_temp_chat": "Return to temporary chat",
+  "insert_saved_message": "Insert saved message",
+  "insert_saved_message_desc": "Choose a saved message to add to your input",
+  "model_info": "Model info",
+  "model_name": "Model name",
+  "model_identifier": "Identifier",
+  "not_available": "Not available",
+  "save_message_folders": "Save message",
+  "remove_from_saved": "Remove from saved",
+  "message_already_saved": "Saved",
+  "stream_ttft": "Time to first token",
+  "stream_tokens_per_sec": "Tokens per second",
+  "stream_stop_reason": "Stop reason",
+  "stream_input_tokens": "Input tokens",
+  "stream_output_tokens": "Output tokens",
+  "stream_generation_time": "Generation time",
+  "attach_image": "Image",
+  "attach_text_document": "Text document",
+  "add_attachment": "Add attachment",
+  "photo_permission_denied": "Photo access is required to attach images",
+  "characters_label": "Characters",
+  "exit_temporary_chat_title": "Exit temporary chat?",
+  "exit_temporary_chat_body": "This will discard the current temporary chat and return to a new chat.",
+  "saved_message_temp_snap_unavailable": "This message was saved from a temporary chat and can't be opened in its original conversation.",
+  "filter_title": "Filter",
+  "filter_pinned": "Pinned",
+  "filter_archived": "Archived",
+  "filter_temp_chats": "Temporary chats",
+  "filter_user_messages": "User messages",
+  "filter_assistant_messages": "Assistant messages",
+  "archive_chat": "Archive",
+  "unarchive_chat": "Unarchive",
+  "conversation_message_count": "{count, plural, one{1 message} other{{count} messages}}",
+  "@conversation_message_count": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "conversation_character_count": "{count} chars",
+  "@conversation_character_count": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "generate_title_with_ai": "Generate with AI",
+  "generating_title": "Generating...",
+  "generate_title_failed": "Could not generate a title"
 }

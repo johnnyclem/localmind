@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:localmind/core/theme/colors.dart';
 import 'package:localmind/l10n/app_localizations.dart';
 import 'recent_conversation_item.dart';
@@ -103,40 +104,52 @@ class _EmptyStateState extends State<EmptyState>
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    return Center(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const SizedBox(height: 24),
-            AnimatedSwitcher(
-              duration: const Duration(milliseconds: 400),
-              child: Text(
-                _welcomeMessages(l10n)[_welcomeIndex],
-                key: ValueKey(_welcomeIndex),
-                textAlign: TextAlign.center,
-                style: theme.textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: isDark ? Colors.white : Colors.black87,
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(32, 8, 32, 24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          SizedBox(
+            height: 72,
+            child: Center(
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 400),
+                layoutBuilder: (current, previous) => Stack(
+                  alignment: Alignment.center,
+                  children: [...previous, if (current != null) current],
+                ),
+                child: Text(
+                  _welcomeMessages(l10n)[_welcomeIndex],
+                  key: ValueKey(_welcomeIndex),
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: isDark ? Colors.white : Colors.black87,
+                  ),
                 ),
               ),
             ),
-            const SizedBox(height: 32),
-            _buildModelAndPersonaSelectors(isDark, theme, l10n),
-            const SizedBox(height: 32),
-            _buildQuickPrompts(isDark),
-            if (widget.recentConversations.isNotEmpty) ...[
-              const SizedBox(height: 32),
-              _buildRecentSection(isDark, l10n),
-            ],
+          ),
+          const SizedBox(height: 8),
+          _buildModelAndPersonaSelectors(isDark, theme, l10n),
+          const SizedBox(height: 24),
+          _buildQuickPrompts(isDark),
+          if (widget.recentConversations.isNotEmpty) ...[
+            const SizedBox(height: 28),
+            _buildRecentSection(isDark, l10n),
           ],
-        ),
+        ],
       ),
     );
   }
 
-  Widget _buildModelAndPersonaSelectors(bool isDark, ThemeData theme, AppLocalizations l10n) {
+  Widget _buildModelAndPersonaSelectors(
+    bool isDark,
+    ThemeData theme,
+    AppLocalizations l10n,
+  ) {
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 0.0, end: 1.0),
       duration: const Duration(milliseconds: 300),
@@ -160,7 +173,8 @@ class _EmptyStateState extends State<EmptyState>
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.settings_suggest, size: 18, color: theme.colorScheme.primary),
+                  Icon(Icons.settings_suggest,
+                      size: 18, color: theme.colorScheme.primary),
                   const SizedBox(width: 8),
                   Flexible(
                     child: Text(
@@ -190,7 +204,8 @@ class _EmptyStateState extends State<EmptyState>
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   if (widget.selectedPersona != null) ...[
-                    Text(widget.selectedPersona!.emoji, style: const TextStyle(fontSize: 18)),
+                    Text(widget.selectedPersona!.emoji,
+                        style: const TextStyle(fontSize: 18)),
                     const SizedBox(width: 8),
                     Flexible(
                       child: Text(
@@ -205,7 +220,8 @@ class _EmptyStateState extends State<EmptyState>
                       ),
                     ),
                   ] else ...[
-                    Icon(Icons.smart_toy_outlined, size: 18, color: theme.colorScheme.primary),
+                    Icon(Icons.smart_toy_outlined,
+                        size: 18, color: theme.colorScheme.primary),
                     const SizedBox(width: 8),
                     Flexible(
                       child: Text(
@@ -278,7 +294,8 @@ class _EmptyStateState extends State<EmptyState>
           child: ActionChip(
             label: Text(prompt),
             onPressed: () => widget.onQuickPrompt(prompt),
-            backgroundColor: isDark ? AppColors.darkSurfaceCard : AppColors.lightSurface,
+            backgroundColor:
+                isDark ? AppColors.darkSurfaceCard : AppColors.lightSurface,
             side: BorderSide(
               color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
             ),
@@ -299,7 +316,8 @@ class _EmptyStateState extends State<EmptyState>
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
-                color: isDark ? AppColors.darkMutedText : AppColors.lightMutedText,
+                color:
+                    isDark ? AppColors.darkMutedText : AppColors.lightMutedText,
               ),
             ),
             const SizedBox(width: 8),

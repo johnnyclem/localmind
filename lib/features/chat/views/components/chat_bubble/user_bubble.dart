@@ -17,6 +17,7 @@ class UserBubble extends StatelessWidget {
     this.onBranch,
     this.onCycleVariant,
     this.onSave,
+    this.onShare,
     this.allMessages = const [],
   });
 
@@ -28,6 +29,7 @@ class UserBubble extends StatelessWidget {
   final VoidCallback? onBranch;
   final void Function(int direction)? onCycleVariant;
   final void Function(Message message)? onSave;
+  final VoidCallback? onShare;
 
   @override
   Widget build(BuildContext context) {
@@ -123,6 +125,7 @@ class UserBubble extends StatelessWidget {
                   onEdit: onEdit,
                   onBranch: onBranch,
                   onSave: onSave == null ? null : () => onSave!(message),
+                  onShare: onShare,
                 ),
               ],
             ),

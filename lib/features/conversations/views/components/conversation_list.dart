@@ -12,8 +12,9 @@ import '../../../../core/routes/app_routes.dart';
 import '../../../chat/providers/chat_providers.dart';
 import '../../data/models/conversation.dart';
 import '../../providers/conversation_providers.dart';
-import 'conversation_tile.dart';
+import 'rename_conversation_dialog.dart';
 import 'date_section_header.dart';
+import 'conversation_tile.dart';
 
 class ConversationList extends ConsumerWidget {
   const ConversationList({
@@ -96,6 +97,12 @@ class ConversationList extends ConsumerWidget {
                 onExport: () {
                   _exportConversation(context, ref, l10n, conversation);
                 },
+                onArchive: () {
+                  ref.read(conversationsProvider.notifier).setArchived(
+                        conversation.id,
+                        !conversation.isArchived,
+                      );
+                },
               );
             }),
           ],
@@ -110,42 +117,7 @@ class ConversationList extends ConsumerWidget {
     AppLocalizations l10n,
     Conversation conversation,
   ) {
-    final controller = TextEditingController(text: conversation.title);
-
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text(l10n.rename_conversation),
-          content: TextField(
-            controller: controller,
-            autofocus: true,
-            decoration: InputDecoration(
-              hintText: l10n.enter_new_title,
-              border: const OutlineInputBorder(),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text(l10n.cancel),
-            ),
-            TextButton(
-              onPressed: () {
-                final newTitle = controller.text.trim();
-                if (newTitle.isNotEmpty) {
-                  ref
-                      .read(conversationsProvider.notifier)
-                      .renameConversation(conversation.id, newTitle);
-                }
-                Navigator.pop(context);
-              },
-              child: Text(l10n.rename),
-            ),
-          ],
-        );
-      },
-    );
+    showRenameConversationDialog(context, ref, conversation: conversation);
   }
 
   void _showDeleteConfirmation(

@@ -12,6 +12,10 @@ class Message {
   final MessageStatus status;
   final String? modelId;
   final int? tokenCount;
+  final int? inputTokenCount;
+  final double? tokensPerSecond;
+  final int? ttftMs;
+  final String? stopReason;
   final String? errorMessage;
   final List<String>? attachmentPaths;
   final int? generationTimeMs;
@@ -36,6 +40,10 @@ class Message {
     this.status = MessageStatus.complete,
     this.modelId,
     this.tokenCount,
+    this.inputTokenCount,
+    this.tokensPerSecond,
+    this.ttftMs,
+    this.stopReason,
     this.errorMessage,
     this.attachmentPaths,
     this.generationTimeMs,
@@ -61,6 +69,10 @@ class Message {
     MessageStatus? status,
     String? modelId,
     int? tokenCount,
+    int? inputTokenCount,
+    double? tokensPerSecond,
+    int? ttftMs,
+    String? stopReason,
     String? errorMessage,
     List<String>? attachmentPaths,
     int? generationTimeMs,
@@ -85,6 +97,10 @@ class Message {
       status: status ?? this.status,
       modelId: modelId ?? this.modelId,
       tokenCount: tokenCount ?? this.tokenCount,
+      inputTokenCount: inputTokenCount ?? this.inputTokenCount,
+      tokensPerSecond: tokensPerSecond ?? this.tokensPerSecond,
+      ttftMs: ttftMs ?? this.ttftMs,
+      stopReason: stopReason ?? this.stopReason,
       errorMessage: errorMessage ?? this.errorMessage,
       attachmentPaths: attachmentPaths ?? this.attachmentPaths,
       generationTimeMs: generationTimeMs ?? this.generationTimeMs,

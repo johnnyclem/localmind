@@ -38,6 +38,7 @@ class AppSettings {
   final KittenTtsModelVariant kittenTtsModelVariant;
   final bool autoSpeakEnabled;
   final bool ttsProcessMarkdown;
+  final int ttsSkipSeconds;
   final bool smartReplyEnabled;
   final String? localeCode;
   final String? huggingFaceToken;
@@ -71,6 +72,7 @@ class AppSettings {
     this.kittenTtsModelVariant = KittenTtsModelVariant.nanoInt8,
     this.autoSpeakEnabled = false,
     this.ttsProcessMarkdown = true,
+    this.ttsSkipSeconds = 10,
     this.smartReplyEnabled = true,
     this.localeCode,
     this.huggingFaceToken,
@@ -105,6 +107,7 @@ class AppSettings {
     KittenTtsModelVariant? kittenTtsModelVariant,
     bool? autoSpeakEnabled,
     bool? ttsProcessMarkdown,
+    int? ttsSkipSeconds,
     bool? smartReplyEnabled,
     Object? localeCode = _unset,
     Object? huggingFaceToken = _unset,
@@ -144,6 +147,7 @@ class AppSettings {
           kittenTtsModelVariant ?? this.kittenTtsModelVariant,
       autoSpeakEnabled: autoSpeakEnabled ?? this.autoSpeakEnabled,
       ttsProcessMarkdown: ttsProcessMarkdown ?? this.ttsProcessMarkdown,
+      ttsSkipSeconds: ttsSkipSeconds ?? this.ttsSkipSeconds,
       smartReplyEnabled: smartReplyEnabled ?? this.smartReplyEnabled,
       localeCode: identical(localeCode, _unset)
           ? this.localeCode
@@ -185,6 +189,7 @@ class AppSettings {
       'kittenTtsModelVariant': kittenTtsModelVariant.name,
       'autoSpeakEnabled': autoSpeakEnabled,
       'ttsProcessMarkdown': ttsProcessMarkdown,
+      'ttsSkipSeconds': ttsSkipSeconds,
       'smartReplyEnabled': smartReplyEnabled,
       'localeCode': localeCode,
       'huggingFaceToken': huggingFaceToken,
@@ -221,6 +226,7 @@ class AppSettings {
       kittenTtsModelVariant: _parseKittenVariant(map['kittenTtsModelVariant']),
       autoSpeakEnabled: map['autoSpeakEnabled'] ?? false,
       ttsProcessMarkdown: map['ttsProcessMarkdown'] ?? true,
+      ttsSkipSeconds: _parseTtsSkipSeconds(map['ttsSkipSeconds']),
       smartReplyEnabled: map['smartReplyEnabled'] ?? true,
       localeCode: map['localeCode'] as String?,
       huggingFaceToken: map['huggingFaceToken'] as String?,
@@ -255,6 +261,12 @@ class AppSettings {
       } catch (_) {}
     }
     return KittenTtsModelVariant.nanoInt8;
+  }
+
+  static int _parseTtsSkipSeconds(dynamic value) {
+    const allowed = {5, 10, 15, 30};
+    if (value is int && allowed.contains(value)) return value;
+    return 10;
   }
 
   String toJson() => json.encode(toMap());

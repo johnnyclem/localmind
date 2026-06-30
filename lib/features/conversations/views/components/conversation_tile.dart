@@ -16,6 +16,7 @@ class ConversationTile extends StatelessWidget {
     required this.onDuplicate,
     required this.onMoveToFolder,
     required this.onExport,
+    required this.onArchive,
   });
 
   final Conversation conversation;
@@ -27,6 +28,7 @@ class ConversationTile extends StatelessWidget {
   final VoidCallback onDuplicate;
   final VoidCallback onMoveToFolder;
   final VoidCallback onExport;
+  final VoidCallback onArchive;
 
   String _formatTimestamp(AppLocalizations l10n, DateTime dateTime) {
     final now = DateTime.now();
@@ -123,6 +125,16 @@ class ConversationTile extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                         ),
                       ],
+                      const SizedBox(height: 2),
+                      Text(
+                        '${l10n.conversation_message_count(conversation.messageCount)} · ${l10n.conversation_character_count(conversation.characterCount)}',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: isDark
+                              ? AppColors.darkMutedText
+                              : AppColors.lightMutedText,
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -209,6 +221,22 @@ class ConversationTile extends StatelessWidget {
                 onTap: () {
                   Navigator.pop(ctx);
                   onExport();
+                },
+              ),
+              ListTile(
+                leading: Icon(
+                  conversation.isArchived
+                      ? Icons.unarchive_outlined
+                      : Icons.archive_outlined,
+                ),
+                title: Text(
+                  conversation.isArchived
+                      ? l10n.unarchive_chat
+                      : l10n.archive_chat,
+                ),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  onArchive();
                 },
               ),
               ListTile(

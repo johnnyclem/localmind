@@ -1,0 +1,49 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:localmind/l10n/app_localizations.dart';
+import '../../providers/saved_message_providers.dart';
+
+Future<void> showSavedMessageMoveToFolderSheet(
+  BuildContext context,
+  WidgetRef ref,
+  String savedMessageId,
+) async {
+  final l10n = AppLocalizations.of(context)!;
+  final folders = ref.read(savedMessageFoldersProvider).value ?? [];
+
+  await showModalBottomSheet<void>(
+    context: context,
+    builder: (ctx) {
+      return SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.folder_off_outlined),
+              title: Text(l10n.remove_from_folder),
+              onTap: () async {
+                Navigator.pop(ctx);
+                await ref
+                    .read(savedMessagesProvider.notifier)
+                    .moveToFolder(savedMessageId, null);
+              },
+            ),
+            ...folders.map(
+              (folder) => ListTile(
+                leading: const Icon(Icons.folder_outlined),
+                title: Text(folder.name),
+                onTap: () async {
+                  Navigator.pop(ctx);
+                  await ref
+                      .read(savedMessagesProvider.notifier)
+                      .moveToFolder(savedMessageId, folder.id);
+                },
+              ),
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      );
+    },
+  );
+}

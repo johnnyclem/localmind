@@ -19,8 +19,10 @@ class ChatBubble extends StatelessWidget {
     this.onBranch,
     this.onContinue,
     this.onModelTap,
+    this.onModelLongPress,
     this.onCycleVariant,
     this.onSave,
+    this.onShare,
     this.isStreaming = false,
   });
 
@@ -33,8 +35,10 @@ class ChatBubble extends StatelessWidget {
   final VoidCallback? onBranch;
   final VoidCallback? onContinue;
   final VoidCallback? onModelTap;
+  final VoidCallback? onModelLongPress;
   final void Function(int direction)? onCycleVariant;
   final void Function(Message message)? onSave;
+  final VoidCallback? onShare;
   final bool isStreaming;
 
   @override
@@ -56,6 +60,7 @@ class ChatBubble extends StatelessWidget {
             onBranch: onBranch,
             onCycleVariant: onCycleVariant,
             onSave: onSave,
+            onShare: onShare,
           ),
         );
       case MessageRole.assistant:
@@ -71,8 +76,10 @@ class ChatBubble extends StatelessWidget {
             onBranch: onBranch,
             onContinue: onContinue,
             onModelTap: onModelTap,
+            onModelLongPress: onModelLongPress,
             onCycleVariant: onCycleVariant,
             onSave: onSave,
+            onShare: onShare,
             isStreaming: isStreaming,
           ),
         );

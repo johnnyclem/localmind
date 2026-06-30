@@ -170,6 +170,12 @@ class SettingsViews extends ConsumerWidget {
                         .read(settingsProvider.notifier)
                         .setTtsProcessMarkdown(value),
                   ),
+                  _TtsSkipSecondsSetting(
+                    value: settings.ttsSkipSeconds,
+                    onChanged: (value) => ref
+                        .read(settingsProvider.notifier)
+                        .setTtsSkipSeconds(value),
+                  ),
                 ],
               );
 
@@ -877,6 +883,7 @@ class _LanguageSetting extends StatelessWidget {
     ('ar', 'العربية', 'assets/images/flag_sa.png', '🇸🇦'),
     ('bn', 'বাংলা', 'assets/images/flag_bd.png', '🇧🇩'),
     ('hi', 'हिन्दी', 'assets/images/flag_in.png', '🇮🇳'),
+    ('ru', 'Русский', 'assets/images/flag_ru.png', '🇷🇺'),
   ];
 
   final String? current;
@@ -1549,6 +1556,59 @@ class _SectionActionButton extends StatelessWidget {
       width: double.infinity,
       leading: Icon(icon, size: 16),
       child: Align(alignment: Alignment.centerLeft, child: Text(label)),
+    );
+  }
+}
+
+class _TtsSkipSecondsSetting extends StatelessWidget {
+  const _TtsSkipSecondsSetting({
+    required this.value,
+    required this.onChanged,
+  });
+
+  final int value;
+  final ValueChanged<int> onChanged;
+
+  static const _options = [5, 10, 15, 30];
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+
+    return _SettingPanel(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.tts_skip_seconds,
+            style: theme.textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            l10n.tts_skip_seconds_desc,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: _options.map((seconds) {
+              final selected = value == seconds;
+              return FilterChip(
+                label: Text(l10n.tts_skip_seconds_value(seconds)),
+                selected: selected,
+                onSelected: (_) => onChanged(seconds),
+                showCheckmark: false,
+              );
+            }).toList(),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -2,6 +2,8 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:localmind/core/models/enums.dart';
+import 'package:localmind/core/providers/app_providers.dart';
 import 'package:localmind/core/routes/app_routes.dart';
 import 'package:localmind/l10n/app_localizations.dart';
 import '../../providers/tts_providers.dart' as tts;
@@ -21,6 +23,18 @@ class TtsPlayerBar extends ConsumerWidget {
     if (content == null || content.isEmpty) return null;
     if (content.length <= 50) return content;
     return '${content.substring(0, 47)}...';
+  }
+
+  String _formatDuration(Duration d) {
+    if (d.inHours > 0) {
+      final h = d.inHours.toString();
+      final m = d.inMinutes.remainder(60).toString().padLeft(2, '0');
+      final s = (d.inSeconds % 60).toString().padLeft(2, '0');
+      return '$h:$m:$s';
+    }
+    final m = d.inMinutes.remainder(60).toString().padLeft(2, '0');
+    final s = (d.inSeconds % 60).toString().padLeft(2, '0');
+    return '$m:$s';
   }
 
   Future<void> _scrollToPlayingMessage(
@@ -86,6 +100,12 @@ class TtsPlayerBar extends ConsumerWidget {
 
     final preview = _truncateContent(ttsState.playingContent);
     final canJumpToMessage = ttsState.playingMessageId != null;
+    final skipSeconds = ref.watch(settingsProvider).ttsSkipSeconds;
+    final hasTimeline = ttsState.duration > Duration.zero;
+    final progress = hasTimeline
+        ? (ttsState.position.inMilliseconds / ttsState.duration.inMilliseconds)
+            .clamp(0.0, 1.0)
+        : null;
 
     return AnimatedSize(
       duration: const Duration(milliseconds: 200),
@@ -173,31 +193,36 @@ class TtsPlayerBar extends ConsumerWidget {
                                   ),
                                 ),
                               ),
-                            if (!ttsState.isInitializing)
-                              Padding(
-                                padding: const EdgeInsets.only(top: 4),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(2),
-                                  child: LinearProgressIndicator(
-                                    backgroundColor:
-                                        theme.colorScheme.secondary,
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                      theme.colorScheme.primary,
-                                    ),
-                                    minHeight: 3,
-                                  ),
-                                ),
-                              ),
                           ],
                         ),
                       ),
                     ),
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 8),
                 if (!ttsState.isInitializing)
                   _WaveformIndicator(isPlaying: !ttsState.isPaused),
-                const SizedBox(width: 12),
+                if (!ttsState.isInitializing &&
+                    ttsState.activeEngine != EngineId.system)
+                  IconButton(
+                    icon: const Icon(Icons.download_outlined, size: 20),
+                    tooltip: l10n.download_tts_audio,
+                    visualDensity: VisualDensity.compact,
+                    onPressed: () async {
+                      final ok = await notifier.downloadCurrentAudio();
+                      if (!context.mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            ok
+                                ? l10n.tts_download_success
+                                : l10n.tts_download_no_audio,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                const SizedBox(width: 4),
                 GestureDetector(
                   onTap: () => notifier.stop(),
                   child: Tooltip(
@@ -218,9 +243,128 @@ class TtsPlayerBar extends ConsumerWidget {
                 ),
               ],
             ),
+            if (!ttsState.isInitializing && (ttsState.canSeek || hasTimeline)) ...[
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.fast_rewind_rounded, size: 22),
+                    tooltip: '-${skipSeconds}s',
+                    visualDensity: VisualDensity.compact,
+                    onPressed: () => notifier.skipBackward(),
+                  ),
+                  Expanded(
+                    child: _TtsSeekSlider(
+                      progress: progress ?? 0,
+                      position: ttsState.position,
+                      duration: ttsState.duration,
+                      enabled: hasTimeline && ttsState.canSeek,
+                      onSeek: notifier.seekTo,
+                      formatDuration: _formatDuration,
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.fast_forward_rounded, size: 22),
+                    tooltip: '+${skipSeconds}s',
+                    visualDensity: VisualDensity.compact,
+                    onPressed: () => notifier.skipForward(),
+                  ),
+                ],
+              ),
+            ],
           ],
         ),
       ),
+    );
+  }
+}
+
+class _TtsSeekSlider extends StatefulWidget {
+  const _TtsSeekSlider({
+    required this.progress,
+    required this.position,
+    required this.duration,
+    required this.enabled,
+    required this.onSeek,
+    required this.formatDuration,
+  });
+
+  final double progress;
+  final Duration position;
+  final Duration duration;
+  final bool enabled;
+  final Future<void> Function(Duration) onSeek;
+  final String Function(Duration) formatDuration;
+
+  @override
+  State<_TtsSeekSlider> createState() => _TtsSeekSliderState();
+}
+
+class _TtsSeekSliderState extends State<_TtsSeekSlider> {
+  double? _dragValue;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final displayProgress = _dragValue ?? widget.progress;
+
+    return Column(
+      children: [
+        SliderTheme(
+          data: SliderTheme.of(context).copyWith(
+            trackHeight: 3,
+            thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
+            overlayShape: const RoundSliderOverlayShape(overlayRadius: 12),
+          ),
+          child: Slider(
+            value: displayProgress.clamp(0.0, 1.0),
+            onChanged: widget.enabled
+                ? (v) => setState(() => _dragValue = v)
+                : null,
+            onChangeEnd: widget.enabled
+                ? (v) async {
+                    setState(() => _dragValue = null);
+                    await widget.onSeek(
+                      Duration(
+                        milliseconds:
+                            (v * widget.duration.inMilliseconds).round(),
+                      ),
+                    );
+                  }
+                : null,
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                widget.formatDuration(
+                  _dragValue != null
+                      ? Duration(
+                          milliseconds: (_dragValue! *
+                                  widget.duration.inMilliseconds)
+                              .round(),
+                        )
+                      : widget.position,
+                ),
+                style: TextStyle(
+                  fontSize: 10,
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                ),
+              ),
+              Text(
+                widget.formatDuration(widget.duration),
+                style: TextStyle(
+                  fontSize: 10,
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

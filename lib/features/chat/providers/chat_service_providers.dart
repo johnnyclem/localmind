@@ -11,6 +11,7 @@ import 'package:localmind/features/on_device/data/on_device_llama_service.dart';
 import 'package:localmind/features/on_device/data/models/on_device_model.dart';
 import '../data/chat_service.dart';
 import '../data/smart_reply_service.dart';
+import '../data/title_generation_service.dart';
 
 final chatServiceProvider = Provider<ChatService?>((ref) {
   final server = ref.watch(activeServerProvider);
@@ -64,4 +65,8 @@ final smartReplyServiceProvider = Provider<SmartReplyService>((ref) {
   final service = SmartReplyService();
   ref.onDispose(() => service.dispose());
   return service;
+});
+
+final titleGenerationServiceProvider = Provider<TitleGenerationService>((ref) {
+  return TitleGenerationService();
 });

@@ -2130,6 +2130,18 @@ class AppLocalizationsJa extends AppLocalizations {
       'Strip formatting like **bold** before reading aloud';
 
   @override
+  String get tts_skip_seconds => 'Skip interval';
+
+  @override
+  String get tts_skip_seconds_desc =>
+      'Forward and rewind jump size during playback';
+
+  @override
+  String tts_skip_seconds_value(int seconds) {
+    return '${seconds}s';
+  }
+
+  @override
   String get preview_system_prompts => 'Preview system prompts';
 
   @override
@@ -2143,4 +2155,168 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get welcome_message_4 => 'Need ideas? Try one of the quick prompts.';
+
+  @override
+  String get temporary_chat => 'Temporary chat';
+
+  @override
+  String get temporary_chat_desc => 'Chats aren\'t saved to history.';
+
+  @override
+  String get temporary_chat_banner => 'Temporary chat — not saved to history';
+
+  @override
+  String get temporary_chat_save_warning_title =>
+      'Save message in temporary chat?';
+
+  @override
+  String get temporary_chat_save_warning_body =>
+      'This chat is temporary and hidden from history. The saved message will still appear in Saved Messages.';
+
+  @override
+  String get save_to_history => 'Save to history';
+
+  @override
+  String get share_conversation => 'Share conversation';
+
+  @override
+  String get download_tts_audio => 'Download audio';
+
+  @override
+  String get tts_download_unavailable =>
+      'Download is only available for Piper and Kitten TTS';
+
+  @override
+  String get tts_download_no_audio => 'No audio available to download yet';
+
+  @override
+  String get tts_download_success => 'Audio saved';
+
+  @override
+  String get return_to_chat => 'Return to chat';
+
+  @override
+  String get return_to_temp_chat => 'Return to temporary chat';
+
+  @override
+  String get insert_saved_message => 'Insert saved message';
+
+  @override
+  String get insert_saved_message_desc =>
+      'Choose a saved message to add to your input';
+
+  @override
+  String get model_info => 'Model info';
+
+  @override
+  String get model_name => 'Model name';
+
+  @override
+  String get model_identifier => 'Identifier';
+
+  @override
+  String get not_available => 'Not available';
+
+  @override
+  String get save_message_folders => 'Save message';
+
+  @override
+  String get remove_from_saved => 'Remove from saved';
+
+  @override
+  String get message_already_saved => 'Saved';
+
+  @override
+  String get stream_ttft => 'Time to first token';
+
+  @override
+  String get stream_tokens_per_sec => 'Tokens per second';
+
+  @override
+  String get stream_stop_reason => 'Stop reason';
+
+  @override
+  String get stream_input_tokens => 'Input tokens';
+
+  @override
+  String get stream_output_tokens => 'Output tokens';
+
+  @override
+  String get stream_generation_time => 'Generation time';
+
+  @override
+  String get attach_image => 'Image';
+
+  @override
+  String get attach_text_document => 'Text document';
+
+  @override
+  String get add_attachment => 'Add attachment';
+
+  @override
+  String get photo_permission_denied =>
+      'Photo access is required to attach images';
+
+  @override
+  String get characters_label => 'Characters';
+
+  @override
+  String get exit_temporary_chat_title => 'Exit temporary chat?';
+
+  @override
+  String get exit_temporary_chat_body =>
+      'This will discard the current temporary chat and return to a new chat.';
+
+  @override
+  String get saved_message_temp_snap_unavailable =>
+      'This message was saved from a temporary chat and can\'t be opened in its original conversation.';
+
+  @override
+  String get filter_title => 'Filter';
+
+  @override
+  String get filter_pinned => 'Pinned';
+
+  @override
+  String get filter_archived => 'Archived';
+
+  @override
+  String get filter_temp_chats => 'Temporary chats';
+
+  @override
+  String get filter_user_messages => 'User messages';
+
+  @override
+  String get filter_assistant_messages => 'Assistant messages';
+
+  @override
+  String get archive_chat => 'Archive';
+
+  @override
+  String get unarchive_chat => 'Unarchive';
+
+  @override
+  String conversation_message_count(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count messages',
+      one: '1 message',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String conversation_character_count(int count) {
+    return '$count chars';
+  }
+
+  @override
+  String get generate_title_with_ai => 'Generate with AI';
+
+  @override
+  String get generating_title => 'Generating...';
+
+  @override
+  String get generate_title_failed => 'Could not generate a title';
 }

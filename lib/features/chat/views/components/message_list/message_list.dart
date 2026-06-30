@@ -22,7 +22,9 @@ class MessageList extends StatelessWidget {
     required this.onContinue,
     required this.onCycleVariant,
     required this.onModelPicker,
+    this.onModelLongPress,
     this.onSave,
+    this.onShare,
     this.onGenerateResponse,
     this.hasSmartReplies = false,
     this.bottomInset = 0,
@@ -40,7 +42,9 @@ class MessageList extends StatelessWidget {
   final void Function(String messageId) onContinue;
   final void Function(String messageId, int direction) onCycleVariant;
   final VoidCallback onModelPicker;
+  final void Function(String modelId)? onModelLongPress;
   final void Function(Message message)? onSave;
+  final void Function(Message message)? onShare;
   final VoidCallback? onGenerateResponse;
   final bool hasSmartReplies;
   final double bottomInset;
@@ -60,7 +64,9 @@ class MessageList extends StatelessWidget {
       onContinue: onContinue,
       onCycleVariant: onCycleVariant,
       onModelPicker: onModelPicker,
+      onModelLongPress: onModelLongPress,
       onSave: onSave,
+      onShare: onShare,
       onGenerateResponse: onGenerateResponse,
       hasSmartReplies: hasSmartReplies,
       bottomInset: bottomInset,
@@ -82,7 +88,9 @@ class _MessageListConsumer extends ConsumerStatefulWidget {
     required this.onContinue,
     required this.onCycleVariant,
     required this.onModelPicker,
+    this.onModelLongPress,
     this.onSave,
+    this.onShare,
     this.onGenerateResponse,
     this.hasSmartReplies = false,
     this.bottomInset = 0,
@@ -100,7 +108,9 @@ class _MessageListConsumer extends ConsumerStatefulWidget {
   final void Function(String messageId) onContinue;
   final void Function(String messageId, int direction) onCycleVariant;
   final VoidCallback onModelPicker;
+  final void Function(String modelId)? onModelLongPress;
   final void Function(Message message)? onSave;
+  final void Function(Message message)? onShare;
   final VoidCallback? onGenerateResponse;
   final bool hasSmartReplies;
   final double bottomInset;
@@ -169,7 +179,9 @@ class _MessageListConsumerState extends ConsumerState<_MessageListConsumer> {
       onContinue: widget.onContinue,
       onCycleVariant: widget.onCycleVariant,
       onModelPicker: widget.onModelPicker,
+      onModelLongPress: widget.onModelLongPress,
       onSave: widget.onSave,
+      onShare: widget.onShare,
       onGenerateResponse: widget.onGenerateResponse,
       hasSmartReplies: widget.hasSmartReplies,
       bottomInset: widget.bottomInset,
@@ -193,7 +205,9 @@ class _MessageList extends StatelessWidget {
     required this.onContinue,
     required this.onCycleVariant,
     required this.onModelPicker,
+    this.onModelLongPress,
     this.onSave,
+    this.onShare,
     this.onGenerateResponse,
     this.hasSmartReplies = false,
     this.bottomInset = 0,
@@ -213,7 +227,9 @@ class _MessageList extends StatelessWidget {
   final void Function(String messageId) onContinue;
   final void Function(String messageId, int direction) onCycleVariant;
   final VoidCallback onModelPicker;
+  final void Function(String modelId)? onModelLongPress;
   final void Function(Message message)? onSave;
+  final void Function(Message message)? onShare;
   final VoidCallback? onGenerateResponse;
   final bool hasSmartReplies;
   final double bottomInset;
@@ -281,7 +297,15 @@ class _MessageList extends StatelessWidget {
               onCycleVariant: (direction) =>
                   onCycleVariant(message.id, direction),
               onModelTap: onModelPicker,
+              onModelLongPress: message.modelId != null &&
+                      message.role == MessageRole.assistant &&
+                      onModelLongPress != null
+                  ? () => onModelLongPress!(message.modelId!)
+                  : null,
               onSave: onSave,
+              onShare: onShare == null
+                  ? null
+                  : () => onShare!(message),
             ),
             if (!isStreaming &&
                 isLast &&

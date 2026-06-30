@@ -188,6 +188,9 @@ class ConversationEntity {
   String? smartRepliesJson;
   String? smartRepliesLastMessageId;
   String? folderId;
+  bool isTemporary;
+  bool isArchived;
+  int characterCount;
 
   @Backlink()
   final messages = ToMany<MessageEntity>();
@@ -213,6 +216,9 @@ class ConversationEntity {
     this.smartRepliesJson,
     this.smartRepliesLastMessageId,
     this.folderId,
+    this.isTemporary = false,
+    this.isArchived = false,
+    this.characterCount = 0,
   });
 
   factory ConversationEntity.fromDomain(Conversation conversation) {
@@ -238,6 +244,9 @@ class ConversationEntity {
           : null,
       smartRepliesLastMessageId: conversation.smartRepliesLastMessageId,
       folderId: conversation.folderId,
+      isTemporary: conversation.isTemporary,
+      isArchived: conversation.isArchived,
+      characterCount: conversation.characterCount,
     );
   }
 
@@ -264,6 +273,9 @@ class ConversationEntity {
           : null,
       smartRepliesLastMessageId: smartRepliesLastMessageId,
       folderId: folderId,
+      isTemporary: isTemporary,
+      isArchived: isArchived,
+      characterCount: characterCount,
     );
   }
 
@@ -379,6 +391,10 @@ class MessageEntity {
 
   String? modelId;
   int? tokenCount;
+  int? inputTokenCount;
+  double? tokensPerSecond;
+  int? ttftMs;
+  String? stopReason;
   String? errorMessage;
   String? attachmentPathsJson;
   int? generationTimeMs;
@@ -404,6 +420,10 @@ class MessageEntity {
     required this.statusIndex,
     this.modelId,
     this.tokenCount,
+    this.inputTokenCount,
+    this.tokensPerSecond,
+    this.ttftMs,
+    this.stopReason,
     this.errorMessage,
     this.attachmentPathsJson,
     this.generationTimeMs,
@@ -430,6 +450,10 @@ class MessageEntity {
       statusIndex: message.status.index,
       modelId: message.modelId,
       tokenCount: message.tokenCount,
+      inputTokenCount: message.inputTokenCount,
+      tokensPerSecond: message.tokensPerSecond,
+      ttftMs: message.ttftMs,
+      stopReason: message.stopReason,
       errorMessage: message.errorMessage,
       attachmentPathsJson: message.attachmentPaths != null
           ? jsonEncode(message.attachmentPaths)
@@ -463,6 +487,10 @@ class MessageEntity {
       status: MessageStatus.values[statusIndex],
       modelId: modelId,
       tokenCount: tokenCount,
+      inputTokenCount: inputTokenCount,
+      tokensPerSecond: tokensPerSecond,
+      ttftMs: ttftMs,
+      stopReason: stopReason,
       errorMessage: errorMessage,
       attachmentPaths: attachmentPathsJson != null
           ? List<String>.from(jsonDecode(attachmentPathsJson!))

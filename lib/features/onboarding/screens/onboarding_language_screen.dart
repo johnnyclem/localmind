@@ -112,6 +112,16 @@ const _languages = [
     shortText: 'Ja',
     gradient: [Color(0xFFF43F5E), Color(0xFFBE123C)],
   ),
+  _LanguageOption(
+    code: 'ru',
+    nativeName: 'Русский',
+    englishName: 'Russian',
+    flag: '🇷🇺',
+    flagAsset: 'assets/images/flag_ru.png',
+    countryCode: 'RU',
+    shortText: 'Ru',
+    gradient: [Color(0xFF3B82F6), Color(0xFF1D4ED8)],
+  ),
 ];
 
 class OnboardingLanguageScreen extends ConsumerStatefulWidget {

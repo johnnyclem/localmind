@@ -12,6 +12,7 @@ import 'package:localmind/core/models/enums.dart';
 import 'package:localmind/core/providers/app_providers.dart';
 import 'package:localmind/core/providers/storage_providers.dart';
 import 'package:localmind/core/services/data_backup_service.dart';
+import 'package:localmind/core/services/share_service.dart';
 import 'package:localmind/core/routes/app_routes.dart';
 import 'package:localmind/core/utils/system_insets.dart';
 import 'package:localmind/l10n/app_localizations.dart';
@@ -21,18 +22,18 @@ import 'package:localmind/features/conversations/data/models/conversation.dart';
 import 'package:localmind/features/models/screens/model_picker_sheet.dart';
 import 'package:localmind/features/personas/providers/personas_providers.dart';
 import 'package:localmind/features/servers/providers/server_providers.dart';
-import 'package:localmind/features/servers/data/models/server.dart';
-import 'package:localmind/features/servers/views/components/server_icon_picker.dart';
 import 'package:localmind/features/tts/views/components/tts_player_bar.dart';
-import 'package:localmind/features/saved_messages/providers/saved_message_providers.dart';
+import 'package:localmind/features/saved_messages/views/components/save_message_sheet.dart';
+import '../data/export_service.dart';
 import '../data/models/message.dart';
 import '../providers/chat_mcp_providers.dart';
+import '../../conversations/views/components/rename_conversation_dialog.dart';
 import '../providers/chat_providers.dart';
 import 'components/chat_auto_scroll_controller.dart';
+import 'components/model_info_sheet.dart';
 import 'components/chat_input_bar.dart';
 import 'components/chat_settings_sheet.dart';
 import 'components/edit_message_dialog.dart';
-import 'components/edit_message_result.dart';
 import 'components/persona_picker_sheet.dart';
 import 'components/notification_permission_banner.dart';
 import 'components/message_list/message_list.dart';
@@ -54,6 +55,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
     with WidgetsBindingObserver {
   final ScrollController _scrollController = ScrollController();
   final FocusNode _inputFocusNode = FocusNode();
+  final GlobalKey<ChatInputBarState> _inputBarKey = GlobalKey();
   bool _isApprovalDialogOpen = false;
   bool _showScrollToBottom = false;
   late final ChatAutoScrollController _autoScroll;
@@ -120,11 +122,14 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
     return _ChatBody(
       scrollController: _scrollController,
       inputFocusNode: _inputFocusNode,
+      inputBarKey: _inputBarKey,
       autoScroll: _autoScroll,
       showScrollToBottom: _showScrollToBottom,
       onScrollToBottom: _scrollToBottom,
       onModelPicker: () => _showModelPicker(context),
       onMenuAction: (action) => _handleMenuAction(action, context),
+      onShareMessage: _shareMessage,
+      onSaveMessage: (message) => _saveMessage(context, message),
     );
   }
 
@@ -141,6 +146,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
     switch (action) {
       case 'new_chat':
         ref.read(chatProvider.notifier).startNewConversation();
+      case 'share_chat':
+        _shareConversation(context);
       case 'persona':
         showPersonaPickerSheet(context);
       case 'remove_persona':
@@ -182,6 +189,31 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
           },
         );
     }
+  }
+
+  Future<void> _shareConversation(BuildContext context) async {
+    final messages = ref.read(chatProvider).messages;
+    if (messages.isEmpty) return;
+    final activeConv = ref.read(conv.activeConversationProvider);
+    final text = ExportService.exportAsText(
+      messages,
+      title: activeConv?.title,
+    );
+    await ShareService.shareText(text, subject: activeConv?.title);
+  }
+
+  void _shareMessage(String content) {
+    ShareService.shareText(content);
+  }
+
+  Future<void> _saveMessage(BuildContext context, Message message) async {
+    final isTemporary = ref.read(chatProvider.select((s) => s.isTemporary));
+    await showSaveMessageSheet(
+      context,
+      ref,
+      message,
+      isTemporaryChat: isTemporary,
+    );
   }
 
   void _showToolApprovalDialog(
@@ -261,64 +293,74 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
   }
 
   void _showRenameDialog(BuildContext context, Conversation conversation) {
-    final l10n = AppLocalizations.of(context)!;
-    final controller = TextEditingController(text: conversation.title);
-
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text(l10n.rename_conversation),
-          content: TextField(
-            controller: controller,
-            autofocus: true,
-            decoration: InputDecoration(
-              hintText: l10n.enter_new_title,
-              border: const OutlineInputBorder(),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text(l10n.cancel),
-            ),
-            TextButton(
-              onPressed: () {
-                final newTitle = controller.text.trim();
-                if (newTitle.isNotEmpty) {
-                  ref
-                      .read(conv.conversationsProvider.notifier)
-                      .renameConversation(conversation.id, newTitle);
-                }
-                Navigator.pop(context);
-              },
-              child: Text(l10n.rename),
-            ),
-          ],
-        );
-      },
-    ).then((_) => controller.dispose());
+    showRenameConversationDialog(context, ref, conversation: conversation);
   }
+}
+
+void _handleChatModeAction(
+  BuildContext context,
+  WidgetRef ref, {
+  required bool hasMessages,
+  required bool isTemporary,
+}) {
+  final l10n = AppLocalizations.of(context)!;
+
+  if (!hasMessages) {
+    ref.read(chatProvider.notifier).setTemporaryMode(!isTemporary);
+    return;
+  }
+
+  if (isTemporary) {
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.exit_temporary_chat_title),
+        content: Text(l10n.exit_temporary_chat_body),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              ref.read(chatProvider.notifier).startNewConversation();
+            },
+            child: Text(l10n.nav_new_chat),
+          ),
+        ],
+      ),
+    );
+    return;
+  }
+
+  ref.read(chatProvider.notifier).startNewConversation();
 }
 
 class _ChatBody extends ConsumerWidget {
   const _ChatBody({
     required this.scrollController,
     required this.inputFocusNode,
+    required this.inputBarKey,
     required this.autoScroll,
     required this.showScrollToBottom,
     required this.onScrollToBottom,
     required this.onModelPicker,
     required this.onMenuAction,
+    required this.onShareMessage,
+    required this.onSaveMessage,
   });
 
   final ScrollController scrollController;
   final FocusNode inputFocusNode;
+  final GlobalKey<ChatInputBarState> inputBarKey;
   final ChatAutoScrollController autoScroll;
   final bool showScrollToBottom;
   final VoidCallback onScrollToBottom;
   final VoidCallback onModelPicker;
   final void Function(String) onMenuAction;
+  final void Function(String content) onShareMessage;
+  final Future<void> Function(Message message) onSaveMessage;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -333,8 +375,8 @@ class _ChatBody extends ConsumerWidget {
     final errorMessage = ref.watch(chatProvider.select((s) => s.errorMessage));
     final selectedModel = ref.watch(selectedModelProvider);
     final connectionStatus = ref.watch(connectionStatusProvider);
-    final activeServer = ref.watch(activeServerProvider);
     final activeConversation = ref.watch(conv.activeConversationProvider);
+    final isTemporary = ref.watch(chatProvider.select((s) => s.isTemporary));
     final personaId = activeConversation?.personaId;
     final persona = personaId != null
         ? ref.watch(personaByIdProvider(personaId))
@@ -359,15 +401,24 @@ class _ChatBody extends ConsumerWidget {
 
     return Column(
       children: [
-        ModelTopBar(selectedModel: selectedModel, onTap: onModelPicker),
+        ModelTopBar(
+          selectedModel: selectedModel,
+          onModelTap: onModelPicker,
+        ),
         _ScreenAppBar(
-          activeServer: activeServer,
           activeConversation: activeConversation,
-          connectionStatus: connectionStatus,
           isDark: isDark,
           persona: persona,
+          isTemporary: isTemporary,
+          hasMessages: messages.isNotEmpty,
           onMenuAction: onMenuAction,
           onPersonaPicker: () => showPersonaPickerSheet(context),
+          onChatModeAction: () => _handleChatModeAction(
+            context,
+            ref,
+            hasMessages: messages.isNotEmpty,
+            isTemporary: isTemporary,
+          ),
         ),
         const NotificationPermissionBanner(),
         if (connectionStatus == ConnectionStatus.disconnected ||
@@ -388,36 +439,56 @@ class _ChatBody extends ConsumerWidget {
           ),
         const TtsPlayerBar(),
         Expanded(
-          child: Stack(
-            children: [
-              _MessageArea(
-                isLoading: isLoading,
-                messages: messages,
-                activeConversation: activeConversation,
-                errorMessage: errorMessage,
-                selectedModel: selectedModel,
-                isStreaming: isStreaming,
-                scrollController: scrollController,
-                effectiveBottomInset: effectiveBottomInset,
-                keyboardBottomInset: keyboardBottomInset,
-                onModelPicker: onModelPicker,
-              ),
-              _ChatBottomBar(
-                isStreaming: isStreaming,
-                keyboardBottomInset: keyboardBottomInset,
-                inputFocusNode: inputFocusNode,
-              ),
-              if (showScrollToBottom && messages.isNotEmpty)
-                Positioned(
-                  right: 16,
-                  bottom: 120 + keyboardBottomInset,
-                  child: FloatingActionButton.small(
-                    onPressed: onScrollToBottom,
-                    tooltip: AppLocalizations.of(context)!.scroll_to_bottom,
-                    child: const Icon(Icons.arrow_downward),
-                  ),
+          child: DecoratedBox(
+            decoration: isTemporary
+                ? BoxDecoration(
+                    color: isDark
+                        ? const Color(0xFF15120C)
+                        : const Color(0xFFFFFBF0),
+                    border: Border.all(
+                      color: isDark
+                          ? const Color(0xFF6B5A2E)
+                          : const Color(0xFFE6C35C),
+                      width: 2,
+                    ),
+                  )
+                : const BoxDecoration(),
+            child: Stack(
+              clipBehavior: Clip.hardEdge,
+              children: [
+                _MessageArea(
+                  isLoading: isLoading,
+                  messages: messages,
+                  activeConversation: activeConversation,
+                  errorMessage: errorMessage,
+                  selectedModel: selectedModel,
+                  isStreaming: isStreaming,
+                  scrollController: scrollController,
+                  effectiveBottomInset: effectiveBottomInset,
+                  keyboardBottomInset: keyboardBottomInset,
+                  onModelPicker: onModelPicker,
+                  onShareMessage: onShareMessage,
+                  onSaveMessage: onSaveMessage,
+                  isTemporary: isTemporary,
                 ),
-            ],
+                _ChatBottomBar(
+                  isStreaming: isStreaming,
+                  keyboardBottomInset: keyboardBottomInset,
+                  inputFocusNode: inputFocusNode,
+                  inputBarKey: inputBarKey,
+                ),
+                if (showScrollToBottom && messages.isNotEmpty)
+                  Positioned(
+                    right: 16,
+                    bottom: 120 + keyboardBottomInset,
+                    child: FloatingActionButton.small(
+                      onPressed: onScrollToBottom,
+                      tooltip: AppLocalizations.of(context)!.scroll_to_bottom,
+                      child: const Icon(Icons.arrow_downward),
+                    ),
+                  ),
+              ],
+            ),
           ),
         ),
       ],
@@ -437,6 +508,9 @@ class _MessageArea extends ConsumerWidget {
     required this.effectiveBottomInset,
     required this.keyboardBottomInset,
     required this.onModelPicker,
+    required this.onShareMessage,
+    required this.onSaveMessage,
+    required this.isTemporary,
   });
 
   final bool isLoading;
@@ -449,6 +523,9 @@ class _MessageArea extends ConsumerWidget {
   final double effectiveBottomInset;
   final double keyboardBottomInset;
   final VoidCallback onModelPicker;
+  final void Function(String content) onShareMessage;
+  final Future<void> Function(Message message) onSaveMessage;
+  final bool isTemporary;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -535,11 +612,13 @@ class _MessageArea extends ConsumerWidget {
       onCycleVariant: (messageId, direction) => ref
           .read(chatProvider.notifier)
           .cycleMessageVariant(messageId, direction),
-      onSave: (message) =>
-          ref.read(savedMessagesProvider.notifier).saveMessage(message),
+      onSave: (message) => onSaveMessage(message),
+      onShare: (message) => onShareMessage(message.content),
       onGenerateResponse: () =>
           ref.read(chatProvider.notifier).generateResponseForLastUser(),
       onModelPicker: onModelPicker,
+      onModelLongPress: (modelId) =>
+          showModelInfoSheet(context, ref, modelId),
       hasSmartReplies:
           !isStreaming &&
           keyboardBottomInset == 0 &&
@@ -551,22 +630,24 @@ class _MessageArea extends ConsumerWidget {
 
 class _ScreenAppBar extends ConsumerWidget {
   const _ScreenAppBar({
-    required this.activeServer,
     required this.activeConversation,
-    required this.connectionStatus,
     required this.isDark,
     required this.persona,
+    required this.isTemporary,
+    required this.hasMessages,
     required this.onMenuAction,
     required this.onPersonaPicker,
+    required this.onChatModeAction,
   });
 
-  final dynamic activeServer;
   final Conversation? activeConversation;
-  final ConnectionStatus connectionStatus;
   final bool isDark;
   final dynamic persona;
+  final bool isTemporary;
+  final bool hasMessages;
   final void Function(String) onMenuAction;
   final VoidCallback onPersonaPicker;
+  final VoidCallback onChatModeAction;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -593,34 +674,15 @@ class _ScreenAppBar extends ConsumerWidget {
           ),
           const SizedBox(width: 8),
           Expanded(
-            child: Row(
-              children: [
-                if (activeServer != null) ...[
-                  _buildServerIcon(context, activeServer as Server?),
-                  const SizedBox(width: 8),
-                ],
-                Text(
-                  activeConversation?.title.isNotEmpty == true
-                      ? activeConversation!.title
-                      : (activeServer?.name ?? l10n.chat_title),
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(width: 8),
-                Container(
-                  width: 8,
-                  height: 8,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: connectionStatus == ConnectionStatus.connected
-                        ? Colors.green
-                        : Colors.grey,
-                  ),
-                ),
-              ],
+            child: Text(
+              activeConversation?.title.isNotEmpty == true
+                  ? activeConversation!.title
+                  : l10n.nav_new_chat,
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+              overflow: TextOverflow.ellipsis,
             ),
           ),
           Stack(
@@ -653,6 +715,12 @@ class _ScreenAppBar extends ConsumerWidget {
               ),
             ],
           ),
+          _ChatModeIconButton(
+            hasMessages: hasMessages,
+            isTemporary: isTemporary,
+            isDark: isDark,
+            onPressed: onChatModeAction,
+          ),
           PopupMenuButton<String>(
             icon: const Icon(Icons.more_vert),
             onSelected: onMenuAction,
@@ -683,6 +751,15 @@ class _ScreenAppBar extends ConsumerWidget {
                   ),
                 ),
               ],
+              if (hasMessages)
+                PopupMenuItem(
+                  value: 'share_chat',
+                  child: ListTile(
+                    leading: const Icon(Icons.share_outlined),
+                    title: Text(l10n.share_conversation),
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                ),
               PopupMenuItem(
                 value: 'persona',
                 child: ListTile(
@@ -722,20 +799,67 @@ class _ScreenAppBar extends ConsumerWidget {
   }
 }
 
-Widget _buildServerIcon(BuildContext context, Server? server) {
-  if (server == null) return const SizedBox.shrink();
+class _ChatModeIconButton extends StatelessWidget {
+  const _ChatModeIconButton({
+    required this.hasMessages,
+    required this.isTemporary,
+    required this.isDark,
+    required this.onPressed,
+  });
 
-  final iconData = server.iconName != null
-      ? getHugeIconByName(server.iconName)
-      : getDefaultServerIcon(server.type.name);
+  final bool hasMessages;
+  final bool isTemporary;
+  final bool isDark;
+  final VoidCallback onPressed;
 
-  if (iconData == null) return const Icon(Icons.dns, size: 18);
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final showGhost = !hasMessages || isTemporary;
+    final ghostActive = isTemporary;
 
-  return HugeIcon(
-    icon: iconData.icon,
-    size: 18,
-    color: Theme.of(context).colorScheme.primary,
-  );
+    if (showGhost) {
+      final activeColor =
+          isDark ? const Color(0xFFE6C35C) : const Color(0xFF9A7B1A);
+      final inactiveColor =
+          isDark ? Colors.white54 : Colors.black45;
+
+      return IconButton(
+        onPressed: onPressed,
+        tooltip: ghostActive
+            ? l10n.exit_temporary_chat_title
+            : l10n.temporary_chat,
+        icon: ghostActive
+            ? Container(
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: activeColor.withValues(alpha: 0.25),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  LucideIcons.ghost,
+                  size: 20,
+                  color: activeColor,
+                ),
+              )
+            : Icon(
+                LucideIcons.ghost,
+                size: 22,
+                color: inactiveColor,
+              ),
+      );
+    }
+
+    return IconButton(
+      onPressed: onPressed,
+      tooltip: l10n.nav_new_chat,
+      icon: Icon(
+        Icons.add_comment_outlined,
+        size: 22,
+        color: isDark ? Colors.white70 : Colors.black87,
+      ),
+    );
+  }
 }
 
 class _ChatBottomBar extends ConsumerWidget {
@@ -743,11 +867,13 @@ class _ChatBottomBar extends ConsumerWidget {
     required this.isStreaming,
     required this.keyboardBottomInset,
     required this.inputFocusNode,
+    required this.inputBarKey,
   });
 
   final bool isStreaming;
   final double keyboardBottomInset;
   final FocusNode inputFocusNode;
+  final GlobalKey<ChatInputBarState> inputBarKey;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -776,6 +902,7 @@ class _ChatBottomBar extends ConsumerWidget {
               _SmartReplyChipsWrapper(),
             ],
             ChatInputBar(
+              key: inputBarKey,
               focusNode: inputFocusNode,
               isStreaming: isStreaming,
               onSend: (message, {attachments}) {

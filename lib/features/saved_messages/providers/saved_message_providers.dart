@@ -12,6 +12,20 @@ final savedMessageFolderFilterProvider =
       return SavedMessageFolderFilterNotifier();
     });
 
+enum SavedMessageListFilter { all, tempChats, user, assistant }
+
+final savedMessageListFilterProvider =
+    NotifierProvider<SavedMessageListFilterNotifier, SavedMessageListFilter>(() {
+      return SavedMessageListFilterNotifier();
+    });
+
+class SavedMessageListFilterNotifier extends Notifier<SavedMessageListFilter> {
+  @override
+  SavedMessageListFilter build() => SavedMessageListFilter.all;
+
+  void setFilter(SavedMessageListFilter filter) => state = filter;
+}
+
 class SavedMessageFolderFilterNotifier extends Notifier<String?> {
   @override
   String? build() => null;
@@ -129,26 +143,59 @@ class SavedMessagesNotifier extends AsyncNotifier<List<SavedMessage>> {
     return exists;
   }
 
-  Future<void> saveMessage(Message message) async {
+  Future<SavedMessage?> getBySourceMessageId(String sourceMessageId) async {
+    final db = ref.read(databaseProvider);
+    final query = db.savedMessageBox
+        .query(SavedMessageEntity_.sourceMessageId.equals(sourceMessageId))
+        .build();
+    final entity = query.findFirst();
+    query.close();
+    if (entity == null) return null;
+    return SavedMessage(
+      id: entity.id,
+      sourceMessageId: entity.sourceMessageId,
+      conversationId: entity.conversationId,
+      conversationTitle: entity.conversationTitle,
+      roleIndex: entity.roleIndex,
+      content: entity.content,
+      modelId: entity.modelId,
+      folderId: entity.folderId,
+      savedAt: entity.savedAt,
+    );
+  }
+
+  Future<void> saveMessage(
+    Message message, {
+    String? folderId,
+    bool isTemporaryChat = false,
+  }) async {
     final db = ref.read(databaseProvider);
     final existingQuery = db.savedMessageBox
         .query(SavedMessageEntity_.sourceMessageId.equals(message.id))
         .build();
-    if (existingQuery.findFirst() != null) {
-      existingQuery.close();
+    final existing = existingQuery.findFirst();
+    existingQuery.close();
+
+    if (existing != null) {
+      existing.folderId = folderId;
+      existing.content = message.content;
+      db.savedMessageBox.put(existing);
+      state = AsyncData(await _loadAll());
       return;
     }
-    existingQuery.close();
 
     final conversation = ref.read(activeConversationProvider);
     final entity = SavedMessageEntity(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       sourceMessageId: message.id,
-      conversationId: message.conversationId,
-      conversationTitle: conversation?.title ?? 'Chat',
+      conversationId: isTemporaryChat ? '' : message.conversationId,
+      conversationTitle: isTemporaryChat
+          ? ''
+          : (conversation?.title ?? 'Chat'),
       roleIndex: message.role.index,
       content: message.content,
       modelId: message.modelId,
+      folderId: folderId,
       savedAt: DateTime.now(),
     );
     db.savedMessageBox.put(entity);
@@ -193,15 +240,31 @@ final filteredSavedMessagesProvider =
     Provider<AsyncValue<List<SavedMessage>>>((ref) {
       final messagesAsync = ref.watch(savedMessagesProvider);
       final folderFilter = ref.watch(savedMessageFolderFilterProvider);
+      final listFilter = ref.watch(savedMessageListFilterProvider);
 
       return messagesAsync.whenData((messages) {
-        if (folderFilter == null) return messages;
+        var filtered = messages;
+
+        switch (listFilter) {
+          case SavedMessageListFilter.tempChats:
+            filtered = filtered
+                .where((m) => m.conversationId.isEmpty)
+                .toList();
+          case SavedMessageListFilter.user:
+            filtered = filtered.where((m) => m.roleIndex == 0).toList();
+          case SavedMessageListFilter.assistant:
+            filtered = filtered.where((m) => m.roleIndex == 1).toList();
+          case SavedMessageListFilter.all:
+            break;
+        }
+
+        if (folderFilter == null) return filtered;
         if (folderFilter.isEmpty) {
-          return messages
+          return filtered
               .where((m) => m.folderId == null || m.folderId!.isEmpty)
               .toList();
         }
-        return messages.where((m) => m.folderId == folderFilter).toList();
+        return filtered.where((m) => m.folderId == folderFilter).toList();
       });
     });
 

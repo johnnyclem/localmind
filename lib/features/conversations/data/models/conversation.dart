@@ -18,6 +18,9 @@ class Conversation {
   final List<String>? smartReplies;
   final String? smartRepliesLastMessageId;
   final String? folderId;
+  final bool isTemporary;
+  final bool isArchived;
+  final int characterCount;
 
   Conversation({
     required this.id,
@@ -39,6 +42,9 @@ class Conversation {
     this.smartReplies,
     this.smartRepliesLastMessageId,
     this.folderId,
+    this.isTemporary = false,
+    this.isArchived = false,
+    this.characterCount = 0,
   });
 
   Conversation copyWith({
@@ -71,6 +77,9 @@ class Conversation {
     bool clearSmartRepliesLastMessageId = false,
     String? folderId,
     bool clearFolderId = false,
+    bool? isTemporary,
+    bool? isArchived,
+    int? characterCount,
   }) {
     return Conversation(
       id: id ?? this.id,
@@ -96,7 +105,9 @@ class Conversation {
           ? null
           : (smartRepliesLastMessageId ?? this.smartRepliesLastMessageId),
       folderId: clearFolderId ? null : (folderId ?? this.folderId),
+      isTemporary: isTemporary ?? this.isTemporary,
+      isArchived: isArchived ?? this.isArchived,
+      characterCount: characterCount ?? this.characterCount,
     );
   }
-
 }

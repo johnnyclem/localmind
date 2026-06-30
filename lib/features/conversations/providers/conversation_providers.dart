@@ -49,6 +49,7 @@ class ConversationsNotifier extends AsyncNotifier<List<Conversation>> {
     String? serverId,
     String? modelId,
     bool? mcpEnabled,
+    bool isTemporary = false,
   }) async {
     final db = ref.read(databaseProvider);
     final now = DateTime.now();
@@ -67,6 +68,7 @@ class ConversationsNotifier extends AsyncNotifier<List<Conversation>> {
       lastMessagePreview: null,
       systemPrompt: systemPrompt,
       mcpEnabled: mcpEnabled,
+      isTemporary: isTemporary,
     );
 
     db.conversationBox.put(ConversationEntity.fromDomain(conversation));
@@ -111,6 +113,45 @@ class ConversationsNotifier extends AsyncNotifier<List<Conversation>> {
 
     final updated = existing.copyWith(
       title: newTitle,
+      updatedAt: DateTime.now(),
+    );
+
+    final query = db.conversationBox
+        .query(ConversationEntity_.id.equals(id))
+        .build();
+    final existingEntity = query.findFirst();
+    query.close();
+
+    final entity = ConversationEntity.fromDomain(updated);
+    if (existingEntity != null) {
+      entity.internalId = existingEntity.internalId;
+    }
+    db.conversationBox.put(entity);
+
+    state = AsyncData(await _loadAll());
+
+    final activeId = ref.read(activeConversationProvider)?.id;
+    if (activeId == id) {
+      final refreshed = state.value?.firstWhere(
+        (c) => c.id == id,
+        orElse: () => updated,
+      );
+      ref
+          .read(activeConversationProvider.notifier)
+          .setActiveConversation(refreshed);
+    }
+  }
+
+  Future<void> setTemporary(String id, bool isTemporary) async {
+    final db = ref.read(databaseProvider);
+    final conversations = state.value ?? [];
+    final existing = conversations.firstWhere(
+      (c) => c.id == id,
+      orElse: () => throw Exception('Conversation not found in state'),
+    );
+
+    final updated = existing.copyWith(
+      isTemporary: isTemporary,
       updatedAt: DateTime.now(),
     );
 
@@ -188,11 +229,41 @@ class ConversationsNotifier extends AsyncNotifier<List<Conversation>> {
     state = AsyncData(await _loadAll());
   }
 
+  Future<void> setArchived(String id, bool archived) async {
+    final db = ref.read(databaseProvider);
+    final conversations = state.value ?? [];
+    final existing = conversations.firstWhere(
+      (c) => c.id == id,
+      orElse: () => throw Exception('Conversation not found in state'),
+    );
+
+    final updated = existing.copyWith(
+      isArchived: archived,
+      updatedAt: DateTime.now(),
+    );
+
+    final query = db.conversationBox
+        .query(ConversationEntity_.id.equals(id))
+        .build();
+    final existingEntity = query.findFirst();
+    query.close();
+
+    final entity = ConversationEntity.fromDomain(updated);
+    if (existingEntity != null) {
+      entity.internalId = existingEntity.internalId;
+    }
+    db.conversationBox.put(entity);
+
+    state = AsyncData(await _loadAll());
+  }
+
   Future<void> updatePreview(
     String id,
     String preview,
     DateTime updatedAt, {
     int? messageCount,
+    int? characterCountDelta,
+    int? characterCount,
   }) async {
     final db = ref.read(databaseProvider);
     final conversations = state.value ?? [];
@@ -203,6 +274,10 @@ class ConversationsNotifier extends AsyncNotifier<List<Conversation>> {
         lastMessagePreview: preview,
         updatedAt: updatedAt,
         messageCount: messageCount ?? existing.messageCount + 1,
+        characterCount: characterCount ??
+            (characterCountDelta != null
+                ? existing.characterCount + characterCountDelta
+                : existing.characterCount),
       );
 
       final query = db.conversationBox
@@ -459,9 +534,20 @@ final filteredConversationsProvider = Provider<AsyncValue<List<Conversation>>>((
   final conversationsAsync = ref.watch(conversationsProvider);
   final query = ref.watch(conversationSearchProvider).toLowerCase();
   final folderFilter = ref.watch(historyFolderFilterProvider);
+  final listFilter = ref.watch(historyListFilterProvider);
 
   return conversationsAsync.whenData((conversations) {
-    var filtered = conversations;
+    var filtered = conversations.where((c) => !c.isTemporary).toList();
+
+    switch (listFilter) {
+      case HistoryListFilter.archived:
+        filtered = filtered.where((c) => c.isArchived).toList();
+      case HistoryListFilter.pinned:
+        filtered = filtered.where((c) => c.isPinned && !c.isArchived).toList();
+      case HistoryListFilter.all:
+        filtered = filtered.where((c) => !c.isArchived).toList();
+    }
+
     if (folderFilter != null) {
       if (folderFilter.isEmpty) {
         filtered = filtered
@@ -482,7 +568,7 @@ final filteredConversationsProvider = Provider<AsyncValue<List<Conversation>>>((
 final recentConversationsProvider = Provider<List<Conversation>>((ref) {
   final allAsync = ref.watch(conversationsProvider);
   final all = allAsync.value ?? [];
-  return all.take(3).toList();
+  return all.where((c) => !c.isTemporary).take(3).toList();
 });
 
 final groupedConversationsProvider =
@@ -531,6 +617,20 @@ final historyFolderFilterProvider =
     NotifierProvider<HistoryFolderFilterNotifier, String?>(() {
       return HistoryFolderFilterNotifier();
     });
+
+enum HistoryListFilter { all, pinned, archived }
+
+final historyListFilterProvider =
+    NotifierProvider<HistoryListFilterNotifier, HistoryListFilter>(() {
+      return HistoryListFilterNotifier();
+    });
+
+class HistoryListFilterNotifier extends Notifier<HistoryListFilter> {
+  @override
+  HistoryListFilter build() => HistoryListFilter.all;
+
+  void setFilter(HistoryListFilter filter) => state = filter;
+}
 
 class HistoryFolderFilterNotifier extends Notifier<String?> {
   @override
