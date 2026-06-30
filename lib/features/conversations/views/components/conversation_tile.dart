@@ -15,6 +15,7 @@ class ConversationTile extends StatelessWidget {
     required this.onDelete,
     required this.onDuplicate,
     required this.onMoveToFolder,
+    required this.onExport,
   });
 
   final Conversation conversation;
@@ -25,6 +26,7 @@ class ConversationTile extends StatelessWidget {
   final VoidCallback onDelete;
   final VoidCallback onDuplicate;
   final VoidCallback onMoveToFolder;
+  final VoidCallback onExport;
 
   String _formatTimestamp(AppLocalizations l10n, DateTime dateTime) {
     final now = DateTime.now();
@@ -199,6 +201,14 @@ class ConversationTile extends StatelessWidget {
                 onTap: () {
                   Navigator.pop(ctx);
                   onMoveToFolder();
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.upload_outlined),
+                title: Text(l10n.export_conversation),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  onExport();
                 },
               ),
               ListTile(

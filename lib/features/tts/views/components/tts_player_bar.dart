@@ -1,8 +1,13 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:localmind/core/routes/app_routes.dart';
 import 'package:localmind/l10n/app_localizations.dart';
 import '../../providers/tts_providers.dart' as tts;
+import '../../../conversations/data/models/conversation.dart';
+import '../../../conversations/providers/conversation_providers.dart';
+import '../../../chat/providers/chat_providers.dart';
 
 class TtsPlayerBar extends ConsumerWidget {
   final EdgeInsetsGeometry margin;
@@ -16,6 +21,42 @@ class TtsPlayerBar extends ConsumerWidget {
     if (content == null || content.isEmpty) return null;
     if (content.length <= 50) return content;
     return '${content.substring(0, 47)}...';
+  }
+
+  Future<void> _scrollToPlayingMessage(
+    BuildContext context,
+    WidgetRef ref,
+  ) async {
+    final ttsState = ref.read(tts.ttsProvider);
+    final messageId = ttsState.playingMessageId;
+    if (messageId == null) return;
+
+    ref.read(scrollToMessageIdProvider.notifier).scrollTo(messageId);
+
+    final conversationId = ttsState.playingConversationId;
+    if (conversationId != null) {
+      final active = ref.read(activeConversationProvider);
+      if (active?.id != conversationId) {
+        final conversations = ref.read(conversationsProvider).value ?? [];
+        Conversation? target;
+        for (final conv in conversations) {
+          if (conv.id == conversationId) {
+            target = conv;
+            break;
+          }
+        }
+        if (target != null) {
+          await ref.read(chatProvider.notifier).loadConversation(target);
+        }
+      }
+    }
+
+    if (context.mounted) {
+      if (Scaffold.maybeOf(context)?.isDrawerOpen ?? false) {
+        Navigator.pop(context);
+      }
+      context.go(AppRoutes.home);
+    }
   }
 
   @override
@@ -44,6 +85,7 @@ class TtsPlayerBar extends ConsumerWidget {
     }
 
     final preview = _truncateContent(ttsState.playingContent);
+    final canJumpToMessage = ttsState.playingMessageId != null;
 
     return AnimatedSize(
       duration: const Duration(milliseconds: 200),
@@ -93,79 +135,93 @@ class TtsPlayerBar extends ConsumerWidget {
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        preview ??
-                            (ttsState.isInitializing
-                                ? l10n.loading
-                                : 'Playing'),
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: theme.colorScheme.onSurface,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      if (ttsState.isInitializing)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 2),
-                          child: Text(
-                            l10n.initializing,
-                            style: TextStyle(
-                              fontSize: 10,
-                              color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
-                            ),
-                          ),
-                        ),
-                      if (!ttsState.isInitializing)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 4),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(2),
-                            child: LinearProgressIndicator(
-                              backgroundColor: theme.colorScheme.secondary,
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                theme.colorScheme.primary,
-                              ),
-                              minHeight: 3,
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-                  const SizedBox(width: 12),
-                  if (!ttsState.isInitializing)
-                    _WaveformIndicator(isPlaying: !ttsState.isPaused),
-                  const SizedBox(width: 12),
-              GestureDetector(
-                onTap: () => notifier.stop(),
-                child: Tooltip(
-                  message: l10n.stop,
-                  child: Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.error.withValues(alpha: 0.1),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: canJumpToMessage
+                          ? () => _scrollToPlayingMessage(context, ref)
+                          : null,
                       borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Icon(
-                      Icons.stop_rounded,
-                      size: 20,
-                      color: theme.colorScheme.error,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 2),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              preview ??
+                                  (ttsState.isInitializing
+                                      ? l10n.loading
+                                      : 'Playing'),
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: theme.colorScheme.onSurface,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            if (ttsState.isInitializing)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 2),
+                                child: Text(
+                                  l10n.initializing,
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    color: theme.colorScheme.onSurface
+                                        .withValues(alpha: 0.5),
+                                  ),
+                                ),
+                              ),
+                            if (!ttsState.isInitializing)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 4),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(2),
+                                  child: LinearProgressIndicator(
+                                    backgroundColor:
+                                        theme.colorScheme.secondary,
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      theme.colorScheme.primary,
+                                    ),
+                                    minHeight: 3,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ],
-          ),
-        ],
+                const SizedBox(width: 12),
+                if (!ttsState.isInitializing)
+                  _WaveformIndicator(isPlaying: !ttsState.isPaused),
+                const SizedBox(width: 12),
+                GestureDetector(
+                  onTap: () => notifier.stop(),
+                  child: Tooltip(
+                    message: l10n.stop,
+                    child: Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.error.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Icon(
+                        Icons.stop_rounded,
+                        size: 20,
+                        color: theme.colorScheme.error,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
-    ),
-  );
+    );
   }
 }
 
@@ -235,14 +291,14 @@ class _WaveformIndicatorState extends State<_WaveformIndicator>
         animation: _controller,
         builder: (context, child) {
           final t = _controller.value;
-          
-          final h1 = widget.isPlaying 
+
+          final h1 = widget.isPlaying
               ? 4.0 + 12.0 * (0.5 + 0.5 * math.sin(t * 2 * math.pi))
               : 4.0;
-          final h2 = widget.isPlaying 
+          final h2 = widget.isPlaying
               ? 4.0 + 12.0 * (0.5 + 0.5 * math.sin(t * 2 * math.pi + math.pi / 3))
               : 6.0;
-          final h3 = widget.isPlaying 
+          final h3 = widget.isPlaying
               ? 4.0 + 12.0 * (0.5 + 0.5 * math.sin(t * 2 * math.pi + 2 * math.pi / 3))
               : 4.0;
 

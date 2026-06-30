@@ -1,23 +1,41 @@
 import 'dart:convert';
 
 import 'package:archive/archive.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/enums.dart';
 import '../storage/entities.dart';
 import '../../features/chat/data/models/message.dart';
 import '../../features/conversations/data/models/conversation.dart';
 import '../../features/personas/data/models/persona.dart';
+import '../../features/servers/data/models/server.dart';
 import '../../objectbox.g.dart';
 
 class DataBackupService {
-  Map<String, dynamic> exportAll(Store store) {
-    final convBox = store.box<ConversationEntity>();
-    final messageBox = store.box<MessageEntity>();
-    final personaBox = store.box<PersonaEntity>();
+  Map<String, dynamic> _messageToMap(Message message) => {
+        'id': message.id,
+        'conversationId': message.conversationId,
+        'role': message.role.name,
+        'content': message.content,
+        'createdAt': message.createdAt.toIso8601String(),
+        'status': message.status.name,
+        'modelId': message.modelId,
+        'tokenCount': message.tokenCount,
+        'errorMessage': message.errorMessage,
+        'attachmentPaths': message.attachmentPaths,
+        'generationTimeMs': message.generationTimeMs,
+        'reasoningContent': message.reasoningContent,
+        'toolCallId': message.toolCallId,
+        'isProcessing': message.isProcessing,
+        'toolSessionId': message.toolSessionId,
+        'variantGroupId': message.variantGroupId,
+        'variantIndex': message.variantIndex,
+        'threadOrder': message.threadOrder,
+        'isActiveVariant': message.isActiveVariant,
+        'parentMessageId': message.parentMessageId,
+      };
 
-    final conversations = convBox.getAll().map((entity) {
-      final domain = entity.toDomain();
-      return {
+  Map<String, dynamic> _conversationToMap(Conversation domain) => {
         'id': domain.id,
         'title': domain.title,
         'createdAt': domain.createdAt.toIso8601String(),
@@ -38,32 +56,76 @@ class DataBackupService {
         'smartRepliesLastMessageId': domain.smartRepliesLastMessageId,
         'folderId': domain.folderId,
       };
-    }).toList();
 
-    final messages = messageBox.getAll().map((entity) {
-      final message = entity.toDomain();
+  List<Map<String, dynamic>> _exportSavedMessages(Store store) {
+    final box = store.box<SavedMessageEntity>();
+    return box.getAll().map((e) {
       return {
-        'id': message.id,
-        'conversationId': message.conversationId,
-        'role': message.role.name,
-        'content': message.content,
-        'createdAt': message.createdAt.toIso8601String(),
-        'status': message.status.name,
-        'modelId': message.modelId,
-        'tokenCount': message.tokenCount,
-        'errorMessage': message.errorMessage,
-        'attachmentPaths': message.attachmentPaths,
-        'generationTimeMs': message.generationTimeMs,
-        'reasoningContent': message.reasoningContent,
-        'toolCallId': message.toolCallId,
-        'isProcessing': message.isProcessing,
-        'toolSessionId': message.toolSessionId,
-        'variantGroupId': message.variantGroupId,
-        'variantIndex': message.variantIndex,
-        'threadOrder': message.threadOrder,
-        'isActiveVariant': message.isActiveVariant,
+        'id': e.id,
+        'sourceMessageId': e.sourceMessageId,
+        'conversationId': e.conversationId,
+        'conversationTitle': e.conversationTitle,
+        'roleIndex': e.roleIndex,
+        'content': e.content,
+        'modelId': e.modelId,
+        'folderId': e.folderId,
+        'savedAt': e.savedAt.toIso8601String(),
       };
     }).toList();
+  }
+
+  List<Map<String, dynamic>> _exportSavedMessageFolders(Store store) {
+    final box = store.box<SavedMessageFolderEntity>();
+    return box.getAll().map((e) {
+      return {
+        'id': e.id,
+        'name': e.name,
+        'sortOrder': e.sortOrder,
+        'createdAt': e.createdAt.toIso8601String(),
+      };
+    }).toList();
+  }
+
+  List<Map<String, dynamic>> _exportServers(Store store) {
+    return store.box<ServerEntity>().getAll().map((entity) {
+      final server = entity.toDomain();
+      return {
+        'id': server.id,
+        'name': server.name,
+        'type': server.type.name,
+        'host': server.host,
+        'port': server.port,
+        'apiKey': server.apiKey,
+        'isDefault': server.isDefault,
+        'createdAt': server.createdAt.toIso8601String(),
+        'lastConnectedAt': server.lastConnectedAt.toIso8601String(),
+        'status': server.status.name,
+        'iconName': server.iconName,
+        'pathPrefix': server.pathPrefix,
+      };
+    }).toList();
+  }
+
+  Map<String, dynamic>? _readModelMetadata(SharedPreferences? prefs) {
+    if (prefs == null) return null;
+    final raw = prefs.getString('modelMetadata');
+    if (raw == null || raw.isEmpty) return null;
+    try {
+      return Map<String, dynamic>.from(jsonDecode(raw) as Map);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Map<String, dynamic> exportAll(Store store, {SharedPreferences? prefs}) {
+    final convBox = store.box<ConversationEntity>();
+    final messageBox = store.box<MessageEntity>();
+    final personaBox = store.box<PersonaEntity>();
+
+    final conversations =
+        convBox.getAll().map((e) => _conversationToMap(e.toDomain())).toList();
+    final messages =
+        messageBox.getAll().map((e) => _messageToMap(e.toDomain())).toList();
 
     final personas = personaBox
         .getAll()
@@ -86,74 +148,128 @@ class DataBackupService {
         .toList();
 
     return {
-      'version': 2,
+      'version': 3,
       'exportedAt': DateTime.now().toIso8601String(),
       'conversations': conversations,
       'messages': messages,
       'personas': personas,
+      'savedMessages': _exportSavedMessages(store),
+      'savedMessageFolders': _exportSavedMessageFolders(store),
+      'servers': _exportServers(store),
+      if (_readModelMetadata(prefs) != null)
+        'modelMetadata': _readModelMetadata(prefs),
     };
   }
 
   Map<String, dynamic> exportConversations(Store store) {
     final all = exportAll(store);
     return {
-      'version': 2,
+      'version': 3,
       'type': 'conversations',
       'exportedAt': all['exportedAt'],
       'conversations': all['conversations'],
       'messages': all['messages'],
+      'savedMessages': all['savedMessages'],
+      'savedMessageFolders': all['savedMessageFolders'],
+    };
+  }
+
+  Map<String, dynamic> exportConversation(Store store, String conversationId) {
+    final all = exportAll(store);
+    final conversations = (all['conversations'] as List)
+        .where((c) => (c as Map)['id'] == conversationId)
+        .toList();
+    final messages = (all['messages'] as List)
+        .where((m) => (m as Map)['conversationId'] == conversationId)
+        .toList();
+    final savedMessages = (all['savedMessages'] as List)
+        .where((m) => (m as Map)['conversationId'] == conversationId)
+        .toList();
+
+    return {
+      'version': 3,
+      'type': 'conversation',
+      'exportedAt': all['exportedAt'],
+      'conversations': conversations,
+      'messages': messages,
+      'savedMessages': savedMessages,
     };
   }
 
   Map<String, dynamic> exportPersonas(Store store) {
     final all = exportAll(store);
     return {
-      'version': 2,
+      'version': 3,
       'type': 'personas',
       'exportedAt': all['exportedAt'],
       'personas': all['personas'],
     };
   }
 
-  Map<String, dynamic> exportSettings(String settingsJson) {
-    return {
-      'version': 2,
+  Map<String, dynamic> exportSettings(
+    String settingsJson, {
+    Store? store,
+    SharedPreferences? prefs,
+  }) {
+    final map = <String, dynamic>{
+      'version': 3,
       'type': 'settings',
       'exportedAt': DateTime.now().toIso8601String(),
       'settings': jsonDecode(settingsJson),
     };
+    if (store != null) {
+      map['servers'] = _exportServers(store);
+    }
+    final metadata = _readModelMetadata(prefs);
+    if (metadata != null) {
+      map['modelMetadata'] = metadata;
+    }
+    return map;
   }
 
   String exportConversationsAsJson(Store store) =>
       const JsonEncoder.withIndent('  ').convert(exportConversations(store));
 
+  String exportConversationAsJson(Store store, String conversationId) =>
+      const JsonEncoder.withIndent('  ')
+          .convert(exportConversation(store, conversationId));
+
   String exportPersonasAsJson(Store store) =>
       const JsonEncoder.withIndent('  ').convert(exportPersonas(store));
 
-  String exportSettingsAsJson(String settingsJson) =>
-      const JsonEncoder.withIndent('  ').convert(exportSettings(settingsJson));
+  String exportSettingsAsJson(
+    String settingsJson, {
+    Store? store,
+    SharedPreferences? prefs,
+  }) =>
+      const JsonEncoder.withIndent('  ').convert(
+        exportSettings(settingsJson, store: store, prefs: prefs),
+      );
 
-  List<int> exportAllZip(Store store, String settingsJson) {
+  ArchiveFile _jsonArchiveFile(String name, String json) {
+    final bytes = utf8.encode(json);
+    return ArchiveFile(name, bytes.length, bytes);
+  }
+
+  List<int> exportAllZip(
+    Store store,
+    String settingsJson, {
+    SharedPreferences? prefs,
+  }) {
     final archive = Archive()
       ..addFile(
-        ArchiveFile(
+        _jsonArchiveFile(
           'conversations.json',
-          0,
-          utf8.encode(exportConversationsAsJson(store)),
+          exportConversationsAsJson(store),
         ),
       )
       ..addFile(
-        ArchiveFile(
-          'personas.json',
-          0,
-          utf8.encode(exportPersonasAsJson(store)),
-        ),
+        _jsonArchiveFile('personas.json', exportPersonasAsJson(store)),
       )
       ..addFile(
-        ArchiveFile(
+        _jsonArchiveFile(
           'settings.json',
-          0,
-          utf8.encode(exportSettingsAsJson(settingsJson)),
+          exportSettingsAsJson(settingsJson, store: store, prefs: prefs),
         ),
       );
     final encoded = ZipEncoder().encode(archive);
@@ -163,8 +279,9 @@ class DataBackupService {
     return encoded;
   }
 
-  String exportAllAsJson(Store store) {
-    return const JsonEncoder.withIndent('  ').convert(exportAll(store));
+  String exportAllAsJson(Store store, {SharedPreferences? prefs}) {
+    return const JsonEncoder.withIndent('  ')
+        .convert(exportAll(store, prefs: prefs));
   }
 
   Future<void> importFromJson(Store store, String jsonString) async {
@@ -177,6 +294,9 @@ class DataBackupService {
       final convBox = store.box<ConversationEntity>();
       final messageBox = store.box<MessageEntity>();
       final personaBox = store.box<PersonaEntity>();
+      final serverBox = store.box<ServerEntity>();
+      final savedBox = store.box<SavedMessageEntity>();
+      final savedFolderBox = store.box<SavedMessageFolderEntity>();
 
       final personas = data['personas'];
       if (personas is List) {
@@ -203,6 +323,79 @@ class DataBackupService {
           final entity = PersonaEntity.fromDomain(persona);
           if (existing != null) entity.internalId = existing.internalId;
           personaBox.put(entity);
+        }
+      }
+
+      final servers = data['servers'];
+      if (servers is List) {
+        for (final item in servers) {
+          if (item is! Map) continue;
+          final server = Server(
+            id: item['id'] as String,
+            name: item['name'] as String,
+            type: ServerType.values.byName(item['type'] as String? ?? 'lmStudio'),
+            host: item['host'] as String? ?? 'localhost',
+            port: item['port'] as int? ?? 1234,
+            apiKey: item['apiKey'] as String?,
+            isDefault: item['isDefault'] as bool? ?? false,
+            createdAt: DateTime.parse(item['createdAt'] as String),
+            lastConnectedAt: DateTime.parse(item['lastConnectedAt'] as String),
+            status: ConnectionStatus.values.byName(
+              item['status'] as String? ?? 'disconnected',
+            ),
+            iconName: item['iconName'] as String?,
+            pathPrefix: item['pathPrefix'] as String?,
+          );
+          final query = serverBox.query(ServerEntity_.id.equals(server.id)).build();
+          final existing = query.findFirst();
+          query.close();
+          final entity = ServerEntity.fromDomain(server);
+          if (existing != null) entity.internalId = existing.internalId;
+          serverBox.put(entity);
+        }
+      }
+
+      final savedFolders = data['savedMessageFolders'];
+      if (savedFolders is List) {
+        for (final item in savedFolders) {
+          if (item is! Map) continue;
+          final entity = SavedMessageFolderEntity(
+            id: item['id'] as String,
+            name: item['name'] as String,
+            sortOrder: item['sortOrder'] as int? ?? 0,
+            createdAt: DateTime.parse(item['createdAt'] as String),
+          );
+          final query = savedFolderBox
+              .query(SavedMessageFolderEntity_.id.equals(entity.id))
+              .build();
+          final existing = query.findFirst();
+          query.close();
+          if (existing != null) entity.internalId = existing.internalId;
+          savedFolderBox.put(entity);
+        }
+      }
+
+      final savedMessages = data['savedMessages'];
+      if (savedMessages is List) {
+        for (final item in savedMessages) {
+          if (item is! Map) continue;
+          final entity = SavedMessageEntity(
+            id: item['id'] as String,
+            sourceMessageId: item['sourceMessageId'] as String,
+            conversationId: item['conversationId'] as String,
+            conversationTitle: item['conversationTitle'] as String? ?? 'Chat',
+            roleIndex: item['roleIndex'] as int? ?? 0,
+            content: item['content'] as String? ?? '',
+            modelId: item['modelId'] as String?,
+            folderId: item['folderId'] as String?,
+            savedAt: DateTime.parse(item['savedAt'] as String),
+          );
+          final query =
+              savedBox.query(SavedMessageEntity_.id.equals(entity.id)).build();
+          final existing = query.findFirst();
+          query.close();
+          if (existing != null) entity.internalId = existing.internalId;
+          savedBox.put(entity);
         }
       }
 
@@ -279,6 +472,7 @@ class DataBackupService {
             variantIndex: item['variantIndex'] as int? ?? 0,
             threadOrder: item['threadOrder'] as int? ?? 0,
             isActiveVariant: item['isActiveVariant'] as bool? ?? true,
+            parentMessageId: item['parentMessageId'] as String?,
           );
 
           final entity = MessageEntity.fromDomain(message)
@@ -297,7 +491,7 @@ class DataBackupService {
     final archive = ZipDecoder().decodeBytes(bytes);
     for (final file in archive.files) {
       if (file.isFile) {
-        await importFromJson(store, utf8.decode(file.content));
+        await importFromJson(store, utf8.decode(file.content as List<int>));
       }
     }
   }

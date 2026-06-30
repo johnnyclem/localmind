@@ -2087,6 +2087,55 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get test_speak_button => 'Speak';
+
+  @override
+  String get scroll_to_bottom => 'Scroll to bottom';
+
+  @override
+  String get generate_ai_response => 'Generate AI response';
+
+  @override
+  String get no_response => 'No response';
+
+  @override
+  String get export => 'Export';
+
+  @override
+  String get import => 'Import';
+
+  @override
+  String get conversations_label => 'Conversations';
+
+  @override
+  String get personas_label => 'Personas';
+
+  @override
+  String get settings_label => 'Settings';
+
+  @override
+  String get export_conversation => 'Export conversation';
+
+  @override
+  String get tts_process_markdown => 'Process markdown for speech';
+
+  @override
+  String get tts_process_markdown_desc =>
+      'Strip formatting like **bold** before reading aloud';
+
+  @override
+  String get preview_system_prompts => 'Preview system prompts';
+
+  @override
+  String get welcome_message_1 => 'What can I help you with today?';
+
+  @override
+  String get welcome_message_2 => 'Ask me anything — I\'m ready when you are.';
+
+  @override
+  String get welcome_message_3 => 'Start a conversation below.';
+
+  @override
+  String get welcome_message_4 => 'Need ideas? Try one of the quick prompts.';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).

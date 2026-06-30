@@ -2581,5 +2581,21 @@
   },
   "test_tts_section_title": "Test voice",
   "test_tts_hint": "Enter text to hear the current TTS engine…",
-  "test_speak_button": "Speak"
+  "test_speak_button": "Speak",
+  "scroll_to_bottom": "Scroll to bottom",
+  "generate_ai_response": "Generate AI response",
+  "no_response": "No response",
+  "export": "Export",
+  "import": "Import",
+  "conversations_label": "Conversations",
+  "personas_label": "Personas",
+  "settings_label": "Settings",
+  "export_conversation": "Export conversation",
+  "tts_process_markdown": "Process markdown for speech",
+  "tts_process_markdown_desc": "Strip formatting like **bold** before reading aloud",
+  "preview_system_prompts": "Preview system prompts",
+  "welcome_message_1": "What can I help you with today?",
+  "welcome_message_2": "Ask me anything — I'm ready when you are.",
+  "welcome_message_3": "Start a conversation below.",
+  "welcome_message_4": "Need ideas? Try one of the quick prompts."
 }

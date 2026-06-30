@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:localmind/l10n/app_localizations.dart';
 import 'package:localmind/core/models/enums.dart';
 import 'package:localmind/core/theme/colors.dart';
 import 'package:localmind/features/chat/data/models/message.dart';
@@ -84,6 +85,16 @@ class AssistantBubble extends StatelessWidget {
             const TypingIndicator()
           else if (isStreaming)
             _StreamingContent(content: message.content, isDark: isDark)
+          else if (message.content.isEmpty &&
+              (message.reasoningContent?.isEmpty ?? true))
+            Text(
+              AppLocalizations.of(context)!.no_response,
+              style: TextStyle(
+                fontSize: 14,
+                fontStyle: FontStyle.italic,
+                color: muted,
+              ),
+            )
           else
             MarkdownContent(content: message.content, isDark: isDark),
           if (message.status == MessageStatus.error &&
@@ -139,11 +150,15 @@ class AssistantBubble extends StatelessWidget {
               if (!isStreaming &&
                   (message.status == MessageStatus.complete ||
                       message.status == MessageStatus.error ||
-                      message.status == MessageStatus.cancelled))
+                      message.status == MessageStatus.cancelled ||
+                      message.content.isEmpty))
                 MessageActionBar(
-                  content: message.content,
+                  content: message.content.isEmpty
+                      ? AppLocalizations.of(context)!.no_response
+                      : message.content,
                   tokenCount: message.tokenCount,
                   messageId: message.id,
+                  conversationId: message.conversationId,
                   onCopy: onCopy,
                   onRetry: onRetry,
                   onDelete: onDelete,

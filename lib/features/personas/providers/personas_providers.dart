@@ -41,6 +41,19 @@ final personaCategoryFilterProvider =
       _CategoryFilterNotifier.new,
     );
 
+final personaPreviewSystemPromptsProvider =
+    NotifierProvider<_PreviewSystemPromptsNotifier, bool>(
+      _PreviewSystemPromptsNotifier.new,
+    );
+
+class _PreviewSystemPromptsNotifier extends Notifier<bool> {
+  @override
+  bool build() => false;
+
+  void toggle() => state = !state;
+  void set(bool value) => state = value;
+}
+
 class _CategoryFilterNotifier extends Notifier<String?> {
   @override
   String? build() => null;

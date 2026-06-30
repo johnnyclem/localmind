@@ -13,15 +13,38 @@ class ConversationSearchBar extends ConsumerStatefulWidget {
 
 class _ConversationSearchBarState extends ConsumerState<ConversationSearchBar> {
   final TextEditingController _controller = TextEditingController();
+  final FocusNode _focusNode = FocusNode();
+  int _lastFocusRequest = 0;
 
   @override
   void dispose() {
     _controller.dispose();
+    _focusNode.dispose();
     super.dispose();
+  }
+
+  void _requestSearchFocus() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _focusNode.requestFocus();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    ref.listen<int>(focusHistorySearchProvider, (previous, next) {
+      if (next != _lastFocusRequest) {
+        _lastFocusRequest = next;
+        _requestSearchFocus();
+      }
+    });
+
+    final pendingFocus = ref.watch(focusHistorySearchProvider);
+    if (pendingFocus != _lastFocusRequest) {
+      _lastFocusRequest = pendingFocus;
+      _requestSearchFocus();
+    }
+
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
@@ -38,6 +61,7 @@ class _ConversationSearchBarState extends ConsumerState<ConversationSearchBar> {
       ),
       child: TextField(
         controller: _controller,
+        focusNode: _focusNode,
         onChanged: (value) {
           ref.read(conversationSearchProvider.notifier).setSearchQuery(value);
           setState(() {});
@@ -62,9 +86,7 @@ class _ConversationSearchBarState extends ConsumerState<ConversationSearchBar> {
             children: [
               IconButton(
                 icon: Icon(
-                  searchContents
-                      ? Icons.article
-                      : Icons.article_outlined,
+                  searchContents ? Icons.article : Icons.article_outlined,
                   size: 20,
                   color: searchContents
                       ? theme.colorScheme.primary

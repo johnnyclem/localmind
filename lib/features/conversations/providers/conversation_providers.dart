@@ -642,6 +642,20 @@ final scrollToMessageIdProvider =
       return ScrollToMessageNotifier();
     });
 
+final focusHistorySearchProvider =
+    NotifierProvider<FocusHistorySearchNotifier, int>(() {
+      return FocusHistorySearchNotifier();
+    });
+
+class FocusHistorySearchNotifier extends Notifier<int> {
+  @override
+  int build() => 0;
+
+  void requestFocus() => state++;
+
+  void clear() {}
+}
+
 class ScrollToMessageNotifier extends Notifier<String?> {
   @override
   String? build() => null;

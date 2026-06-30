@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:localmind/l10n/app_localizations.dart';
+import 'edit_message_result.dart';
 
 class EditMessageDialog extends StatefulWidget {
   const EditMessageDialog({
@@ -8,11 +9,13 @@ class EditMessageDialog extends StatefulWidget {
     required this.initialContent,
     this.description,
     this.saveLabel,
+    this.showSaveOnly = false,
   });
 
   final String initialContent;
   final String? description;
   final String? saveLabel;
+  final bool showSaveOnly;
 
   static Future<String?> show(
     BuildContext context, {
@@ -28,6 +31,21 @@ class EditMessageDialog extends StatefulWidget {
         initialContent: initialContent,
         description: description,
         saveLabel: saveLabel,
+      ),
+    );
+  }
+
+  static Future<EditMessageResult?> showUserEdit(
+    BuildContext context, {
+    required String initialContent,
+  }) {
+    return showModalBottomSheet<EditMessageResult>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => EditMessageDialog(
+        initialContent: initialContent,
+        showSaveOnly: true,
       ),
     );
   }
@@ -61,10 +79,22 @@ class _EditMessageDialogState extends State<EditMessageDialog> {
     super.dispose();
   }
 
-  void _save() {
+  String? _validatedText() {
     final text = _controller.text.trim();
-    if (text.isEmpty) return;
-    Navigator.of(context).pop(text);
+    if (text.isEmpty) return null;
+    return text;
+  }
+
+  void _popResult({required bool regenerate}) {
+    final text = _validatedText();
+    if (text == null) return;
+    if (widget.showSaveOnly) {
+      Navigator.of(context).pop(
+        EditMessageResult(content: text, regenerate: regenerate),
+      );
+    } else {
+      Navigator.of(context).pop(text);
+    }
   }
 
   @override
@@ -147,10 +177,21 @@ class _EditMessageDialogState extends State<EditMessageDialog> {
                       child: Text(l10n.cancel),
                     ),
                     const SizedBox(width: 8),
-                    ShadButton(
-                      onPressed: _save,
-                      child: Text(widget.saveLabel ?? l10n.save_regenerate),
-                    ),
+                    if (widget.showSaveOnly) ...[
+                      ShadButton.outline(
+                        onPressed: () => _popResult(regenerate: false),
+                        child: Text(l10n.save),
+                      ),
+                      const SizedBox(width: 8),
+                      ShadButton(
+                        onPressed: () => _popResult(regenerate: true),
+                        child: Text(l10n.save_regenerate),
+                      ),
+                    ] else
+                      ShadButton(
+                        onPressed: () => _popResult(regenerate: true),
+                        child: Text(widget.saveLabel ?? l10n.save_regenerate),
+                      ),
                   ],
                 ),
               ],

@@ -13,6 +13,7 @@ import '../../../core/logger/app_logger.dart';
 import '../../on_device/data/on_device_gemma_service.dart';
 import '../../on_device/data/on_device_chat_service.dart';
 import 'tools/adapters/tool_transport_adapter.dart';
+import '../utils/attachment_helpers.dart';
 import 'tools/adapters/openai_tool_adapter.dart';
 import 'tools/adapters/openrouter_tool_adapter.dart';
 import 'tools/adapters/ollama_tool_adapter.dart';
@@ -408,36 +409,57 @@ class LMStudioChatService implements ChatService {
   Future<dynamic> _formatInputWithImages(List<Message> messages) async {
     final formattedInputs = <Map<String, dynamic>>[];
     for (final m in messages) {
-      if (m.role != MessageRole.system) {
-        if (m.attachmentPaths != null && m.attachmentPaths!.isNotEmpty) {
-          formattedInputs.add({'type': 'text', 'content': m.content});
-          for (final path in m.attachmentPaths!) {
-            try {
-              final base64Image = await Isolate.run(() async {
-                final file = File(path);
-                if (await file.exists()) {
-                  final bytes = await file.readAsBytes();
-                  return base64Encode(bytes);
-                }
-                return null;
-              });
+      if (m.role == MessageRole.system) continue;
 
-              if (base64Image != null) {
-                final ext = path.split('.').last.toLowerCase();
-                final mimeType = (ext == 'png')
-                    ? 'image/png'
-                    : (ext == 'webp' ? 'image/webp' : 'image/jpeg');
-                formattedInputs.add({
-                  'type': 'image',
-                  'data_url': 'data:$mimeType;base64,$base64Image',
-                });
-              }
-            } catch (e) {
-              Log.error('Failed to read attachment for LMStudio format: $e');
-            }
+      var textContent = m.content;
+      final hasAttachments =
+          m.attachmentPaths != null && m.attachmentPaths!.isNotEmpty;
+
+      if (hasAttachments) {
+        for (final path in m.attachmentPaths!) {
+          if (!AttachmentHelpers.isTextPath(path)) continue;
+          final text = await AttachmentHelpers.readTextFile(path);
+          if (text != null) {
+            textContent = AttachmentHelpers.appendTextAttachment(
+              textContent,
+              AttachmentHelpers.fileNameOf(path),
+              text,
+            );
           }
-        } else {
-          formattedInputs.add({'type': 'text', 'content': m.content});
+        }
+      }
+
+      final isEmptyAssistant =
+          m.role == MessageRole.assistant && textContent.trim().isEmpty;
+
+      if (textContent.trim().isNotEmpty && !isEmptyAssistant) {
+        formattedInputs.add({'type': 'text', 'content': textContent});
+      }
+
+      if (hasAttachments) {
+        for (final path in m.attachmentPaths!) {
+          if (!AttachmentHelpers.isImagePath(path)) continue;
+          try {
+            final base64Image = await Isolate.run(() {
+              try {
+                final file = File(path);
+                if (!file.existsSync()) return null;
+                return base64Encode(file.readAsBytesSync());
+              } catch (_) {
+                return null;
+              }
+            });
+
+            if (base64Image != null) {
+              final mimeType = AttachmentHelpers.mimeTypeForImage(path);
+              formattedInputs.add({
+                'type': 'image',
+                'data_url': 'data:$mimeType;base64,$base64Image',
+              });
+            }
+          } catch (e) {
+            Log.error('Failed to read attachment for LMStudio format: $e');
+          }
         }
       }
     }

@@ -12,6 +12,7 @@ class MessageActionBar extends ConsumerStatefulWidget {
     required this.content,
     this.tokenCount,
     this.messageId,
+    this.conversationId,
     this.onCopy,
     this.onRetry,
     this.onDelete,
@@ -25,6 +26,7 @@ class MessageActionBar extends ConsumerStatefulWidget {
   final String content;
   final int? tokenCount;
   final String? messageId;
+  final String? conversationId;
   final VoidCallback? onCopy;
   final VoidCallback? onRetry;
   final VoidCallback? onDelete;
@@ -43,8 +45,7 @@ class _MessageActionBarState extends ConsumerState<MessageActionBar> {
   void _toggleTts() async {
     final ttsNotifier = ref.read(tts.ttsProvider.notifier);
     final ttsState = ref.read(tts.ttsProvider);
-    final isThisActive = ttsState.playingContent == widget.content &&
-        (ttsState.isSpeaking || ttsState.isPaused);
+    final isThisActive = _isMessageActive(ttsState);
 
     if (isThisActive) {
       ttsNotifier.togglePauseResume();
@@ -53,19 +54,33 @@ class _MessageActionBarState extends ConsumerState<MessageActionBar> {
         await ttsNotifier.stop();
       }
       try {
-        await ttsNotifier.speak(widget.content);
+        await ttsNotifier.speak(
+          widget.content,
+          messageId: widget.messageId,
+          conversationId: widget.conversationId,
+        );
       } catch (_) {}
     }
+  }
+
+  bool _isMessageActive(tts.TtsState ttsState) {
+    if (widget.messageId != null &&
+        ttsState.playingMessageId == widget.messageId) {
+      return ttsState.isSpeaking || ttsState.isPaused;
+    }
+    return ttsState.playingContent == widget.content &&
+        (ttsState.isSpeaking || ttsState.isPaused);
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final ttsState = ref.watch(tts.ttsProvider);
-    final isThisActive = ttsState.playingContent == widget.content &&
-        (ttsState.isSpeaking || ttsState.isPaused);
-    final isThisPlaying = ttsState.playingContent == widget.content && ttsState.isSpeaking && !ttsState.isPaused;
-    final isThisInitializing = ttsState.playingContent == widget.content && ttsState.isInitializing;
+    final isThisActive = _isMessageActive(ttsState);
+    final isThisPlaying =
+        isThisActive && ttsState.isSpeaking && !ttsState.isPaused;
+    final isThisInitializing =
+        isThisActive && ttsState.isInitializing;
 
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -170,9 +185,9 @@ class _MessageActionBarState extends ConsumerState<MessageActionBar> {
   void _showMoreOptions(BuildContext context) {
     final sheetL10n = AppLocalizations.of(context)!;
     final ttsState = ref.read(tts.ttsProvider);
-    final isThisActive = ttsState.playingContent == widget.content &&
-        (ttsState.isSpeaking || ttsState.isPaused);
-    final isThisPlaying = ttsState.playingContent == widget.content && ttsState.isSpeaking && !ttsState.isPaused;
+    final isThisActive = _isMessageActive(ttsState);
+    final isThisPlaying =
+        isThisActive && ttsState.isSpeaking && !ttsState.isPaused;
 
     showShadSheet(
       context: context,
@@ -244,17 +259,12 @@ class _MessageActionBarState extends ConsumerState<MessageActionBar> {
               title: Text(sheetL10n.character_count(widget.content.length)),
               enabled: false,
             ),
-            ListTile(
-              leading: const Icon(Icons.token),
-              title: Text(
-                widget.tokenCount != null
-                    ? sheetL10n.token_count(widget.tokenCount!)
-                    : sheetL10n.estimated_token_count(
-                        (widget.content.length / 4).ceil(),
-                      ),
+            if (widget.tokenCount != null)
+              ListTile(
+                leading: const Icon(Icons.numbers),
+                title: Text(sheetL10n.token_count(widget.tokenCount!)),
+                enabled: false,
               ),
-              enabled: false,
-            ),
           ],
         ),
       ),

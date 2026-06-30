@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:localmind/core/theme/colors.dart';
 import 'package:localmind/l10n/app_localizations.dart';
@@ -34,6 +36,8 @@ class _EmptyStateState extends State<EmptyState>
   late AnimationController _controller;
   late List<Animation<double>> _fadeAnimations;
   late List<Animation<Offset>> _slideAnimations;
+  Timer? _welcomeTimer;
+  int _welcomeIndex = 0;
 
   @override
   void initState() {
@@ -73,13 +77,25 @@ class _EmptyStateState extends State<EmptyState>
     });
 
     _controller.forward();
+    _welcomeTimer = Timer.periodic(const Duration(seconds: 5), (_) {
+      if (!mounted) return;
+      setState(() => _welcomeIndex = (_welcomeIndex + 1) % 4);
+    });
   }
 
   @override
   void dispose() {
+    _welcomeTimer?.cancel();
     _controller.dispose();
     super.dispose();
   }
+
+  List<String> _welcomeMessages(AppLocalizations l10n) => [
+        l10n.welcome_message_1,
+        l10n.welcome_message_2,
+        l10n.welcome_message_3,
+        l10n.welcome_message_4,
+      ];
 
   @override
   Widget build(BuildContext context) {
@@ -94,10 +110,21 @@ class _EmptyStateState extends State<EmptyState>
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const SizedBox(height: 24),
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 400),
+              child: Text(
+                _welcomeMessages(l10n)[_welcomeIndex],
+                key: ValueKey(_welcomeIndex),
+                textAlign: TextAlign.center,
+                style: theme.textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: isDark ? Colors.white : Colors.black87,
+                ),
+              ),
+            ),
+            const SizedBox(height: 32),
             _buildModelAndPersonaSelectors(isDark, theme, l10n),
             const SizedBox(height: 32),
-            _buildStartText(l10n),
-            const SizedBox(height: 16),
             _buildQuickPrompts(isDark),
             if (widget.recentConversations.isNotEmpty) ...[
               const SizedBox(height: 32),
@@ -219,21 +246,6 @@ class _EmptyStateState extends State<EmptyState>
         ),
       ),
       child: child,
-    );
-  }
-
-  Widget _buildStartText(AppLocalizations l10n) {
-    return TweenAnimationBuilder<double>(
-      tween: Tween(begin: 0.0, end: 1.0),
-      duration: const Duration(milliseconds: 400),
-      curve: Curves.easeOut,
-      builder: (context, value, child) {
-        return Opacity(opacity: value, child: child);
-      },
-      child: Text(
-        l10n.start_conversation,
-        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-      ),
     );
   }
 

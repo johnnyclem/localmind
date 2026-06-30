@@ -4010,6 +4010,102 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Speak'**
   String get test_speak_button;
+
+  /// No description provided for @scroll_to_bottom.
+  ///
+  /// In en, this message translates to:
+  /// **'Scroll to bottom'**
+  String get scroll_to_bottom;
+
+  /// No description provided for @generate_ai_response.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate AI response'**
+  String get generate_ai_response;
+
+  /// No description provided for @no_response.
+  ///
+  /// In en, this message translates to:
+  /// **'No response'**
+  String get no_response;
+
+  /// No description provided for @export.
+  ///
+  /// In en, this message translates to:
+  /// **'Export'**
+  String get export;
+
+  /// No description provided for @import.
+  ///
+  /// In en, this message translates to:
+  /// **'Import'**
+  String get import;
+
+  /// No description provided for @conversations_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Conversations'**
+  String get conversations_label;
+
+  /// No description provided for @personas_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Personas'**
+  String get personas_label;
+
+  /// No description provided for @settings_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get settings_label;
+
+  /// No description provided for @export_conversation.
+  ///
+  /// In en, this message translates to:
+  /// **'Export conversation'**
+  String get export_conversation;
+
+  /// No description provided for @tts_process_markdown.
+  ///
+  /// In en, this message translates to:
+  /// **'Process markdown for speech'**
+  String get tts_process_markdown;
+
+  /// No description provided for @tts_process_markdown_desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Strip formatting like **bold** before reading aloud'**
+  String get tts_process_markdown_desc;
+
+  /// No description provided for @preview_system_prompts.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview system prompts'**
+  String get preview_system_prompts;
+
+  /// No description provided for @welcome_message_1.
+  ///
+  /// In en, this message translates to:
+  /// **'What can I help you with today?'**
+  String get welcome_message_1;
+
+  /// No description provided for @welcome_message_2.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask me anything — I\'m ready when you are.'**
+  String get welcome_message_2;
+
+  /// No description provided for @welcome_message_3.
+  ///
+  /// In en, this message translates to:
+  /// **'Start a conversation below.'**
+  String get welcome_message_3;
+
+  /// No description provided for @welcome_message_4.
+  ///
+  /// In en, this message translates to:
+  /// **'Need ideas? Try one of the quick prompts.'**
+  String get welcome_message_4;
 }
 
 class _AppLocalizationsDelegate

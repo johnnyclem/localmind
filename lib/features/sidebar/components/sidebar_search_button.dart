@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';import 'package:hugeicons/hugeicons.dart';
 import 'package:go_router/go_router.dart';
 import 'package:localmind/core/theme/colors.dart';
 import '../../../core/routes/app_routes.dart';
+import '../../conversations/providers/conversation_providers.dart';
 
-class SidebarSearchButton extends StatelessWidget {
+class SidebarSearchButton extends ConsumerWidget {
   const SidebarSearchButton({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Padding(
@@ -19,6 +20,9 @@ class SidebarSearchButton extends StatelessWidget {
             Navigator.pop(context);
           }
           context.go(AppRoutes.chatHistory);
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            ref.read(focusHistorySearchProvider.notifier).requestFocus();
+          });
         },
         borderRadius: BorderRadius.circular(8),
         child: Container(

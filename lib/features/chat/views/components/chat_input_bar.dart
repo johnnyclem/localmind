@@ -151,7 +151,9 @@ class _ChatInputBarState extends ConsumerState<ChatInputBar>
 
   Future<void> _handleAttach() async {
     final result = await FilePicker.pickFiles(
-      type: FileType.image,
+      type: FileType.custom,
+      allowedExtensions: const ['jpg', 'jpeg', 'png', 'gif', 'webp', 'txt', 'md'],
+      allowMultiple: true,
     );
     if (result != null && result.files.isNotEmpty) {
       setState(() {
@@ -337,6 +339,8 @@ class _ChatInputBarState extends ConsumerState<ChatInputBar>
                         separatorBuilder: (_, _) => const SizedBox(width: 8),
                         itemBuilder: (context, index) {
                           final file = _attachedFiles[index];
+                          final ext = file.path.split('.').last.toLowerCase();
+                          final isImage = !['txt', 'md'].contains(ext);
                           return Stack(
                             clipBehavior: Clip.none,
                             children: [
@@ -351,12 +355,23 @@ class _ChatInputBarState extends ConsumerState<ChatInputBar>
                                 ),
                                 child: ClipRRect(
                                   borderRadius: BorderRadius.circular(11),
-                                  child: Image.file(
-                                    file,
-                                    width: 48,
-                                    height: 48,
-                                    fit: BoxFit.cover,
-                                  ),
+                                  child: isImage
+                                      ? Image.file(
+                                          file,
+                                          width: 48,
+                                          height: 48,
+                                          fit: BoxFit.cover,
+                                        )
+                                      : Container(
+                                          width: 48,
+                                          height: 48,
+                                          color: theme.colorScheme.surfaceContainerHighest,
+                                          child: Icon(
+                                            Icons.description_outlined,
+                                            size: 22,
+                                            color: theme.colorScheme.primary,
+                                          ),
+                                        ),
                                 ),
                               ),
                               PositionedDirectional(

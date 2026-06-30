@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:localmind/core/models/enums.dart';
+import 'package:localmind/core/routes/app_routes.dart';
 import 'package:localmind/l10n/app_localizations.dart';
+import '../../chat/providers/chat_providers.dart';
+import '../../conversations/data/models/conversation.dart';
+import '../../conversations/providers/conversation_providers.dart';
 import '../providers/saved_message_providers.dart';
 import 'components/saved_message_folder_bar.dart';
 
@@ -72,7 +78,7 @@ class SavedMessagesScreen extends ConsumerWidget {
               return ListView.separated(
                 padding: const EdgeInsets.all(16),
                 itemCount: messages.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 8),
+                separatorBuilder: (_, _) => const SizedBox(height: 8),
                 itemBuilder: (context, index) {
                   final saved = messages[index];
                   final role = MessageRole.values[saved.roleIndex];
@@ -94,43 +100,89 @@ class SavedMessagesScreen extends ConsumerWidget {
                         overflow: TextOverflow.ellipsis,
                       ),
                       isThreeLine: true,
-                      trailing: PopupMenuButton<String>(
-                        onSelected: (value) async {
-                          if (value == 'delete') {
-                            await ref
-                                .read(savedMessagesProvider.notifier)
-                                .deleteSavedMessage(saved.id);
-                          } else if (value.startsWith('folder:')) {
-                            final folderId = value.substring(7);
-                            await ref
-                                .read(savedMessagesProvider.notifier)
-                                .moveToFolder(
-                                  saved.id,
-                                  folderId.isEmpty ? null : folderId,
-                                );
+                      onTap: () async {
+                        final conversations =
+                            ref.read(conversationsProvider).value ?? [];
+                        Conversation? conversation;
+                        for (final conv in conversations) {
+                          if (conv.id == saved.conversationId) {
+                            conversation = conv;
+                            break;
                           }
-                        },
-                        itemBuilder: (context) {
-                          final folders =
-                              ref.read(savedMessageFoldersProvider).value ??
-                              [];
-                          return [
-                            ...folders.map(
-                              (folder) => PopupMenuItem(
-                                value: 'folder:${folder.id}',
-                                child: Text(folder.name),
-                              ),
-                            ),
-                            PopupMenuItem(
-                              value: 'folder:',
-                              child: Text(l10n.unfiled_chats),
-                            ),
-                            PopupMenuItem(
-                              value: 'delete',
-                              child: Text(l10n.delete),
-                            ),
-                          ];
-                        },
+                        }
+                        if (conversation == null) return;
+
+                        ref
+                            .read(scrollToMessageIdProvider.notifier)
+                            .scrollTo(saved.sourceMessageId);
+                        await ref
+                            .read(chatProvider.notifier)
+                            .loadConversation(conversation);
+                        if (context.mounted) {
+                          if (Scaffold.maybeOf(context)?.isDrawerOpen ?? false) {
+                            Navigator.pop(context);
+                          }
+                          context.go(AppRoutes.home);
+                        }
+                      },
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.copy_outlined, size: 20),
+                            tooltip: l10n.copy,
+                            onPressed: () async {
+                              await Clipboard.setData(
+                                ClipboardData(text: saved.content),
+                              );
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(l10n.copied_to_clipboard),
+                                  ),
+                                );
+                              }
+                            },
+                          ),
+                          PopupMenuButton<String>(
+                            onSelected: (value) async {
+                              if (value == 'delete') {
+                                await ref
+                                    .read(savedMessagesProvider.notifier)
+                                    .deleteSavedMessage(saved.id);
+                              } else if (value.startsWith('folder:')) {
+                                final folderId = value.substring(7);
+                                await ref
+                                    .read(savedMessagesProvider.notifier)
+                                    .moveToFolder(
+                                      saved.id,
+                                      folderId.isEmpty ? null : folderId,
+                                    );
+                              }
+                            },
+                            itemBuilder: (context) {
+                              final folders =
+                                  ref.read(savedMessageFoldersProvider).value ??
+                                  [];
+                              return [
+                                ...folders.map(
+                                  (folder) => PopupMenuItem(
+                                    value: 'folder:${folder.id}',
+                                    child: Text(folder.name),
+                                  ),
+                                ),
+                                PopupMenuItem(
+                                  value: 'folder:',
+                                  child: Text(l10n.unfiled_chats),
+                                ),
+                                PopupMenuItem(
+                                  value: 'delete',
+                                  child: Text(l10n.delete),
+                                ),
+                              ];
+                            },
+                          ),
+                        ],
                       ),
                     ),
                   );

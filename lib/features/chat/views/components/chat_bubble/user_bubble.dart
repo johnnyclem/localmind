@@ -117,6 +117,7 @@ class UserBubble extends StatelessWidget {
                   content: message.content,
                   tokenCount: message.tokenCount,
                   messageId: message.id,
+                  conversationId: message.conversationId,
                   onCopy: onCopy,
                   onDelete: onDelete,
                   onEdit: onEdit,

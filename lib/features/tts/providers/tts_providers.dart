@@ -12,6 +12,7 @@ import 'package:flutter_tts/flutter_tts.dart';
 import '../../../core/logger/app_logger.dart';
 import '../../../core/models/enums.dart';
 import '../../../core/providers/app_providers.dart';
+import '../utils/tts_text_processor.dart';
 import 'tts_model_providers.dart';
 import '../data/piper_tts_model.dart';
 import 'tts_worker.dart';
@@ -27,6 +28,8 @@ class TtsState {
   final String? error;
   final EngineId? activeEngine;
   final String? playingContent;
+  final String? playingMessageId;
+  final String? playingConversationId;
   final bool isPreview;
 
   const TtsState({
@@ -36,6 +39,8 @@ class TtsState {
     this.error,
     this.activeEngine,
     this.playingContent,
+    this.playingMessageId,
+    this.playingConversationId,
     this.isPreview = false,
   });
 
@@ -46,7 +51,10 @@ class TtsState {
     String? error,
     EngineId? activeEngine,
     String? playingContent,
+    String? playingMessageId,
+    String? playingConversationId,
     bool? isPreview,
+    bool clearPlayingTarget = false,
   }) {
     return TtsState(
       isSpeaking: isSpeaking ?? this.isSpeaking,
@@ -55,6 +63,11 @@ class TtsState {
       error: error,
       activeEngine: activeEngine ?? this.activeEngine,
       playingContent: playingContent,
+      playingMessageId:
+          clearPlayingTarget ? null : (playingMessageId ?? this.playingMessageId),
+      playingConversationId: clearPlayingTarget
+          ? null
+          : (playingConversationId ?? this.playingConversationId),
       isPreview: isPreview ?? this.isPreview,
     );
   }
@@ -252,6 +265,7 @@ class TtsNotifier extends Notifier<TtsState> {
       isInitializing: false,
       playingContent: null,
       isPreview: false,
+      clearPlayingTarget: true,
     );
   }
 
@@ -398,8 +412,21 @@ class TtsNotifier extends Notifier<TtsState> {
     }
   }
 
-  Future<void> speak(String text, {EngineId? engineId, String? voiceId, bool isPreview = false}) async {
+  Future<void> speak(
+    String text, {
+    EngineId? engineId,
+    String? voiceId,
+    bool isPreview = false,
+    String? messageId,
+    String? conversationId,
+  }) async {
     if (text.trim().isEmpty) return;
+
+    final settings = ref.read(settingsProvider);
+    if (settings.ttsProcessMarkdown) {
+      text = TtsTextProcessor.process(text, stripMarkdown: true);
+      if (text.trim().isEmpty) return;
+    }
 
     _isStopping = false;
     if (state.isSpeaking) {
@@ -408,7 +435,6 @@ class TtsNotifier extends Notifier<TtsState> {
       _isStopping = false;
     }
 
-    final settings = ref.read(settingsProvider);
     engineId ??= settings.ttsEngine;
 
     final availableVoices = voicesForEngine(engineId);
@@ -429,6 +455,8 @@ class TtsNotifier extends Notifier<TtsState> {
         error: null,
         activeEngine: EngineId.system,
         playingContent: text,
+        playingMessageId: isPreview ? null : messageId,
+        playingConversationId: isPreview ? null : conversationId,
         isPreview: isPreview,
       );
       try {
@@ -438,7 +466,11 @@ class TtsNotifier extends Notifier<TtsState> {
         );
         _flutterTts!.setCompletionHandler(() {
           if (!_isStopping) {
-            state = state.copyWith(isSpeaking: false, playingContent: null);
+            state = state.copyWith(
+              isSpeaking: false,
+              playingContent: null,
+              clearPlayingTarget: true,
+            );
           }
         });
         _flutterTts!.setErrorHandler((msg) {
@@ -447,12 +479,17 @@ class TtsNotifier extends Notifier<TtsState> {
               isSpeaking: false,
               playingContent: null,
               error: msg.toString(),
+              clearPlayingTarget: true,
             );
           }
         });
         _flutterTts!.setCancelHandler(() {
           if (!_isStopping) {
-            state = state.copyWith(isSpeaking: false, playingContent: null);
+            state = state.copyWith(
+              isSpeaking: false,
+              playingContent: null,
+              clearPlayingTarget: true,
+            );
           }
         });
         await _flutterTts!.awaitSpeakCompletion(true);
@@ -462,6 +499,7 @@ class TtsNotifier extends Notifier<TtsState> {
           isSpeaking: false,
           error: 'System TTS unavailable',
           playingContent: null,
+          clearPlayingTarget: true,
         );
         rethrow;
       }
@@ -497,6 +535,8 @@ class TtsNotifier extends Notifier<TtsState> {
       error: null,
       activeEngine: engineId,
       playingContent: text,
+      playingMessageId: isPreview ? null : messageId,
+      playingConversationId: isPreview ? null : conversationId,
       isPreview: isPreview,
     );
 
@@ -512,6 +552,7 @@ class TtsNotifier extends Notifier<TtsState> {
         isInitializing: false,
         error: e.toString(),
         playingContent: null,
+        clearPlayingTarget: true,
       );
     }
   }
@@ -615,6 +656,7 @@ class TtsNotifier extends Notifier<TtsState> {
       isInitializing: false,
       playingContent: null,
       isPreview: false,
+      clearPlayingTarget: true,
     );
   }
 

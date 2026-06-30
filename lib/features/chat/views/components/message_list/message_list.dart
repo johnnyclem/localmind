@@ -4,6 +4,7 @@ import 'package:localmind/core/models/enums.dart';
 import 'package:localmind/features/chat/data/models/message.dart';
 import 'package:localmind/features/chat/providers/chat_providers.dart';
 import 'package:localmind/features/conversations/providers/conversation_providers.dart';
+import 'package:localmind/l10n/app_localizations.dart';
 import '../chat_bubble.dart';
 
 class MessageList extends StatelessWidget {
@@ -22,6 +23,7 @@ class MessageList extends StatelessWidget {
     required this.onCycleVariant,
     required this.onModelPicker,
     this.onSave,
+    this.onGenerateResponse,
     this.hasSmartReplies = false,
     this.bottomInset = 0,
   });
@@ -39,6 +41,7 @@ class MessageList extends StatelessWidget {
   final void Function(String messageId, int direction) onCycleVariant;
   final VoidCallback onModelPicker;
   final void Function(Message message)? onSave;
+  final VoidCallback? onGenerateResponse;
   final bool hasSmartReplies;
   final double bottomInset;
 
@@ -58,6 +61,7 @@ class MessageList extends StatelessWidget {
       onCycleVariant: onCycleVariant,
       onModelPicker: onModelPicker,
       onSave: onSave,
+      onGenerateResponse: onGenerateResponse,
       hasSmartReplies: hasSmartReplies,
       bottomInset: bottomInset,
     );
@@ -79,6 +83,7 @@ class _MessageListConsumer extends ConsumerStatefulWidget {
     required this.onCycleVariant,
     required this.onModelPicker,
     this.onSave,
+    this.onGenerateResponse,
     this.hasSmartReplies = false,
     this.bottomInset = 0,
   });
@@ -96,6 +101,7 @@ class _MessageListConsumer extends ConsumerStatefulWidget {
   final void Function(String messageId, int direction) onCycleVariant;
   final VoidCallback onModelPicker;
   final void Function(Message message)? onSave;
+  final VoidCallback? onGenerateResponse;
   final bool hasSmartReplies;
   final double bottomInset;
 
@@ -164,6 +170,7 @@ class _MessageListConsumerState extends ConsumerState<_MessageListConsumer> {
       onCycleVariant: widget.onCycleVariant,
       onModelPicker: widget.onModelPicker,
       onSave: widget.onSave,
+      onGenerateResponse: widget.onGenerateResponse,
       hasSmartReplies: widget.hasSmartReplies,
       bottomInset: widget.bottomInset,
     );
@@ -187,6 +194,7 @@ class _MessageList extends StatelessWidget {
     required this.onCycleVariant,
     required this.onModelPicker,
     this.onSave,
+    this.onGenerateResponse,
     this.hasSmartReplies = false,
     this.bottomInset = 0,
   });
@@ -206,6 +214,7 @@ class _MessageList extends StatelessWidget {
   final void Function(String messageId, int direction) onCycleVariant;
   final VoidCallback onModelPicker;
   final void Function(Message message)? onSave;
+  final VoidCallback? onGenerateResponse;
   final bool hasSmartReplies;
   final double bottomInset;
 
@@ -249,26 +258,49 @@ class _MessageList extends StatelessWidget {
         final itemKey =
             messageKeys.putIfAbsent(message.id, GlobalKey.new);
 
-        return ChatBubble(
-          key: itemKey,
-          message: message,
-          allMessages: this.allMessages,
-          isStreaming:
-              isLast && isStreaming && message.id == streamingMessage?.id,
-          onRetry: () => onRetry(message.id),
-          onDelete: () => onDelete(message.id),
-          onEdit: message.role == MessageRole.user
-              ? () => onEdit(message.id, message.content)
-              : message.role == MessageRole.assistant
-                  ? () => onEditAssistant(message.id, message.content)
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            ChatBubble(
+              key: itemKey,
+              message: message,
+              allMessages: this.allMessages,
+              isStreaming:
+                  isLast && isStreaming && message.id == streamingMessage?.id,
+              onRetry: () => onRetry(message.id),
+              onDelete: () => onDelete(message.id),
+              onEdit: message.role == MessageRole.user
+                  ? () => onEdit(message.id, message.content)
+                  : message.role == MessageRole.assistant
+                      ? () => onEditAssistant(message.id, message.content)
+                      : null,
+              onBranch: () => onBranch(message.id),
+              onContinue: message.role == MessageRole.assistant && isLast
+                  ? () => onContinue(message.id)
                   : null,
-          onBranch: () => onBranch(message.id),
-          onContinue: message.role == MessageRole.assistant && isLast
-              ? () => onContinue(message.id)
-              : null,
-          onCycleVariant: (direction) => onCycleVariant(message.id, direction),
-          onModelTap: onModelPicker,
-          onSave: onSave,
+              onCycleVariant: (direction) =>
+                  onCycleVariant(message.id, direction),
+              onModelTap: onModelPicker,
+              onSave: onSave,
+            ),
+            if (!isStreaming &&
+                isLast &&
+                message.role == MessageRole.user &&
+                onGenerateResponse != null)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 0, 24, 8),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: OutlinedButton.icon(
+                    onPressed: onGenerateResponse,
+                    icon: const Icon(Icons.auto_awesome, size: 16),
+                    label: Text(
+                      AppLocalizations.of(context)!.generate_ai_response,
+                    ),
+                  ),
+                ),
+              ),
+          ],
         );
       },
     );

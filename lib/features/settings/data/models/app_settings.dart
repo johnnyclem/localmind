@@ -37,6 +37,7 @@ class AppSettings {
   final double ttsSpeed;
   final KittenTtsModelVariant kittenTtsModelVariant;
   final bool autoSpeakEnabled;
+  final bool ttsProcessMarkdown;
   final bool smartReplyEnabled;
   final String? localeCode;
   final String? huggingFaceToken;
@@ -69,6 +70,7 @@ class AppSettings {
     this.ttsSpeed = 1.0,
     this.kittenTtsModelVariant = KittenTtsModelVariant.nanoInt8,
     this.autoSpeakEnabled = false,
+    this.ttsProcessMarkdown = true,
     this.smartReplyEnabled = true,
     this.localeCode,
     this.huggingFaceToken,
@@ -102,6 +104,7 @@ class AppSettings {
     double? ttsSpeed,
     KittenTtsModelVariant? kittenTtsModelVariant,
     bool? autoSpeakEnabled,
+    bool? ttsProcessMarkdown,
     bool? smartReplyEnabled,
     Object? localeCode = _unset,
     Object? huggingFaceToken = _unset,
@@ -140,6 +143,7 @@ class AppSettings {
       kittenTtsModelVariant:
           kittenTtsModelVariant ?? this.kittenTtsModelVariant,
       autoSpeakEnabled: autoSpeakEnabled ?? this.autoSpeakEnabled,
+      ttsProcessMarkdown: ttsProcessMarkdown ?? this.ttsProcessMarkdown,
       smartReplyEnabled: smartReplyEnabled ?? this.smartReplyEnabled,
       localeCode: identical(localeCode, _unset)
           ? this.localeCode
@@ -180,6 +184,7 @@ class AppSettings {
       'ttsSpeed': ttsSpeed,
       'kittenTtsModelVariant': kittenTtsModelVariant.name,
       'autoSpeakEnabled': autoSpeakEnabled,
+      'ttsProcessMarkdown': ttsProcessMarkdown,
       'smartReplyEnabled': smartReplyEnabled,
       'localeCode': localeCode,
       'huggingFaceToken': huggingFaceToken,
@@ -215,6 +220,7 @@ class AppSettings {
       ttsSpeed: map['ttsSpeed']?.toDouble() ?? 1.0,
       kittenTtsModelVariant: _parseKittenVariant(map['kittenTtsModelVariant']),
       autoSpeakEnabled: map['autoSpeakEnabled'] ?? false,
+      ttsProcessMarkdown: map['ttsProcessMarkdown'] ?? true,
       smartReplyEnabled: map['smartReplyEnabled'] ?? true,
       localeCode: map['localeCode'] as String?,
       huggingFaceToken: map['huggingFaceToken'] as String?,

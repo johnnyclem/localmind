@@ -1,7 +1,13 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:localmind/l10n/app_localizations.dart';
+import 'package:localmind/core/providers/storage_providers.dart';
+import 'package:localmind/core/services/data_backup_service.dart';
 import '../../../../core/routes/app_routes.dart';
 import '../../../chat/providers/chat_providers.dart';
 import '../../data/models/conversation.dart';
@@ -86,6 +92,9 @@ class ConversationList extends ConsumerWidget {
                 },
                 onMoveToFolder: () {
                   _showMoveToFolderSheet(context, ref, l10n, conversation);
+                },
+                onExport: () {
+                  _exportConversation(context, ref, l10n, conversation);
                 },
               );
             }),
@@ -214,5 +223,29 @@ class ConversationList extends ConsumerWidget {
         );
       },
     );
+  }
+
+  Future<void> _exportConversation(
+    BuildContext context,
+    WidgetRef ref,
+    AppLocalizations l10n,
+    Conversation conversation,
+  ) async {
+    final db = ref.read(databaseProvider);
+    final json = DataBackupService()
+        .exportConversationAsJson(db.store, conversation.id);
+    final saved = await FilePicker.saveFile(
+      dialogTitle: l10n.export_conversation,
+      fileName:
+          'localmind_${conversation.title.replaceAll(RegExp(r'[^\w\-]+'), '_')}_${DateTime.now().millisecondsSinceEpoch}.json',
+      type: FileType.custom,
+      allowedExtensions: const ['json'],
+      bytes: Uint8List.fromList(utf8.encode(json)),
+    );
+    if (saved != null && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.export_data_success)),
+      );
+    }
   }
 }

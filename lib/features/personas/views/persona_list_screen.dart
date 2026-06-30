@@ -17,6 +17,7 @@ class PersonaListScreen extends ConsumerWidget {
     final builtIn = filteredPersonas.where((p) => p.isBuiltIn).toList();
     final userCreated = filteredPersonas.where((p) => !p.isBuiltIn).toList();
     final selectedCategory = ref.watch(personaCategoryFilterProvider);
+    final previewSystemPrompts = ref.watch(personaPreviewSystemPromptsProvider);
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final topPadding = MediaQuery.of(context).padding.top;
@@ -53,13 +54,26 @@ class PersonaListScreen extends ConsumerWidget {
                       ),
                     ),
                     const SizedBox(width: 8),
-                    Text(
-                      l10n.personas_title,
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: isDark ? Colors.white : Colors.black,
+                    Expanded(
+                      child: Text(
+                        l10n.personas_title,
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: isDark ? Colors.white : Colors.black,
+                        ),
                       ),
+                    ),
+                    IconButton(
+                      icon: Icon(
+                        previewSystemPrompts
+                            ? Icons.visibility
+                            : Icons.visibility_outlined,
+                      ),
+                      tooltip: l10n.preview_system_prompts,
+                      onPressed: () => ref
+                          .read(personaPreviewSystemPromptsProvider.notifier)
+                          .toggle(),
                     ),
                   ],
                 ),
@@ -148,6 +162,7 @@ class PersonaListScreen extends ConsumerWidget {
                                 persona: p,
                                 isDark: isDark,
                                 l10n: l10n,
+                                showSystemPrompt: previewSystemPrompts,
                                 onLongPress: () => _showActions(
                                   context,
                                   ref,
@@ -308,6 +323,7 @@ class _PersonaCard extends StatelessWidget {
     required this.persona,
     required this.isDark,
     required this.l10n,
+    this.showSystemPrompt = false,
     this.onTap,
     this.onLongPress,
   });
@@ -315,6 +331,7 @@ class _PersonaCard extends StatelessWidget {
   final Persona persona;
   final bool isDark;
   final AppLocalizations l10n;
+  final bool showSystemPrompt;
   final VoidCallback? onTap;
   final VoidCallback? onLongPress;
 
@@ -401,19 +418,26 @@ class _PersonaCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    persona.description ??
-                        persona.systemPrompt.substring(
-                          0,
-                          persona.systemPrompt.length.clamp(0, 60),
-                        ),
+                    showSystemPrompt && persona.isBuiltIn
+                        ? persona.systemPrompt
+                        : (persona.description ??
+                            persona.systemPrompt.substring(
+                              0,
+                              persona.systemPrompt.length.clamp(0, 60),
+                            )),
                     style: TextStyle(
-                      fontSize: 13,
+                      fontSize: showSystemPrompt && persona.isBuiltIn ? 12 : 13,
                       color: isDark
                           ? const Color(0xFF888888)
                           : const Color(0xFF999999),
+                      fontFamily: showSystemPrompt && persona.isBuiltIn
+                          ? 'monospace'
+                          : null,
                     ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                    maxLines: showSystemPrompt && persona.isBuiltIn ? 8 : 1,
+                    overflow: showSystemPrompt && persona.isBuiltIn
+                        ? TextOverflow.fade
+                        : TextOverflow.ellipsis,
                   ),
                   if (persona.category != null) ...[
                     const SizedBox(height: 4),

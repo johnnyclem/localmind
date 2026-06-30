@@ -361,19 +361,27 @@ class ChatNotifier extends Notifier<ChatState> {
       return;
     }
 
-    if (content.trim().isEmpty) return;
+    if (content.trim().isEmpty &&
+        (attachments == null || attachments.isEmpty)) {
+      return;
+    }
+
+    final trimmedContent = content.trim();
 
     if (_currentConversationId == null) {
-      final server = ref.read(activeServerProvider);
-      final selectedModel = ref.read(selectedModelProvider);
       final selectedPersona = ref.read(selectedPersonaProvider);
+      final titleSource = trimmedContent.isNotEmpty
+          ? trimmedContent
+          : (attachments?.isNotEmpty == true
+              ? attachments!.first.path.split(Platform.pathSeparator).last
+              : 'New chat');
       final conversation = await ref
           .read(conv.conversationsProvider.notifier)
           .createConversation(
-            title: content.length > 50
-                ? '${content.substring(0, 50)}...'
-                : content,
-            serverId: server?.id,
+            title: titleSource.length > 50
+                ? '${titleSource.substring(0, 50)}...'
+                : titleSource,
+            serverId: server.id,
             modelId: selectedModel?.id,
             personaId: selectedPersona?.id,
             systemPrompt: selectedPersona?.systemPrompt,
@@ -418,7 +426,7 @@ class ChatNotifier extends Notifier<ChatState> {
       id: generateUuid(),
       conversationId: _currentConversationId!,
       role: MessageRole.user,
-      content: content,
+      content: trimmedContent,
       createdAt: DateTime.now(),
       status: MessageStatus.complete,
       attachmentPaths: savedPaths.isNotEmpty ? savedPaths : null,
@@ -1359,30 +1367,12 @@ class ChatNotifier extends Notifier<ChatState> {
     if (newContent.trim().isEmpty) return;
     if (newContent == message.content) return;
 
-    final groupId = MessageVariants.groupId(message);
-    final deactivated = state.allMessages.map((m) {
-      if (MessageVariants.groupId(m) != groupId) return m;
-      return m.copyWith(isActiveVariant: false);
-    }).toList();
-    for (final m in deactivated.where(
-      (x) => MessageVariants.groupId(x) == groupId,
-    )) {
-      await _saveMessage(m);
-    }
-    state = state.copyWith(allMessages: deactivated);
-
     final updated = message.copyWith(
-      id: generateUuid(),
       content: newContent,
-      createdAt: DateTime.now(),
       status: MessageStatus.complete,
-      variantIndex: _nextVariantIndex(groupId),
-      isActiveVariant: true,
-      parentMessageId: message.parentMessageId,
     );
     await _saveMessage(updated);
-    final updatedAll = [...state.allMessages, updated];
-    _setAllMessages(updatedAll);
+    _replaceMessageInAll(updated);
   }
 
   Future<void> branchFromMessage(String messageId) async {
@@ -1465,6 +1455,34 @@ class ChatNotifier extends Notifier<ChatState> {
     state = state.copyWith(
       allMessages: updatedAll,
       messages: MessageVariants.resolveActiveTimeline(updatedAll),
+    );
+  }
+
+  Future<void> editMessageSaveOnly(String messageId, String newContent) async {
+    final messageIndex = state.messages.indexWhere((m) => m.id == messageId);
+    if (messageIndex == -1) return;
+
+    final message = state.messages[messageIndex];
+    if (message.role != MessageRole.user) return;
+    if (newContent.trim().isEmpty) return;
+    if (newContent == message.content) return;
+
+    final updated = message.copyWith(content: newContent);
+    await _saveMessage(updated);
+    _replaceMessageInAll(updated);
+  }
+
+  Future<void> generateResponseForLastUser() async {
+    if (state.isStreaming) return;
+    final messages = state.messages;
+    if (messages.isEmpty || messages.last.role != MessageRole.user) return;
+
+    final userMessage = messages.last;
+    await _regenerateAssistant(
+      userMessage,
+      variantGroupId: generateUuid(),
+      threadOrder: userMessage.threadOrder + 1,
+      variantIndex: 0,
     );
   }
 

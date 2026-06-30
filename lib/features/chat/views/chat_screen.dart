@@ -1,4 +1,7 @@
 import 'dart:convert';
+import 'dart:typed_data';
+
+import 'package:file_picker/file_picker.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,6 +10,8 @@ import 'package:hugeicons/hugeicons.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:localmind/core/models/enums.dart';
 import 'package:localmind/core/providers/app_providers.dart';
+import 'package:localmind/core/providers/storage_providers.dart';
+import 'package:localmind/core/services/data_backup_service.dart';
 import 'package:localmind/core/routes/app_routes.dart';
 import 'package:localmind/core/utils/system_insets.dart';
 import 'package:localmind/l10n/app_localizations.dart';
@@ -27,6 +32,7 @@ import 'components/chat_auto_scroll_controller.dart';
 import 'components/chat_input_bar.dart';
 import 'components/chat_settings_sheet.dart';
 import 'components/edit_message_dialog.dart';
+import 'components/edit_message_result.dart';
 import 'components/persona_picker_sheet.dart';
 import 'components/notification_permission_banner.dart';
 import 'components/message_list/message_list.dart';
@@ -49,6 +55,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
   final ScrollController _scrollController = ScrollController();
   final FocusNode _inputFocusNode = FocusNode();
   bool _isApprovalDialogOpen = false;
+  bool _showScrollToBottom = false;
   late final ChatAutoScrollController _autoScroll;
 
   @override
@@ -56,10 +63,27 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _inputFocusNode.addListener(() => setState(() {}));
-    _scrollController.addListener(
-      () => _autoScroll.onScrollChanged(_scrollController),
-    );
+    _scrollController.addListener(_onScrollChanged);
     _autoScroll = ChatAutoScrollController();
+  }
+
+  void _onScrollChanged() {
+    if (!_scrollController.hasClients) return;
+    final pos = _scrollController.position;
+    final atBottom = pos.pixels >= pos.maxScrollExtent - 96;
+    if (atBottom != !_showScrollToBottom) {
+      setState(() => _showScrollToBottom = !atBottom);
+    }
+    _autoScroll.onScrollChanged(_scrollController);
+  }
+
+  void _scrollToBottom() {
+    if (!_scrollController.hasClients) return;
+    _scrollController.animateTo(
+      _scrollController.position.maxScrollExtent,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeOut,
+    );
   }
 
   @override
@@ -97,6 +121,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
       scrollController: _scrollController,
       inputFocusNode: _inputFocusNode,
       autoScroll: _autoScroll,
+      showScrollToBottom: _showScrollToBottom,
+      onScrollToBottom: _scrollToBottom,
       onModelPicker: () => _showModelPicker(context),
       onMenuAction: (action) => _handleMenuAction(action, context),
     );
@@ -129,6 +155,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
         if (activeConv != null) {
           _showRenameDialog(context, activeConv);
         }
+      case 'export_chat':
+        _exportActiveConversation(context);
       case 'clear':
         showDialog(
           context: context,
@@ -210,6 +238,28 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
     });
   }
 
+  Future<void> _exportActiveConversation(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
+    final activeConv = ref.read(conv.activeConversationProvider);
+    if (activeConv == null) return;
+    final db = ref.read(databaseProvider);
+    final json = DataBackupService()
+        .exportConversationAsJson(db.store, activeConv.id);
+    final saved = await FilePicker.saveFile(
+      dialogTitle: l10n.export_conversation,
+      fileName:
+          'localmind_${activeConv.title.replaceAll(RegExp(r'[^\w\-]+'), '_')}_${DateTime.now().millisecondsSinceEpoch}.json',
+      type: FileType.custom,
+      allowedExtensions: const ['json'],
+      bytes: Uint8List.fromList(utf8.encode(json)),
+    );
+    if (saved != null && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.export_data_success)),
+      );
+    }
+  }
+
   void _showRenameDialog(BuildContext context, Conversation conversation) {
     final l10n = AppLocalizations.of(context)!;
     final controller = TextEditingController(text: conversation.title);
@@ -256,6 +306,8 @@ class _ChatBody extends ConsumerWidget {
     required this.scrollController,
     required this.inputFocusNode,
     required this.autoScroll,
+    required this.showScrollToBottom,
+    required this.onScrollToBottom,
     required this.onModelPicker,
     required this.onMenuAction,
   });
@@ -263,6 +315,8 @@ class _ChatBody extends ConsumerWidget {
   final ScrollController scrollController;
   final FocusNode inputFocusNode;
   final ChatAutoScrollController autoScroll;
+  final bool showScrollToBottom;
+  final VoidCallback onScrollToBottom;
   final VoidCallback onModelPicker;
   final void Function(String) onMenuAction;
 
@@ -353,6 +407,16 @@ class _ChatBody extends ConsumerWidget {
                 keyboardBottomInset: keyboardBottomInset,
                 inputFocusNode: inputFocusNode,
               ),
+              if (showScrollToBottom && messages.isNotEmpty)
+                Positioned(
+                  right: 16,
+                  bottom: 120 + keyboardBottomInset,
+                  child: FloatingActionButton.small(
+                    onPressed: onScrollToBottom,
+                    tooltip: AppLocalizations.of(context)!.scroll_to_bottom,
+                    child: const Icon(Icons.arrow_downward),
+                  ),
+                ),
             ],
           ),
         ),
@@ -435,14 +499,19 @@ class _MessageArea extends ConsumerWidget {
       onDelete: (messageId) =>
           ref.read(chatProvider.notifier).deleteMessage(messageId),
       onEdit: (messageId, currentContent) async {
-        final newContent = await EditMessageDialog.show(
+        final result = await EditMessageDialog.showUserEdit(
           context,
           initialContent: currentContent,
         );
-        if (newContent != null && newContent != currentContent) {
+        if (result == null || result.content == currentContent) return;
+        if (result.regenerate) {
           await ref
               .read(chatProvider.notifier)
-              .editMessage(messageId, newContent);
+              .editMessage(messageId, result.content);
+        } else {
+          await ref
+              .read(chatProvider.notifier)
+              .editMessageSaveOnly(messageId, result.content);
         }
       },
       onEditAssistant: (messageId, currentContent) async {
@@ -468,6 +537,8 @@ class _MessageArea extends ConsumerWidget {
           .cycleMessageVariant(messageId, direction),
       onSave: (message) =>
           ref.read(savedMessagesProvider.notifier).saveMessage(message),
+      onGenerateResponse: () =>
+          ref.read(chatProvider.notifier).generateResponseForLastUser(),
       onModelPicker: onModelPicker,
       hasSmartReplies:
           !isStreaming &&
@@ -594,7 +665,7 @@ class _ScreenAppBar extends ConsumerWidget {
                   contentPadding: EdgeInsets.zero,
                 ),
               ),
-              if (activeConversation != null)
+              if (activeConversation != null) ...[
                 PopupMenuItem(
                   value: 'rename',
                   child: ListTile(
@@ -603,6 +674,15 @@ class _ScreenAppBar extends ConsumerWidget {
                     contentPadding: EdgeInsets.zero,
                   ),
                 ),
+                PopupMenuItem(
+                  value: 'export_chat',
+                  child: ListTile(
+                    leading: const Icon(Icons.upload_outlined),
+                    title: Text(l10n.export_conversation),
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                ),
+              ],
               PopupMenuItem(
                 value: 'persona',
                 child: ListTile(

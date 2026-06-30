@@ -162,6 +162,14 @@ class SettingsViews extends ConsumerWidget {
                       valueFormat: (value) => '${value.toStringAsFixed(2)}x',
                     ),
                   ],
+                  _ToggleSetting(
+                    label: l10n.tts_process_markdown,
+                    description: l10n.tts_process_markdown_desc,
+                    value: settings.ttsProcessMarkdown,
+                    onChanged: (value) => ref
+                        .read(settingsProvider.notifier)
+                        .setTtsProcessMarkdown(value),
+                  ),
                 ],
               );
 
@@ -1083,10 +1091,12 @@ class _ToggleSetting extends StatelessWidget {
     required this.label,
     required this.value,
     required this.onChanged,
+    this.description,
     this.badges = const [],
   });
 
   final String label;
+  final String? description;
   final bool value;
   final ValueChanged<bool> onChanged;
   final List<Widget> badges;
@@ -1100,18 +1110,32 @@ class _ToggleSetting extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Expanded(
-            child: Wrap(
-              spacing: 8,
-              runSpacing: 6,
-              crossAxisAlignment: WrapCrossAlignment.center,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  label,
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 6,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    Text(
+                      label,
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    ...badges,
+                  ],
                 ),
-                ...badges,
+                if (description != null) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    description!,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
               ],
             ),
           ),

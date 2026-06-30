@@ -1110,10 +1110,22 @@ class _TtsTestSectionState extends ConsumerState<_TtsTestSection> {
           ),
         ),
         const SizedBox(height: 12),
-        ShadButton(
-          onPressed: _speak,
-          leading: const Icon(Icons.volume_up),
-          child: Text(l10n.test_speak_button),
+        Row(
+          children: [
+            Expanded(
+              child: ShadButton(
+                onPressed: _speak,
+                leading: const Icon(Icons.volume_up),
+                child: Text(l10n.test_speak_button),
+              ),
+            ),
+            const SizedBox(width: 8),
+            ShadButton.outline(
+              onPressed: () => ref.read(tts.ttsProvider.notifier).stop(),
+              leading: const Icon(Icons.stop),
+              child: Text(l10n.stop),
+            ),
+          ],
         ),
       ],
     );
