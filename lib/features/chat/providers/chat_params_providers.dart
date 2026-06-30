@@ -1,8 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:localmind/core/providers/app_providers.dart';
-import 'package:localmind/features/conversations/providers/conversation_providers.dart'
-    as conv;
-import 'package:localmind/features/personas/providers/personas_providers.dart';
+import 'package:localmind/core/providers/conversation_providers.dart' as conv;
+import 'package:localmind/core/providers/personas_providers.dart';
 import '../data/models/chat_parameters.dart';
 
 final chatParamsProvider = Provider<ChatParameters>((ref) {

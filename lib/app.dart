@@ -13,12 +13,12 @@ import 'features/chat/views/chat_screen.dart';
 import 'features/conversations/views/chat_history_screen.dart';
 import 'features/mcp/views/mcp_tools_screen.dart';
 import 'features/on_device/views/model_manager_screen.dart';
-import 'features/onboarding/screens/onboarding_language_screen.dart';
-import 'features/onboarding/screens/onboarding_model_download_screen.dart';
-import 'features/onboarding/screens/onboarding_notification_permission_screen.dart';
-import 'features/onboarding/screens/onboarding_server_setup_screen.dart';
-import 'features/onboarding/screens/onboarding_server_type_screen.dart';
-import 'features/onboarding/screens/onboarding_theme_screen.dart';
+import 'features/onboarding/views/onboarding_language_screen.dart';
+import 'features/onboarding/views/onboarding_model_download_screen.dart';
+import 'features/onboarding/views/onboarding_notification_permission_screen.dart';
+import 'features/onboarding/views/onboarding_server_setup_screen.dart';
+import 'features/onboarding/views/onboarding_server_type_screen.dart';
+import 'features/onboarding/views/onboarding_theme_screen.dart';
 import 'features/personas/views/create_persona_screen.dart';
 import 'features/personas/views/persona_list_screen.dart';
 import 'features/servers/data/models/server.dart';
@@ -26,8 +26,8 @@ import 'features/servers/views/add_server_screen.dart';
 import 'features/servers/views/server_list_screen.dart';
 import 'features/tts/views/tts_model_manager_screen.dart';
 import 'features/settings/views/settings_screen.dart';
-import 'features/sidebar/sidebar_drawer.dart';
-import 'features/sidebar/sidebar_widget.dart';
+import 'features/sidebar/views/components/sidebar_widget.dart';
+import 'features/sidebar/views/sidebar_drawer.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorKey = GlobalKey<NavigatorState>();
@@ -131,7 +131,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: AppRoutes.settings,
             pageBuilder: (context, state) =>
-                const NoTransitionPage(child: SettingsViews()),
+            const NoTransitionPage(child: SettingsScreen()),
           ),
           GoRoute(
             path: AppRoutes.chatHistory,

@@ -5,10 +5,10 @@ import '../../../core/models/enums.dart';
 import '../../../core/providers/storage_providers.dart';
 import '../../../core/providers/service_providers.dart';
 import '../../../core/storage/entities.dart';
-import '../../models/data/model_cache.dart';
+import '../../models/data/repositories/model_cache.dart';
 
 import '../../../objectbox.g.dart';
-import '../../models/data/models/model_info.dart';
+import '../../../core/models/model_info.dart';
 import '../../on_device/providers/on_device_providers.dart';
 import '../../on_device/data/models/on_device_model.dart';
 

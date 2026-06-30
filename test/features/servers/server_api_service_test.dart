@@ -2,7 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:localmind/core/models/enums.dart';
 import 'package:localmind/features/servers/data/models/server.dart';
-import 'package:localmind/features/servers/data/server_api_service.dart';
+import 'package:localmind/features/servers/data/repositories/server_api_service.dart';
 
 class TestInterceptor extends Interceptor {
   final dynamic responseData;

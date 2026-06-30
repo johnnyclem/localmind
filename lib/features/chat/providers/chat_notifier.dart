@@ -6,19 +6,18 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:localmind/core/logger/app_logger.dart';
 import 'package:localmind/core/models/enums.dart';
 import 'package:localmind/core/providers/app_providers.dart';
-import 'package:localmind/core/providers/review_prompt_providers.dart';
 import 'package:localmind/core/providers/chat_background_service_provider.dart';
+import 'package:localmind/core/providers/conversation_providers.dart' as conv;
+import 'package:localmind/core/providers/on_device_providers.dart';
+import 'package:localmind/core/providers/personas_providers.dart';
+import 'package:localmind/core/providers/review_prompt_providers.dart';
+import 'package:localmind/core/providers/server_providers.dart';
 import 'package:localmind/core/providers/storage_providers.dart';
 import 'package:localmind/core/services/message_save_service.dart';
 import 'package:localmind/core/storage/entities.dart';
 import 'package:localmind/features/conversations/data/models/conversation.dart';
-import 'package:localmind/features/conversations/providers/conversation_providers.dart'
-    as conv;
-import 'package:localmind/features/models/data/models/model_info.dart';
-import 'package:localmind/features/on_device/providers/on_device_providers.dart';
-import 'package:localmind/features/personas/providers/personas_providers.dart';
+import 'package:localmind/core/models/model_info.dart';
 import 'package:localmind/features/servers/data/models/server.dart';
-import 'package:localmind/features/servers/providers/server_providers.dart';
 import 'package:localmind/objectbox.g.dart';
 import '../data/chat_service.dart';
 import '../data/models/message.dart' hide ToolCallData;
@@ -28,7 +27,7 @@ import '../data/tools/adapters/tool_transport_adapter.dart' show ParsedToolCall;
 import 'chat_mcp_providers.dart';
 import 'chat_params_providers.dart';
 import 'chat_service_providers.dart';
-import 'model_selection_providers.dart';
+import '../../../core/providers/model_selection_providers.dart';
 import 'tooling_providers.dart';
 
 class PendingToolApproval {

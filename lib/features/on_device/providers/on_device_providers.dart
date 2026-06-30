@@ -11,7 +11,7 @@ import '../../../core/providers/chat_background_service_provider.dart';
 import '../../../core/providers/review_prompt_providers.dart';
 import '../../../core/providers/service_providers.dart';
 import '../../../core/providers/storage_providers.dart';
-import '../data/imported_gguf_model_repository.dart';
+import '../data/repositories/imported_gguf_model_repository.dart';
 import '../data/models/on_device_model.dart';
 import '../data/notification_permission_service.dart';
 import '../data/on_device_gemma_service.dart';

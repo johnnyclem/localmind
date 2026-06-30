@@ -3,11 +3,11 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../data/model_downloader.dart';
+import '../data/repositories/model_downloader.dart';
 import '../data/kitten_tts_model.dart';
-import '../data/kitten_tts_downloader.dart';
+import '../data/repositories/kitten_tts_downloader.dart';
 import '../data/piper_tts_model.dart';
-import '../data/piper_tts_downloader.dart';
+import '../data/repositories/piper_tts_downloader.dart';
 
 /// Provider for the KittenTTS downloader instance.
 final kittenTtsDownloaderProvider = Provider<KittenTtsDownloader>((ref) {

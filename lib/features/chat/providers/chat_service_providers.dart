@@ -1,10 +1,10 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:localmind/core/models/enums.dart';
+import 'package:localmind/core/providers/on_device_providers.dart';
 import 'package:localmind/core/providers/service_providers.dart';
+import 'package:localmind/core/providers/server_providers.dart';
 import 'package:localmind/features/servers/data/models/server.dart';
-import 'package:localmind/features/servers/providers/server_providers.dart';
-import 'package:localmind/features/on_device/providers/on_device_providers.dart';
 import 'package:localmind/features/on_device/data/on_device_chat_service.dart';
 import 'package:localmind/features/on_device/data/on_device_gemma_service.dart';
 import 'package:localmind/features/on_device/data/on_device_llama_service.dart';
