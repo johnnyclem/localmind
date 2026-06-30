@@ -4,10 +4,10 @@ import 'package:hugeicons/hugeicons.dart';
 
 import 'package:localmind/core/models/enums.dart';
 import 'package:localmind/l10n/app_localizations.dart';
-import '../../../../servers/data/models/server.dart';
-import '../../../../servers/providers/server_providers.dart';
-import '../../../../servers/views/components/server_icon_picker.dart';
-import '../../../../servers/views/components/server_picker_sheet.dart';
+import 'package:localmind/features/servers/data/models/server.dart';
+import 'package:localmind/features/servers/providers/server_providers.dart';
+import 'package:localmind/features/servers/views/components/server_icon_picker.dart';
+import 'package:localmind/features/servers/views/components/server_picker_sheet.dart';
 
 class ModelTopBar extends ConsumerWidget {
   const ModelTopBar({

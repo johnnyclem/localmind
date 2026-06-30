@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';import 'package:hugeicons/hugeicons.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:go_router/go_router.dart';
+import 'package:localmind/core/routes/app_routes.dart';
 import 'package:localmind/core/theme/colors.dart';
-import '../../../core/routes/app_routes.dart';
-import '../../conversations/providers/conversation_providers.dart';
+import 'package:localmind/features/conversations/providers/conversation_providers.dart';
 
 class SidebarSearchButton extends ConsumerWidget {
   const SidebarSearchButton({super.key});

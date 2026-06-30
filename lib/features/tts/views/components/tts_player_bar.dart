@@ -6,10 +6,10 @@ import 'package:localmind/core/models/enums.dart';
 import 'package:localmind/core/providers/app_providers.dart';
 import 'package:localmind/core/routes/app_routes.dart';
 import 'package:localmind/l10n/app_localizations.dart';
-import '../../providers/tts_providers.dart' as tts;
-import '../../../conversations/data/models/conversation.dart';
-import '../../../conversations/providers/conversation_providers.dart';
-import '../../../chat/providers/chat_providers.dart';
+import 'package:localmind/features/tts/providers/tts_providers.dart' as tts;
+import 'package:localmind/features/conversations/data/models/conversation.dart';
+import 'package:localmind/features/conversations/providers/conversation_providers.dart';
+import 'package:localmind/features/chat/providers/chat_providers.dart';
 
 class TtsPlayerBar extends ConsumerWidget {
   final EdgeInsetsGeometry margin;

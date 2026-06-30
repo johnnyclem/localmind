@@ -1,40 +1,34 @@
 import 'dart:convert';
-import 'dart:typed_data';
-
-import 'package:file_picker/file_picker.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
+import 'package:localmind/core/theme/colors.dart';
 import 'package:localmind/core/models/enums.dart';
 import 'package:localmind/core/providers/app_providers.dart';
-import 'package:localmind/core/providers/storage_providers.dart';
-import 'package:localmind/core/services/data_backup_service.dart';
-import 'package:localmind/core/services/share_service.dart';
 import 'package:localmind/core/routes/app_routes.dart';
 import 'package:localmind/core/utils/system_insets.dart';
 import 'package:localmind/l10n/app_localizations.dart';
 import 'package:localmind/features/conversations/providers/conversation_providers.dart'
     as conv;
-import 'package:localmind/features/conversations/data/models/conversation.dart';
 import 'package:localmind/features/models/screens/model_picker_sheet.dart';
 import 'package:localmind/features/personas/providers/personas_providers.dart';
 import 'package:localmind/features/servers/providers/server_providers.dart';
-import 'package:localmind/features/tts/views/components/tts_player_bar.dart';
+import 'package:localmind/features/servers/data/models/server.dart';
+import 'package:localmind/features/servers/views/components/server_icon_picker.dart';
+import 'package:localmind/core/services/share_service.dart';
 import 'package:localmind/features/saved_messages/views/components/save_message_sheet.dart';
-import '../data/export_service.dart';
+import 'package:localmind/features/tts/views/components/tts_player_bar.dart';
 import '../data/models/message.dart';
 import '../providers/chat_mcp_providers.dart';
-import '../../conversations/views/components/rename_conversation_dialog.dart';
 import '../providers/chat_providers.dart';
 import 'components/chat_auto_scroll_controller.dart';
 import 'components/model_info_sheet.dart';
 import 'components/chat_input_bar.dart';
 import 'components/chat_settings_sheet.dart';
 import 'components/edit_message_dialog.dart';
-import 'components/persona_picker_sheet.dart';
 import 'components/notification_permission_banner.dart';
 import 'components/message_list/message_list.dart';
 import 'components/message_list/empty_state.dart';
@@ -55,9 +49,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
     with WidgetsBindingObserver {
   final ScrollController _scrollController = ScrollController();
   final FocusNode _inputFocusNode = FocusNode();
-  final GlobalKey<ChatInputBarState> _inputBarKey = GlobalKey();
   bool _isApprovalDialogOpen = false;
-  bool _showScrollToBottom = false;
   late final ChatAutoScrollController _autoScroll;
 
   @override
@@ -65,27 +57,10 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _inputFocusNode.addListener(() => setState(() {}));
-    _scrollController.addListener(_onScrollChanged);
-    _autoScroll = ChatAutoScrollController();
-  }
-
-  void _onScrollChanged() {
-    if (!_scrollController.hasClients) return;
-    final pos = _scrollController.position;
-    final atBottom = pos.pixels >= pos.maxScrollExtent - 96;
-    if (atBottom != !_showScrollToBottom) {
-      setState(() => _showScrollToBottom = !atBottom);
-    }
-    _autoScroll.onScrollChanged(_scrollController);
-  }
-
-  void _scrollToBottom() {
-    if (!_scrollController.hasClients) return;
-    _scrollController.animateTo(
-      _scrollController.position.maxScrollExtent,
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeOut,
+    _scrollController.addListener(
+      () => _autoScroll.onScrollChanged(_scrollController),
     );
+    _autoScroll = ChatAutoScrollController();
   }
 
   @override
@@ -122,14 +97,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
     return _ChatBody(
       scrollController: _scrollController,
       inputFocusNode: _inputFocusNode,
-      inputBarKey: _inputBarKey,
       autoScroll: _autoScroll,
-      showScrollToBottom: _showScrollToBottom,
-      onScrollToBottom: _scrollToBottom,
       onModelPicker: () => _showModelPicker(context),
       onMenuAction: (action) => _handleMenuAction(action, context),
-      onShareMessage: _shareMessage,
-      onSaveMessage: (message) => _saveMessage(context, message),
     );
   }
 
@@ -146,10 +116,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
     switch (action) {
       case 'new_chat':
         ref.read(chatProvider.notifier).startNewConversation();
-      case 'share_chat':
-        _shareConversation(context);
       case 'persona':
-        showPersonaPickerSheet(context);
+        _showPersonaPicker(context);
       case 'remove_persona':
         final activeConv = ref.read(conv.activeConversationProvider);
         if (activeConv != null) {
@@ -157,13 +125,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
               .read(conv.conversationsProvider.notifier)
               .updatePersona(activeConv.id, null, null);
         }
-      case 'rename':
-        final activeConv = ref.read(conv.activeConversationProvider);
-        if (activeConv != null) {
-          _showRenameDialog(context, activeConv);
-        }
-      case 'export_chat':
-        _exportActiveConversation(context);
       case 'clear':
         showDialog(
           context: context,
@@ -191,28 +152,105 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
     }
   }
 
-  Future<void> _shareConversation(BuildContext context) async {
-    final messages = ref.read(chatProvider).messages;
-    if (messages.isEmpty) return;
+  void _showPersonaPicker(BuildContext context) {
+    final personasAsync = ref.read(personasNotifierProvider);
+    final personas = personasAsync.value ?? [];
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final activeConv = ref.read(conv.activeConversationProvider);
-    final text = ExportService.exportAsText(
-      messages,
-      title: activeConv?.title,
-    );
-    await ShareService.shareText(text, subject: activeConv?.title);
-  }
+    final currentPersonaId = activeConv?.personaId;
 
-  void _shareMessage(String content) {
-    ShareService.shareText(content);
-  }
-
-  Future<void> _saveMessage(BuildContext context, Message message) async {
-    final isTemporary = ref.read(chatProvider.select((s) => s.isTemporary));
-    await showSaveMessageSheet(
-      context,
-      ref,
-      message,
-      isTemporaryChat: isTemporary,
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (ctx) {
+        final sheetL10n = AppLocalizations.of(context)!;
+        return SafeArea(
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: isDark ? Colors.grey[600] : Colors.grey[300],
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  sheetL10n.select_persona,
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: isDark ? Colors.white : Colors.black,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Flexible(
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: personas.length,
+                    itemBuilder: (context, index) {
+                      final p = personas[index];
+                      final isSelected = p.id == currentPersonaId;
+                      final accent = isDark
+                          ? AppColors.darkAccent
+                          : AppColors.lightAccent;
+                      return ListTile(
+                        leading: Text(
+                          p.emoji,
+                          style: const TextStyle(fontSize: 22),
+                        ),
+                        title: Text(
+                          p.name,
+                          style: TextStyle(
+                            fontWeight: isSelected
+                                ? FontWeight.w600
+                                : FontWeight.normal,
+                            color: isDark ? Colors.white : Colors.black,
+                          ),
+                        ),
+                        subtitle: p.description != null
+                            ? Text(
+                                p.description!,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: isDark
+                                      ? AppColors.darkMutedText
+                                      : AppColors.lightMutedText,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              )
+                            : null,
+                        trailing: isSelected
+                            ? Icon(Icons.check_circle, color: accent)
+                            : null,
+                        onTap: () {
+                          if (activeConv != null) {
+                            ref
+                                .read(conv.conversationsProvider.notifier)
+                                .updatePersona(
+                                  activeConv.id,
+                                  p.id,
+                                  p.systemPrompt,
+                                );
+                          }
+                          Navigator.pop(ctx);
+                        },
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -269,98 +307,22 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
       ref.read(chatProvider.notifier).approveTool(value ?? false);
     });
   }
-
-  Future<void> _exportActiveConversation(BuildContext context) async {
-    final l10n = AppLocalizations.of(context)!;
-    final activeConv = ref.read(conv.activeConversationProvider);
-    if (activeConv == null) return;
-    final db = ref.read(databaseProvider);
-    final json = DataBackupService()
-        .exportConversationAsJson(db.store, activeConv.id);
-    final saved = await FilePicker.saveFile(
-      dialogTitle: l10n.export_conversation,
-      fileName:
-          'localmind_${activeConv.title.replaceAll(RegExp(r'[^\w\-]+'), '_')}_${DateTime.now().millisecondsSinceEpoch}.json',
-      type: FileType.custom,
-      allowedExtensions: const ['json'],
-      bytes: Uint8List.fromList(utf8.encode(json)),
-    );
-    if (saved != null && context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.export_data_success)),
-      );
-    }
-  }
-
-  void _showRenameDialog(BuildContext context, Conversation conversation) {
-    showRenameConversationDialog(context, ref, conversation: conversation);
-  }
-}
-
-void _handleChatModeAction(
-  BuildContext context,
-  WidgetRef ref, {
-  required bool hasMessages,
-  required bool isTemporary,
-}) {
-  final l10n = AppLocalizations.of(context)!;
-
-  if (!hasMessages) {
-    ref.read(chatProvider.notifier).setTemporaryMode(!isTemporary);
-    return;
-  }
-
-  if (isTemporary) {
-    showDialog<void>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.exit_temporary_chat_title),
-        content: Text(l10n.exit_temporary_chat_body),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text(l10n.cancel),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(ctx);
-              ref.read(chatProvider.notifier).startNewConversation();
-            },
-            child: Text(l10n.nav_new_chat),
-          ),
-        ],
-      ),
-    );
-    return;
-  }
-
-  ref.read(chatProvider.notifier).startNewConversation();
 }
 
 class _ChatBody extends ConsumerWidget {
   const _ChatBody({
     required this.scrollController,
     required this.inputFocusNode,
-    required this.inputBarKey,
     required this.autoScroll,
-    required this.showScrollToBottom,
-    required this.onScrollToBottom,
     required this.onModelPicker,
     required this.onMenuAction,
-    required this.onShareMessage,
-    required this.onSaveMessage,
   });
 
   final ScrollController scrollController;
   final FocusNode inputFocusNode;
-  final GlobalKey<ChatInputBarState> inputBarKey;
   final ChatAutoScrollController autoScroll;
-  final bool showScrollToBottom;
-  final VoidCallback onScrollToBottom;
   final VoidCallback onModelPicker;
   final void Function(String) onMenuAction;
-  final void Function(String content) onShareMessage;
-  final Future<void> Function(Message message) onSaveMessage;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -375,8 +337,8 @@ class _ChatBody extends ConsumerWidget {
     final errorMessage = ref.watch(chatProvider.select((s) => s.errorMessage));
     final selectedModel = ref.watch(selectedModelProvider);
     final connectionStatus = ref.watch(connectionStatusProvider);
+    final activeServer = ref.watch(activeServerProvider);
     final activeConversation = ref.watch(conv.activeConversationProvider);
-    final isTemporary = ref.watch(chatProvider.select((s) => s.isTemporary));
     final personaId = activeConversation?.personaId;
     final persona = personaId != null
         ? ref.watch(personaByIdProvider(personaId))
@@ -401,24 +363,14 @@ class _ChatBody extends ConsumerWidget {
 
     return Column(
       children: [
-        ModelTopBar(
-          selectedModel: selectedModel,
-          onModelTap: onModelPicker,
-        ),
+        ModelTopBar(selectedModel: selectedModel, onModelTap: onModelPicker),
         _ScreenAppBar(
-          activeConversation: activeConversation,
+          activeServer: activeServer,
+          connectionStatus: connectionStatus,
           isDark: isDark,
           persona: persona,
-          isTemporary: isTemporary,
-          hasMessages: messages.isNotEmpty,
           onMenuAction: onMenuAction,
-          onPersonaPicker: () => showPersonaPickerSheet(context),
-          onChatModeAction: () => _handleChatModeAction(
-            context,
-            ref,
-            hasMessages: messages.isNotEmpty,
-            isTemporary: isTemporary,
-          ),
+          onPersonaPicker: () => _openPersonaPicker(context, ref),
         ),
         const NotificationPermissionBanner(),
         if (connectionStatus == ConnectionStatus.disconnected ||
@@ -427,7 +379,7 @@ class _ChatBody extends ConsumerWidget {
         if (persona != null)
           PersonaIndicator(
             persona: persona,
-            onTap: () => showPersonaPickerSheet(context),
+            onTap: () => _openPersonaPicker(context, ref),
             onRemove: () {
               final activeConv = ref.read(conv.activeConversationProvider);
               if (activeConv != null) {
@@ -439,61 +391,133 @@ class _ChatBody extends ConsumerWidget {
           ),
         const TtsPlayerBar(),
         Expanded(
-          child: DecoratedBox(
-            decoration: isTemporary
-                ? BoxDecoration(
-                    color: isDark
-                        ? const Color(0xFF15120C)
-                        : const Color(0xFFFFFBF0),
-                    border: Border.all(
-                      color: isDark
-                          ? const Color(0xFF6B5A2E)
-                          : const Color(0xFFE6C35C),
-                      width: 2,
-                    ),
-                  )
-                : const BoxDecoration(),
-            child: Stack(
-              clipBehavior: Clip.hardEdge,
-              children: [
-                _MessageArea(
-                  isLoading: isLoading,
-                  messages: messages,
-                  activeConversation: activeConversation,
-                  errorMessage: errorMessage,
-                  selectedModel: selectedModel,
-                  isStreaming: isStreaming,
-                  scrollController: scrollController,
-                  effectiveBottomInset: effectiveBottomInset,
-                  keyboardBottomInset: keyboardBottomInset,
-                  onModelPicker: onModelPicker,
-                  onShareMessage: onShareMessage,
-                  onSaveMessage: onSaveMessage,
-                  isTemporary: isTemporary,
-                ),
-                _ChatBottomBar(
-                  isStreaming: isStreaming,
-                  keyboardBottomInset: keyboardBottomInset,
-                  inputFocusNode: inputFocusNode,
-                  inputBarKey: inputBarKey,
-                ),
-                if (showScrollToBottom && messages.isNotEmpty)
-                  Positioned(
-                    right: 16,
-                    bottom: 120 + keyboardBottomInset,
-                    child: FloatingActionButton.small(
-                      onPressed: onScrollToBottom,
-                      tooltip: AppLocalizations.of(context)!.scroll_to_bottom,
-                      child: const Icon(Icons.arrow_downward),
-                    ),
-                  ),
-              ],
-            ),
+          child: Stack(
+            children: [
+              _MessageArea(
+                isLoading: isLoading,
+                messages: messages,
+                activeConversation: activeConversation,
+                errorMessage: errorMessage,
+                selectedModel: selectedModel,
+                isStreaming: isStreaming,
+                scrollController: scrollController,
+                effectiveBottomInset: effectiveBottomInset,
+                keyboardBottomInset: keyboardBottomInset,
+                onModelPicker: onModelPicker,
+              ),
+              _ChatBottomBar(
+                isStreaming: isStreaming,
+                keyboardBottomInset: keyboardBottomInset,
+                inputFocusNode: inputFocusNode,
+              ),
+            ],
           ),
         ),
       ],
     );
   }
+}
+
+void _openPersonaPicker(BuildContext context, WidgetRef ref) {
+  final personasAsync = ref.read(personasNotifierProvider);
+  final personas = personasAsync.value ?? [];
+  final isDark = Theme.of(context).brightness == Brightness.dark;
+  final activeConv = ref.read(conv.activeConversationProvider);
+  final currentPersonaId = activeConv?.personaId;
+
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    builder: (ctx) {
+      final sheetL10n = AppLocalizations.of(context)!;
+      return SafeArea(
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: isDark ? Colors.grey[600] : Colors.grey[300],
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                sheetL10n.select_persona,
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: isDark ? Colors.white : Colors.black,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Flexible(
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: personas.length,
+                  itemBuilder: (context, index) {
+                    final p = personas[index];
+                    final isSelected = p.id == currentPersonaId;
+                    final accent = isDark
+                        ? AppColors.darkAccent
+                        : AppColors.lightAccent;
+                    return ListTile(
+                      leading: Text(
+                        p.emoji,
+                        style: const TextStyle(fontSize: 22),
+                      ),
+                      title: Text(
+                        p.name,
+                        style: TextStyle(
+                          fontWeight: isSelected
+                              ? FontWeight.w600
+                              : FontWeight.normal,
+                          color: isDark ? Colors.white : Colors.black,
+                        ),
+                      ),
+                      subtitle: p.description != null
+                          ? Text(
+                              p.description!,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: isDark
+                                    ? AppColors.darkMutedText
+                                    : AppColors.lightMutedText,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            )
+                          : null,
+                      trailing: isSelected
+                          ? Icon(Icons.check_circle, color: accent)
+                          : null,
+                      onTap: () {
+                        if (activeConv != null) {
+                          ref
+                              .read(conv.conversationsProvider.notifier)
+                              .updatePersona(
+                                activeConv.id,
+                                p.id,
+                                p.systemPrompt,
+                              );
+                        }
+                        Navigator.pop(ctx);
+                      },
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    },
+  ).then((_) {});
 }
 
 class _MessageArea extends ConsumerWidget {
@@ -508,9 +532,6 @@ class _MessageArea extends ConsumerWidget {
     required this.effectiveBottomInset,
     required this.keyboardBottomInset,
     required this.onModelPicker,
-    required this.onShareMessage,
-    required this.onSaveMessage,
-    required this.isTemporary,
   });
 
   final bool isLoading;
@@ -523,9 +544,6 @@ class _MessageArea extends ConsumerWidget {
   final double effectiveBottomInset;
   final double keyboardBottomInset;
   final VoidCallback onModelPicker;
-  final void Function(String content) onShareMessage;
-  final Future<void> Function(Message message) onSaveMessage;
-  final bool isTemporary;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -559,10 +577,7 @@ class _MessageArea extends ConsumerWidget {
         selectedModel: selectedModel,
         onModelTap: onModelPicker,
         selectedPersona: ref.watch(selectedPersonaProvider),
-        onPersonaTap: () => showPersonaPickerSheet(
-          context,
-          mode: PersonaPickerMode.preselection,
-        ),
+        onPersonaTap: () => _openPersonaPickerForPreselection(context, ref),
       );
     }
 
@@ -592,12 +607,12 @@ class _MessageArea extends ConsumerWidget {
         }
       },
       onEditAssistant: (messageId, currentContent) async {
-        final l10n = AppLocalizations.of(context)!;
+        final editL10n = AppLocalizations.of(context)!;
         final newContent = await EditMessageDialog.show(
           context,
           initialContent: currentContent,
-          description: l10n.edit_assistant_message_desc,
-          saveLabel: l10n.save,
+          description: editL10n.edit_assistant_message_desc,
+          saveLabel: editL10n.save,
         );
         if (newContent != null && newContent != currentContent) {
           await ref
@@ -612,13 +627,17 @@ class _MessageArea extends ConsumerWidget {
       onCycleVariant: (messageId, direction) => ref
           .read(chatProvider.notifier)
           .cycleMessageVariant(messageId, direction),
-      onSave: (message) => onSaveMessage(message),
-      onShare: (message) => onShareMessage(message.content),
+      onSave: (message) => showSaveMessageSheet(
+        context,
+        ref,
+        message,
+        isTemporaryChat: ref.read(chatProvider.select((s) => s.isTemporary)),
+      ),
+      onShare: (message) => ShareService.shareText(message.content),
       onGenerateResponse: () =>
           ref.read(chatProvider.notifier).generateResponseForLastUser(),
       onModelPicker: onModelPicker,
-      onModelLongPress: (modelId) =>
-          showModelInfoSheet(context, ref, modelId),
+      onModelLongPress: (modelId) => showModelInfoSheet(context, ref, modelId),
       hasSmartReplies:
           !isStreaming &&
           keyboardBottomInset == 0 &&
@@ -628,26 +647,115 @@ class _MessageArea extends ConsumerWidget {
   }
 }
 
+void _openPersonaPickerForPreselection(BuildContext context, WidgetRef ref) {
+  final personasAsync = ref.read(personasNotifierProvider);
+  final personas = personasAsync.value ?? [];
+  final isDark = Theme.of(context).brightness == Brightness.dark;
+  final currentPersona = ref.watch(selectedPersonaProvider);
+
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    builder: (ctx) {
+      final sheetL10n = AppLocalizations.of(context)!;
+      return SafeArea(
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: isDark ? Colors.grey[600] : Colors.grey[300],
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                sheetL10n.select_persona,
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: isDark ? Colors.white : Colors.black,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Flexible(
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: personas.length,
+                  itemBuilder: (context, index) {
+                    final p = personas[index];
+                    final isSelected = p.id == currentPersona?.id;
+                    final accent = isDark
+                        ? AppColors.darkAccent
+                        : AppColors.lightAccent;
+                    return ListTile(
+                      leading: Text(
+                        p.emoji,
+                        style: const TextStyle(fontSize: 22),
+                      ),
+                      title: Text(
+                        p.name,
+                        style: TextStyle(
+                          fontWeight: isSelected
+                              ? FontWeight.w600
+                              : FontWeight.normal,
+                          color: isDark ? Colors.white : Colors.black,
+                        ),
+                      ),
+                      subtitle: p.description != null
+                          ? Text(
+                              p.description!,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: isDark
+                                    ? AppColors.darkMutedText
+                                    : AppColors.lightMutedText,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            )
+                          : null,
+                      trailing: isSelected
+                          ? Icon(Icons.check_circle, color: accent)
+                          : null,
+                      onTap: () {
+                        ref.read(selectedPersonaProvider.notifier).select(p);
+                        Navigator.pop(ctx);
+                      },
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    },
+  ).then((_) {});
+}
+
 class _ScreenAppBar extends ConsumerWidget {
   const _ScreenAppBar({
-    required this.activeConversation,
+    required this.activeServer,
+    required this.connectionStatus,
     required this.isDark,
     required this.persona,
-    required this.isTemporary,
-    required this.hasMessages,
     required this.onMenuAction,
     required this.onPersonaPicker,
-    required this.onChatModeAction,
   });
 
-  final Conversation? activeConversation;
+  final dynamic activeServer;
+  final ConnectionStatus connectionStatus;
   final bool isDark;
   final dynamic persona;
-  final bool isTemporary;
-  final bool hasMessages;
   final void Function(String) onMenuAction;
   final VoidCallback onPersonaPicker;
-  final VoidCallback onChatModeAction;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -674,15 +782,31 @@ class _ScreenAppBar extends ConsumerWidget {
           ),
           const SizedBox(width: 8),
           Expanded(
-            child: Text(
-              activeConversation?.title.isNotEmpty == true
-                  ? activeConversation!.title
-                  : l10n.nav_new_chat,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-              overflow: TextOverflow.ellipsis,
+            child: Row(
+              children: [
+                if (activeServer != null) ...[
+                  _buildServerIcon(context, activeServer as Server?),
+                  const SizedBox(width: 8),
+                ],
+                Text(
+                  activeServer?.name ?? l10n.chat_title,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Container(
+                  width: 8,
+                  height: 8,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: connectionStatus == ConnectionStatus.connected
+                        ? Colors.green
+                        : Colors.grey,
+                  ),
+                ),
+              ],
             ),
           ),
           Stack(
@@ -715,12 +839,6 @@ class _ScreenAppBar extends ConsumerWidget {
               ),
             ],
           ),
-          _ChatModeIconButton(
-            hasMessages: hasMessages,
-            isTemporary: isTemporary,
-            isDark: isDark,
-            onPressed: onChatModeAction,
-          ),
           PopupMenuButton<String>(
             icon: const Icon(Icons.more_vert),
             onSelected: onMenuAction,
@@ -733,33 +851,6 @@ class _ScreenAppBar extends ConsumerWidget {
                   contentPadding: EdgeInsets.zero,
                 ),
               ),
-              if (activeConversation != null) ...[
-                PopupMenuItem(
-                  value: 'rename',
-                  child: ListTile(
-                    leading: const Icon(Icons.drive_file_rename_outline),
-                    title: Text(l10n.rename_conversation),
-                    contentPadding: EdgeInsets.zero,
-                  ),
-                ),
-                PopupMenuItem(
-                  value: 'export_chat',
-                  child: ListTile(
-                    leading: const Icon(Icons.upload_outlined),
-                    title: Text(l10n.export_conversation),
-                    contentPadding: EdgeInsets.zero,
-                  ),
-                ),
-              ],
-              if (hasMessages)
-                PopupMenuItem(
-                  value: 'share_chat',
-                  child: ListTile(
-                    leading: const Icon(Icons.share_outlined),
-                    title: Text(l10n.share_conversation),
-                    contentPadding: EdgeInsets.zero,
-                  ),
-                ),
               PopupMenuItem(
                 value: 'persona',
                 child: ListTile(
@@ -799,67 +890,20 @@ class _ScreenAppBar extends ConsumerWidget {
   }
 }
 
-class _ChatModeIconButton extends StatelessWidget {
-  const _ChatModeIconButton({
-    required this.hasMessages,
-    required this.isTemporary,
-    required this.isDark,
-    required this.onPressed,
-  });
+Widget _buildServerIcon(BuildContext context, Server? server) {
+  if (server == null) return const SizedBox.shrink();
 
-  final bool hasMessages;
-  final bool isTemporary;
-  final bool isDark;
-  final VoidCallback onPressed;
+  final iconData = server.iconName != null
+      ? getHugeIconByName(server.iconName)
+      : getDefaultServerIcon(server.type.name);
 
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final showGhost = !hasMessages || isTemporary;
-    final ghostActive = isTemporary;
+  if (iconData == null) return const Icon(Icons.dns, size: 18);
 
-    if (showGhost) {
-      final activeColor =
-          isDark ? const Color(0xFFE6C35C) : const Color(0xFF9A7B1A);
-      final inactiveColor =
-          isDark ? Colors.white54 : Colors.black45;
-
-      return IconButton(
-        onPressed: onPressed,
-        tooltip: ghostActive
-            ? l10n.exit_temporary_chat_title
-            : l10n.temporary_chat,
-        icon: ghostActive
-            ? Container(
-                padding: const EdgeInsets.all(4),
-                decoration: BoxDecoration(
-                  color: activeColor.withValues(alpha: 0.25),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  LucideIcons.ghost,
-                  size: 20,
-                  color: activeColor,
-                ),
-              )
-            : Icon(
-                LucideIcons.ghost,
-                size: 22,
-                color: inactiveColor,
-              ),
-      );
-    }
-
-    return IconButton(
-      onPressed: onPressed,
-      tooltip: l10n.nav_new_chat,
-      icon: Icon(
-        Icons.add_comment_outlined,
-        size: 22,
-        color: isDark ? Colors.white70 : Colors.black87,
-      ),
-    );
-  }
+  return HugeIcon(
+    icon: iconData.icon,
+    size: 18,
+    color: Theme.of(context).colorScheme.primary,
+  );
 }
 
 class _ChatBottomBar extends ConsumerWidget {
@@ -867,13 +911,11 @@ class _ChatBottomBar extends ConsumerWidget {
     required this.isStreaming,
     required this.keyboardBottomInset,
     required this.inputFocusNode,
-    required this.inputBarKey,
   });
 
   final bool isStreaming;
   final double keyboardBottomInset;
   final FocusNode inputFocusNode;
-  final GlobalKey<ChatInputBarState> inputBarKey;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -902,7 +944,6 @@ class _ChatBottomBar extends ConsumerWidget {
               _SmartReplyChipsWrapper(),
             ],
             ChatInputBar(
-              key: inputBarKey,
               focusNode: inputFocusNode,
               isStreaming: isStreaming,
               onSend: (message, {attachments}) {

@@ -162,20 +162,6 @@ class SettingsViews extends ConsumerWidget {
                       valueFormat: (value) => '${value.toStringAsFixed(2)}x',
                     ),
                   ],
-                  _ToggleSetting(
-                    label: l10n.tts_process_markdown,
-                    description: l10n.tts_process_markdown_desc,
-                    value: settings.ttsProcessMarkdown,
-                    onChanged: (value) => ref
-                        .read(settingsProvider.notifier)
-                        .setTtsProcessMarkdown(value),
-                  ),
-                  _TtsSkipSecondsSetting(
-                    value: settings.ttsSkipSeconds,
-                    onChanged: (value) => ref
-                        .read(settingsProvider.notifier)
-                        .setTtsSkipSeconds(value),
-                  ),
                 ],
               );
 
@@ -299,13 +285,6 @@ class SettingsViews extends ConsumerWidget {
                         .setDefaultPersona(value),
                     icon: Icons.smart_toy_outlined,
                   ),
-                  _ToggleSetting(
-                    label: l10n.unload_models_before_load,
-                    value: settings.unloadModelsBeforeLoad,
-                    onChanged: (value) => ref
-                        .read(settingsProvider.notifier)
-                        .setUnloadModelsBeforeLoad(value),
-                  ),
                 ],
               );
 
@@ -330,7 +309,6 @@ class SettingsViews extends ConsumerWidget {
                 icon: Icons.restore_page_outlined,
                 accent: const Color(0xFFEF4444),
                 children: [
-                  const DataBackupActions(),
                   _DangerousAction(
                     label: l10n.delete_all_conversations,
                     icon: Icons.delete_outline_rounded,
@@ -883,7 +861,6 @@ class _LanguageSetting extends StatelessWidget {
     ('ar', 'العربية', 'assets/images/flag_sa.png', '🇸🇦'),
     ('bn', 'বাংলা', 'assets/images/flag_bd.png', '🇧🇩'),
     ('hi', 'हिन्दी', 'assets/images/flag_in.png', '🇮🇳'),
-    ('ru', 'Русский', 'assets/images/flag_ru.png', '🇷🇺'),
   ];
 
   final String? current;
@@ -1098,12 +1075,10 @@ class _ToggleSetting extends StatelessWidget {
     required this.label,
     required this.value,
     required this.onChanged,
-    this.description,
     this.badges = const [],
   });
 
   final String label;
-  final String? description;
   final bool value;
   final ValueChanged<bool> onChanged;
   final List<Widget> badges;
@@ -1117,32 +1092,18 @@ class _ToggleSetting extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 6,
+              crossAxisAlignment: WrapCrossAlignment.center,
               children: [
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 6,
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  children: [
-                    Text(
-                      label,
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    ...badges,
-                  ],
-                ),
-                if (description != null) ...[
-                  const SizedBox(height: 4),
-                  Text(
-                    description!,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
+                Text(
+                  label,
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
                   ),
-                ],
+                ),
+                ...badges,
               ],
             ),
           ),
@@ -1556,59 +1517,6 @@ class _SectionActionButton extends StatelessWidget {
       width: double.infinity,
       leading: Icon(icon, size: 16),
       child: Align(alignment: Alignment.centerLeft, child: Text(label)),
-    );
-  }
-}
-
-class _TtsSkipSecondsSetting extends StatelessWidget {
-  const _TtsSkipSecondsSetting({
-    required this.value,
-    required this.onChanged,
-  });
-
-  final int value;
-  final ValueChanged<int> onChanged;
-
-  static const _options = [5, 10, 15, 30];
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
-
-    return _SettingPanel(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            l10n.tts_skip_seconds,
-            style: theme.textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            l10n.tts_skip_seconds_desc,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-          ),
-          const SizedBox(height: 10),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: _options.map((seconds) {
-              final selected = value == seconds;
-              return FilterChip(
-                label: Text(l10n.tts_skip_seconds_value(seconds)),
-                selected: selected,
-                onSelected: (_) => onChanged(seconds),
-                showCheckmark: false,
-              );
-            }).toList(),
-          ),
-        ],
-      ),
     );
   }
 }

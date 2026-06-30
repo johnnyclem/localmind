@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:localmind/core/models/enums.dart';
 import 'package:localmind/core/theme/colors.dart';
 import 'package:localmind/features/models/data/models/model_info.dart';
 import 'package:localmind/l10n/app_localizations.dart';
-import 'package:shadcn_ui/shadcn_ui.dart';
 import 'metadata_chip.dart';
 
 class ModelTile extends StatelessWidget {
