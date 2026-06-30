@@ -99,6 +99,17 @@ Map<String, String> buildServerAuthHeaders(Server server) {
   return const {};
 }
 
+String normalizeServerPathPrefix(String? raw) {
+  if (raw == null) return '';
+  var value = raw.trim();
+  if (value.isEmpty) return '';
+  if (!value.startsWith('/')) value = '/$value';
+  while (value.endsWith('/') && value.length > 1) {
+    value = value.substring(0, value.length - 1);
+  }
+  return value;
+}
+
 class Server {
   final String id;
   final String name;
@@ -111,6 +122,7 @@ class Server {
   final DateTime lastConnectedAt;
   final ConnectionStatus status;
   final String? iconName;
+  final String? pathPrefix;
 
   Server({
     required this.id,
@@ -124,7 +136,17 @@ class Server {
     required this.lastConnectedAt,
     this.status = ConnectionStatus.disconnected,
     this.iconName,
+    this.pathPrefix,
   });
+
+  String get apiPathPrefix => normalizeServerPathPrefix(pathPrefix);
+
+  String _apiPath(String suffix) {
+    if (type != ServerType.ollama || apiPathPrefix.isEmpty) {
+      return suffix;
+    }
+    return '$apiPathPrefix$suffix';
+  }
 
   String get baseUrl {
     return buildServerBaseUrl(host, port, type);
@@ -139,7 +161,7 @@ class Server {
       case ServerType.openAICompatible:
         return '$baseUrl/v1/chat/completions';
       case ServerType.ollama:
-        return '$baseUrl/api/chat';
+        return '$baseUrl${_apiPath('/api/chat')}';
       case ServerType.openRouter:
         return '$baseUrl/chat/completions';
       case ServerType.onDevice:
@@ -154,7 +176,7 @@ class Server {
       case ServerType.openAICompatible:
         return '$baseUrl/v1/models';
       case ServerType.ollama:
-        return '$baseUrl/api/tags';
+        return '$baseUrl${_apiPath('/api/tags')}';
       case ServerType.openRouter:
         return '$baseUrl/models';
       case ServerType.onDevice:
@@ -169,7 +191,7 @@ class Server {
       case ServerType.openAICompatible:
         return '$baseUrl/v1/models';
       case ServerType.ollama:
-        return '$baseUrl/api/ps';
+        return '$baseUrl${_apiPath('/api/ps')}';
       case ServerType.openRouter:
         return '';
       case ServerType.onDevice:
@@ -184,7 +206,7 @@ class Server {
       case ServerType.openAICompatible:
         return '$baseUrl/v1/models/load';
       case ServerType.ollama:
-        return '$baseUrl/api/generate';
+        return '$baseUrl${_apiPath('/api/generate')}';
       case ServerType.openRouter:
         return '';
       case ServerType.onDevice:
@@ -199,7 +221,7 @@ class Server {
       case ServerType.openAICompatible:
         return '$baseUrl/v1/models/unload';
       case ServerType.ollama:
-        return '$baseUrl/api/generate';
+        return '$baseUrl${_apiPath('/api/generate')}';
       case ServerType.openRouter:
         return '';
       case ServerType.onDevice:
@@ -223,6 +245,8 @@ class Server {
     DateTime? lastConnectedAt,
     ConnectionStatus? status,
     String? iconName,
+    String? pathPrefix,
+    bool clearPathPrefix = false,
   }) {
     return Server(
       id: id ?? this.id,
@@ -236,6 +260,7 @@ class Server {
       lastConnectedAt: lastConnectedAt ?? this.lastConnectedAt,
       status: status ?? this.status,
       iconName: iconName ?? this.iconName,
+      pathPrefix: clearPathPrefix ? null : (pathPrefix ?? this.pathPrefix),
     );
   }
 }

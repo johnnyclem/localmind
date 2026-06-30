@@ -12,12 +12,14 @@ import 'package:localmind/core/utils/system_insets.dart';
 import 'package:localmind/l10n/app_localizations.dart';
 import 'package:localmind/features/conversations/providers/conversation_providers.dart'
     as conv;
+import 'package:localmind/features/conversations/data/models/conversation.dart';
 import 'package:localmind/features/models/screens/model_picker_sheet.dart';
 import 'package:localmind/features/personas/providers/personas_providers.dart';
 import 'package:localmind/features/servers/providers/server_providers.dart';
 import 'package:localmind/features/servers/data/models/server.dart';
 import 'package:localmind/features/servers/views/components/server_icon_picker.dart';
 import 'package:localmind/features/tts/views/components/tts_player_bar.dart';
+import 'package:localmind/features/saved_messages/providers/saved_message_providers.dart';
 import '../data/models/message.dart';
 import '../providers/chat_mcp_providers.dart';
 import '../providers/chat_providers.dart';
@@ -122,6 +124,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
               .read(conv.conversationsProvider.notifier)
               .updatePersona(activeConv.id, null, null);
         }
+      case 'rename':
+        final activeConv = ref.read(conv.activeConversationProvider);
+        if (activeConv != null) {
+          _showRenameDialog(context, activeConv);
+        }
       case 'clear':
         showDialog(
           context: context,
@@ -202,6 +209,46 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
       ref.read(chatProvider.notifier).approveTool(value ?? false);
     });
   }
+
+  void _showRenameDialog(BuildContext context, Conversation conversation) {
+    final l10n = AppLocalizations.of(context)!;
+    final controller = TextEditingController(text: conversation.title);
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(l10n.rename_conversation),
+          content: TextField(
+            controller: controller,
+            autofocus: true,
+            decoration: InputDecoration(
+              hintText: l10n.enter_new_title,
+              border: const OutlineInputBorder(),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(l10n.cancel),
+            ),
+            TextButton(
+              onPressed: () {
+                final newTitle = controller.text.trim();
+                if (newTitle.isNotEmpty) {
+                  ref
+                      .read(conv.conversationsProvider.notifier)
+                      .renameConversation(conversation.id, newTitle);
+                }
+                Navigator.pop(context);
+              },
+              child: Text(l10n.rename),
+            ),
+          ],
+        );
+      },
+    ).then((_) => controller.dispose());
+  }
 }
 
 class _ChatBody extends ConsumerWidget {
@@ -261,6 +308,7 @@ class _ChatBody extends ConsumerWidget {
         ModelTopBar(selectedModel: selectedModel, onTap: onModelPicker),
         _ScreenAppBar(
           activeServer: activeServer,
+          activeConversation: activeConversation,
           connectionStatus: connectionStatus,
           isDark: isDark,
           persona: persona,
@@ -380,6 +428,7 @@ class _MessageArea extends ConsumerWidget {
     return MessageList(
       scrollController: scrollController,
       messages: messages,
+      allMessages: ref.watch(chatProvider.select((s) => s.allMessages)),
       isStreaming: isStreaming,
       onRetry: (messageId) =>
           ref.read(chatProvider.notifier).retryMessage(messageId),
@@ -412,6 +461,13 @@ class _MessageArea extends ConsumerWidget {
       },
       onBranch: (messageId) =>
           ref.read(chatProvider.notifier).branchFromMessage(messageId),
+      onContinue: (messageId) =>
+          ref.read(chatProvider.notifier).continueFromMessage(messageId),
+      onCycleVariant: (messageId, direction) => ref
+          .read(chatProvider.notifier)
+          .cycleMessageVariant(messageId, direction),
+      onSave: (message) =>
+          ref.read(savedMessagesProvider.notifier).saveMessage(message),
       onModelPicker: onModelPicker,
       hasSmartReplies:
           !isStreaming &&
@@ -425,6 +481,7 @@ class _MessageArea extends ConsumerWidget {
 class _ScreenAppBar extends ConsumerWidget {
   const _ScreenAppBar({
     required this.activeServer,
+    required this.activeConversation,
     required this.connectionStatus,
     required this.isDark,
     required this.persona,
@@ -433,6 +490,7 @@ class _ScreenAppBar extends ConsumerWidget {
   });
 
   final dynamic activeServer;
+  final Conversation? activeConversation;
   final ConnectionStatus connectionStatus;
   final bool isDark;
   final dynamic persona;
@@ -471,11 +529,14 @@ class _ScreenAppBar extends ConsumerWidget {
                   const SizedBox(width: 8),
                 ],
                 Text(
-                  activeServer?.name ?? l10n.chat_title,
+                  activeConversation?.title.isNotEmpty == true
+                      ? activeConversation!.title
+                      : (activeServer?.name ?? l10n.chat_title),
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
+                  overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(width: 8),
                 Container(
@@ -533,6 +594,15 @@ class _ScreenAppBar extends ConsumerWidget {
                   contentPadding: EdgeInsets.zero,
                 ),
               ),
+              if (activeConversation != null)
+                PopupMenuItem(
+                  value: 'rename',
+                  child: ListTile(
+                    leading: const Icon(Icons.drive_file_rename_outline),
+                    title: Text(l10n.rename_conversation),
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                ),
               PopupMenuItem(
                 value: 'persona',
                 child: ListTile(

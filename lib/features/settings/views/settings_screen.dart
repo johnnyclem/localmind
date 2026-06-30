@@ -1,10 +1,5 @@
-import 'dart:convert';
-import 'dart:io';
-import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
@@ -12,9 +7,7 @@ import 'package:localmind/l10n/app_localizations.dart';
 
 import '../../../core/models/enums.dart';
 import '../../../core/providers/app_providers.dart';
-import '../../../core/providers/storage_providers.dart';
 import '../../../core/routes/app_routes.dart';
-import '../../../core/services/data_backup_service.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/system_insets.dart';
 import '../../conversations/providers/conversation_providers.dart';
@@ -22,6 +15,7 @@ import '../../on_device/providers/on_device_providers.dart';
 import '../../personas/providers/personas_providers.dart';
 import '../../servers/providers/server_providers.dart';
 import '../data/models/app_settings.dart';
+import 'data_backup_actions.dart';
 
 class SettingsViews extends ConsumerWidget {
   const SettingsViews({super.key});
@@ -322,7 +316,7 @@ class SettingsViews extends ConsumerWidget {
                 icon: Icons.restore_page_outlined,
                 accent: const Color(0xFFEF4444),
                 children: [
-                  _DataBackupActions(),
+                  const DataBackupActions(),
                   _DangerousAction(
                     label: l10n.delete_all_conversations,
                     icon: Icons.delete_outline_rounded,
@@ -1447,112 +1441,6 @@ class _CodeThemeDropdown extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-class _DataBackupActions extends ConsumerWidget {
-  const _DataBackupActions();
-
-  Future<void> _exportData(BuildContext context, WidgetRef ref) async {
-    final l10n = AppLocalizations.of(context)!;
-    try {
-      final db = ref.read(databaseProvider);
-      final service = DataBackupService();
-      final json = service.exportAllAsJson(db.store);
-      final saved = await FilePicker.saveFile(
-        dialogTitle: l10n.export_all_data,
-        fileName:
-            'localmind_backup_${DateTime.now().millisecondsSinceEpoch}.json',
-        type: FileType.custom,
-        allowedExtensions: const ['json'],
-        bytes: Uint8List.fromList(utf8.encode(json)),
-      );
-      if (saved == null) return;
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.export_data_success)),
-        );
-      }
-    } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.import_data_failed(e.toString()))),
-        );
-      }
-    }
-  }
-
-  Future<void> _importData(BuildContext context, WidgetRef ref) async {
-    final l10n = AppLocalizations.of(context)!;
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) {
-        final dialogL10n = AppLocalizations.of(dialogContext)!;
-        return AlertDialog(
-          title: Text(l10n.import_all_data),
-          content: Text(l10n.import_data_confirm),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(dialogContext, false),
-              child: Text(dialogL10n.cancel),
-            ),
-            TextButton(
-              onPressed: () => Navigator.pop(dialogContext, true),
-              child: Text(dialogL10n.confirm),
-            ),
-          ],
-        );
-      },
-    );
-    if (confirmed != true || !context.mounted) return;
-
-    try {
-      final result = await FilePicker.pickFiles(
-        type: FileType.custom,
-        allowedExtensions: const ['json'],
-      );
-      final path = result?.files.single.path;
-      if (path == null) return;
-
-      final json = await File(path).readAsString();
-      final db = ref.read(databaseProvider);
-      await DataBackupService().importFromJson(db.store, json);
-
-      ref.invalidate(conversationsProvider);
-      ref.invalidate(personasNotifierProvider);
-
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.import_data_success)),
-        );
-      }
-    } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.import_data_failed(e.toString()))),
-        );
-      }
-    }
-  }
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context)!;
-
-    return Column(
-      children: [
-        _SectionActionButton(
-          icon: Icons.upload_file_outlined,
-          label: l10n.export_all_data,
-          onPressed: () => _exportData(context, ref),
-        ),
-        _SectionActionButton(
-          icon: Icons.download_outlined,
-          label: l10n.import_all_data,
-          onPressed: () => _importData(context, ref),
-        ),
-      ],
     );
   }
 }

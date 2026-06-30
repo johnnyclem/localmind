@@ -17,6 +17,7 @@ class Conversation {
   final bool? mcpEnabled;
   final List<String>? smartReplies;
   final String? smartRepliesLastMessageId;
+  final String? folderId;
 
   Conversation({
     required this.id,
@@ -37,6 +38,7 @@ class Conversation {
     this.mcpEnabled,
     this.smartReplies,
     this.smartRepliesLastMessageId,
+    this.folderId,
   });
 
   Conversation copyWith({
@@ -67,6 +69,8 @@ class Conversation {
     bool clearSmartReplies = false,
     String? smartRepliesLastMessageId,
     bool clearSmartRepliesLastMessageId = false,
+    String? folderId,
+    bool clearFolderId = false,
   }) {
     return Conversation(
       id: id ?? this.id,
@@ -91,6 +95,7 @@ class Conversation {
       smartRepliesLastMessageId: clearSmartRepliesLastMessageId
           ? null
           : (smartRepliesLastMessageId ?? this.smartRepliesLastMessageId),
+      folderId: clearFolderId ? null : (folderId ?? this.folderId),
     );
   }
 

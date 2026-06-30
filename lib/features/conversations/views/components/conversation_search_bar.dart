@@ -25,6 +25,7 @@ class _ConversationSearchBarState extends ConsumerState<ConversationSearchBar> {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final searchContents = ref.watch(searchMessageContentsProvider);
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -39,6 +40,7 @@ class _ConversationSearchBarState extends ConsumerState<ConversationSearchBar> {
         controller: _controller,
         onChanged: (value) {
           ref.read(conversationSearchProvider.notifier).setSearchQuery(value);
+          setState(() {});
         },
         style: TextStyle(
           fontSize: 14,
@@ -55,8 +57,28 @@ class _ConversationSearchBarState extends ConsumerState<ConversationSearchBar> {
             size: 20,
             color: isDark ? const Color(0xFF666666) : const Color(0xFF999999),
           ),
-          suffixIcon: _controller.text.isNotEmpty
-              ? IconButton(
+          suffixIcon: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                icon: Icon(
+                  searchContents
+                      ? Icons.article
+                      : Icons.article_outlined,
+                  size: 20,
+                  color: searchContents
+                      ? theme.colorScheme.primary
+                      : (isDark
+                          ? const Color(0xFF666666)
+                          : const Color(0xFF999999)),
+                ),
+                tooltip: l10n.search_message_contents,
+                onPressed: () => ref
+                    .read(searchMessageContentsProvider.notifier)
+                    .toggle(),
+              ),
+              if (_controller.text.isNotEmpty)
+                IconButton(
                   icon: Icon(
                     Icons.clear,
                     size: 18,
@@ -67,9 +89,11 @@ class _ConversationSearchBarState extends ConsumerState<ConversationSearchBar> {
                   onPressed: () {
                     _controller.clear();
                     ref.read(conversationSearchProvider.notifier).clearSearch();
+                    setState(() {});
                   },
-                )
-              : null,
+                ),
+            ],
+          ),
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 16,

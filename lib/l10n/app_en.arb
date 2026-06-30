@@ -2539,7 +2539,47 @@
     }
   },
   "import_data_confirm": "Import conversations and custom personas from this backup? Existing items with the same IDs will be updated.",
-  "@import_data_confirm": {
-    "description": "Confirmation message before importing backup"
-  }
+  "import_settings_confirm": "Replace current settings with the imported backup?",
+  "export_conversations": "Export conversations",
+  "import_conversations": "Import conversations",
+  "export_personas": "Export personas",
+  "import_personas": "Import personas",
+  "export_settings": "Export settings",
+  "import_settings": "Import settings",
+  "export_all_zip": "Export all (ZIP)",
+  "import_all_zip": "Import all (ZIP)",
+  "duplicate_chat": "Duplicate chat",
+  "duplicate_chat_success": "Chat duplicated",
+  "move_to_folder": "Move to folder",
+  "remove_from_folder": "Remove from folder",
+  "create_folder": "Create folder",
+  "new_folder": "New folder",
+  "folder_name_hint": "Folder name",
+  "all_chats": "All",
+  "unfiled_chats": "Unfiled",
+  "create": "Create",
+  "server_path_prefix_label": "API path prefix",
+  "server_path_prefix_hint": "/your-secret-token",
+  "search_message_contents": "Search message contents",
+  "message_search_results": "Message matches",
+  "saved_messages_title": "Saved Messages",
+  "nav_saved_messages": "Saved Messages",
+  "saved_messages_empty": "No saved messages yet. Bookmark a message from its options menu.",
+  "save_message": "Save message",
+  "message_saved": "Message saved",
+  "token_count": "{count} tokens",
+  "@token_count": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "estimated_token_count": "~{count} tokens (estimated)",
+  "@estimated_token_count": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "test_tts_section_title": "Test voice",
+  "test_tts_hint": "Enter text to hear the current TTS engine…",
+  "test_speak_button": "Speak"
 }

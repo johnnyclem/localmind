@@ -34,6 +34,7 @@ class ServerEntity {
   int statusIndex;
 
   String? iconName;
+  String? pathPrefix;
 
   ServerEntity({
     this.internalId = 0,
@@ -46,8 +47,9 @@ class ServerEntity {
     this.isDefault = false,
     required this.createdAt,
     required this.lastConnectedAt,
-    required this.statusIndex,
+    required     this.statusIndex,
     this.iconName,
+    this.pathPrefix,
   });
 
   factory ServerEntity.fromDomain(Server server) {
@@ -63,6 +65,7 @@ class ServerEntity {
       lastConnectedAt: server.lastConnectedAt,
       statusIndex: server.status.index,
       iconName: server.iconName,
+      pathPrefix: server.pathPrefix,
     );
   }
 
@@ -79,6 +82,7 @@ class ServerEntity {
       lastConnectedAt: lastConnectedAt,
       status: ConnectionStatus.values[statusIndex],
       iconName: iconName,
+      pathPrefix: pathPrefix,
     );
   }
 }
@@ -183,6 +187,7 @@ class ConversationEntity {
   bool? mcpEnabled;
   String? smartRepliesJson;
   String? smartRepliesLastMessageId;
+  String? folderId;
 
   @Backlink()
   final messages = ToMany<MessageEntity>();
@@ -207,6 +212,7 @@ class ConversationEntity {
     this.mcpEnabled,
     this.smartRepliesJson,
     this.smartRepliesLastMessageId,
+    this.folderId,
   });
 
   factory ConversationEntity.fromDomain(Conversation conversation) {
@@ -231,6 +237,7 @@ class ConversationEntity {
           ? jsonEncode(conversation.smartReplies)
           : null,
       smartRepliesLastMessageId: conversation.smartRepliesLastMessageId,
+      folderId: conversation.folderId,
     );
   }
 
@@ -256,9 +263,94 @@ class ConversationEntity {
           ? List<String>.from(jsonDecode(smartRepliesJson!))
           : null,
       smartRepliesLastMessageId: smartRepliesLastMessageId,
+      folderId: folderId,
     );
   }
 
+}
+
+@Entity()
+class ConversationFolderEntity {
+  @Id()
+  int internalId = 0;
+
+  @Index()
+  String id;
+  String name;
+  int sortOrder;
+
+  @Property(type: PropertyType.date)
+  DateTime createdAt;
+
+  ConversationFolderEntity({
+    this.internalId = 0,
+    required this.id,
+    required this.name,
+    this.sortOrder = 0,
+    required this.createdAt,
+  });
+}
+
+@Entity()
+class SavedMessageFolderEntity {
+  @Id()
+  int internalId = 0;
+
+  @Index()
+  String id;
+  String name;
+  int sortOrder;
+
+  @Property(type: PropertyType.date)
+  DateTime createdAt;
+
+  SavedMessageFolderEntity({
+    this.internalId = 0,
+    required this.id,
+    required this.name,
+    this.sortOrder = 0,
+    required this.createdAt,
+  });
+}
+
+@Entity()
+class SavedMessageEntity {
+  @Id()
+  int internalId = 0;
+
+  @Index()
+  String id;
+
+  @Index()
+  String sourceMessageId;
+
+  @Index()
+  String conversationId;
+
+  String conversationTitle;
+
+  @Property(type: PropertyType.int)
+  int roleIndex;
+
+  String content;
+  String? modelId;
+  String? folderId;
+
+  @Property(type: PropertyType.date)
+  DateTime savedAt;
+
+  SavedMessageEntity({
+    this.internalId = 0,
+    required this.id,
+    required this.sourceMessageId,
+    required this.conversationId,
+    required this.conversationTitle,
+    required this.roleIndex,
+    required this.content,
+    this.modelId,
+    this.folderId,
+    required this.savedAt,
+  });
 }
 
 @Entity()
@@ -296,6 +388,11 @@ class MessageEntity {
   bool isProcessing;
   String? toolSessionId;
   String? toolEventsJson;
+  String? variantGroupId;
+  int variantIndex;
+  int threadOrder;
+  bool isActiveVariant;
+  String? parentMessageId;
 
   MessageEntity({
     this.internalId = 0,
@@ -316,6 +413,11 @@ class MessageEntity {
     this.isProcessing = false,
     this.toolSessionId,
     this.toolEventsJson,
+    this.variantGroupId,
+    this.variantIndex = 0,
+    this.threadOrder = 0,
+    this.isActiveVariant = true,
+    this.parentMessageId,
   });
 
   factory MessageEntity.fromDomain(Message message) {
@@ -343,6 +445,11 @@ class MessageEntity {
       toolEventsJson: message.toolEvents != null
           ? jsonEncode(message.toolEvents!.map((e) => e.toMap()).toList())
           : null,
+      variantGroupId: message.variantGroupId,
+      variantIndex: message.variantIndex,
+      threadOrder: message.threadOrder,
+      isActiveVariant: message.isActiveVariant,
+      parentMessageId: message.parentMessageId,
     );
   }
 
@@ -375,6 +482,11 @@ class MessageEntity {
                 .map((e) => ToolEvent.fromMap(Map<String, dynamic>.from(e)))
                 .toList()
           : null,
+      variantGroupId: variantGroupId,
+      variantIndex: variantIndex,
+      threadOrder: threadOrder,
+      isActiveVariant: isActiveVariant,
+      parentMessageId: parentMessageId,
     );
   }
 }

@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:archive/archive.dart';
+
 import '../models/enums.dart';
 import '../storage/entities.dart';
 import '../../features/chat/data/models/message.dart';
@@ -34,6 +36,7 @@ class DataBackupService {
         'mcpEnabled': domain.mcpEnabled,
         'smartReplies': domain.smartReplies,
         'smartRepliesLastMessageId': domain.smartRepliesLastMessageId,
+        'folderId': domain.folderId,
       };
     }).toList();
 
@@ -55,6 +58,10 @@ class DataBackupService {
         'toolCallId': message.toolCallId,
         'isProcessing': message.isProcessing,
         'toolSessionId': message.toolSessionId,
+        'variantGroupId': message.variantGroupId,
+        'variantIndex': message.variantIndex,
+        'threadOrder': message.threadOrder,
+        'isActiveVariant': message.isActiveVariant,
       };
     }).toList();
 
@@ -79,12 +86,81 @@ class DataBackupService {
         .toList();
 
     return {
-      'version': 1,
+      'version': 2,
       'exportedAt': DateTime.now().toIso8601String(),
       'conversations': conversations,
       'messages': messages,
       'personas': personas,
     };
+  }
+
+  Map<String, dynamic> exportConversations(Store store) {
+    final all = exportAll(store);
+    return {
+      'version': 2,
+      'type': 'conversations',
+      'exportedAt': all['exportedAt'],
+      'conversations': all['conversations'],
+      'messages': all['messages'],
+    };
+  }
+
+  Map<String, dynamic> exportPersonas(Store store) {
+    final all = exportAll(store);
+    return {
+      'version': 2,
+      'type': 'personas',
+      'exportedAt': all['exportedAt'],
+      'personas': all['personas'],
+    };
+  }
+
+  Map<String, dynamic> exportSettings(String settingsJson) {
+    return {
+      'version': 2,
+      'type': 'settings',
+      'exportedAt': DateTime.now().toIso8601String(),
+      'settings': jsonDecode(settingsJson),
+    };
+  }
+
+  String exportConversationsAsJson(Store store) =>
+      const JsonEncoder.withIndent('  ').convert(exportConversations(store));
+
+  String exportPersonasAsJson(Store store) =>
+      const JsonEncoder.withIndent('  ').convert(exportPersonas(store));
+
+  String exportSettingsAsJson(String settingsJson) =>
+      const JsonEncoder.withIndent('  ').convert(exportSettings(settingsJson));
+
+  List<int> exportAllZip(Store store, String settingsJson) {
+    final archive = Archive()
+      ..addFile(
+        ArchiveFile(
+          'conversations.json',
+          0,
+          utf8.encode(exportConversationsAsJson(store)),
+        ),
+      )
+      ..addFile(
+        ArchiveFile(
+          'personas.json',
+          0,
+          utf8.encode(exportPersonasAsJson(store)),
+        ),
+      )
+      ..addFile(
+        ArchiveFile(
+          'settings.json',
+          0,
+          utf8.encode(exportSettingsAsJson(settingsJson)),
+        ),
+      );
+    final encoded = ZipEncoder().encode(archive);
+    if (encoded == null) {
+      throw StateError('Failed to encode backup ZIP');
+    }
+    return encoded;
   }
 
   String exportAllAsJson(Store store) {
@@ -156,6 +232,7 @@ class DataBackupService {
                 : null,
             smartRepliesLastMessageId:
                 item['smartRepliesLastMessageId'] as String?,
+            folderId: item['folderId'] as String?,
           );
           final query =
               convBox.query(ConversationEntity_.id.equals(conversation.id)).build();
@@ -198,6 +275,10 @@ class DataBackupService {
             toolCallId: item['toolCallId'] as String?,
             isProcessing: item['isProcessing'] as bool? ?? false,
             toolSessionId: item['toolSessionId'] as String?,
+            variantGroupId: item['variantGroupId'] as String?,
+            variantIndex: item['variantIndex'] as int? ?? 0,
+            threadOrder: item['threadOrder'] as int? ?? 0,
+            isActiveVariant: item['isActiveVariant'] as bool? ?? true,
           );
 
           final entity = MessageEntity.fromDomain(message)
@@ -210,5 +291,14 @@ class DataBackupService {
         }
       }
     }, decoded);
+  }
+
+  Future<void> importZip(Store store, List<int> bytes) async {
+    final archive = ZipDecoder().decodeBytes(bytes);
+    for (final file in archive.files) {
+      if (file.isFile) {
+        await importFromJson(store, utf8.decode(file.content));
+      }
+    }
   }
 }

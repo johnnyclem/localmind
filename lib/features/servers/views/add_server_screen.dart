@@ -29,6 +29,7 @@ class _AddServerScreenState extends ConsumerState<AddServerScreen> {
   late TextEditingController _hostController;
   late TextEditingController _portController;
   late TextEditingController _apiKeyController;
+  late TextEditingController _pathPrefixController;
 
   late ServerType _selectedType;
   String? _selectedIconName;
@@ -54,6 +55,7 @@ class _AddServerScreenState extends ConsumerState<AddServerScreen> {
           AppConstants.lmStudioDefaultPort.toString(),
     );
     _apiKeyController = TextEditingController(text: server?.apiKey ?? '');
+    _pathPrefixController = TextEditingController(text: server?.pathPrefix ?? '');
   }
 
   @override
@@ -62,6 +64,7 @@ class _AddServerScreenState extends ConsumerState<AddServerScreen> {
     _hostController.dispose();
     _portController.dispose();
     _apiKeyController.dispose();
+    _pathPrefixController.dispose();
     super.dispose();
   }
 
@@ -136,6 +139,10 @@ class _AddServerScreenState extends ConsumerState<AddServerScreen> {
       lastConnectedAt: widget.editServer?.lastConnectedAt ?? DateTime.now(),
       status: ConnectionStatus.disconnected,
       iconName: _selectedIconName,
+      pathPrefix: _selectedType == ServerType.ollama &&
+              _pathPrefixController.text.trim().isNotEmpty
+          ? normalizeServerPathPrefix(_pathPrefixController.text.trim())
+          : null,
     );
   }
 
@@ -411,6 +418,17 @@ class _AddServerScreenState extends ConsumerState<AddServerScreen> {
                       keyboardType: TextInputType.number,
                       textInputAction: TextInputAction.next,
                     ),
+                    if (_selectedType == ServerType.ollama) ...[
+                      const SizedBox(height: 12),
+                      TextFormField(
+                        controller: _pathPrefixController,
+                        decoration: InputDecoration(
+                          labelText: l10n.server_path_prefix_label,
+                          hintText: l10n.server_path_prefix_hint,
+                        ),
+                        textInputAction: TextInputAction.next,
+                      ),
+                    ],
                   ],
                 ),
               ),

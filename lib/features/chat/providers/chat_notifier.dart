@@ -30,6 +30,7 @@ import 'chat_params_providers.dart';
 import 'chat_service_providers.dart';
 import 'model_selection_providers.dart';
 import 'tooling_providers.dart';
+import '../utils/message_variants.dart';
 
 class PendingToolApproval {
   final ParsedToolCall toolCall;
@@ -40,6 +41,7 @@ class PendingToolApproval {
 
 class ChatState {
   final List<Message> messages;
+  final List<Message> allMessages;
   final bool isStreaming;
   final bool isLoading;
   final String? errorMessage;
@@ -48,6 +50,7 @@ class ChatState {
 
   const ChatState({
     this.messages = const [],
+    this.allMessages = const [],
     this.isStreaming = false,
     this.isLoading = false,
     this.errorMessage,
@@ -57,6 +60,7 @@ class ChatState {
 
   ChatState copyWith({
     List<Message>? messages,
+    List<Message>? allMessages,
     bool? isStreaming,
     bool? isLoading,
     String? errorMessage,
@@ -68,6 +72,7 @@ class ChatState {
   }) {
     return ChatState(
       messages: messages ?? this.messages,
+      allMessages: allMessages ?? this.allMessages,
       isStreaming: isStreaming ?? this.isStreaming,
       isLoading: isLoading ?? this.isLoading,
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
@@ -152,7 +157,11 @@ class ChatNotifier extends Notifier<ChatState> {
         conversation.id,
       );
 
-      state = ChatState(messages: messages, isLoading: false);
+      state = ChatState(
+        allMessages: messages,
+        messages: MessageVariants.resolveActiveTimeline(messages),
+        isLoading: false,
+      );
       ref
           .read(conv.activeConversationProvider.notifier)
           .setActiveConversation(conversation);
@@ -213,7 +222,53 @@ class ChatNotifier extends Notifier<ChatState> {
     }
 
     messages.sort((a, b) => a.createdAt.compareTo(b.createdAt));
-    return messages;
+    final normalized = messages
+        .asMap()
+        .entries
+        .map((entry) {
+          final msg = entry.value;
+          if (msg.variantGroupId?.isNotEmpty == true) return msg;
+          return msg.copyWith(
+            variantGroupId: msg.id,
+            variantIndex: 0,
+            threadOrder: entry.key,
+            isActiveVariant: true,
+          );
+        })
+        .toList();
+    return _assignLegacyParentsIfNeeded(normalized);
+  }
+
+  static List<Message> _assignLegacyParentsIfNeeded(List<Message> messages) {
+    if (messages.any((m) => m.parentMessageId?.isNotEmpty == true)) {
+      return messages;
+    }
+    final byThreadOrder = <int, List<Message>>{};
+    for (final message in messages) {
+      byThreadOrder.putIfAbsent(message.threadOrder, () => []).add(message);
+    }
+    final orders = byThreadOrder.keys.toList()..sort();
+    String? previousActiveId;
+    final updated = <Message>[];
+    for (final order in orders) {
+      final group = byThreadOrder[order]!;
+      for (final message in group) {
+        updated.add(message.copyWith(parentMessageId: previousActiveId));
+      }
+      final active = group.firstWhere(
+        (m) => m.isActiveVariant,
+        orElse: () => group.last,
+      );
+      previousActiveId = active.id;
+    }
+    return updated;
+  }
+
+  void _setAllMessages(List<Message> allMessages) {
+    state = state.copyWith(
+      allMessages: allMessages,
+      messages: MessageVariants.resolveActiveTimeline(allMessages),
+    );
   }
 
   Future<void> startNewConversation() async {
@@ -291,22 +346,7 @@ class ChatNotifier extends Notifier<ChatState> {
   }
 
   void _replaceMessageInState(Message message, {bool clearStreaming = false}) {
-    final messageIndex = state.messages.indexWhere((m) => m.id == message.id);
-    if (messageIndex == -1) {
-      state = state.copyWith(
-        streamingMessage: clearStreaming ? null : message,
-        clearStreaming: clearStreaming,
-      );
-      return;
-    }
-
-    final updatedMessages = List<Message>.from(state.messages);
-    updatedMessages[messageIndex] = message;
-    state = state.copyWith(
-      messages: updatedMessages,
-      streamingMessage: clearStreaming ? null : message,
-      clearStreaming: clearStreaming,
-    );
+    _replaceMessageInAll(message, clearStreaming: clearStreaming);
   }
 
   Future<void> sendMessage(String content, {List<File>? attachments}) async {
@@ -368,6 +408,12 @@ class ChatNotifier extends Notifier<ChatState> {
       }
     }
 
+    final userThreadOrder = MessageVariants.nextThreadOrder(state.messages);
+    final userGroupId = generateUuid();
+    final assistantThreadOrder = userThreadOrder + 1;
+    final assistantGroupId = generateUuid();
+    final lastInTimeline = state.messages.isNotEmpty ? state.messages.last : null;
+
     final userMessage = Message(
       id: generateUuid(),
       conversationId: _currentConversationId!,
@@ -376,6 +422,11 @@ class ChatNotifier extends Notifier<ChatState> {
       createdAt: DateTime.now(),
       status: MessageStatus.complete,
       attachmentPaths: savedPaths.isNotEmpty ? savedPaths : null,
+      variantGroupId: userGroupId,
+      variantIndex: 0,
+      threadOrder: userThreadOrder,
+      isActiveVariant: true,
+      parentMessageId: lastInTimeline?.id,
     );
 
     final assistantMessageId = generateUuid();
@@ -387,10 +438,17 @@ class ChatNotifier extends Notifier<ChatState> {
       createdAt: DateTime.now(),
       status: MessageStatus.streaming,
       modelId: selectedModel?.id,
+      variantGroupId: assistantGroupId,
+      variantIndex: 0,
+      threadOrder: assistantThreadOrder,
+      isActiveVariant: true,
+      parentMessageId: userMessage.id,
     );
 
+    final updatedAll = [...state.allMessages, userMessage, assistantMessage];
     state = state.copyWith(
-      messages: [...state.messages, userMessage, assistantMessage],
+      allMessages: updatedAll,
+      messages: MessageVariants.resolveActiveTimeline(updatedAll),
       isStreaming: true,
       streamingMessage: assistantMessage,
       clearError: true,
@@ -958,6 +1016,82 @@ class ChatNotifier extends Notifier<ChatState> {
     }
   }
 
+  Future<void> continueFromMessage(String messageId) async {
+    final messages = state.messages;
+    if (messages.isEmpty || messages.last.id != messageId) return;
+    final assistant = messages.last;
+    if (assistant.role != MessageRole.assistant) return;
+    if (state.isStreaming) return;
+
+    final streamingAssistant = assistant.copyWith(
+      status: MessageStatus.streaming,
+      isProcessing: true,
+    );
+    _replaceMessageInAll(streamingAssistant);
+    state = state.copyWith(
+      isStreaming: true,
+      streamingMessage: streamingAssistant,
+      clearError: true,
+    );
+    ref.read(isStreamingProvider.notifier).setStreaming(true);
+    ref.read(chatBackgroundServiceProvider).start();
+    _resetCheckpointMetrics();
+    _updateSavedMetrics(streamingAssistant);
+    _latestStreamingMessage = streamingAssistant;
+
+    await _runAssistantStream(
+      streamingAssistant,
+      ref.read(selectedModelProvider),
+      continueGeneration: true,
+    );
+  }
+
+  Future<void> cycleMessageVariant(String messageId, int direction) async {
+    Message? displayMsg;
+    for (final m in state.messages) {
+      if (m.id == messageId) {
+        displayMsg = m;
+        break;
+      }
+    }
+    if (displayMsg == null) return;
+
+    final variants = MessageVariants.variantsForMessage(
+      state.allMessages,
+      displayMsg,
+    );
+    if (variants.length <= 1) return;
+
+    final currentIndex = MessageVariants.activeVariantIndex(variants);
+    final newIndex = (currentIndex + direction).clamp(0, variants.length - 1);
+    if (newIndex == currentIndex) return;
+
+    final groupId = MessageVariants.groupId(displayMsg);
+    final targetId = variants[newIndex].id;
+    final updatedAll = state.allMessages.map((message) {
+      if (MessageVariants.groupId(message) != groupId) return message;
+      return message.copyWith(isActiveVariant: message.id == targetId);
+    }).toList();
+
+    for (final message in updatedAll.where(
+      (m) => MessageVariants.groupId(m) == groupId,
+    )) {
+      await _saveMessage(message);
+    }
+    _setAllMessages(updatedAll);
+  }
+
+  int _nextVariantIndex(String groupId) {
+    final variants = state.allMessages.where(
+      (m) => MessageVariants.groupId(m) == groupId,
+    );
+    if (variants.isEmpty) return 0;
+    return variants
+            .map((m) => m.variantIndex)
+            .reduce((a, b) => a > b ? a : b) +
+        1;
+  }
+
   Future<void> retryMessage(String messageId) async {
     final messageIndex = state.messages.indexWhere((m) => m.id == messageId);
     if (messageIndex == -1) return;
@@ -967,30 +1101,253 @@ class ChatNotifier extends Notifier<ChatState> {
 
     if (messageIndex > 0 &&
         state.messages[messageIndex - 1].role == MessageRole.user) {
-      final userMessageIndex = messageIndex - 1;
-      final userMessage = state.messages[userMessageIndex];
+      final userMessage = state.messages[messageIndex - 1];
+      final groupId = MessageVariants.groupId(message);
 
-      final messagesToRemove = state.messages.sublist(userMessageIndex);
-      final db = ref.read(databaseProvider);
-
-      for (final msg in messagesToRemove) {
-        final query = db.messageBox
-            .query(MessageEntity_.id.equals(msg.id))
-            .build();
-        db.messageBox.removeMany(query.findIds());
-        query.close();
+      final deactivated = state.allMessages.map((m) {
+        if (MessageVariants.groupId(m) != groupId) return m;
+        return m.copyWith(isActiveVariant: false);
+      }).toList();
+      for (final m in deactivated.where(
+        (x) => MessageVariants.groupId(x) == groupId,
+      )) {
+        await _saveMessage(m);
       }
+      state = state.copyWith(allMessages: deactivated);
 
-      state = state.copyWith(
-        messages: state.messages.sublist(0, userMessageIndex),
-        clearStreaming: true,
-      );
-
-      await sendMessage(
-        userMessage.content,
-        attachments: userMessage.attachmentPaths?.map((p) => File(p)).toList(),
+      await _regenerateAssistant(
+        userMessage,
+        variantGroupId: groupId,
+        threadOrder: message.threadOrder,
+        variantIndex: _nextVariantIndex(groupId),
       );
     }
+  }
+
+  Future<void> _regenerateAssistant(
+    Message userMessage, {
+    required String variantGroupId,
+    required int threadOrder,
+    required int variantIndex,
+  }) async {
+    final selectedModel = ref.read(selectedModelProvider);
+    final server = ref.read(activeServerProvider);
+    if (server == null || _currentConversationId == null) return;
+
+    final assistantMessage = Message(
+      id: generateUuid(),
+      conversationId: _currentConversationId!,
+      role: MessageRole.assistant,
+      content: '',
+      createdAt: DateTime.now(),
+      status: MessageStatus.streaming,
+      modelId: selectedModel?.id,
+      variantGroupId: variantGroupId,
+      variantIndex: variantIndex,
+      threadOrder: threadOrder,
+      isActiveVariant: true,
+      parentMessageId: userMessage.id,
+    );
+
+    final updatedAll = [...state.allMessages, assistantMessage];
+    state = state.copyWith(
+      allMessages: updatedAll,
+      messages: MessageVariants.resolveActiveTimeline(updatedAll),
+      isStreaming: true,
+      streamingMessage: assistantMessage,
+      clearError: true,
+    );
+    ref.read(isStreamingProvider.notifier).setStreaming(true);
+    await _saveMessage(assistantMessage);
+
+    ref.read(chatBackgroundServiceProvider).start();
+    _resetCheckpointMetrics();
+    _updateSavedMetrics(assistantMessage);
+
+    await _runAssistantStream(assistantMessage, selectedModel);
+  }
+
+  Future<void> _runAssistantStream(
+    Message assistantMessage,
+    ModelInfo? selectedModel, {
+    bool continueGeneration = false,
+  }) async {
+    final server = ref.read(activeServerProvider);
+    final chatParams = ref.read(chatParamsProvider);
+    final chatService = ref.read(chatServiceProvider);
+    if (server == null || chatService == null) return;
+
+    final messagesForApi = _buildMessagesForApi(selectedModel);
+
+    try {
+      _streamSubscription?.cancel();
+      _uiUpdateTimer?.cancel();
+
+      String reasoningContent = '';
+      var streamingAssistantMessage = assistantMessage;
+      _latestStreamingMessage = streamingAssistantMessage;
+
+      final mcpConfig = ref.read(chatMcpConfigProvider);
+      final integrations =
+          mcpConfig.enabled && mcpConfig.integrations.isNotEmpty
+          ? mcpConfig.integrations
+          : null;
+
+      final registry = ref.read(toolRegistryProvider);
+      final tools = mcpConfig.enabled
+          ? await registry.listTools()
+          : const <ToolDefinition>[];
+
+      bool stateNeedsUpdate = false;
+
+      void updateUiState() {
+        if (!stateNeedsUpdate) return;
+        stateNeedsUpdate = false;
+        if (_currentConversationId == assistantMessage.conversationId) {
+          state = state.copyWith(streamingMessage: streamingAssistantMessage);
+        }
+      }
+
+      _uiUpdateTimer = Timer.periodic(const Duration(milliseconds: 80), (_) {
+        updateUiState();
+      });
+
+      _streamSubscription = chatService
+          .sendMessage(
+            server: server,
+            modelId: selectedModel?.id ?? 'default',
+            messages: messagesForApi,
+            params: chatParams,
+            integrations: integrations,
+            tools: tools,
+            continueGeneration: continueGeneration,
+          )
+          .listen(
+            (response) async {
+              if (_currentConversationId != assistantMessage.conversationId) {
+                return;
+              }
+
+              switch (response.type) {
+                case ChatResponseType.message:
+                  streamingAssistantMessage = streamingAssistantMessage
+                      .copyWith(
+                        content:
+                            streamingAssistantMessage.content +
+                            (response.content ?? ''),
+                        isProcessing: false,
+                      );
+                  _latestStreamingMessage = streamingAssistantMessage;
+                  _chunkCount++;
+                  if (_shouldCheckpointSave(streamingAssistantMessage)) {
+                    _saveService?.enqueue(streamingAssistantMessage);
+                    _updateSavedMetrics(streamingAssistantMessage);
+                    _resetCheckpointMetrics();
+                  }
+                  stateNeedsUpdate = true;
+                  break;
+                case ChatResponseType.reasoning:
+                  reasoningContent += response.reasoningContent ?? '';
+                  streamingAssistantMessage = streamingAssistantMessage
+                      .copyWith(
+                        reasoningContent: reasoningContent,
+                        isProcessing: false,
+                      );
+                  _latestStreamingMessage = streamingAssistantMessage;
+                  _chunkCount++;
+                  if (_shouldCheckpointSave(streamingAssistantMessage)) {
+                    _saveService?.enqueue(streamingAssistantMessage);
+                    _updateSavedMetrics(streamingAssistantMessage);
+                    _resetCheckpointMetrics();
+                  }
+                  stateNeedsUpdate = true;
+                  break;
+                case ChatResponseType.processing:
+                  streamingAssistantMessage = streamingAssistantMessage
+                      .copyWith(isProcessing: true);
+                  _latestStreamingMessage = streamingAssistantMessage;
+                  stateNeedsUpdate = true;
+                  break;
+                case ChatResponseType.timeoutError:
+                case ChatResponseType.error:
+                  _uiUpdateTimer?.cancel();
+                  _uiUpdateTimer = null;
+                  streamingAssistantMessage = streamingAssistantMessage.copyWith(
+                    status: MessageStatus.error,
+                    errorMessage: response.content,
+                    isProcessing: false,
+                  );
+                  await _saveMessage(streamingAssistantMessage);
+                  _replaceMessageInAll(
+                    streamingAssistantMessage,
+                    clearStreaming: true,
+                  );
+                  state = state.copyWith(isStreaming: false, clearStreaming: true);
+                  ref.read(isStreamingProvider.notifier).setStreaming(false);
+                  ref.read(chatBackgroundServiceProvider).stop();
+                  break;
+                default:
+                  break;
+              }
+            },
+            onDone: () async {
+              _uiUpdateTimer?.cancel();
+              _uiUpdateTimer = null;
+              final finalMessage = streamingAssistantMessage.copyWith(
+                status: MessageStatus.complete,
+                isProcessing: false,
+              );
+              await _saveMessage(finalMessage);
+              _replaceMessageInAll(finalMessage, clearStreaming: true);
+              state = state.copyWith(isStreaming: false, clearStreaming: true);
+              ref.read(isStreamingProvider.notifier).setStreaming(false);
+              ref.read(chatBackgroundServiceProvider).stop();
+              _maybeRequestReviewAfterSuccessfulCompletion(
+                finalMessage: finalMessage,
+                server: server,
+                selectedModel: selectedModel,
+              );
+            },
+            onError: (Object error, StackTrace stackTrace) async {
+              Log.error('Stream error: $error');
+              _uiUpdateTimer?.cancel();
+              _uiUpdateTimer = null;
+              final errorMessage = streamingAssistantMessage.copyWith(
+                status: MessageStatus.error,
+                errorMessage: error.toString(),
+                isProcessing: false,
+              );
+              await _saveMessage(errorMessage);
+              _replaceMessageInAll(errorMessage, clearStreaming: true);
+              state = state.copyWith(
+                isStreaming: false,
+                clearStreaming: true,
+                errorMessage: error.toString(),
+              );
+              ref.read(isStreamingProvider.notifier).setStreaming(false);
+              ref.read(chatBackgroundServiceProvider).stop();
+            },
+          );
+    } catch (e) {
+      state = state.copyWith(
+        isStreaming: false,
+        errorMessage: e.toString(),
+        clearStreaming: true,
+      );
+      ref.read(isStreamingProvider.notifier).setStreaming(false);
+    }
+  }
+
+  void _replaceMessageInAll(Message message, {bool clearStreaming = false}) {
+    final updatedAll = state.allMessages.map((m) {
+      return m.id == message.id ? message : m;
+    }).toList();
+    state = state.copyWith(
+      allMessages: updatedAll,
+      messages: MessageVariants.resolveActiveTimeline(updatedAll),
+      streamingMessage: clearStreaming ? null : message,
+      clearStreaming: clearStreaming,
+    );
   }
 
   Future<void> editAssistantMessage(String messageId, String newContent) async {
@@ -1002,9 +1359,30 @@ class ChatNotifier extends Notifier<ChatState> {
     if (newContent.trim().isEmpty) return;
     if (newContent == message.content) return;
 
-    final updated = message.copyWith(content: newContent);
+    final groupId = MessageVariants.groupId(message);
+    final deactivated = state.allMessages.map((m) {
+      if (MessageVariants.groupId(m) != groupId) return m;
+      return m.copyWith(isActiveVariant: false);
+    }).toList();
+    for (final m in deactivated.where(
+      (x) => MessageVariants.groupId(x) == groupId,
+    )) {
+      await _saveMessage(m);
+    }
+    state = state.copyWith(allMessages: deactivated);
+
+    final updated = message.copyWith(
+      id: generateUuid(),
+      content: newContent,
+      createdAt: DateTime.now(),
+      status: MessageStatus.complete,
+      variantIndex: _nextVariantIndex(groupId),
+      isActiveVariant: true,
+      parentMessageId: message.parentMessageId,
+    );
     await _saveMessage(updated);
-    _replaceMessageInState(updated);
+    final updatedAll = [...state.allMessages, updated];
+    _setAllMessages(updatedAll);
   }
 
   Future<void> branchFromMessage(String messageId) async {
@@ -1082,8 +1460,11 @@ class ChatNotifier extends Notifier<ChatState> {
     db.messageBox.removeMany(query.findIds());
     query.close();
 
+    final updatedAll =
+        state.allMessages.where((m) => m.id != messageId).toList();
     state = state.copyWith(
-      messages: state.messages.where((m) => m.id != messageId).toList(),
+      allMessages: updatedAll,
+      messages: MessageVariants.resolveActiveTimeline(updatedAll),
     );
   }
 
@@ -1096,26 +1477,35 @@ class ChatNotifier extends Notifier<ChatState> {
     if (newContent.trim().isEmpty) return;
     if (newContent == message.content) return;
 
-    final attachmentPaths = message.attachmentPaths;
-
-    final messagesToRemove = state.messages.sublist(messageIndex);
-    final db = ref.read(databaseProvider);
-    for (final msg in messagesToRemove) {
-      final query = db.messageBox
-          .query(MessageEntity_.id.equals(msg.id))
-          .build();
-      db.messageBox.removeMany(query.findIds());
-      query.close();
+    final groupId = MessageVariants.groupId(message);
+    final deactivated = state.allMessages.map((m) {
+      if (MessageVariants.groupId(m) != groupId) return m;
+      return m.copyWith(isActiveVariant: false);
+    }).toList();
+    for (final m in deactivated.where(
+      (x) => MessageVariants.groupId(x) == groupId,
+    )) {
+      await _saveMessage(m);
     }
+    state = state.copyWith(allMessages: deactivated);
 
-    state = state.copyWith(
-      messages: state.messages.sublist(0, messageIndex),
-      clearStreaming: true,
+    final newUser = message.copyWith(
+      id: generateUuid(),
+      content: newContent,
+      createdAt: DateTime.now(),
+      variantIndex: _nextVariantIndex(groupId),
+      isActiveVariant: true,
+      parentMessageId: message.parentMessageId,
     );
+    await _saveMessage(newUser);
+    final updatedAll = [...state.allMessages, newUser];
+    _setAllMessages(updatedAll);
 
-    await sendMessage(
-      newContent,
-      attachments: attachmentPaths?.map((p) => File(p)).toList(),
+    await _regenerateAssistant(
+      newUser,
+      variantGroupId: generateUuid(),
+      threadOrder: message.threadOrder + 1,
+      variantIndex: 0,
     );
   }
 

@@ -13,12 +13,18 @@ class ObjectBoxStore {
   late final Box<PersonaEntity> personaBox;
   late final Box<ConversationEntity> conversationBox;
   late final Box<MessageEntity> messageBox;
+  late final Box<ConversationFolderEntity> conversationFolderBox;
+  late final Box<SavedMessageEntity> savedMessageBox;
+  late final Box<SavedMessageFolderEntity> savedMessageFolderBox;
 
   ObjectBoxStore._create(this.store) {
     serverBox = Box<ServerEntity>(store);
     personaBox = Box<PersonaEntity>(store);
     conversationBox = Box<ConversationEntity>(store);
     messageBox = Box<MessageEntity>(store);
+    conversationFolderBox = Box<ConversationFolderEntity>(store);
+    savedMessageBox = Box<SavedMessageEntity>(store);
+    savedMessageFolderBox = Box<SavedMessageFolderEntity>(store);
   }
 
   /// Create an instance of ObjectBox storage.

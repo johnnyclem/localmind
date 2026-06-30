@@ -10,21 +10,29 @@ class MessageActionBar extends ConsumerStatefulWidget {
   const MessageActionBar({
     super.key,
     required this.content,
+    this.tokenCount,
+    this.messageId,
     this.onCopy,
     this.onRetry,
     this.onDelete,
     this.onEdit,
     this.onShare,
     this.onBranch,
+    this.onContinue,
+    this.onSave,
   });
 
   final String content;
+  final int? tokenCount;
+  final String? messageId;
   final VoidCallback? onCopy;
   final VoidCallback? onRetry;
   final VoidCallback? onDelete;
   final VoidCallback? onEdit;
   final VoidCallback? onShare;
   final VoidCallback? onBranch;
+  final VoidCallback? onContinue;
+  final VoidCallback? onSave;
 
   @override
   ConsumerState<MessageActionBar> createState() => _MessageActionBarState();
@@ -84,6 +92,14 @@ class _MessageActionBarState extends ConsumerState<MessageActionBar> {
             icon: Icons.refresh,
             label: l10n.retry,
             onTap: widget.onRetry,
+          ),
+        ],
+        if (widget.onContinue != null) ...[
+          const SizedBox(width: 4),
+          _ActionButton(
+            icon: Icons.arrow_forward,
+            label: l10n.continue_action,
+            onTap: widget.onContinue,
           ),
         ],
         if (widget.onEdit != null) ...[
@@ -211,9 +227,32 @@ class _MessageActionBarState extends ConsumerState<MessageActionBar> {
                   widget.onBranch?.call();
                 },
               ),
+            if (widget.onSave != null)
+              ListTile(
+                leading: const Icon(Icons.bookmark_outline),
+                title: Text(sheetL10n.save_message),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  widget.onSave?.call();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(sheetL10n.message_saved)),
+                  );
+                },
+              ),
             ListTile(
               leading: const Icon(Icons.text_fields),
               title: Text(sheetL10n.character_count(widget.content.length)),
+              enabled: false,
+            ),
+            ListTile(
+              leading: const Icon(Icons.token),
+              title: Text(
+                widget.tokenCount != null
+                    ? sheetL10n.token_count(widget.tokenCount!)
+                    : sheetL10n.estimated_token_count(
+                        (widget.content.length / 4).ceil(),
+                      ),
+              ),
               enabled: false,
             ),
           ],

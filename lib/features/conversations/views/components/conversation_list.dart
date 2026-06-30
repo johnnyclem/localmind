@@ -76,6 +76,17 @@ class ConversationList extends ConsumerWidget {
                 onDelete: () {
                   _showDeleteConfirmation(context, ref, l10n, conversation);
                 },
+                onDuplicate: () {
+                  ref
+                      .read(conversationsProvider.notifier)
+                      .duplicateConversation(conversation.id);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(l10n.duplicate_chat_success)),
+                  );
+                },
+                onMoveToFolder: () {
+                  _showMoveToFolderSheet(context, ref, l10n, conversation);
+                },
               );
             }),
           ],
@@ -156,6 +167,50 @@ class ConversationList extends ConsumerWidget {
               child: Text(l10n.delete),
             ),
           ],
+        );
+      },
+    );
+  }
+
+  void _showMoveToFolderSheet(
+    BuildContext context,
+    WidgetRef ref,
+    AppLocalizations l10n,
+    Conversation conversation,
+  ) {
+    final folders = ref.read(conversationFoldersProvider).value ?? [];
+
+    showModalBottomSheet<void>(
+      context: context,
+      builder: (ctx) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.folder_off_outlined),
+                title: Text(l10n.remove_from_folder),
+                onTap: () async {
+                  Navigator.pop(ctx);
+                  await ref
+                      .read(conversationsProvider.notifier)
+                      .moveConversationToFolder(conversation.id, null);
+                },
+              ),
+              ...folders.map(
+                (folder) => ListTile(
+                  leading: const Icon(Icons.folder_outlined),
+                  title: Text(folder.name),
+                  onTap: () async {
+                    Navigator.pop(ctx);
+                    await ref
+                        .read(conversationsProvider.notifier)
+                        .moveConversationToFolder(conversation.id, folder.id);
+                  },
+                ),
+              ),
+            ],
+          ),
         );
       },
     );

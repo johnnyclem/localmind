@@ -26,6 +26,7 @@ abstract class ChatService {
     List<McpIntegration>? integrations,
     List<ToolDefinition>? tools,
     String? previousResponseId,
+    bool continueGeneration = false,
   });
 
   void cancelStream();
@@ -155,6 +156,7 @@ class LMStudioChatService implements ChatService {
     List<McpIntegration>? integrations,
     List<ToolDefinition>? tools,
     String? previousResponseId,
+    bool continueGeneration = false,
   }) async* {
     _cancelToken = CancelToken();
 
@@ -464,6 +466,7 @@ class OpenAICompatibleChatService implements ChatService {
     List<McpIntegration>? integrations,
     List<ToolDefinition>? tools,
     String? previousResponseId,
+    bool continueGeneration = false,
   }) async* {
     _cancelToken = CancelToken();
     final toolAdapter = OpenAiToolAdapter();
@@ -471,12 +474,14 @@ class OpenAICompatibleChatService implements ChatService {
     final apiMessages = messages.map(_messageToApiMap).toList();
     // Strip trailing empty assistant messages to avoid "prefill incompatible
     // with enable_thinking" errors from servers running thinking models
-    while (apiMessages.isNotEmpty &&
-        apiMessages.last['role'] == 'assistant' &&
-        (apiMessages.last['content'] == null ||
-            (apiMessages.last['content'] is String &&
-                (apiMessages.last['content'] as String).isEmpty))) {
-      apiMessages.removeLast();
+    if (!continueGeneration) {
+      while (apiMessages.isNotEmpty &&
+          apiMessages.last['role'] == 'assistant' &&
+          (apiMessages.last['content'] == null ||
+              (apiMessages.last['content'] is String &&
+                  (apiMessages.last['content'] as String).isEmpty))) {
+        apiMessages.removeLast();
+      }
     }
 
     final body = {
@@ -694,6 +699,7 @@ class OllamaChatService implements ChatService {
     List<McpIntegration>? integrations,
     List<ToolDefinition>? tools,
     String? previousResponseId,
+    bool continueGeneration = false,
   }) async* {
     _cancelToken = CancelToken();
     final toolAdapter = OllamaToolAdapter();
@@ -815,6 +821,7 @@ class OpenRouterChatService implements ChatService {
     List<McpIntegration>? integrations,
     List<ToolDefinition>? tools,
     String? previousResponseId,
+    bool continueGeneration = false,
   }) async* {
     _cancelToken = CancelToken();
     final toolAdapter = OpenRouterToolAdapter();

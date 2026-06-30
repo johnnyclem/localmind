@@ -240,6 +240,7 @@ class OnDeviceLlamaChatService implements ChatService {
     List<McpIntegration>? integrations,
     List<ToolDefinition>? tools,
     String? previousResponseId,
+    bool continueGeneration = false,
   }) async* {
     _isCancelled = false;
     await for (final response in _llamaService.sendMessage(

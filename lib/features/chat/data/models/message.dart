@@ -21,6 +21,11 @@ class Message {
   final bool isProcessing;
   final String? toolSessionId;
   final List<ToolEvent>? toolEvents;
+  final String? variantGroupId;
+  final int variantIndex;
+  final int threadOrder;
+  final bool isActiveVariant;
+  final String? parentMessageId;
 
   Message({
     required this.id,
@@ -40,6 +45,11 @@ class Message {
     this.isProcessing = false,
     this.toolSessionId,
     this.toolEvents,
+    this.variantGroupId,
+    this.variantIndex = 0,
+    this.threadOrder = 0,
+    this.isActiveVariant = true,
+    this.parentMessageId,
   });
 
   Message copyWith({
@@ -60,6 +70,11 @@ class Message {
     bool? isProcessing,
     String? toolSessionId,
     List<ToolEvent>? toolEvents,
+    String? variantGroupId,
+    int? variantIndex,
+    int? threadOrder,
+    bool? isActiveVariant,
+    String? parentMessageId,
   }) {
     return Message(
       id: id ?? this.id,
@@ -79,6 +94,11 @@ class Message {
       isProcessing: isProcessing ?? this.isProcessing,
       toolSessionId: toolSessionId ?? this.toolSessionId,
       toolEvents: toolEvents ?? this.toolEvents,
+      variantGroupId: variantGroupId ?? this.variantGroupId,
+      variantIndex: variantIndex ?? this.variantIndex,
+      threadOrder: threadOrder ?? this.threadOrder,
+      isActiveVariant: isActiveVariant ?? this.isActiveVariant,
+      parentMessageId: parentMessageId ?? this.parentMessageId,
     );
   }
 }

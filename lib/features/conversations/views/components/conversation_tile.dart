@@ -13,6 +13,8 @@ class ConversationTile extends StatelessWidget {
     required this.onRename,
     required this.onTogglePin,
     required this.onDelete,
+    required this.onDuplicate,
+    required this.onMoveToFolder,
   });
 
   final Conversation conversation;
@@ -21,6 +23,8 @@ class ConversationTile extends StatelessWidget {
   final VoidCallback onRename;
   final VoidCallback onTogglePin;
   final VoidCallback onDelete;
+  final VoidCallback onDuplicate;
+  final VoidCallback onMoveToFolder;
 
   String _formatTimestamp(AppLocalizations l10n, DateTime dateTime) {
     final now = DateTime.now();
@@ -179,6 +183,22 @@ class ConversationTile extends StatelessWidget {
                 onTap: () {
                   Navigator.pop(ctx);
                   onRename();
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.copy_outlined),
+                title: Text(l10n.duplicate_chat),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  onDuplicate();
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.folder_outlined),
+                title: Text(l10n.move_to_folder),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  onMoveToFolder();
                 },
               ),
               ListTile(

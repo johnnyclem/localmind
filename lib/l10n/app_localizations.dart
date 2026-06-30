@@ -3807,11 +3807,209 @@ abstract class AppLocalizations {
   /// **'Failed to import backup: {error}'**
   String import_data_failed(String error);
 
-  /// Confirmation message before importing backup
+  /// No description provided for @import_data_confirm.
   ///
   /// In en, this message translates to:
   /// **'Import conversations and custom personas from this backup? Existing items with the same IDs will be updated.'**
   String get import_data_confirm;
+
+  /// No description provided for @import_settings_confirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace current settings with the imported backup?'**
+  String get import_settings_confirm;
+
+  /// No description provided for @export_conversations.
+  ///
+  /// In en, this message translates to:
+  /// **'Export conversations'**
+  String get export_conversations;
+
+  /// No description provided for @import_conversations.
+  ///
+  /// In en, this message translates to:
+  /// **'Import conversations'**
+  String get import_conversations;
+
+  /// No description provided for @export_personas.
+  ///
+  /// In en, this message translates to:
+  /// **'Export personas'**
+  String get export_personas;
+
+  /// No description provided for @import_personas.
+  ///
+  /// In en, this message translates to:
+  /// **'Import personas'**
+  String get import_personas;
+
+  /// No description provided for @export_settings.
+  ///
+  /// In en, this message translates to:
+  /// **'Export settings'**
+  String get export_settings;
+
+  /// No description provided for @import_settings.
+  ///
+  /// In en, this message translates to:
+  /// **'Import settings'**
+  String get import_settings;
+
+  /// No description provided for @export_all_zip.
+  ///
+  /// In en, this message translates to:
+  /// **'Export all (ZIP)'**
+  String get export_all_zip;
+
+  /// No description provided for @import_all_zip.
+  ///
+  /// In en, this message translates to:
+  /// **'Import all (ZIP)'**
+  String get import_all_zip;
+
+  /// No description provided for @duplicate_chat.
+  ///
+  /// In en, this message translates to:
+  /// **'Duplicate chat'**
+  String get duplicate_chat;
+
+  /// No description provided for @duplicate_chat_success.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat duplicated'**
+  String get duplicate_chat_success;
+
+  /// No description provided for @move_to_folder.
+  ///
+  /// In en, this message translates to:
+  /// **'Move to folder'**
+  String get move_to_folder;
+
+  /// No description provided for @remove_from_folder.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from folder'**
+  String get remove_from_folder;
+
+  /// No description provided for @create_folder.
+  ///
+  /// In en, this message translates to:
+  /// **'Create folder'**
+  String get create_folder;
+
+  /// No description provided for @new_folder.
+  ///
+  /// In en, this message translates to:
+  /// **'New folder'**
+  String get new_folder;
+
+  /// No description provided for @folder_name_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Folder name'**
+  String get folder_name_hint;
+
+  /// No description provided for @all_chats.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get all_chats;
+
+  /// No description provided for @unfiled_chats.
+  ///
+  /// In en, this message translates to:
+  /// **'Unfiled'**
+  String get unfiled_chats;
+
+  /// No description provided for @create.
+  ///
+  /// In en, this message translates to:
+  /// **'Create'**
+  String get create;
+
+  /// No description provided for @server_path_prefix_label.
+  ///
+  /// In en, this message translates to:
+  /// **'API path prefix'**
+  String get server_path_prefix_label;
+
+  /// No description provided for @server_path_prefix_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'/your-secret-token'**
+  String get server_path_prefix_hint;
+
+  /// No description provided for @search_message_contents.
+  ///
+  /// In en, this message translates to:
+  /// **'Search message contents'**
+  String get search_message_contents;
+
+  /// No description provided for @message_search_results.
+  ///
+  /// In en, this message translates to:
+  /// **'Message matches'**
+  String get message_search_results;
+
+  /// No description provided for @saved_messages_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved Messages'**
+  String get saved_messages_title;
+
+  /// No description provided for @nav_saved_messages.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved Messages'**
+  String get nav_saved_messages;
+
+  /// No description provided for @saved_messages_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'No saved messages yet. Bookmark a message from its options menu.'**
+  String get saved_messages_empty;
+
+  /// No description provided for @save_message.
+  ///
+  /// In en, this message translates to:
+  /// **'Save message'**
+  String get save_message;
+
+  /// No description provided for @message_saved.
+  ///
+  /// In en, this message translates to:
+  /// **'Message saved'**
+  String get message_saved;
+
+  /// No description provided for @token_count.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} tokens'**
+  String token_count(int count);
+
+  /// No description provided for @estimated_token_count.
+  ///
+  /// In en, this message translates to:
+  /// **'~{count} tokens (estimated)'**
+  String estimated_token_count(int count);
+
+  /// No description provided for @test_tts_section_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Test voice'**
+  String get test_tts_section_title;
+
+  /// No description provided for @test_tts_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter text to hear the current TTS engine…'**
+  String get test_tts_hint;
+
+  /// No description provided for @test_speak_button.
+  ///
+  /// In en, this message translates to:
+  /// **'Speak'**
+  String get test_speak_button;
 }
 
 class _AppLocalizationsDelegate

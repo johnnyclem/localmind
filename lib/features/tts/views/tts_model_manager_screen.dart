@@ -74,6 +74,8 @@ class TtsModelManagerScreen extends ConsumerWidget {
                 const SizedBox(height: 16),
                 _PiperEngineCard(isSelected: settings.ttsEngine == EngineId.piper),
                 const SizedBox(height: 24),
+                const _TtsTestSection(),
+                const SizedBox(height: 24),
               ],
             ),
           ),
@@ -1049,5 +1051,71 @@ class _VoiceChipsState extends ConsumerState<_VoiceChips> {
         ).showSnackBar(SnackBar(content: Text(l10n.preview_failed(e.toString()))));
       }
     }
+  }
+}
+
+class _TtsTestSection extends ConsumerStatefulWidget {
+  const _TtsTestSection();
+
+  @override
+  ConsumerState<_TtsTestSection> createState() => _TtsTestSectionState();
+}
+
+class _TtsTestSectionState extends ConsumerState<_TtsTestSection> {
+  final _controller = TextEditingController(
+    text:
+        'The quick brown fox jumps over the lazy dog. '
+        'This is a longer sample to test how the selected text-to-speech engine handles extended passages.',
+  );
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Future<void> _speak() async {
+    final text = _controller.text.trim();
+    if (text.isEmpty) return;
+    try {
+      await ref.read(tts.ttsProvider.notifier).speak(text);
+    } catch (_) {}
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          l10n.test_tts_section_title,
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 12),
+        TextField(
+          controller: _controller,
+          maxLines: 6,
+          minLines: 4,
+          decoration: InputDecoration(
+            hintText: l10n.test_tts_hint,
+            filled: true,
+            fillColor: isDark ? const Color(0xFF1A1A1A) : const Color(0xFFF5F5F5),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+          ),
+        ),
+        const SizedBox(height: 12),
+        ShadButton(
+          onPressed: _speak,
+          leading: const Icon(Icons.volume_up),
+          child: Text(l10n.test_speak_button),
+        ),
+      ],
+    );
   }
 }

@@ -7,6 +7,7 @@ import 'package:localmind/features/chat/views/components/processing_indicator.da
 import 'package:localmind/features/chat/views/components/typing_indicator.dart';
 import 'package:localmind/features/chat/views/components/reasoning_widget.dart';
 import 'package:localmind/features/chat/views/components/message_action_bar.dart';
+import 'package:localmind/features/chat/views/components/message_variant_navigator.dart';
 import 'markdown/themed_gpt_markdown.dart';
 import 'tool_bubble/tool_timeline.dart';
 
@@ -19,17 +20,25 @@ class AssistantBubble extends StatelessWidget {
     this.onDelete,
     this.onEdit,
     this.onBranch,
+    this.onContinue,
     this.onModelTap,
+    this.onCycleVariant,
+    this.onSave,
+    this.allMessages = const [],
     this.isStreaming = false,
   });
 
   final Message message;
+  final List<Message> allMessages;
   final VoidCallback? onCopy;
   final VoidCallback? onRetry;
   final VoidCallback? onDelete;
   final VoidCallback? onEdit;
   final VoidCallback? onBranch;
+  final VoidCallback? onContinue;
+  final void Function(Message message)? onSave;
   final VoidCallback? onModelTap;
+  final void Function(int direction)? onCycleVariant;
   final bool isStreaming;
 
   @override
@@ -109,6 +118,12 @@ class AssistantBubble extends StatelessWidget {
               padding: EdgeInsets.only(top: 8),
               child: _StreamingIndicator(),
             ),
+          if (!isStreaming && onCycleVariant != null)
+            MessageVariantNavigator(
+              message: message,
+              allMessages: allMessages,
+              onCycle: onCycleVariant!,
+            ),
           const SizedBox(height: 8),
           Row(
             children: [
@@ -127,11 +142,15 @@ class AssistantBubble extends StatelessWidget {
                       message.status == MessageStatus.cancelled))
                 MessageActionBar(
                   content: message.content,
+                  tokenCount: message.tokenCount,
+                  messageId: message.id,
                   onCopy: onCopy,
                   onRetry: onRetry,
                   onDelete: onDelete,
                   onEdit: onEdit,
                   onBranch: onBranch,
+                  onContinue: onContinue,
+                  onSave: () => onSave?.call(message),
                 ),
             ],
           ),

@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:localmind/l10n/app_localizations.dart';
 import '../providers/conversation_providers.dart';
+import 'components/conversation_folder_bar.dart';
 import 'components/conversation_empty_state.dart';
 import 'components/conversation_list.dart';
 import 'components/conversation_search_bar.dart';
+import 'components/message_search_results_list.dart';
 
 class ChatHistoryScreen extends ConsumerWidget {
   const ChatHistoryScreen({super.key});
@@ -18,6 +20,7 @@ class ChatHistoryScreen extends ConsumerWidget {
     final groupedConversations = ref.watch(groupedConversationsProvider);
     final activeConversation = ref.watch(activeConversationProvider);
     final searchQuery = ref.watch(conversationSearchProvider);
+    final messageSearchHits = ref.watch(messageSearchResultsProvider);
     final topPadding = MediaQuery.of(context).padding.top;
 
     return Column(
@@ -62,6 +65,17 @@ class ChatHistoryScreen extends ConsumerWidget {
           ),
 
           const ConversationSearchBar(),
+          const ConversationFolderBar(),
+          if (messageSearchHits.isNotEmpty)
+            ConstrainedBox(
+              constraints: BoxConstraints(
+                maxHeight: (MediaQuery.sizeOf(context).height * 0.35)
+                    .clamp(120.0, 280.0),
+              ),
+              child: const SingleChildScrollView(
+                child: MessageSearchResultsList(),
+              ),
+            ),
 
           Expanded(
             child: groupedConversations.when(

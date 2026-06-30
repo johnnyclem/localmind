@@ -25,6 +25,7 @@ class SidebarWidget extends ConsumerWidget {
     final location = GoRouterState.of(context).uri.toString();
 
     final isHistory = location.startsWith(AppRoutes.chatHistory);
+    final isSavedMessages = location.startsWith(AppRoutes.savedMessages);
     final isServers = location.startsWith(AppRoutes.servers);
     final isMcpTools = location.startsWith(AppRoutes.mcpTools);
     final isPersonas = location.startsWith(AppRoutes.personas);
@@ -81,6 +82,17 @@ class SidebarWidget extends ConsumerWidget {
                           Navigator.pop(context);
                         }
                         context.go(AppRoutes.chatHistory);
+                      },
+                    ),
+                    DrawerNavItem(
+                      iconData: HugeIcons.strokeRoundedBookmark01,
+                      label: l10n.nav_saved_messages,
+                      isSelected: isSavedMessages,
+                      onTap: () {
+                        if (Scaffold.maybeOf(context)?.isDrawerOpen ?? false) {
+                          Navigator.pop(context);
+                        }
+                        context.go(AppRoutes.savedMessages);
                       },
                     ),
                     DrawerNavItem(

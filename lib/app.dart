@@ -9,6 +9,9 @@ import 'core/models/enums.dart';
 import 'core/providers/app_providers.dart';
 import 'core/routes/app_routes.dart';
 import 'core/theme/app_theme.dart';
+import 'features/chat/providers/chat_providers.dart';
+import 'features/conversations/providers/conversation_providers.dart'
+    as conv;
 import 'features/chat/views/chat_screen.dart';
 import 'features/conversations/views/chat_history_screen.dart';
 import 'features/mcp/views/mcp_tools_screen.dart';
@@ -25,6 +28,7 @@ import 'features/servers/data/models/server.dart';
 import 'features/servers/views/add_server_screen.dart';
 import 'features/servers/views/server_list_screen.dart';
 import 'features/tts/views/tts_model_manager_screen.dart';
+import 'features/saved_messages/views/saved_messages_screen.dart';
 import 'features/settings/views/settings_screen.dart';
 import 'features/sidebar/sidebar_drawer.dart';
 import 'features/sidebar/sidebar_widget.dart';
@@ -153,6 +157,11 @@ final routerProvider = Provider<GoRouter>((ref) {
             pageBuilder: (context, state) =>
                 const NoTransitionPage(child: TtsModelManagerScreen()),
           ),
+          GoRoute(
+            path: AppRoutes.savedMessages,
+            pageBuilder: (context, state) =>
+                const NoTransitionPage(child: SavedMessagesScreen()),
+          ),
         ],
       ),
     ],
@@ -246,7 +255,7 @@ class App extends ConsumerWidget {
   }
 }
 
-class AppShell extends StatelessWidget {
+class AppShell extends ConsumerWidget {
   final Widget child;
 
   const AppShell({super.key, required this.child});
@@ -256,16 +265,22 @@ class AppShell extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final location = GoRouterState.of(context).uri.path;
     final isHome = location == AppRoutes.home;
+    final hasActiveChat = ref.watch(conv.activeConversationProvider) != null;
 
     return PopScope(
-      canPop: isHome,
+      canPop: isHome && !hasActiveChat,
       onPopInvokedWithResult: (didPop, result) {
-        if (!didPop && !isHome) {
+        if (didPop) return;
+        if (isHome && hasActiveChat) {
+          ref.read(chatProvider.notifier).startNewConversation();
+          return;
+        }
+        if (!isHome) {
           context.go(AppRoutes.home);
         }
       },

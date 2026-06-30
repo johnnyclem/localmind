@@ -11,22 +11,30 @@ class ChatBubble extends StatelessWidget {
   const ChatBubble({
     super.key,
     required this.message,
+    required this.allMessages,
     this.onCopy,
     this.onRetry,
     this.onDelete,
     this.onEdit,
     this.onBranch,
+    this.onContinue,
     this.onModelTap,
+    this.onCycleVariant,
+    this.onSave,
     this.isStreaming = false,
   });
 
   final Message message;
+  final List<Message> allMessages;
   final VoidCallback? onCopy;
   final VoidCallback? onRetry;
   final VoidCallback? onDelete;
   final VoidCallback? onEdit;
   final VoidCallback? onBranch;
+  final VoidCallback? onContinue;
   final VoidCallback? onModelTap;
+  final void Function(int direction)? onCycleVariant;
+  final void Function(Message message)? onSave;
   final bool isStreaming;
 
   @override
@@ -41,10 +49,13 @@ class ChatBubble extends StatelessWidget {
           alignment: AlignmentDirectional.centerEnd,
           child: UserBubble(
             message: message,
+            allMessages: allMessages,
             onCopy: onCopy,
             onDelete: onDelete,
             onEdit: onEdit,
             onBranch: onBranch,
+            onCycleVariant: onCycleVariant,
+            onSave: onSave,
           ),
         );
       case MessageRole.assistant:
@@ -52,12 +63,16 @@ class ChatBubble extends StatelessWidget {
           alignment: AlignmentDirectional.centerStart,
           child: AssistantBubble(
             message: message,
+            allMessages: allMessages,
             onCopy: onCopy,
             onRetry: onRetry,
             onDelete: onDelete,
             onEdit: onEdit,
             onBranch: onBranch,
+            onContinue: onContinue,
             onModelTap: onModelTap,
+            onCycleVariant: onCycleVariant,
+            onSave: onSave,
             isStreaming: isStreaming,
           ),
         );

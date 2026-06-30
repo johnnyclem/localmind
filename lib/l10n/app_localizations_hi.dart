@@ -2016,4 +2016,109 @@ class AppLocalizationsHi extends AppLocalizations {
   @override
   String get import_data_confirm =>
       'Import conversations and custom personas from this backup? Existing items with the same IDs will be updated.';
+
+  @override
+  String get import_settings_confirm =>
+      'Replace current settings with the imported backup?';
+
+  @override
+  String get export_conversations => 'Export conversations';
+
+  @override
+  String get import_conversations => 'Import conversations';
+
+  @override
+  String get export_personas => 'Export personas';
+
+  @override
+  String get import_personas => 'Import personas';
+
+  @override
+  String get export_settings => 'Export settings';
+
+  @override
+  String get import_settings => 'Import settings';
+
+  @override
+  String get export_all_zip => 'Export all (ZIP)';
+
+  @override
+  String get import_all_zip => 'Import all (ZIP)';
+
+  @override
+  String get duplicate_chat => 'Duplicate chat';
+
+  @override
+  String get duplicate_chat_success => 'Chat duplicated';
+
+  @override
+  String get move_to_folder => 'Move to folder';
+
+  @override
+  String get remove_from_folder => 'Remove from folder';
+
+  @override
+  String get create_folder => 'Create folder';
+
+  @override
+  String get new_folder => 'New folder';
+
+  @override
+  String get folder_name_hint => 'Folder name';
+
+  @override
+  String get all_chats => 'All';
+
+  @override
+  String get unfiled_chats => 'Unfiled';
+
+  @override
+  String get create => 'Create';
+
+  @override
+  String get server_path_prefix_label => 'API path prefix';
+
+  @override
+  String get server_path_prefix_hint => '/your-secret-token';
+
+  @override
+  String get search_message_contents => 'Search message contents';
+
+  @override
+  String get message_search_results => 'Message matches';
+
+  @override
+  String get saved_messages_title => 'Saved Messages';
+
+  @override
+  String get nav_saved_messages => 'Saved Messages';
+
+  @override
+  String get saved_messages_empty =>
+      'No saved messages yet. Bookmark a message from its options menu.';
+
+  @override
+  String get save_message => 'Save message';
+
+  @override
+  String get message_saved => 'Message saved';
+
+  @override
+  String token_count(int count) {
+    return '$count tokens';
+  }
+
+  @override
+  String estimated_token_count(int count) {
+    return '~$count tokens (estimated)';
+  }
+
+  @override
+  String get test_tts_section_title => 'Test voice';
+
+  @override
+  String get test_tts_hint => 'Enter text to hear the current TTS engine…';
+
+  @override
+  String get test_speak_button => 'Speak';
 }
