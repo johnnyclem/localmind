@@ -162,6 +162,20 @@ class SettingsViews extends ConsumerWidget {
                       valueFormat: (value) => '${value.toStringAsFixed(2)}x',
                     ),
                   ],
+                  _ToggleSetting(
+                    label: l10n.tts_process_markdown,
+                    description: l10n.tts_process_markdown_desc,
+                    value: settings.ttsProcessMarkdown,
+                    onChanged: (value) => ref
+                        .read(settingsProvider.notifier)
+                        .setTtsProcessMarkdown(value),
+                  ),
+                  _TtsSkipSecondsSetting(
+                    value: settings.ttsSkipSeconds,
+                    onChanged: (value) => ref
+                        .read(settingsProvider.notifier)
+                        .setTtsSkipSeconds(value),
+                  ),
                 ],
               );
 
@@ -265,6 +279,13 @@ class SettingsViews extends ConsumerWidget {
                     icon: Icons.phone_android_rounded,
                     label: l10n.manage_on_device_models,
                     onPressed: () => context.push(AppRoutes.onDeviceModels),
+                  ),
+                  _ToggleSetting(
+                    label: l10n.unload_models_before_load,
+                    value: settings.unloadModelsBeforeLoad,
+                    onChanged: (value) => ref
+                        .read(settingsProvider.notifier)
+                        .setUnloadModelsBeforeLoad(value),
                   ),
                   const _OnDeviceEngineStatusCard(),
                 ],
@@ -1083,10 +1104,12 @@ class _ToggleSetting extends StatelessWidget {
     required this.label,
     required this.value,
     required this.onChanged,
+    this.description,
     this.badges = const [],
   });
 
   final String label;
+  final String? description;
   final bool value;
   final ValueChanged<bool> onChanged;
   final List<Widget> badges;
@@ -1100,23 +1123,90 @@ class _ToggleSetting extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Expanded(
-            child: Wrap(
-              spacing: 8,
-              runSpacing: 6,
-              crossAxisAlignment: WrapCrossAlignment.center,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  label,
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 6,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    Text(
+                      label,
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    ...badges,
+                  ],
                 ),
-                ...badges,
+                if (description != null) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    description!,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
           const SizedBox(width: 8),
           Switch.adaptive(value: value, onChanged: onChanged),
+        ],
+      ),
+    );
+  }
+}
+
+class _TtsSkipSecondsSetting extends StatelessWidget {
+  const _TtsSkipSecondsSetting({
+    required this.value,
+    required this.onChanged,
+  });
+
+  final int value;
+  final ValueChanged<int> onChanged;
+
+  static const _options = [5, 10, 15, 30];
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+
+    return _SettingPanel(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.tts_skip_seconds,
+            style: theme.textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            l10n.tts_skip_seconds_desc,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: _options.map((seconds) {
+              final selected = value == seconds;
+              return FilterChip(
+                label: Text(l10n.tts_skip_seconds_value(seconds)),
+                selected: selected,
+                onSelected: (_) => onChanged(seconds),
+                showCheckmark: false,
+              );
+            }).toList(),
+          ),
         ],
       ),
     );
