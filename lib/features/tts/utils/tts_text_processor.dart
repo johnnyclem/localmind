@@ -51,8 +51,8 @@ class TtsTextProcessor {
       RegExp(r'\$(\d+(?:\.\d+)?)'),
       (m) => '${m.group(1)} dollars',
     );
-    // Lone `$` symbols
-    s = s.replaceAll(r'$', ' dollars ');
+    // Lone `$` symbols (not followed by a word character, e.g. `$HOME`)
+    s = s.replaceAll(RegExp(r'\$(?!\w)'), ' dollars ');
     // Collapse whitespace
     s = s.replaceAll(RegExp(r'[ \t]+'), ' ');
     s = s.replaceAll(RegExp(r'\n{3,}'), '\n\n');

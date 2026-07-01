@@ -461,11 +461,12 @@ class LMStudioChatService implements ChatService {
         for (final path in m.attachmentPaths!) {
           if (!AttachmentHelpers.isImagePath(path)) continue;
           try {
+            final file = File(path);
+            if (!await file.exists()) continue;
+            final fileBytes = await file.readAsBytes();
             final base64Image = await Isolate.run(() {
               try {
-                final file = File(path);
-                if (!file.existsSync()) return null;
-                return base64Encode(file.readAsBytesSync());
+                return base64Encode(fileBytes);
               } catch (_) {
                 return null;
               }

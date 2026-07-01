@@ -6,41 +6,70 @@ Uint8List mergeWavFiles(List<Uint8List> wavFiles) {
   if (wavFiles.length == 1) return wavFiles.first;
 
   final first = wavFiles.first;
-  if (first.length < 44) return first;
+  final dataOffset = _findPcmDataOffset(first);
+  if (dataOffset == null) return first;
+
+  final dataSizeOffset = _findDataChunkSizeOffset(first);
 
   final pcmBuilder = BytesBuilder(copy: false);
   for (final wav in wavFiles) {
-    if (wav.length > 44) {
-      pcmBuilder.add(wav.sublist(44));
+    final offset = _findPcmDataOffset(wav);
+    if (offset != null && wav.length > offset) {
+      pcmBuilder.add(wav.sublist(offset));
     }
   }
   final pcmData = pcmBuilder.toBytes();
-  final totalSize = 36 + pcmData.length;
 
-  final merged = ByteData(44);
-  merged.setUint8(0, 0x52); // R
-  merged.setUint8(1, 0x49); // I
-  merged.setUint8(2, 0x46); // F
-  merged.setUint8(3, 0x46); // F
-  merged.setUint32(4, totalSize, Endian.little);
-  merged.setUint8(8, 0x57); // W
-  merged.setUint8(9, 0x41); // A
-  merged.setUint8(10, 0x56); // V
-  merged.setUint8(11, 0x45); // E
-
-  // Copy fmt chunk from first file (bytes 12-35)
-  for (var i = 12; i < 36; i++) {
-    merged.setUint8(i, first[i]);
+  final header = Uint8List.fromList(first.sublist(0, dataOffset));
+  _writeUint32LE(header, 4, header.length + pcmData.length - 8);
+  if (dataSizeOffset != null) {
+    _writeUint32LE(header, dataSizeOffset, pcmData.length);
   }
 
-  merged.setUint8(36, 0x64); // d
-  merged.setUint8(37, 0x61); // a
-  merged.setUint8(38, 0x74); // t
-  merged.setUint8(39, 0x61); // a
-  merged.setUint32(40, pcmData.length, Endian.little);
+  return Uint8List.fromList([...header, ...pcmData]);
+}
 
-  return Uint8List.fromList([
-    ...merged.buffer.asUint8List(),
-    ...pcmData,
-  ]);
+int? _findPcmDataOffset(Uint8List wav) {
+  final dataSizeOffset = _findDataChunkSizeOffset(wav);
+  return dataSizeOffset == null ? null : dataSizeOffset + 4;
+}
+
+int? _findDataChunkSizeOffset(Uint8List wav) {
+  if (wav.length < 12) return null;
+  if (wav[0] != 0x52 ||
+      wav[1] != 0x49 ||
+      wav[2] != 0x46 ||
+      wav[3] != 0x46 ||
+      wav[8] != 0x57 ||
+      wav[9] != 0x41 ||
+      wav[10] != 0x56 ||
+      wav[11] != 0x45) {
+    return null;
+  }
+
+  var offset = 12;
+  while (offset + 8 <= wav.length) {
+    final chunkId = String.fromCharCodes(wav.sublist(offset, offset + 4));
+    final chunkSize = _readUint32LE(wav, offset + 4);
+    if (chunkId == 'data') {
+      return offset + 4;
+    }
+    offset += 8 + chunkSize;
+    if (chunkSize.isOdd) offset++;
+  }
+  return null;
+}
+
+int _readUint32LE(Uint8List bytes, int offset) {
+  return bytes[offset] |
+      (bytes[offset + 1] << 8) |
+      (bytes[offset + 2] << 16) |
+      (bytes[offset + 3] << 24);
+}
+
+void _writeUint32LE(Uint8List bytes, int offset, int value) {
+  bytes[offset] = value & 0xff;
+  bytes[offset + 1] = (value >> 8) & 0xff;
+  bytes[offset + 2] = (value >> 16) & 0xff;
+  bytes[offset + 3] = (value >> 24) & 0xff;
 }

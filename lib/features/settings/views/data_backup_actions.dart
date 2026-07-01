@@ -234,8 +234,8 @@ class DataBackupActions extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final service = DataBackupService();
-    final db = ref.read(databaseProvider);
-    final prefs = ref.read(sharedPreferencesProvider);
+    final db = ref.watch(databaseProvider);
+    final prefs = ref.watch(sharedPreferencesProvider);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,

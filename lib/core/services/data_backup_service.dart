@@ -147,6 +147,7 @@ class DataBackupService {
         })
         .toList();
 
+    final modelMetadata = _readModelMetadata(prefs);
     return {
       'version': 3,
       'exportedAt': DateTime.now().toIso8601String(),
@@ -156,8 +157,7 @@ class DataBackupService {
       'savedMessages': _exportSavedMessages(store),
       'savedMessageFolders': _exportSavedMessageFolders(store),
       'servers': _exportServers(store),
-      if (_readModelMetadata(prefs) != null)
-        'modelMetadata': _readModelMetadata(prefs),
+      if (modelMetadata != null) 'modelMetadata': modelMetadata,
     };
   }
 
@@ -185,6 +185,13 @@ class DataBackupService {
     final savedMessages = (all['savedMessages'] as List)
         .where((m) => (m as Map)['conversationId'] == conversationId)
         .toList();
+    final folderIds = savedMessages
+        .map((m) => (m as Map)['folderId'] as String?)
+        .whereType<String>()
+        .toSet();
+    final savedMessageFolders = (all['savedMessageFolders'] as List)
+        .where((f) => folderIds.contains((f as Map)['id']))
+        .toList();
 
     return {
       'version': 3,
@@ -193,6 +200,7 @@ class DataBackupService {
       'conversations': conversations,
       'messages': messages,
       'savedMessages': savedMessages,
+      'savedMessageFolders': savedMessageFolders,
     };
   }
 
@@ -302,15 +310,22 @@ class DataBackupService {
       if (personas is List) {
         for (final item in personas) {
           if (item is! Map) continue;
+          final id = _backupString(item['id']);
+          final name = _backupString(item['name']);
+          final createdAt = _backupDateTime(item['createdAt']);
+          final updatedAt = _backupDateTime(item['updatedAt']);
+          if (id == null || name == null || createdAt == null || updatedAt == null) {
+            continue;
+          }
           final persona = Persona(
-            id: item['id'] as String,
-            name: item['name'] as String,
+            id: id,
+            name: name,
             emoji: item['emoji'] as String? ?? '🤖',
             systemPrompt: item['systemPrompt'] as String? ?? '',
             description: item['description'] as String?,
             isBuiltIn: item['isBuiltIn'] as bool? ?? false,
-            createdAt: DateTime.parse(item['createdAt'] as String),
-            updatedAt: DateTime.parse(item['updatedAt'] as String),
+            createdAt: createdAt,
+            updatedAt: updatedAt,
             category: item['category'] as String?,
             preferredParams: item['preferredParams'] is Map
                 ? Map<String, dynamic>.from(item['preferredParams'] as Map)
@@ -330,16 +345,26 @@ class DataBackupService {
       if (servers is List) {
         for (final item in servers) {
           if (item is! Map) continue;
+          final id = _backupString(item['id']);
+          final name = _backupString(item['name']);
+          final createdAt = _backupDateTime(item['createdAt']);
+          final lastConnectedAt = _backupDateTime(item['lastConnectedAt']);
+          if (id == null ||
+              name == null ||
+              createdAt == null ||
+              lastConnectedAt == null) {
+            continue;
+          }
           final server = Server(
-            id: item['id'] as String,
-            name: item['name'] as String,
+            id: id,
+            name: name,
             type: ServerType.values.byName(item['type'] as String? ?? 'lmStudio'),
             host: item['host'] as String? ?? 'localhost',
             port: item['port'] as int? ?? 1234,
             apiKey: item['apiKey'] as String?,
             isDefault: item['isDefault'] as bool? ?? false,
-            createdAt: DateTime.parse(item['createdAt'] as String),
-            lastConnectedAt: DateTime.parse(item['lastConnectedAt'] as String),
+            createdAt: createdAt,
+            lastConnectedAt: lastConnectedAt,
             status: ConnectionStatus.values.byName(
               item['status'] as String? ?? 'disconnected',
             ),
@@ -359,11 +384,15 @@ class DataBackupService {
       if (savedFolders is List) {
         for (final item in savedFolders) {
           if (item is! Map) continue;
+          final id = _backupString(item['id']);
+          final folderName = _backupString(item['name']);
+          final createdAt = _backupDateTime(item['createdAt']);
+          if (id == null || folderName == null || createdAt == null) continue;
           final entity = SavedMessageFolderEntity(
-            id: item['id'] as String,
-            name: item['name'] as String,
+            id: id,
+            name: folderName,
             sortOrder: item['sortOrder'] as int? ?? 0,
-            createdAt: DateTime.parse(item['createdAt'] as String),
+            createdAt: createdAt,
           );
           final query = savedFolderBox
               .query(SavedMessageFolderEntity_.id.equals(entity.id))
@@ -379,16 +408,26 @@ class DataBackupService {
       if (savedMessages is List) {
         for (final item in savedMessages) {
           if (item is! Map) continue;
+          final id = _backupString(item['id']);
+          final sourceMessageId = _backupString(item['sourceMessageId']);
+          final conversationId = _backupString(item['conversationId']);
+          final savedAt = _backupDateTime(item['savedAt']);
+          if (id == null ||
+              sourceMessageId == null ||
+              conversationId == null ||
+              savedAt == null) {
+            continue;
+          }
           final entity = SavedMessageEntity(
-            id: item['id'] as String,
-            sourceMessageId: item['sourceMessageId'] as String,
-            conversationId: item['conversationId'] as String,
+            id: id,
+            sourceMessageId: sourceMessageId,
+            conversationId: conversationId,
             conversationTitle: item['conversationTitle'] as String? ?? 'Chat',
             roleIndex: item['roleIndex'] as int? ?? 0,
             content: item['content'] as String? ?? '',
             modelId: item['modelId'] as String?,
             folderId: item['folderId'] as String?,
-            savedAt: DateTime.parse(item['savedAt'] as String),
+            savedAt: savedAt,
           );
           final query =
               savedBox.query(SavedMessageEntity_.id.equals(entity.id)).build();
@@ -403,11 +442,15 @@ class DataBackupService {
       if (conversations is List) {
         for (final item in conversations) {
           if (item is! Map) continue;
+          final id = _backupString(item['id']);
+          final createdAt = _backupDateTime(item['createdAt']);
+          final updatedAt = _backupDateTime(item['updatedAt']);
+          if (id == null || createdAt == null || updatedAt == null) continue;
           final conversation = Conversation(
-            id: item['id'] as String,
+            id: id,
             title: item['title'] as String? ?? 'Imported Chat',
-            createdAt: DateTime.parse(item['createdAt'] as String),
-            updatedAt: DateTime.parse(item['updatedAt'] as String),
+            createdAt: createdAt,
+            updatedAt: updatedAt,
             isPinned: item['isPinned'] as bool? ?? false,
             personaId: item['personaId'] as String?,
             serverId: item['serverId'] as String?,
@@ -441,19 +484,25 @@ class DataBackupService {
       if (messages is List) {
         for (final item in messages) {
           if (item is! Map) continue;
+          final conversationId = _backupString(item['conversationId']);
+          final id = _backupString(item['id']);
+          final createdAt = _backupDateTime(item['createdAt']);
+          if (conversationId == null || id == null || createdAt == null) {
+            continue;
+          }
           final convQuery = convBox
-              .query(ConversationEntity_.id.equals(item['conversationId'] as String))
+              .query(ConversationEntity_.id.equals(conversationId))
               .build();
           final convEntity = convQuery.findFirst();
           convQuery.close();
           if (convEntity == null) continue;
 
           final message = Message(
-            id: item['id'] as String,
-            conversationId: item['conversationId'] as String,
+            id: id,
+            conversationId: conversationId,
             role: MessageRole.values.byName(item['role'] as String? ?? 'user'),
             content: item['content'] as String? ?? '',
-            createdAt: DateTime.parse(item['createdAt'] as String),
+            createdAt: createdAt,
             status: MessageStatus.values.byName(
               item['status'] as String? ?? 'complete',
             ),
@@ -494,5 +543,17 @@ class DataBackupService {
         await importFromJson(store, utf8.decode(file.content as List<int>));
       }
     }
+  }
+}
+
+String? _backupString(Object? value) => value is String ? value : null;
+
+DateTime? _backupDateTime(Object? value) {
+  final raw = _backupString(value);
+  if (raw == null) return null;
+  try {
+    return DateTime.parse(raw);
+  } catch (_) {
+    return null;
   }
 }

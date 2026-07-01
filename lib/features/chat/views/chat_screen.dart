@@ -7,7 +7,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
-import 'package:localmind/core/theme/colors.dart';
 import 'package:localmind/core/models/enums.dart';
 import 'package:localmind/core/providers/app_providers.dart';
 import 'package:localmind/core/routes/app_routes.dart';
@@ -42,6 +41,7 @@ import 'components/top_bar/model_top_bar.dart';
 import 'components/top_bar/connection_banner.dart';
 import 'components/top_bar/persona_indicator.dart';
 import 'components/top_bar/smart_reply_chips.dart';
+import 'components/persona_picker_sheet.dart';
 
 class ChatScreen extends ConsumerStatefulWidget {
   const ChatScreen({super.key});
@@ -124,7 +124,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
       case 'share_chat':
         _shareConversation(context);
       case 'persona':
-        _showPersonaPicker(context);
+        showPersonaPickerSheet(context);
       case 'remove_persona':
         final activeConv = ref.read(conv.activeConversationProvider);
         if (activeConv != null) {
@@ -164,108 +164,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
           },
         );
     }
-  }
-
-  void _showPersonaPicker(BuildContext context) {
-    final personasAsync = ref.read(personasNotifierProvider);
-    final personas = personasAsync.value ?? [];
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final activeConv = ref.read(conv.activeConversationProvider);
-    final currentPersonaId = activeConv?.personaId;
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder: (ctx) {
-        final sheetL10n = AppLocalizations.of(context)!;
-        return SafeArea(
-          child: Container(
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Center(
-                  child: Container(
-                    width: 40,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: isDark ? Colors.grey[600] : Colors.grey[300],
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  sheetL10n.select_persona,
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: isDark ? Colors.white : Colors.black,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Flexible(
-                  child: ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: personas.length,
-                    itemBuilder: (context, index) {
-                      final p = personas[index];
-                      final isSelected = p.id == currentPersonaId;
-                      final accent = isDark
-                          ? AppColors.darkAccent
-                          : AppColors.lightAccent;
-                      return ListTile(
-                        leading: Text(
-                          p.emoji,
-                          style: const TextStyle(fontSize: 22),
-                        ),
-                        title: Text(
-                          p.name,
-                          style: TextStyle(
-                            fontWeight: isSelected
-                                ? FontWeight.w600
-                                : FontWeight.normal,
-                            color: isDark ? Colors.white : Colors.black,
-                          ),
-                        ),
-                        subtitle: p.description != null
-                            ? Text(
-                                p.description!,
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: isDark
-                                      ? AppColors.darkMutedText
-                                      : AppColors.lightMutedText,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              )
-                            : null,
-                        trailing: isSelected
-                            ? Icon(Icons.check_circle, color: accent)
-                            : null,
-                        onTap: () {
-                          if (activeConv != null) {
-                            ref
-                                .read(conv.conversationsProvider.notifier)
-                                .updatePersona(
-                                  activeConv.id,
-                                  p.id,
-                                  p.systemPrompt,
-                                );
-                          }
-                          Navigator.pop(ctx);
-                        },
-                      );
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
   }
 
   Future<void> _shareConversation(BuildContext context) async {
@@ -451,7 +349,7 @@ class _ChatBody extends ConsumerWidget {
           isTemporary: isTemporary,
           hasMessages: messages.isNotEmpty,
           onMenuAction: onMenuAction,
-          onPersonaPicker: () => _openPersonaPicker(context, ref),
+          onPersonaPicker: () => showPersonaPickerSheet(context),
           onChatModeAction: () => _handleChatModeAction(
             context,
             ref,
@@ -466,7 +364,7 @@ class _ChatBody extends ConsumerWidget {
         if (persona != null)
           PersonaIndicator(
             persona: persona,
-            onTap: () => _openPersonaPicker(context, ref),
+            onTap: () => showPersonaPickerSheet(context),
             onRemove: () {
               final activeConv = ref.read(conv.activeConversationProvider);
               if (activeConv != null) {
@@ -518,108 +416,6 @@ class _ChatBody extends ConsumerWidget {
       ],
     );
   }
-}
-
-void _openPersonaPicker(BuildContext context, WidgetRef ref) {
-  final personasAsync = ref.read(personasNotifierProvider);
-  final personas = personasAsync.value ?? [];
-  final isDark = Theme.of(context).brightness == Brightness.dark;
-  final activeConv = ref.read(conv.activeConversationProvider);
-  final currentPersonaId = activeConv?.personaId;
-
-  showModalBottomSheet(
-    context: context,
-    isScrollControlled: true,
-    builder: (ctx) {
-      final sheetL10n = AppLocalizations.of(context)!;
-      return SafeArea(
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: isDark ? Colors.grey[600] : Colors.grey[300],
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                sheetL10n.select_persona,
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: isDark ? Colors.white : Colors.black,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Flexible(
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: personas.length,
-                  itemBuilder: (context, index) {
-                    final p = personas[index];
-                    final isSelected = p.id == currentPersonaId;
-                    final accent = isDark
-                        ? AppColors.darkAccent
-                        : AppColors.lightAccent;
-                    return ListTile(
-                      leading: Text(
-                        p.emoji,
-                        style: const TextStyle(fontSize: 22),
-                      ),
-                      title: Text(
-                        p.name,
-                        style: TextStyle(
-                          fontWeight: isSelected
-                              ? FontWeight.w600
-                              : FontWeight.normal,
-                          color: isDark ? Colors.white : Colors.black,
-                        ),
-                      ),
-                      subtitle: p.description != null
-                          ? Text(
-                              p.description!,
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: isDark
-                                    ? AppColors.darkMutedText
-                                    : AppColors.lightMutedText,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            )
-                          : null,
-                      trailing: isSelected
-                          ? Icon(Icons.check_circle, color: accent)
-                          : null,
-                      onTap: () {
-                        if (activeConv != null) {
-                          ref
-                              .read(conv.conversationsProvider.notifier)
-                              .updatePersona(
-                                activeConv.id,
-                                p.id,
-                                p.systemPrompt,
-                              );
-                        }
-                        Navigator.pop(ctx);
-                      },
-                    );
-                  },
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-    },
-  ).then((_) {});
 }
 
 class _MessageArea extends ConsumerWidget {
@@ -679,7 +475,10 @@ class _MessageArea extends ConsumerWidget {
         selectedModel: selectedModel,
         onModelTap: onModelPicker,
         selectedPersona: ref.watch(selectedPersonaProvider),
-        onPersonaTap: () => _openPersonaPickerForPreselection(context, ref),
+        onPersonaTap: () => showPersonaPickerSheet(
+          context,
+          mode: PersonaPickerMode.preselection,
+        ),
       );
     }
 
@@ -747,99 +546,6 @@ class _MessageArea extends ConsumerWidget {
       bottomInset: effectiveBottomInset,
     );
   }
-}
-
-void _openPersonaPickerForPreselection(BuildContext context, WidgetRef ref) {
-  final personasAsync = ref.read(personasNotifierProvider);
-  final personas = personasAsync.value ?? [];
-  final isDark = Theme.of(context).brightness == Brightness.dark;
-  final currentPersona = ref.watch(selectedPersonaProvider);
-
-  showModalBottomSheet(
-    context: context,
-    isScrollControlled: true,
-    builder: (ctx) {
-      final sheetL10n = AppLocalizations.of(context)!;
-      return SafeArea(
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: isDark ? Colors.grey[600] : Colors.grey[300],
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                sheetL10n.select_persona,
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: isDark ? Colors.white : Colors.black,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Flexible(
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: personas.length,
-                  itemBuilder: (context, index) {
-                    final p = personas[index];
-                    final isSelected = p.id == currentPersona?.id;
-                    final accent = isDark
-                        ? AppColors.darkAccent
-                        : AppColors.lightAccent;
-                    return ListTile(
-                      leading: Text(
-                        p.emoji,
-                        style: const TextStyle(fontSize: 22),
-                      ),
-                      title: Text(
-                        p.name,
-                        style: TextStyle(
-                          fontWeight: isSelected
-                              ? FontWeight.w600
-                              : FontWeight.normal,
-                          color: isDark ? Colors.white : Colors.black,
-                        ),
-                      ),
-                      subtitle: p.description != null
-                          ? Text(
-                              p.description!,
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: isDark
-                                    ? AppColors.darkMutedText
-                                    : AppColors.lightMutedText,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            )
-                          : null,
-                      trailing: isSelected
-                          ? Icon(Icons.check_circle, color: accent)
-                          : null,
-                      onTap: () {
-                        ref.read(selectedPersonaProvider.notifier).select(p);
-                        Navigator.pop(ctx);
-                      },
-                    );
-                  },
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-    },
-  ).then((_) {});
 }
 
 void _handleChatModeAction(

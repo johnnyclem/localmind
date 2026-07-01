@@ -101,6 +101,7 @@ class ChatNotifier extends Notifier<ChatState> {
   static const _checkpointTimeThreshold = Duration(seconds: 2);
 
   StreamSubscription<ChatResponse>? _streamSubscription;
+  int _streamGeneration = 0;
   Timer? _uiUpdateTimer;
   Message? _latestStreamingMessage;
   String? _currentConversationId;
@@ -350,7 +351,12 @@ class ChatNotifier extends Notifier<ChatState> {
         .setEnabled(settings.newChatMcpEnabled);
   }
 
+  void _invalidateStreamCallbacks() {
+    _streamGeneration++;
+  }
+
   void _abortStreamImmediately() {
+    _invalidateStreamCallbacks();
     _uiUpdateTimer?.cancel();
     _uiUpdateTimer = null;
     _clearPendingApproval();
@@ -611,6 +617,7 @@ class ChatNotifier extends Notifier<ChatState> {
 
     try {
       _streamSubscription?.cancel();
+      _invalidateStreamCallbacks();
       _uiUpdateTimer?.cancel();
 
       String reasoningContent = '';
@@ -649,6 +656,7 @@ class ChatNotifier extends Notifier<ChatState> {
           updateUiState();
         });
 
+        final streamGeneration = _streamGeneration;
         _streamSubscription = chatService
             .sendMessage(
               server: server,
@@ -660,6 +668,7 @@ class ChatNotifier extends Notifier<ChatState> {
             )
             .listen(
               (response) async {
+                if (streamGeneration != _streamGeneration) return;
                 final streamConvId = assistantMessage.conversationId;
                 final isCurrentContext = _currentConversationId == streamConvId;
 
@@ -1235,6 +1244,7 @@ class ChatNotifier extends Notifier<ChatState> {
   }
 
   Future<void> cancelStream() async {
+    _invalidateStreamCallbacks();
     _uiUpdateTimer?.cancel();
     _uiUpdateTimer = null;
     _clearPendingApproval();
@@ -1272,37 +1282,43 @@ class ChatNotifier extends Notifier<ChatState> {
     final messages = state.messages;
     if (messages.isEmpty) return;
 
-    if (messages.last.role == MessageRole.assistant) {
-      final lastAssistantIndex = messages.lastIndexWhere(
-        (m) => m.role == MessageRole.assistant,
-      );
-      if (lastAssistantIndex > 0) {
-        final userMessageIndex = lastAssistantIndex - 1;
-        final userMessage = messages[userMessageIndex];
-        final messagesToRemove = messages.sublist(userMessageIndex);
-        final db = ref.read(databaseProvider);
+    final lastAssistantIndex = messages.lastIndexWhere(
+      (m) => m.role == MessageRole.assistant,
+    );
+    if (lastAssistantIndex < 0) return;
 
-        for (final msg in messagesToRemove) {
-          final query = db.messageBox
-              .query(MessageEntity_.id.equals(msg.id))
-              .build();
-          db.messageBox.removeMany(query.findIds());
-          query.close();
-        }
-
-        state = state.copyWith(
-          messages: messages.sublist(0, userMessageIndex),
-          clearStreaming: true,
-        );
-
-        await sendMessage(
-          userMessage.content,
-          attachments: userMessage.attachmentPaths
-              ?.map((p) => File(p))
-              .toList(),
-        );
+    Message? userMessage;
+    for (var i = lastAssistantIndex - 1; i >= 0; i--) {
+      if (messages[i].role == MessageRole.user) {
+        userMessage = messages[i];
+        break;
       }
     }
+    if (userMessage == null) return;
+
+    final userMessageIndex = messages.indexWhere((m) => m.id == userMessage!.id);
+    final messagesToRemove = messages.sublist(userMessageIndex);
+    final db = ref.read(databaseProvider);
+
+    for (final msg in messagesToRemove) {
+      final query = db.messageBox
+          .query(MessageEntity_.id.equals(msg.id))
+          .build();
+      db.messageBox.removeMany(query.findIds());
+      query.close();
+    }
+
+    state = state.copyWith(
+      messages: messages.sublist(0, userMessageIndex),
+      clearStreaming: true,
+    );
+
+    await sendMessage(
+      userMessage.content,
+      attachments: userMessage.attachmentPaths
+          ?.map((p) => File(p))
+          .toList(),
+    );
   }
 
   Future<void> continueFromMessage(String messageId) async {
@@ -1472,6 +1488,7 @@ class ChatNotifier extends Notifier<ChatState> {
 
     try {
       _streamSubscription?.cancel();
+      _invalidateStreamCallbacks();
       _uiUpdateTimer?.cancel();
 
       String reasoningContent = '';
@@ -1504,6 +1521,7 @@ class ChatNotifier extends Notifier<ChatState> {
         updateUiState();
       });
 
+      final streamGeneration = _streamGeneration;
       _streamSubscription = chatService
           .sendMessage(
             server: server,
@@ -1516,6 +1534,7 @@ class ChatNotifier extends Notifier<ChatState> {
           )
           .listen(
             (response) async {
+              if (streamGeneration != _streamGeneration) return;
               if (_activeConversationId != assistantMessage.conversationId) {
                 return;
               }

@@ -650,7 +650,15 @@ class ConversationFoldersNotifier extends AsyncNotifier<List<ConversationFolder>
 
   Future<List<ConversationFolder>> _loadAll() async {
     final db = ref.read(databaseProvider);
-    final entities = db.conversationFolderBox.getAll();
+    return db.store.runInTransactionAsync(
+      TxMode.read,
+      _loadFoldersInBackground,
+      null,
+    );
+  }
+
+  static List<ConversationFolder> _loadFoldersInBackground(Store store, _) {
+    final entities = store.box<ConversationFolderEntity>().getAll();
     final folders = entities
         .map(
           (e) => ConversationFolder(
@@ -753,7 +761,7 @@ class FocusHistorySearchNotifier extends Notifier<int> {
 
   void requestFocus() => state++;
 
-  void clear() {}
+  void clear() => state = 0;
 }
 
 class ScrollToMessageNotifier extends Notifier<String?> {
@@ -771,14 +779,16 @@ final messageSearchResultsProvider = Provider<List<MessageSearchHit>>((ref) {
     return const [];
   }
 
-  final db = ref.read(databaseProvider);
+  final db = ref.watch(databaseProvider);
   final conversations = db.conversationBox.getAll();
   final titleById = {
     for (final conv in conversations) conv.id: conv.title,
   };
 
   final hits = <MessageSearchHit>[];
-  final messageQuery = db.messageBox.query().build();
+  final messageQuery = db.messageBox
+      .query(MessageEntity_.content.contains(query, caseSensitive: false))
+      .build();
   final messages = messageQuery.find();
   messageQuery.close();
 

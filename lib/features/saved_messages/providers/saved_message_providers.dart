@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/models/enums.dart';
 import '../../../core/providers/storage_providers.dart';
 import '../../../core/storage/entities.dart';
 import '../../../objectbox.g.dart';
@@ -251,9 +252,13 @@ final filteredSavedMessagesProvider =
                 .where((m) => m.conversationId.isEmpty)
                 .toList();
           case SavedMessageListFilter.user:
-            filtered = filtered.where((m) => m.roleIndex == 0).toList();
+            filtered = filtered
+                .where((m) => m.roleIndex == MessageRole.user.index)
+                .toList();
           case SavedMessageListFilter.assistant:
-            filtered = filtered.where((m) => m.roleIndex == 1).toList();
+            filtered = filtered
+                .where((m) => m.roleIndex == MessageRole.assistant.index)
+                .toList();
           case SavedMessageListFilter.all:
             break;
         }
