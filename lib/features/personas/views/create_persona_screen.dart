@@ -447,15 +447,30 @@ class _CreatePersonaScreenState extends ConsumerState<CreatePersonaScreen> {
               ),
             ],
             const SizedBox(height: 32),
-            ElevatedButton(
-              onPressed: _isSaving ? null : _save,
-              child: _isSaving
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : Text(_isEditing ? l10n.save_changes : l10n.create_persona_button),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton(
+                onPressed: _isSaving ? null : _save,
+                style: FilledButton.styleFrom(
+                  backgroundColor: theme.colorScheme.primary,
+                  foregroundColor: theme.colorScheme.onPrimary,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                ),
+                child: _isSaving
+                    ? SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: theme.colorScheme.onPrimary,
+                        ),
+                      )
+                    : Text(
+                        _isEditing
+                            ? l10n.save_changes
+                            : l10n.create_persona_button,
+                      ),
+              ),
             ),
           ],
         ),
