@@ -146,7 +146,7 @@ class ChatNotifier extends Notifier<ChatState> {
       final db = ref.read(databaseProvider);
 
       final messages = await db.store.runInTransactionAsync(
-        TxMode.write,
+        TxMode.read,
         _loadMessagesInBackground,
         conversation.id,
       );

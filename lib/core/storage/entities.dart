@@ -70,14 +70,18 @@ class ServerEntity {
     return Server(
       id: id,
       name: name,
-      type: ServerType.values[typeIndex],
+      type: typeIndex >= 0 && typeIndex < ServerType.values.length
+          ? ServerType.values[typeIndex]
+          : ServerType.values.first,
       host: host,
       port: port,
       apiKey: apiKey,
       isDefault: isDefault,
       createdAt: createdAt,
       lastConnectedAt: lastConnectedAt,
-      status: ConnectionStatus.values[statusIndex],
+      status: statusIndex >= 0 && statusIndex < ConnectionStatus.values.length
+          ? ConnectionStatus.values[statusIndex]
+          : ConnectionStatus.values.first,
       iconName: iconName,
     );
   }
@@ -148,7 +152,17 @@ class PersonaEntity {
       updatedAt: updatedAt,
       category: category,
       preferredParams: preferredParamsJson != null
-          ? Map<String, dynamic>.from(jsonDecode(preferredParamsJson!))
+          ? () {
+              try {
+                final decoded = jsonDecode(preferredParamsJson!);
+                if (decoded is Map) {
+                  return Map<String, dynamic>.from(decoded);
+                }
+                return null;
+              } catch (_) {
+                return null;
+              }
+            }()
           : null,
     );
   }
@@ -253,7 +267,17 @@ class ConversationEntity {
       contextLength: contextLength,
       mcpEnabled: mcpEnabled,
       smartReplies: smartRepliesJson != null
-          ? List<String>.from(jsonDecode(smartRepliesJson!))
+          ? () {
+              try {
+                final decoded = jsonDecode(smartRepliesJson!);
+                if (decoded is List) {
+                  return List<String>.from(decoded);
+                }
+                return null;
+              } catch (_) {
+                return null;
+              }
+            }()
           : null,
       smartRepliesLastMessageId: smartRepliesLastMessageId,
     );
@@ -353,27 +377,59 @@ class MessageEntity {
       role: MessageRole.values[roleIndex],
       content: content,
       createdAt: createdAt,
-      status: MessageStatus.values[statusIndex],
+      status: statusIndex >= 0 && statusIndex < MessageStatus.values.length
+          ? MessageStatus.values[statusIndex]
+          : MessageStatus.values.first,
       modelId: modelId,
       tokenCount: tokenCount,
       errorMessage: errorMessage,
       attachmentPaths: attachmentPathsJson != null
-          ? List<String>.from(jsonDecode(attachmentPathsJson!))
+          ? () {
+              try {
+                final decoded = jsonDecode(attachmentPathsJson!);
+                if (decoded is List) {
+                  return List<String>.from(decoded);
+                }
+                return null;
+              } catch (_) {
+                return null;
+              }
+            }()
           : null,
       generationTimeMs: generationTimeMs,
       reasoningContent: reasoningContent,
       toolCalls: toolCallsJson != null
-          ? (jsonDecode(toolCallsJson!) as List)
-                .map((e) => ToolCallData.fromMap(Map<String, dynamic>.from(e)))
-                .toList()
+          ? () {
+              try {
+                final decoded = jsonDecode(toolCallsJson!);
+                if (decoded is List) {
+                  return decoded
+                      .map((e) => ToolCallData.fromMap(Map<String, dynamic>.from(e as Map)))
+                      .toList();
+                }
+                return null;
+              } catch (_) {
+                return null;
+              }
+            }()
           : null,
       toolCallId: toolCallId,
       isProcessing: isProcessing,
       toolSessionId: toolSessionId,
       toolEvents: toolEventsJson != null
-          ? (jsonDecode(toolEventsJson!) as List)
-                .map((e) => ToolEvent.fromMap(Map<String, dynamic>.from(e)))
-                .toList()
+          ? () {
+              try {
+                final decoded = jsonDecode(toolEventsJson!);
+                if (decoded is List) {
+                  return decoded
+                      .map((e) => ToolEvent.fromMap(Map<String, dynamic>.from(e as Map)))
+                      .toList();
+                }
+                return null;
+              } catch (_) {
+                return null;
+              }
+            }()
           : null,
     );
   }

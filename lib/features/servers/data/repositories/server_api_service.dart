@@ -75,11 +75,12 @@ class ServerApiService {
 
       switch (server.type) {
         case ServerType.lmStudio:
-        case ServerType.openAICompatible:
           return _parseRunningOpenAICompatibleModels(response.data);
         case ServerType.ollama:
           return _parseRunningOllamaModels(response.data);
         case ServerType.openRouter:
+          return {};
+        case ServerType.openAICompatible:
           return {};
         case ServerType.onDevice:
           return {};

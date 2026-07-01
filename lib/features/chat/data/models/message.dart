@@ -107,10 +107,10 @@ class ToolCallData {
 
   factory ToolCallData.fromMap(Map<String, dynamic> map) {
     return ToolCallData(
-      id: map['id'],
-      toolName: map['toolName'],
-      arguments: Map<String, dynamic>.from(map['arguments'] ?? {}),
-      result: map['result'],
+      id: (map['id'] as String?) ?? '',
+      toolName: (map['toolName'] as String?) ?? '',
+      arguments: Map<String, dynamic>.from((map['arguments'] as Map?) ?? {}),
+      result: map['result'] as String?,
     );
   }
 

@@ -10,6 +10,7 @@ import 'package:localmind/core/components/model_picker/model_picker_sheet.dart';
 import 'package:localmind/core/components/server/server_icon_picker.dart';
 import 'package:localmind/core/components/tts/tts_player_bar.dart';
 import 'package:localmind/core/models/enums.dart';
+import 'package:localmind/core/models/model_info.dart';
 import 'package:localmind/core/providers/app_providers.dart';
 import 'package:localmind/core/providers/conversation_providers.dart' as conv;
 import 'package:localmind/core/providers/personas_providers.dart';
@@ -17,6 +18,8 @@ import 'package:localmind/core/providers/server_providers.dart';
 import 'package:localmind/core/routes/app_routes.dart';
 import 'package:localmind/core/utils/system_insets.dart';
 import 'package:localmind/l10n/app_localizations.dart';
+import 'package:localmind/features/conversations/data/models/conversation.dart';
+import 'package:localmind/features/personas/data/models/persona.dart';
 import 'package:localmind/features/servers/data/models/server.dart';
 import '../../data/models/message.dart';
 import '../../providers/chat_mcp_providers.dart';
@@ -532,9 +535,9 @@ class _MessageArea extends ConsumerWidget {
 
   final bool isLoading;
   final List<Message> messages;
-  final dynamic activeConversation;
+  final Conversation? activeConversation;
   final String? errorMessage;
-  final dynamic selectedModel;
+  final ModelInfo? selectedModel;
   final bool isStreaming;
   final ScrollController scrollController;
   final double effectiveBottomInset;
@@ -551,7 +554,7 @@ class _MessageArea extends ConsumerWidget {
 
     if (messages.isEmpty && activeConversation != null) {
       return CorruptedChatState(
-        conversation: activeConversation,
+        conversation: activeConversation!,
         errorMessage: errorMessage,
         onStartNewChat: () =>
             ref.read(chatProvider.notifier).startNewConversation(),
@@ -708,10 +711,10 @@ class _ScreenAppBar extends ConsumerWidget {
     required this.onPersonaPicker,
   });
 
-  final dynamic activeServer;
+  final Server? activeServer;
   final ConnectionStatus connectionStatus;
   final bool isDark;
-  final dynamic persona;
+  final Persona? persona;
   final void Function(String) onMenuAction;
   final VoidCallback onPersonaPicker;
 
@@ -743,7 +746,7 @@ class _ScreenAppBar extends ConsumerWidget {
             child: Row(
               children: [
                 if (activeServer != null) ...[
-                  _buildServerIcon(context, activeServer as Server?),
+                  _buildServerIcon(context, activeServer),
                   const SizedBox(width: 8),
                 ],
                 Text(

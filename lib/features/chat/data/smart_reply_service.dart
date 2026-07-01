@@ -90,6 +90,7 @@ class SmartReplyService {
         const Duration(seconds: 15),
         onTimeout: () {
           subscription?.cancel();
+          chatService.cancelStream();
           return accumulatedContent;
         },
       );
