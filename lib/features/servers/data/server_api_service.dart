@@ -64,7 +64,8 @@ class ServerApiService {
 
   Future<Set<String>> fetchRunningModels(Server server) async {
     if (server.type == ServerType.openRouter ||
-        server.type == ServerType.openAICompatible) {
+        server.type == ServerType.openAICompatible ||
+        server.type == ServerType.onDevice) {
       return {};
     }
 
@@ -145,6 +146,9 @@ class ServerApiService {
           throw Exception(_extractApiErrorMessage(e.response?.data) ?? e.message);
         }
       case ServerType.ollama:
+        // Ollama auto-loads models on /api/chat. Calling /api/generate here
+        // would trigger an auto-pull (download) when the model is not already
+        // present on the Ollama server, which is not what the user wants.
         return null;
       case ServerType.openRouter:
       case ServerType.onDevice:

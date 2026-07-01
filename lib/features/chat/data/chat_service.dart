@@ -583,122 +583,125 @@ class OpenAICompatibleChatService implements ChatService {
 
       Log.debug('OpenAICompatible: Starting to receive stream...');
 
-      await for (final chunk in stream) {
-        // Check if timeout was triggered
-        if (timeoutTriggered && lastContentReceived == null) {
-          _timeoutTimer?.cancel();
-          yield const ChatResponse(
-            type: ChatResponseType.timeoutError,
-            content:
-                'Model is taking too long to respond. This may happen with free tier models.',
-          );
-          return;
-        }
-
-        buffer += chunk;
-        final lines = buffer.split('\n');
-        buffer = lines.removeLast();
-
-        for (final line in lines) {
-          logCounter++;
-          if (logCounter % 10 == 0) {
-            Log.debug('OpenAICompatible SSE line #$logCounter');
+      try {
+        await for (final chunk in stream) {
+          // Check if timeout was triggered
+          if (timeoutTriggered && lastContentReceived == null) {
+            yield const ChatResponse(
+              type: ChatResponseType.timeoutError,
+              content:
+                  'Model is taking too long to respond. This may happen with free tier models.',
+            );
+            return;
           }
 
-          if (line.startsWith('data: ')) {
-            final data = line.substring(6);
-            if (data == '[DONE]') {
-              _timeoutTimer?.cancel();
-              Log.debug('OpenAICompatible: Received [DONE]');
-              for (final call in toolAdapter.takeCompletedCalls()) {
-                yield ChatResponse(
-                  type: ChatResponseType.toolCall,
-                  toolCall: ToolCallData(
-                    tool: call.name,
-                    arguments: call.arguments,
-                  ),
-                );
-              }
-              yield const ChatResponse(type: ChatResponseType.done);
-              return;
-            }
-            try {
-              final json = jsonDecode(data) as Map<String, dynamic>;
-              toolAdapter.consumeDynamicChunk(json);
+          buffer += chunk;
+          final lines = buffer.split('\n');
+          buffer = lines.removeLast();
 
-              // Check for errors in the response
-              if (json['error'] != null) {
+          for (final line in lines) {
+            logCounter++;
+            if (logCounter % 10 == 0) {
+              Log.debug('OpenAICompatible SSE line #$logCounter');
+            }
+
+            if (line.startsWith('data: ')) {
+              final data = line.substring(6);
+              if (data == '[DONE]') {
                 _timeoutTimer?.cancel();
-                final error = json['error'];
-                String errorMsg;
-                if (error is Map) {
-                  errorMsg = (error['message'] ?? 'Unknown API error') as String;
-                } else {
-                  errorMsg = error.toString();
+                Log.debug('OpenAICompatible: Received [DONE]');
+                for (final call in toolAdapter.takeCompletedCalls()) {
+                  yield ChatResponse(
+                    type: ChatResponseType.toolCall,
+                    toolCall: ToolCallData(
+                      tool: call.name,
+                      arguments: call.arguments,
+                    ),
+                  );
                 }
-                Log.error('OpenAICompatible mid-stream error: $errorMsg');
-                yield ChatResponse(
-                  type: ChatResponseType.error,
-                  content: 'API Error: $errorMsg',
-                );
+                yield const ChatResponse(type: ChatResponseType.done);
                 return;
               }
+              try {
+                final json = jsonDecode(data) as Map<String, dynamic>;
+                toolAdapter.consumeDynamicChunk(json);
 
-              final choices = json['choices'] as List<dynamic>?;
-              if (choices == null || choices.isEmpty) {
-                continue;
-              }
-
-              final firstChoice = choices[0] as Map<String, dynamic>?;
-              if (firstChoice == null) continue;
-
-              final delta = firstChoice['delta'];
-              if (delta == null || delta is! Map<String, dynamic>) continue;
-
-              final content = (delta['content'] ?? delta['text']) as String?;
-              final reasoning =
-                  (delta['reasoning'] ?? delta['reasoning_content']) as String?;
-              final refusal = delta['refusal'] as String?;
-
-              // Check if content is empty/null (processing but not outputting)
-              final hasContent = content != null && content.isNotEmpty;
-              final hasReasoning = reasoning != null && reasoning.isNotEmpty;
-              final hasRefusal = refusal != null && refusal.isNotEmpty;
-
-              if (!hasContent && !hasReasoning && !hasRefusal) {
-                emptyDeltaCount++;
-                if (emptyDeltaCount % 10 == 0) {
-                  yield const ChatResponse(type: ChatResponseType.processing);
-                }
-              } else {
-                emptyDeltaCount = 0;
-                lastContentReceived = DateTime.now();
-
-                if (hasRefusal) {
+                // Check for errors in the response
+                if (json['error'] != null) {
+                  _timeoutTimer?.cancel();
+                  final error = json['error'];
+                  String errorMsg;
+                  if (error is Map) {
+                    errorMsg = (error['message'] ?? 'Unknown API error') as String;
+                  } else {
+                    errorMsg = error.toString();
+                  }
+                  Log.error('OpenAICompatible mid-stream error: $errorMsg');
                   yield ChatResponse(
                     type: ChatResponseType.error,
-                    content: 'Refusal: $refusal',
+                    content: 'API Error: $errorMsg',
                   );
                   return;
                 }
-                if (hasContent) {
-                  yield ChatResponse(
-                    type: ChatResponseType.message,
-                    content: content,
-                  );
+
+                final choices = json['choices'] as List<dynamic>?;
+                if (choices == null || choices.isEmpty) {
+                  continue;
                 }
-                if (hasReasoning) {
-                  yield ChatResponse(
-                    type: ChatResponseType.reasoning,
-                    reasoningContent: reasoning,
-                  );
+
+                final firstChoice = choices[0] as Map<String, dynamic>?;
+                if (firstChoice == null) continue;
+
+                final delta = firstChoice['delta'];
+                if (delta == null || delta is! Map<String, dynamic>) continue;
+
+                final content = (delta['content'] ?? delta['text']) as String?;
+                final reasoning =
+                    (delta['reasoning'] ?? delta['reasoning_content']) as String?;
+                final refusal = delta['refusal'] as String?;
+
+                // Check if content is empty/null (processing but not outputting)
+                final hasContent = content != null && content.isNotEmpty;
+                final hasReasoning = reasoning != null && reasoning.isNotEmpty;
+                final hasRefusal = refusal != null && refusal.isNotEmpty;
+
+                if (!hasContent && !hasReasoning && !hasRefusal) {
+                  emptyDeltaCount++;
+                  if (emptyDeltaCount % 10 == 0) {
+                    yield const ChatResponse(type: ChatResponseType.processing);
+                  }
+                } else {
+                  emptyDeltaCount = 0;
+                  lastContentReceived = DateTime.now();
+
+                  if (hasRefusal) {
+                    yield ChatResponse(
+                      type: ChatResponseType.error,
+                      content: 'Refusal: $refusal',
+                    );
+                    return;
+                  }
+                  if (hasContent) {
+                    yield ChatResponse(
+                      type: ChatResponseType.message,
+                      content: content,
+                    );
+                  }
+                  if (hasReasoning) {
+                    yield ChatResponse(
+                      type: ChatResponseType.reasoning,
+                      reasoningContent: reasoning,
+                    );
+                  }
                 }
+              } catch (e) {
+                Log.error('OpenAICompatible parsing error: $e');
               }
-            } catch (e) {
-              Log.error('OpenAICompatible parsing error: $e');
             }
           }
         }
+      } finally {
+        _timeoutTimer?.cancel();
       }
 
       // Flush any tool calls accumulated without a [DONE] marker (e.g.
@@ -719,9 +722,10 @@ class OpenAICompatibleChatService implements ChatService {
         content: _handleChatError(e),
       );
       return;
+    } finally {
+      _timeoutTimer?.cancel();
     }
 
-    _timeoutTimer?.cancel();
     yield const ChatResponse(type: ChatResponseType.done);
     Log.debug('OpenAICompatible: Stream ended');
   }
@@ -927,17 +931,17 @@ class OpenRouterChatService implements ChatService {
 
       Log.debug('OpenRouter: Starting to receive stream...');
 
-      await for (final chunk in stream) {
-        // Check if timeout was triggered
-        if (timeoutTriggered && lastContentReceived == null) {
-          _timeoutTimer?.cancel();
-          yield const ChatResponse(
-            type: ChatResponseType.timeoutError,
-            content:
-                'Model is taking too long to respond. This may happen with free tier models.',
-          );
-          return;
-        }
+      try {
+        await for (final chunk in stream) {
+          // Check if timeout was triggered
+          if (timeoutTriggered && lastContentReceived == null) {
+            yield const ChatResponse(
+              type: ChatResponseType.timeoutError,
+              content:
+                  'Model is taking too long to respond. This may happen with free tier models.',
+            );
+            return;
+          }
 
         buffer += chunk;
         final lines = buffer.split('\n');
@@ -1049,6 +1053,9 @@ class OpenRouterChatService implements ChatService {
           }
         }
       }
+      } finally {
+        _timeoutTimer?.cancel();
+      }
 
       // Flush any tool calls accumulated without a [DONE] marker (e.g.
       // connection drop or server crash before sending [DONE]).
@@ -1068,9 +1075,10 @@ class OpenRouterChatService implements ChatService {
         content: _handleChatError(e),
       );
       return;
+    } finally {
+      _timeoutTimer?.cancel();
     }
 
-    _timeoutTimer?.cancel();
     yield const ChatResponse(type: ChatResponseType.done);
     Log.debug('OpenRouter: Stream ended');
   }

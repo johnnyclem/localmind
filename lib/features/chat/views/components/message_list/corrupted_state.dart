@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
+import 'package:localmind/features/conversations/data/models/conversation.dart';
 import 'package:localmind/l10n/app_localizations.dart';
 import 'debug_row.dart';
 
@@ -13,7 +14,7 @@ class CorruptedChatState extends ConsumerWidget {
     required this.onStartNewChat,
   });
 
-  final dynamic conversation;
+  final Conversation conversation;
   final String? errorMessage;
   final VoidCallback onStartNewChat;
 

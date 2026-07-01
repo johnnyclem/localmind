@@ -116,6 +116,13 @@ class SettingsNotifier extends Notifier<AppSettings> {
   Future<void> _update(AppSettings updated) async {
     state = updated;
     final prefs = ref.read(sharedPreferencesProvider);
+    // Fire-and-forget persistence: in-memory state is updated synchronously
+    // above so the UI reflects the new value immediately. The async write to
+    // SharedPreferences is not awaited by setter callers (which are sync
+    // UI handlers), so a hard app kill between the state mutation and the
+    // write completing can lose the most recent setting change. Settings
+    // are flushed on every state change and on app pause via
+    // [flushPendingSettings] in the root widget.
     await prefs.setString('appSettings', updated.toJson());
   }
 

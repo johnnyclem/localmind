@@ -20,6 +20,9 @@ class OnDeviceChatService implements ChatService {
   gemma.InferenceChat? _activeChat;
   String? _activeModelId;
   String? _activeSystemInstruction;
+  // Safe in Dart's single-threaded event loop: reads/writes are not
+  // interrupted by other isolates, and async boundaries only yield control
+  // at `await` points — so simple `bool` state is sufficient.
   bool _isCancelled = false;
 
   OnDeviceChatService(this._gemmaService);

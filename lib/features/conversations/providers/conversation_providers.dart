@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/providers/storage_providers.dart';
@@ -479,8 +481,11 @@ class ConversationsNotifier extends AsyncNotifier<List<Conversation>> {
   }
 
   String _generateUuid() {
-    final random = DateTime.now().microsecondsSinceEpoch;
-    return '${random.toRadixString(16)}-${DateTime.now().millisecondsSinceEpoch.toRadixString(16)}';
+    final secure = Random.secure();
+    final now = DateTime.now().microsecondsSinceEpoch.toRadixString(16);
+    final r1 = secure.nextInt(0xFFFFFFFF).toRadixString(16).padLeft(8, '0');
+    final r2 = secure.nextInt(0xFFFFFFFF).toRadixString(16).padLeft(8, '0');
+    return '$now-$r1-$r2';
   }
 }
 
