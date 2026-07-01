@@ -74,18 +74,10 @@ class ServerApiService {
         options: Options(headers: buildServerAuthHeaders(server)),
       );
 
-      switch (server.type) {
-        case ServerType.lmStudio:
-          return _parseRunningOpenAICompatibleModels(response.data);
-        case ServerType.ollama:
-          return _parseRunningOllamaModels(response.data);
-        case ServerType.openRouter:
-          return {};
-        case ServerType.onDevice:
-          return {};
-        case ServerType.openAICompatible:
-          return {};
+      if (server.type == ServerType.lmStudio) {
+        return _parseRunningOpenAICompatibleModels(response.data);
       }
+      return _parseRunningOllamaModels(response.data);
     } catch (e) {
       return {};
     }

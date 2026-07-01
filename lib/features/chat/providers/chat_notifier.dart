@@ -189,7 +189,10 @@ class ChatNotifier extends Notifier<ChatState> {
     _saveService = MessageSaveService(db);
     ref.onDispose(() {
       _uiUpdateTimer?.cancel();
-      _streamSubscription?.cancel();
+      _invalidateStreamCallbacks();
+      final subscription = _streamSubscription;
+      _streamSubscription = null;
+      subscription?.cancel();
       _saveService?.dispose();
       final pending = state.pendingToolApproval;
       if (pending != null && !pending.completer.isCompleted) {
@@ -334,7 +337,7 @@ class ChatNotifier extends Notifier<ChatState> {
   }
 
   Future<void> startNewConversation() async {
-    _abortStreamImmediately();
+    await _abortStreamImmediately();
 
     _currentConversationId = null;
     _ephemeralConversationId = null;
@@ -355,17 +358,20 @@ class ChatNotifier extends Notifier<ChatState> {
     _streamGeneration++;
   }
 
-  void _abortStreamImmediately() {
+  Future<void> _detachStreamSubscription() async {
     _invalidateStreamCallbacks();
-    _uiUpdateTimer?.cancel();
-    _uiUpdateTimer = null;
-    _clearPendingApproval();
-
     final subscription = _streamSubscription;
     _streamSubscription = null;
     if (subscription != null) {
-      unawaited(subscription.cancel());
+      await subscription.cancel();
     }
+  }
+
+  Future<void> _abortStreamImmediately() async {
+    await _detachStreamSubscription();
+    _uiUpdateTimer?.cancel();
+    _uiUpdateTimer = null;
+    _clearPendingApproval();
 
     ref.read(chatServiceProvider)?.cancelStream();
     ref.read(chatBackgroundServiceProvider).stop();
@@ -616,8 +622,7 @@ class ChatNotifier extends Notifier<ChatState> {
     final messagesForApi = _buildMessagesForApi(selectedModel);
 
     try {
-      _streamSubscription?.cancel();
-      _invalidateStreamCallbacks();
+      await _detachStreamSubscription();
       _uiUpdateTimer?.cancel();
 
       String reasoningContent = '';
@@ -1244,12 +1249,10 @@ class ChatNotifier extends Notifier<ChatState> {
   }
 
   Future<void> cancelStream() async {
-    _invalidateStreamCallbacks();
+    await _detachStreamSubscription();
     _uiUpdateTimer?.cancel();
     _uiUpdateTimer = null;
     _clearPendingApproval();
-    await _streamSubscription?.cancel();
-    _streamSubscription = null;
     ref.read(chatServiceProvider)?.cancelStream();
     ref.read(chatBackgroundServiceProvider).stop();
 
@@ -1487,8 +1490,7 @@ class ChatNotifier extends Notifier<ChatState> {
         : _buildMessagesForApi(selectedModel);
 
     try {
-      _streamSubscription?.cancel();
-      _invalidateStreamCallbacks();
+      await _detachStreamSubscription();
       _uiUpdateTimer?.cancel();
 
       String reasoningContent = '';

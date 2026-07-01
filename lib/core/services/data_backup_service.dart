@@ -281,11 +281,7 @@ class DataBackupService {
           exportSettingsAsJson(settingsJson, store: store, prefs: prefs),
         ),
       );
-    final encoded = ZipEncoder().encode(archive);
-    if (encoded == null) {
-      throw StateError('Failed to encode backup ZIP');
-    }
-    return encoded;
+    return ZipEncoder().encode(archive);
   }
 
   String exportAllAsJson(Store store, {SharedPreferences? prefs}) {

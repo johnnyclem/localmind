@@ -14,13 +14,8 @@ class MessageSearchService {
     final normalizedQuery = query.trim().toLowerCase();
     if (normalizedQuery.isEmpty) return const [];
 
-    final conversations = db.conversationBox.getAll();
-    final titleById = {
-      for (final conversation in conversations)
-        conversation.id: conversation.title,
-    };
-
     final hits = <MessageSearchHit>[];
+    final conversationIds = <String>{};
     final messageQuery = db.messageBox
         .query(
           MessageEntity_.content.contains(
@@ -35,7 +30,6 @@ class MessageSearchService {
     for (final entity in messages) {
       if (!entity.content.toLowerCase().contains(normalizedQuery)) continue;
 
-      final title = titleById[entity.conversationUid] ?? 'Chat';
       final content = entity.content;
       final index = content.toLowerCase().indexOf(normalizedQuery);
       final start = index > 40 ? index - 40 : 0;
@@ -44,17 +38,47 @@ class MessageSearchService {
       if (start > 0) snippet = '…$snippet';
       if (end < content.length) snippet = '$snippet…';
 
+      conversationIds.add(entity.conversationUid);
       hits.add(
         MessageSearchHit(
           messageId: entity.id,
           conversationId: entity.conversationUid,
-          conversationTitle: title,
+          conversationTitle: 'Chat',
           snippet: snippet,
           role: MessageRole.values[entity.roleIndex],
         ),
       );
       if (hits.length >= limit) break;
     }
-    return hits;
+
+    if (hits.isEmpty) return hits;
+
+    final titleById = _loadConversationTitles(db, conversationIds);
+    return hits
+        .map(
+          (hit) => MessageSearchHit(
+            messageId: hit.messageId,
+            conversationId: hit.conversationId,
+            conversationTitle: titleById[hit.conversationId] ?? 'Chat',
+            snippet: hit.snippet,
+            role: hit.role,
+          ),
+        )
+        .toList();
+  }
+
+  Map<String, String> _loadConversationTitles(
+    ObjectBoxStore db,
+    Set<String> conversationIds,
+  ) {
+    if (conversationIds.isEmpty) return const {};
+
+    final query = db.conversationBox
+        .query(ConversationEntity_.id.oneOf(conversationIds.toList(growable: false)))
+        .build();
+    final entities = query.find();
+    query.close();
+
+    return {for (final entity in entities) entity.id: entity.title};
   }
 }
