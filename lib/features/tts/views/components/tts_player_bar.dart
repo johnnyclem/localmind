@@ -94,7 +94,11 @@ class TtsPlayerBar extends ConsumerWidget {
       }
     });
 
-    if ((!ttsState.isSpeaking && !ttsState.isInitializing) || ttsState.isPreview) {
+    final isActivePlayback =
+        ttsState.isSpeaking ||
+        ttsState.isInitializing ||
+        (ttsState.isPaused && ttsState.playingContent != null);
+    if (!isActivePlayback || ttsState.isPreview) {
       return const SizedBox.shrink();
     }
 

@@ -1005,6 +1005,21 @@ class ChatNotifier extends Notifier<ChatState> {
     return _truncateToContextWindow(messages, contextLength);
   }
 
+  List<Message> _buildMessagesForContinue(
+    ModelInfo? selectedModel,
+    Message assistantMessage,
+  ) {
+    final messages = _buildMessagesForApi(selectedModel);
+    if (messages.isEmpty) return messages;
+    if (messages.last.role != MessageRole.assistant) return messages;
+
+    messages[messages.length - 1] = assistantMessage.copyWith(
+      status: MessageStatus.complete,
+      isProcessing: false,
+    );
+    return messages;
+  }
+
   String? _getPersonaSystemPrompt() {
     final conversation = ref.read(conv.activeConversationProvider);
     final personaId = conversation?.personaId;
@@ -1451,7 +1466,9 @@ class ChatNotifier extends Notifier<ChatState> {
     final chatService = ref.read(chatServiceProvider);
     if (server == null || chatService == null) return;
 
-    final messagesForApi = _buildMessagesForApi(selectedModel);
+    final messagesForApi = continueGeneration
+        ? _buildMessagesForContinue(selectedModel, assistantMessage)
+        : _buildMessagesForApi(selectedModel);
 
     try {
       _streamSubscription?.cancel();
@@ -1460,6 +1477,7 @@ class ChatNotifier extends Notifier<ChatState> {
       String reasoningContent = '';
       var streamingAssistantMessage = assistantMessage;
       _latestStreamingMessage = streamingAssistantMessage;
+      var isFirstContinueChunk = continueGeneration;
 
       final mcpConfig = ref.read(chatMcpConfigProvider);
       final integrations =
@@ -1507,11 +1525,21 @@ class ChatNotifier extends Notifier<ChatState> {
                   if (response.content?.isNotEmpty ?? false) {
                     _noteFirstToken();
                   }
+                  var delta = response.content ?? '';
+                  if (isFirstContinueChunk && delta.isNotEmpty) {
+                    isFirstContinueChunk = false;
+                    final existing = streamingAssistantMessage.content;
+                    if (existing.isNotEmpty &&
+                        !RegExp(r'[\s\p{P}]$', unicode: true)
+                            .hasMatch(existing) &&
+                        !RegExp(r'^[\s\p{P}]', unicode: true)
+                            .hasMatch(delta)) {
+                      delta = ' $delta';
+                    }
+                  }
                   streamingAssistantMessage = streamingAssistantMessage
                       .copyWith(
-                        content:
-                            streamingAssistantMessage.content +
-                            (response.content ?? ''),
+                        content: streamingAssistantMessage.content + delta,
                         isProcessing: false,
                       );
                   _latestStreamingMessage = streamingAssistantMessage;
@@ -1773,6 +1801,76 @@ class ChatNotifier extends Notifier<ChatState> {
       threadOrder: userMessage.threadOrder + 1,
       variantIndex: 0,
     );
+  }
+
+  Future<void> generateAiUserMessage() async {
+    if (state.isStreaming) return;
+    if (state.messages.isEmpty) return;
+
+    final server = ref.read(activeServerProvider);
+    final selectedModel = ref.read(selectedModelProvider);
+    final chatService = ref.read(chatServiceProvider);
+    if (server == null || chatService == null || selectedModel == null) return;
+
+    final generated = await ref.read(smartReplyServiceProvider).generateUserMessage(
+          chatService: chatService,
+          server: server,
+          modelId: selectedModel.id,
+          messages: state.messages,
+          params: ref.read(chatParamsProvider),
+        );
+
+    if (generated == null || generated.trim().isEmpty) return;
+    await sendMessage(generated.trim());
+  }
+
+  Future<void> saveTemporaryChatToHistory() async {
+    if (!state.isTemporary || state.messages.isEmpty) return;
+
+    final server = ref.read(activeServerProvider);
+    if (server == null) return;
+
+    final settings = ref.read(settingsProvider);
+    final firstUser = state.messages
+        .where((m) => m.role == MessageRole.user)
+        .map((m) => m.content.trim())
+        .firstWhere((c) => c.isNotEmpty, orElse: () => '');
+
+    final title = settings.autoGenerateTitle
+        ? 'New Chat'
+        : ref
+            .read(titleGenerationServiceProvider)
+            .truncateFirstMessageTitle(
+              firstUser.isNotEmpty ? firstUser : 'New Chat',
+            );
+
+    final conversation = await ref
+        .read(conv.conversationsProvider.notifier)
+        .createConversation(
+          title: title,
+          serverId: server.id,
+          modelId: ref.read(selectedModelProvider)?.id,
+          personaId: ref.read(selectedPersonaProvider)?.id,
+          systemPrompt: ref.read(selectedPersonaProvider)?.systemPrompt,
+          mcpEnabled: settings.newChatMcpEnabled,
+          isTemporary: false,
+        );
+
+    _currentConversationId = conversation.id;
+    _ephemeralConversationId = null;
+    state = state.copyWith(isTemporary: false);
+    ref
+        .read(conv.activeConversationProvider.notifier)
+        .setActiveConversation(conversation);
+
+    final updatedAll = state.allMessages
+        .map((m) => m.copyWith(conversationId: conversation.id))
+        .toList();
+    _setAllMessages(updatedAll);
+
+    for (final message in updatedAll) {
+      await _saveMessage(message);
+    }
   }
 
   Future<void> editMessage(String messageId, String newContent) async {

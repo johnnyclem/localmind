@@ -470,6 +470,12 @@ class AppLocalizationsEs extends AppLocalizations {
   String get enable_smart_reply => 'Respuestas inteligentes locales';
 
   @override
+  String get ai_user_response_enabled => 'AI user message button';
+
+  @override
+  String get ai_user_response_tooltip => 'Generate user message with AI';
+
+  @override
   String get streaming_responses => 'Respuestas en tiempo real (streaming)';
 
   @override

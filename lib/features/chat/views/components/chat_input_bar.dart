@@ -24,10 +24,11 @@ import 'package:permission_handler/permission_handler.dart';
 
 import '../../../../core/models/enums.dart';
 
+import '../../../../core/providers/app_providers.dart';
 import '../../../servers/providers/server_providers.dart';
 
 import '../../../stt/providers/stt_providers.dart';
-
+import '../../providers/chat_providers.dart';
 import '../../../saved_messages/views/components/saved_message_picker_sheet.dart';
 
 
@@ -85,6 +86,8 @@ class ChatInputBarState extends ConsumerState<ChatInputBar>
   late final FocusNode _focusNode;
 
   final List<File> _attachedFiles = [];
+
+  bool _isGeneratingAiUser = false;
 
   late AnimationController _sendButtonAnimController;
 
@@ -572,6 +575,43 @@ class ChatInputBarState extends ConsumerState<ChatInputBar>
 
 
 
+  Future<void> _handleGenerateAiUser() async {
+    if (_isGeneratingAiUser || widget.isStreaming || !widget.enabled) return;
+    setState(() => _isGeneratingAiUser = true);
+    try {
+      await ref.read(chatProvider.notifier).generateAiUserMessage();
+    } finally {
+      if (mounted) setState(() => _isGeneratingAiUser = false);
+    }
+  }
+
+  Widget _buildAiUserButton(bool isConnected, ThemeData theme) {
+    final l10n = AppLocalizations.of(context)!;
+    final enabled = isConnected && widget.enabled && !widget.isStreaming;
+
+    return IconButton(
+      visualDensity: VisualDensity.compact,
+      padding: const EdgeInsets.all(8),
+      constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+      tooltip: l10n.ai_user_response_tooltip,
+      onPressed: enabled && !_isGeneratingAiUser ? _handleGenerateAiUser : null,
+      icon: _isGeneratingAiUser
+          ? SizedBox(
+              width: 18,
+              height: 18,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: theme.colorScheme.primary,
+              ),
+            )
+          : Icon(
+              Icons.person_outline,
+              size: 22,
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+            ),
+    );
+  }
+
   Widget _buildActionButton(bool canSend, ThemeData theme) {
 
     final l10n = AppLocalizations.of(context)!;
@@ -753,6 +793,7 @@ class ChatInputBarState extends ConsumerState<ChatInputBar>
     final connectionStatus = ref.watch(connectionStatusProvider);
 
     final isConnected = connectionStatus == ConnectionStatus.connected;
+    final showAiUserButton = ref.watch(settingsProvider).aiUserResponseEnabled;
 
 
 
@@ -1087,6 +1128,11 @@ class ChatInputBarState extends ConsumerState<ChatInputBar>
                 _buildMicButton(isListening, theme),
 
                 const SizedBox(width: 6),
+
+                if (showAiUserButton) ...[
+                  _buildAiUserButton(isConnected, theme),
+                  const SizedBox(width: 6),
+                ],
 
                 _buildActionButton(canSend, theme),
 

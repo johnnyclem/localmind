@@ -660,6 +660,14 @@
   "@enable_smart_reply": {
     "description": "Toggle for on-device smart reply suggestions"
   },
+  "ai_user_response_enabled": "AI user message button",
+  "@ai_user_response_enabled": {
+    "description": "Settings toggle for AI-generated user message button in chat input"
+  },
+  "ai_user_response_tooltip": "Generate user message with AI",
+  "@ai_user_response_tooltip": {
+    "description": "Tooltip for the AI user message button next to send"
+  },
   "streaming_responses": "Streaming Responses",
   "@streaming_responses": {
     "description": "Toggle for streaming responses"

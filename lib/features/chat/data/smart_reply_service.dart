@@ -101,6 +101,92 @@ class SmartReplyService {
     }
   }
 
+  Future<String?> generateUserMessage({
+    required ChatService chatService,
+    required Server server,
+    required String modelId,
+    required List<Message> messages,
+    required ChatParameters params,
+  }) async {
+    if (messages.isEmpty) return null;
+
+    final promptMessage = Message(
+      id: 'ai-user-response-prompt',
+      conversationId: messages.last.conversationId,
+      role: MessageRole.user,
+      content:
+          'Based on the conversation above, write the next user message that a human would naturally send. '
+          'Return ONLY the raw message text with no quotes, labels, markdown, or explanation.',
+      createdAt: DateTime.now(),
+    );
+
+    final suggestionParams = params.copyWith(
+      temperature: 0.7,
+      maxTokens: 256,
+      systemPrompt:
+          'You write realistic user messages for chat conversations. Output only the user message text.',
+    );
+
+    try {
+      final completer = Completer<String>();
+      var accumulatedContent = '';
+
+      final stream = chatService.sendMessage(
+        server: server,
+        modelId: modelId,
+        messages: [...messages, promptMessage],
+        params: suggestionParams,
+      );
+
+      StreamSubscription? subscription;
+      subscription = stream.listen(
+        (response) {
+          if (response.type == ChatResponseType.message &&
+              response.content != null) {
+            accumulatedContent += response.content!;
+          } else if (response.type == ChatResponseType.done) {
+            subscription?.cancel();
+            if (!completer.isCompleted) {
+              completer.complete(accumulatedContent);
+            }
+          } else if (response.type == ChatResponseType.error) {
+            subscription?.cancel();
+            if (!completer.isCompleted) {
+              completer.completeError(response.content ?? 'Unknown error');
+            }
+          }
+        },
+        onError: (err) {
+          subscription?.cancel();
+          if (!completer.isCompleted) completer.completeError(err);
+        },
+        onDone: () {
+          subscription?.cancel();
+          if (!completer.isCompleted) completer.complete(accumulatedContent);
+        },
+        cancelOnError: true,
+      );
+
+      final rawResponse = await completer.future.timeout(
+        const Duration(seconds: 20),
+        onTimeout: () {
+          subscription?.cancel();
+          return accumulatedContent;
+        },
+      );
+
+      final cleaned = rawResponse.trim();
+      if (cleaned.isEmpty) return null;
+      if (cleaned.startsWith('"') && cleaned.endsWith('"')) {
+        return cleaned.substring(1, cleaned.length - 1).trim();
+      }
+      return cleaned;
+    } catch (e) {
+      Log.warning('AI user message generation failed: $e');
+      return null;
+    }
+  }
+
   List<String> _parseSuggestions(String text) {
     final cleaned = text.trim();
 

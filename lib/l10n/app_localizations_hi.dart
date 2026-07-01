@@ -471,6 +471,12 @@ class AppLocalizationsHi extends AppLocalizations {
   String get enable_smart_reply => 'ऑन-डिवाइस स्मार्ट रिप्लाइ';
 
   @override
+  String get ai_user_response_enabled => 'AI user message button';
+
+  @override
+  String get ai_user_response_tooltip => 'Generate user message with AI';
+
+  @override
   String get streaming_responses => 'प्रतिक्रियाएं स्ट्रीम करें';
 
   @override

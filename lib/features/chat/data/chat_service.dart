@@ -161,7 +161,28 @@ class LMStudioChatService implements ChatService {
   }) async* {
     _cancelToken = CancelToken();
 
-    final formattedInput = await _formatInputWithImages(messages);
+    final dynamic formattedInput;
+    if (continueGeneration &&
+        messages.isNotEmpty &&
+        messages.last.role == MessageRole.assistant) {
+      final assistantText = messages.last.content.trim();
+      final priorMessages = messages.sublist(0, messages.length - 1);
+      formattedInput = await _formatInputWithImages(priorMessages);
+      if (assistantText.isNotEmpty) {
+        formattedInput.add({
+          'type': 'text',
+          'content':
+              'Continue your previous assistant reply from exactly where it stopped. '
+              'Write ONLY the next part of the assistant reply. '
+              'Do not repeat earlier text, do not write a user message, '
+              'and do not restart the reply.\n\n'
+              'Assistant reply so far:\n<<<\n$assistantText\n>>>\n\n'
+              'Continuation:',
+        });
+      }
+    } else {
+      formattedInput = await _formatInputWithImages(messages);
+    }
 
     final body = <String, dynamic>{
       'model': modelId,
@@ -504,6 +525,11 @@ class OpenAICompatibleChatService implements ChatService {
                   (apiMessages.last['content'] as String).isEmpty))) {
         apiMessages.removeLast();
       }
+    } else if (apiMessages.isNotEmpty &&
+        apiMessages.last['role'] == 'assistant') {
+      // Keep the assistant prefill for continuation; ensure content is a string.
+      final last = apiMessages.last;
+      last['content'] = (last['content'] as String?) ?? '';
     }
 
     final body = {

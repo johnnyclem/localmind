@@ -977,6 +977,18 @@ abstract class AppLocalizations {
   /// **'On-Device Smart Replies'**
   String get enable_smart_reply;
 
+  /// Settings toggle for AI-generated user message button in chat input
+  ///
+  /// In en, this message translates to:
+  /// **'AI user message button'**
+  String get ai_user_response_enabled;
+
+  /// Tooltip for the AI user message button next to send
+  ///
+  /// In en, this message translates to:
+  /// **'Generate user message with AI'**
+  String get ai_user_response_tooltip;
+
   /// Toggle for streaming responses
   ///
   /// In en, this message translates to:

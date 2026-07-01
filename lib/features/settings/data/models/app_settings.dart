@@ -40,6 +40,7 @@ class AppSettings {
   final bool ttsProcessMarkdown;
   final int ttsSkipSeconds;
   final bool smartReplyEnabled;
+  final bool aiUserResponseEnabled;
   final String? localeCode;
   final String? huggingFaceToken;
   final bool unloadModelsBeforeLoad;
@@ -74,6 +75,7 @@ class AppSettings {
     this.ttsProcessMarkdown = true,
     this.ttsSkipSeconds = 10,
     this.smartReplyEnabled = true,
+    this.aiUserResponseEnabled = false,
     this.localeCode,
     this.huggingFaceToken,
     this.unloadModelsBeforeLoad = false,
@@ -109,6 +111,7 @@ class AppSettings {
     bool? ttsProcessMarkdown,
     int? ttsSkipSeconds,
     bool? smartReplyEnabled,
+    bool? aiUserResponseEnabled,
     Object? localeCode = _unset,
     Object? huggingFaceToken = _unset,
     bool? unloadModelsBeforeLoad,
@@ -149,6 +152,8 @@ class AppSettings {
       ttsProcessMarkdown: ttsProcessMarkdown ?? this.ttsProcessMarkdown,
       ttsSkipSeconds: ttsSkipSeconds ?? this.ttsSkipSeconds,
       smartReplyEnabled: smartReplyEnabled ?? this.smartReplyEnabled,
+      aiUserResponseEnabled:
+          aiUserResponseEnabled ?? this.aiUserResponseEnabled,
       localeCode: identical(localeCode, _unset)
           ? this.localeCode
           : localeCode as String?,
@@ -191,6 +196,7 @@ class AppSettings {
       'ttsProcessMarkdown': ttsProcessMarkdown,
       'ttsSkipSeconds': ttsSkipSeconds,
       'smartReplyEnabled': smartReplyEnabled,
+      'aiUserResponseEnabled': aiUserResponseEnabled,
       'localeCode': localeCode,
       'huggingFaceToken': huggingFaceToken,
       'unloadModelsBeforeLoad': unloadModelsBeforeLoad,
@@ -228,6 +234,7 @@ class AppSettings {
       ttsProcessMarkdown: map['ttsProcessMarkdown'] ?? true,
       ttsSkipSeconds: _parseTtsSkipSeconds(map['ttsSkipSeconds']),
       smartReplyEnabled: map['smartReplyEnabled'] ?? true,
+      aiUserResponseEnabled: map['aiUserResponseEnabled'] ?? false,
       localeCode: map['localeCode'] as String?,
       huggingFaceToken: map['huggingFaceToken'] as String?,
       unloadModelsBeforeLoad: map['unloadModelsBeforeLoad'] ?? false,

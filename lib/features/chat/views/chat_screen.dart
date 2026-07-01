@@ -1,5 +1,7 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -11,16 +13,19 @@ import 'package:localmind/core/providers/app_providers.dart';
 import 'package:localmind/core/routes/app_routes.dart';
 import 'package:localmind/core/utils/system_insets.dart';
 import 'package:localmind/l10n/app_localizations.dart';
+import 'package:localmind/core/providers/storage_providers.dart';
+import 'package:localmind/core/services/data_backup_service.dart';
+import 'package:localmind/core/services/share_service.dart';
+import 'package:localmind/features/conversations/data/models/conversation.dart';
 import 'package:localmind/features/conversations/providers/conversation_providers.dart'
     as conv;
+import 'package:localmind/features/conversations/views/components/rename_conversation_dialog.dart';
 import 'package:localmind/features/models/screens/model_picker_sheet.dart';
 import 'package:localmind/features/personas/providers/personas_providers.dart';
 import 'package:localmind/features/servers/providers/server_providers.dart';
-import 'package:localmind/features/servers/data/models/server.dart';
-import 'package:localmind/features/servers/views/components/server_icon_picker.dart';
-import 'package:localmind/core/services/share_service.dart';
 import 'package:localmind/features/saved_messages/views/components/save_message_sheet.dart';
 import 'package:localmind/features/tts/views/components/tts_player_bar.dart';
+import '../data/export_service.dart';
 import '../data/models/message.dart';
 import '../providers/chat_mcp_providers.dart';
 import '../providers/chat_providers.dart';
@@ -116,6 +121,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
     switch (action) {
       case 'new_chat':
         ref.read(chatProvider.notifier).startNewConversation();
+      case 'share_chat':
+        _shareConversation(context);
       case 'persona':
         _showPersonaPicker(context);
       case 'remove_persona':
@@ -125,6 +132,13 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
               .read(conv.conversationsProvider.notifier)
               .updatePersona(activeConv.id, null, null);
         }
+      case 'rename':
+        final activeConv = ref.read(conv.activeConversationProvider);
+        if (activeConv != null) {
+          _showRenameDialog(context, activeConv);
+        }
+      case 'export_chat':
+        _exportConversation(context);
       case 'clear':
         showDialog(
           context: context,
@@ -254,6 +268,72 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
     );
   }
 
+  Future<void> _shareConversation(BuildContext context) async {
+    final messages = ref.read(chatProvider).messages;
+    if (messages.isEmpty) return;
+    final activeConv = ref.read(conv.activeConversationProvider);
+    final isTemporary = ref.read(chatProvider.select((s) => s.isTemporary));
+    final title = isTemporary
+        ? AppLocalizations.of(context)!.temporary_chat
+        : activeConv?.title;
+    final text = ExportService.exportAsText(messages, title: title);
+    await ShareService.shareText(text, subject: title);
+  }
+
+  Future<void> _exportConversation(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
+    final messages = ref.read(chatProvider).messages;
+    if (messages.isEmpty) return;
+
+    final activeConv = ref.read(conv.activeConversationProvider);
+    final isTemporary = ref.read(chatProvider.select((s) => s.isTemporary));
+    final title = isTemporary
+        ? l10n.temporary_chat
+        : activeConv?.title;
+
+    if (activeConv != null && !isTemporary) {
+      final db = ref.read(databaseProvider);
+      final json = DataBackupService()
+          .exportConversationAsJson(db.store, activeConv.id);
+      final saved = await FilePicker.saveFile(
+        dialogTitle: l10n.export_conversation,
+        fileName:
+            'localmind_${activeConv.title.replaceAll(RegExp(r'[^\w\-]+'), '_')}_${DateTime.now().millisecondsSinceEpoch}.json',
+        type: FileType.custom,
+        allowedExtensions: const ['json'],
+        bytes: Uint8List.fromList(utf8.encode(json)),
+      );
+      if (saved != null && context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.export_data_success)),
+        );
+      }
+      return;
+    }
+
+    final markdown = await ExportService.exportAsMarkdown(
+      messages,
+      title: title,
+    );
+    final saved = await FilePicker.saveFile(
+      dialogTitle: l10n.export_conversation,
+      fileName:
+          'localmind_${(title ?? 'chat').replaceAll(RegExp(r'[^\w\-]+'), '_')}_${DateTime.now().millisecondsSinceEpoch}.md',
+      type: FileType.custom,
+      allowedExtensions: const ['md'],
+      bytes: Uint8List.fromList(utf8.encode(markdown)),
+    );
+    if (saved != null && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.export_data_success)),
+      );
+    }
+  }
+
+  void _showRenameDialog(BuildContext context, Conversation conversation) {
+    showRenameConversationDialog(context, ref, conversation: conversation);
+  }
+
   void _showToolApprovalDialog(
     BuildContext context,
     PendingToolApproval approval,
@@ -337,8 +417,8 @@ class _ChatBody extends ConsumerWidget {
     final errorMessage = ref.watch(chatProvider.select((s) => s.errorMessage));
     final selectedModel = ref.watch(selectedModelProvider);
     final connectionStatus = ref.watch(connectionStatusProvider);
-    final activeServer = ref.watch(activeServerProvider);
     final activeConversation = ref.watch(conv.activeConversationProvider);
+    final isTemporary = ref.watch(chatProvider.select((s) => s.isTemporary));
     final personaId = activeConversation?.personaId;
     final persona = personaId != null
         ? ref.watch(personaByIdProvider(personaId))
@@ -365,12 +445,19 @@ class _ChatBody extends ConsumerWidget {
       children: [
         ModelTopBar(selectedModel: selectedModel, onModelTap: onModelPicker),
         _ScreenAppBar(
-          activeServer: activeServer,
-          connectionStatus: connectionStatus,
+          activeConversation: activeConversation,
           isDark: isDark,
           persona: persona,
+          isTemporary: isTemporary,
+          hasMessages: messages.isNotEmpty,
           onMenuAction: onMenuAction,
           onPersonaPicker: () => _openPersonaPicker(context, ref),
+          onChatModeAction: () => _handleChatModeAction(
+            context,
+            ref,
+            hasMessages: messages.isNotEmpty,
+            isTemporary: isTemporary,
+          ),
         ),
         const NotificationPermissionBanner(),
         if (connectionStatus == ConnectionStatus.disconnected ||
@@ -391,9 +478,23 @@ class _ChatBody extends ConsumerWidget {
           ),
         const TtsPlayerBar(),
         Expanded(
-          child: Stack(
-            children: [
-              _MessageArea(
+          child: DecoratedBox(
+            decoration: isTemporary
+                ? BoxDecoration(
+                    color: isDark
+                        ? const Color(0xFF15120C)
+                        : const Color(0xFFFFFBF0),
+                    border: Border.all(
+                      color: isDark
+                          ? const Color(0xFF6B5A2E)
+                          : const Color(0xFFE6C35C),
+                      width: 2,
+                    ),
+                  )
+                : const BoxDecoration(),
+            child: Stack(
+              children: [
+                _MessageArea(
                 isLoading: isLoading,
                 messages: messages,
                 activeConversation: activeConversation,
@@ -412,6 +513,7 @@ class _ChatBody extends ConsumerWidget {
               ),
             ],
           ),
+        ),
         ),
       ],
     );
@@ -740,22 +842,66 @@ void _openPersonaPickerForPreselection(BuildContext context, WidgetRef ref) {
   ).then((_) {});
 }
 
+void _handleChatModeAction(
+  BuildContext context,
+  WidgetRef ref, {
+  required bool hasMessages,
+  required bool isTemporary,
+}) {
+  final l10n = AppLocalizations.of(context)!;
+
+  if (!hasMessages) {
+    ref.read(chatProvider.notifier).setTemporaryMode(!isTemporary);
+    return;
+  }
+
+  if (isTemporary) {
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.exit_temporary_chat_title),
+        content: Text(l10n.exit_temporary_chat_body),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              ref.read(chatProvider.notifier).startNewConversation();
+            },
+            child: Text(l10n.nav_new_chat),
+          ),
+        ],
+      ),
+    );
+    return;
+  }
+
+  ref.read(chatProvider.notifier).startNewConversation();
+}
+
 class _ScreenAppBar extends ConsumerWidget {
   const _ScreenAppBar({
-    required this.activeServer,
-    required this.connectionStatus,
+    required this.activeConversation,
     required this.isDark,
     required this.persona,
+    required this.isTemporary,
+    required this.hasMessages,
     required this.onMenuAction,
     required this.onPersonaPicker,
+    required this.onChatModeAction,
   });
 
-  final dynamic activeServer;
-  final ConnectionStatus connectionStatus;
+  final Conversation? activeConversation;
   final bool isDark;
   final dynamic persona;
+  final bool isTemporary;
+  final bool hasMessages;
   final void Function(String) onMenuAction;
   final VoidCallback onPersonaPicker;
+  final VoidCallback onChatModeAction;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -782,31 +928,13 @@ class _ScreenAppBar extends ConsumerWidget {
           ),
           const SizedBox(width: 8),
           Expanded(
-            child: Row(
-              children: [
-                if (activeServer != null) ...[
-                  _buildServerIcon(context, activeServer as Server?),
-                  const SizedBox(width: 8),
-                ],
-                Text(
-                  activeServer?.name ?? l10n.chat_title,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Container(
-                  width: 8,
-                  height: 8,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: connectionStatus == ConnectionStatus.connected
-                        ? Colors.green
-                        : Colors.grey,
-                  ),
-                ),
-              ],
+            child: Text(
+              _appBarTitle(l10n),
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+              overflow: TextOverflow.ellipsis,
             ),
           ),
           Stack(
@@ -839,6 +967,12 @@ class _ScreenAppBar extends ConsumerWidget {
               ),
             ],
           ),
+          _ChatModeIconButton(
+            hasMessages: hasMessages,
+            isTemporary: isTemporary,
+            isDark: isDark,
+            onPressed: onChatModeAction,
+          ),
           PopupMenuButton<String>(
             icon: const Icon(Icons.more_vert),
             onSelected: onMenuAction,
@@ -851,6 +985,33 @@ class _ScreenAppBar extends ConsumerWidget {
                   contentPadding: EdgeInsets.zero,
                 ),
               ),
+              if (activeConversation != null && !isTemporary)
+                PopupMenuItem(
+                  value: 'rename',
+                  child: ListTile(
+                    leading: const Icon(Icons.drive_file_rename_outline),
+                    title: Text(l10n.rename_conversation),
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                ),
+              if (hasMessages) ...[
+                PopupMenuItem(
+                  value: 'export_chat',
+                  child: ListTile(
+                    leading: const Icon(Icons.upload_outlined),
+                    title: Text(l10n.export_conversation),
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                ),
+                PopupMenuItem(
+                  value: 'share_chat',
+                  child: ListTile(
+                    leading: const Icon(Icons.share_outlined),
+                    title: Text(l10n.share_conversation),
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                ),
+              ],
               PopupMenuItem(
                 value: 'persona',
                 child: ListTile(
@@ -888,22 +1049,77 @@ class _ScreenAppBar extends ConsumerWidget {
       ),
     );
   }
+
+  String _appBarTitle(AppLocalizations l10n) {
+    if (isTemporary) return l10n.temporary_chat;
+    if (activeConversation?.title.isNotEmpty == true) {
+      return activeConversation!.title;
+    }
+    return l10n.nav_new_chat;
+  }
 }
 
-Widget _buildServerIcon(BuildContext context, Server? server) {
-  if (server == null) return const SizedBox.shrink();
+class _ChatModeIconButton extends StatelessWidget {
+  const _ChatModeIconButton({
+    required this.hasMessages,
+    required this.isTemporary,
+    required this.isDark,
+    required this.onPressed,
+  });
 
-  final iconData = server.iconName != null
-      ? getHugeIconByName(server.iconName)
-      : getDefaultServerIcon(server.type.name);
+  final bool hasMessages;
+  final bool isTemporary;
+  final bool isDark;
+  final VoidCallback onPressed;
 
-  if (iconData == null) return const Icon(Icons.dns, size: 18);
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final showGhost = !hasMessages || isTemporary;
+    final ghostActive = isTemporary;
 
-  return HugeIcon(
-    icon: iconData.icon,
-    size: 18,
-    color: Theme.of(context).colorScheme.primary,
-  );
+    if (showGhost) {
+      final activeColor =
+          isDark ? const Color(0xFFE6C35C) : const Color(0xFF9A7B1A);
+      final inactiveColor =
+          isDark ? Colors.white54 : Colors.black45;
+
+      return IconButton(
+        onPressed: onPressed,
+        tooltip: ghostActive
+            ? l10n.exit_temporary_chat_title
+            : l10n.temporary_chat,
+        icon: ghostActive
+            ? Container(
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: activeColor.withValues(alpha: 0.25),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  LucideIcons.ghost,
+                  size: 20,
+                  color: activeColor,
+                ),
+              )
+            : Icon(
+                LucideIcons.ghost,
+                size: 22,
+                color: inactiveColor,
+              ),
+      );
+    }
+
+    return IconButton(
+      onPressed: onPressed,
+      tooltip: l10n.nav_new_chat,
+      icon: Icon(
+        Icons.add_comment_outlined,
+        size: 22,
+        color: isDark ? Colors.white70 : Colors.black87,
+      ),
+    );
+  }
 }
 
 class _ChatBottomBar extends ConsumerWidget {

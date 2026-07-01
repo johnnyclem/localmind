@@ -855,7 +855,9 @@ class TtsNotifier extends Notifier<TtsState> {
       return;
     }
 
+    _isStopping = true;
     await _flutterTts!.stop();
+    _isStopping = false;
     _systemSkippedOffset = Duration(
       milliseconds: (start / cps * 1000).round(),
     );
@@ -864,6 +866,7 @@ class TtsNotifier extends Notifier<TtsState> {
     await _flutterTts!.setSpeechRate(
       (settings.ttsSpeed * 0.5).clamp(0.0, 1.0),
     );
+    state = state.copyWith(isSpeaking: true, canSeek: true);
     await _flutterTts!.speak(remainder);
     _updatePlaybackProgress();
   }

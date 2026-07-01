@@ -471,6 +471,12 @@ class AppLocalizationsBn extends AppLocalizations {
   String get enable_smart_reply => 'অন-ডিভাইস স্মার্ট রিপ্লাই';
 
   @override
+  String get ai_user_response_enabled => 'AI user message button';
+
+  @override
+  String get ai_user_response_tooltip => 'Generate user message with AI';
+
+  @override
   String get streaming_responses => 'স্ট্রিমিং প্রতিক্রিয়া';
 
   @override

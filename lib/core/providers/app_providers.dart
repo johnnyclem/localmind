@@ -104,6 +104,8 @@ class SettingsNotifier extends Notifier<AppSettings> {
       _update(state.copyWith(ttsSkipSeconds: value));
   void setSmartReplyEnabled(bool value) =>
       _update(state.copyWith(smartReplyEnabled: value));
+  void setAiUserResponseEnabled(bool value) =>
+      _update(state.copyWith(aiUserResponseEnabled: value));
   void setLocaleCode(String? value) =>
       _update(state.copyWith(localeCode: value));
   void setHuggingFaceToken(String? value) =>

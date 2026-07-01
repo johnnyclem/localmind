@@ -236,6 +236,14 @@ class SettingsViews extends ConsumerWidget {
                         .read(settingsProvider.notifier)
                         .setSmartReplyEnabled(value),
                   ),
+                  _ToggleSetting(
+                    label: l10n.ai_user_response_enabled,
+                    value: settings.aiUserResponseEnabled,
+                    badges: [_FeatureBadge(label: l10n.experimental_label)],
+                    onChanged: (value) => ref
+                        .read(settingsProvider.notifier)
+                        .setAiUserResponseEnabled(value),
+                  ),
                   _HuggingFaceTokenSetting(
                     currentToken: settings.huggingFaceToken,
                     onSave: (value) {
