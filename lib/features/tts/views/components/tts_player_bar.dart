@@ -25,7 +25,8 @@ class TtsPlayerBar extends ConsumerWidget {
     return '${content.substring(0, 47)}...';
   }
 
-  String _formatDuration(Duration d) {
+  String _formatDuration(Duration d, {bool unknown = false}) {
+    if (unknown || d <= Duration.zero) return '--:--';
     if (d.inHours > 0) {
       final h = d.inHours.toString();
       final m = d.inMinutes.remainder(60).toString().padLeft(2, '0');
@@ -105,11 +106,17 @@ class TtsPlayerBar extends ConsumerWidget {
     final preview = _truncateContent(ttsState.playingContent);
     final canJumpToMessage = ttsState.playingMessageId != null;
     final skipSeconds = ref.watch(settingsProvider).ttsSkipSeconds;
-    final hasTimeline = ttsState.duration > Duration.zero;
+    final isSystemTts = ttsState.activeEngine == EngineId.system;
+    final hasTimeline =
+        !isSystemTts &&
+        ttsState.duration > Duration.zero &&
+        ttsState.canSeek;
     final progress = hasTimeline
         ? (ttsState.position.inMilliseconds / ttsState.duration.inMilliseconds)
             .clamp(0.0, 1.0)
         : null;
+    final speedLabel =
+        '${ttsState.playbackSpeed.toStringAsFixed(2).replaceAll(RegExp(r'\.?0+$'), '')}x';
 
     return AnimatedSize(
       duration: const Duration(milliseconds: 200),
@@ -206,6 +213,23 @@ class TtsPlayerBar extends ConsumerWidget {
                 const SizedBox(width: 8),
                 if (!ttsState.isInitializing)
                   _WaveformIndicator(isPlaying: !ttsState.isPaused),
+                if (!ttsState.isInitializing)
+                  TextButton(
+                    onPressed: notifier.cyclePlaybackSpeed,
+                    style: TextButton.styleFrom(
+                      minimumSize: Size.zero,
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                    child: Text(
+                      speedLabel,
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: theme.colorScheme.primary,
+                      ),
+                    ),
+                  ),
                 if (!ttsState.isInitializing &&
                     ttsState.activeEngine != EngineId.system)
                   IconButton(
@@ -247,7 +271,7 @@ class TtsPlayerBar extends ConsumerWidget {
                 ),
               ],
             ),
-            if (!ttsState.isInitializing && (ttsState.canSeek || hasTimeline)) ...[
+            if (!ttsState.isInitializing && hasTimeline) ...[
               const SizedBox(height: 8),
               Row(
                 children: [
@@ -255,14 +279,14 @@ class TtsPlayerBar extends ConsumerWidget {
                     icon: const Icon(Icons.fast_rewind_rounded, size: 22),
                     tooltip: '-${skipSeconds}s',
                     visualDensity: VisualDensity.compact,
-                    onPressed: () => notifier.skipBackward(),
+                    onPressed: ttsState.canSeek ? notifier.skipBackward : null,
                   ),
                   Expanded(
                     child: _TtsSeekSlider(
                       progress: progress ?? 0,
                       position: ttsState.position,
                       duration: ttsState.duration,
-                      enabled: hasTimeline && ttsState.canSeek,
+                      enabled: hasTimeline,
                       onSeek: notifier.seekTo,
                       formatDuration: _formatDuration,
                     ),
@@ -271,7 +295,7 @@ class TtsPlayerBar extends ConsumerWidget {
                     icon: const Icon(Icons.fast_forward_rounded, size: 22),
                     tooltip: '+${skipSeconds}s',
                     visualDensity: VisualDensity.compact,
-                    onPressed: () => notifier.skipForward(),
+                    onPressed: ttsState.canSeek ? notifier.skipForward : null,
                   ),
                 ],
               ),
