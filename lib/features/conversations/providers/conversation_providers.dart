@@ -1,9 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/models/enums.dart';
 import '../../../core/providers/storage_providers.dart';
 import '../../../core/storage/entities.dart';
 import '../../../objectbox.g.dart';
+import '../data/message_search_service.dart';
+import '../data/models/message_search_hit.dart';
 import '../data/models/conversation.dart';
 import '../data/models/conversation_folder.dart';
 
@@ -715,22 +716,6 @@ class ConversationFoldersNotifier extends AsyncNotifier<List<ConversationFolder>
   }
 }
 
-class MessageSearchHit {
-  const MessageSearchHit({
-    required this.messageId,
-    required this.conversationId,
-    required this.conversationTitle,
-    required this.snippet,
-    required this.role,
-  });
-
-  final String messageId;
-  final String conversationId;
-  final String conversationTitle;
-  final String snippet;
-  final MessageRole role;
-}
-
 final searchMessageContentsProvider =
     NotifierProvider<SearchMessageContentsNotifier, bool>(() {
       return SearchMessageContentsNotifier();
@@ -773,46 +758,14 @@ class ScrollToMessageNotifier extends Notifier<String?> {
   void clear() => state = null;
 }
 
+const _messageSearchService = MessageSearchService();
+
 final messageSearchResultsProvider = Provider<List<MessageSearchHit>>((ref) {
-  final query = ref.watch(conversationSearchProvider).trim().toLowerCase();
-  if (query.isEmpty || !ref.watch(searchMessageContentsProvider)) {
+  final query = ref.watch(conversationSearchProvider);
+  if (query.trim().isEmpty || !ref.watch(searchMessageContentsProvider)) {
     return const [];
   }
 
   final db = ref.watch(databaseProvider);
-  final conversations = db.conversationBox.getAll();
-  final titleById = {
-    for (final conv in conversations) conv.id: conv.title,
-  };
-
-  final hits = <MessageSearchHit>[];
-  final messageQuery = db.messageBox
-      .query(MessageEntity_.content.contains(query, caseSensitive: false))
-      .build();
-  final messages = messageQuery.find();
-  messageQuery.close();
-
-  for (final entity in messages) {
-    if (!entity.content.toLowerCase().contains(query)) continue;
-    final title = titleById[entity.conversationUid] ?? 'Chat';
-    final content = entity.content;
-    final index = content.toLowerCase().indexOf(query);
-    final start = index > 40 ? index - 40 : 0;
-    final end = (index + query.length + 40).clamp(0, content.length);
-    var snippet = content.substring(start, end);
-    if (start > 0) snippet = '…$snippet';
-    if (end < content.length) snippet = '$snippet…';
-
-    hits.add(
-      MessageSearchHit(
-        messageId: entity.id,
-        conversationId: entity.conversationUid,
-        conversationTitle: title,
-        snippet: snippet,
-        role: MessageRole.values[entity.roleIndex],
-      ),
-    );
-    if (hits.length >= 50) break;
-  }
-  return hits;
+  return _messageSearchService.searchMessages(db, query: query);
 });

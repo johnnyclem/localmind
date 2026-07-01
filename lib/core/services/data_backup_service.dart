@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/enums.dart';
 import '../storage/entities.dart';
+import 'data_backup_import_helpers.dart';
 import '../../features/chat/data/models/message.dart';
 import '../../features/conversations/data/models/conversation.dart';
 import '../../features/personas/data/models/persona.dart';
@@ -310,10 +311,10 @@ class DataBackupService {
       if (personas is List) {
         for (final item in personas) {
           if (item is! Map) continue;
-          final id = _backupString(item['id']);
-          final name = _backupString(item['name']);
-          final createdAt = _backupDateTime(item['createdAt']);
-          final updatedAt = _backupDateTime(item['updatedAt']);
+          final id = backupImportString(item['id']);
+          final name = backupImportString(item['name']);
+          final createdAt = backupImportDateTime(item['createdAt']);
+          final updatedAt = backupImportDateTime(item['updatedAt']);
           if (id == null || name == null || createdAt == null || updatedAt == null) {
             continue;
           }
@@ -345,10 +346,10 @@ class DataBackupService {
       if (servers is List) {
         for (final item in servers) {
           if (item is! Map) continue;
-          final id = _backupString(item['id']);
-          final name = _backupString(item['name']);
-          final createdAt = _backupDateTime(item['createdAt']);
-          final lastConnectedAt = _backupDateTime(item['lastConnectedAt']);
+          final id = backupImportString(item['id']);
+          final name = backupImportString(item['name']);
+          final createdAt = backupImportDateTime(item['createdAt']);
+          final lastConnectedAt = backupImportDateTime(item['lastConnectedAt']);
           if (id == null ||
               name == null ||
               createdAt == null ||
@@ -384,9 +385,9 @@ class DataBackupService {
       if (savedFolders is List) {
         for (final item in savedFolders) {
           if (item is! Map) continue;
-          final id = _backupString(item['id']);
-          final folderName = _backupString(item['name']);
-          final createdAt = _backupDateTime(item['createdAt']);
+          final id = backupImportString(item['id']);
+          final folderName = backupImportString(item['name']);
+          final createdAt = backupImportDateTime(item['createdAt']);
           if (id == null || folderName == null || createdAt == null) continue;
           final entity = SavedMessageFolderEntity(
             id: id,
@@ -408,10 +409,10 @@ class DataBackupService {
       if (savedMessages is List) {
         for (final item in savedMessages) {
           if (item is! Map) continue;
-          final id = _backupString(item['id']);
-          final sourceMessageId = _backupString(item['sourceMessageId']);
-          final conversationId = _backupString(item['conversationId']);
-          final savedAt = _backupDateTime(item['savedAt']);
+          final id = backupImportString(item['id']);
+          final sourceMessageId = backupImportString(item['sourceMessageId']);
+          final conversationId = backupImportString(item['conversationId']);
+          final savedAt = backupImportDateTime(item['savedAt']);
           if (id == null ||
               sourceMessageId == null ||
               conversationId == null ||
@@ -442,9 +443,9 @@ class DataBackupService {
       if (conversations is List) {
         for (final item in conversations) {
           if (item is! Map) continue;
-          final id = _backupString(item['id']);
-          final createdAt = _backupDateTime(item['createdAt']);
-          final updatedAt = _backupDateTime(item['updatedAt']);
+          final id = backupImportString(item['id']);
+          final createdAt = backupImportDateTime(item['createdAt']);
+          final updatedAt = backupImportDateTime(item['updatedAt']);
           if (id == null || createdAt == null || updatedAt == null) continue;
           final conversation = Conversation(
             id: id,
@@ -484,9 +485,9 @@ class DataBackupService {
       if (messages is List) {
         for (final item in messages) {
           if (item is! Map) continue;
-          final conversationId = _backupString(item['conversationId']);
-          final id = _backupString(item['id']);
-          final createdAt = _backupDateTime(item['createdAt']);
+          final conversationId = backupImportString(item['conversationId']);
+          final id = backupImportString(item['id']);
+          final createdAt = backupImportDateTime(item['createdAt']);
           if (conversationId == null || id == null || createdAt == null) {
             continue;
           }
@@ -543,17 +544,5 @@ class DataBackupService {
         await importFromJson(store, utf8.decode(file.content as List<int>));
       }
     }
-  }
-}
-
-String? _backupString(Object? value) => value is String ? value : null;
-
-DateTime? _backupDateTime(Object? value) {
-  final raw = _backupString(value);
-  if (raw == null) return null;
-  try {
-    return DateTime.parse(raw);
-  } catch (_) {
-    return null;
   }
 }

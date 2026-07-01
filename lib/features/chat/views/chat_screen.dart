@@ -41,7 +41,7 @@ import 'components/top_bar/model_top_bar.dart';
 import 'components/top_bar/connection_banner.dart';
 import 'components/top_bar/persona_indicator.dart';
 import 'components/top_bar/smart_reply_chips.dart';
-import 'components/persona_picker_sheet.dart';
+import 'package:localmind/features/personas/views/components/persona_picker_sheet.dart';
 
 class ChatScreen extends ConsumerStatefulWidget {
   const ChatScreen({super.key});
