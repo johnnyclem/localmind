@@ -64,7 +64,8 @@ class ServerApiService {
 
   Future<Set<String>> fetchRunningModels(Server server) async {
     if (server.type == ServerType.openRouter ||
-        server.type == ServerType.openAICompatible) {
+        server.type == ServerType.openAICompatible ||
+        server.type == ServerType.onDevice) {
       return {};
     }
 
@@ -74,10 +75,16 @@ class ServerApiService {
         options: Options(headers: buildServerAuthHeaders(server)),
       );
 
-      if (server.type == ServerType.lmStudio) {
-        return _parseRunningOpenAICompatibleModels(response.data);
+      switch (server.type) {
+        case ServerType.lmStudio:
+          return _parseRunningOpenAICompatibleModels(response.data);
+        case ServerType.ollama:
+          return _parseRunningOllamaModels(response.data);
+        case ServerType.openRouter:
+        case ServerType.openAICompatible:
+        case ServerType.onDevice:
+          return {};
       }
-      return _parseRunningOllamaModels(response.data);
     } catch (e) {
       return {};
     }
