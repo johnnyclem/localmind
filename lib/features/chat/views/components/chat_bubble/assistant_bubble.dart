@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:localmind/l10n/app_localizations.dart';
 import 'package:localmind/core/models/enums.dart';
 import 'package:localmind/core/theme/colors.dart';
 import 'package:localmind/features/chat/data/models/message.dart';
@@ -7,6 +8,7 @@ import 'package:localmind/features/chat/views/components/processing_indicator.da
 import 'package:localmind/features/chat/views/components/typing_indicator.dart';
 import 'package:localmind/features/chat/views/components/reasoning_widget.dart';
 import 'package:localmind/features/chat/views/components/message_action_bar.dart';
+import 'package:localmind/features/chat/views/components/message_variant_navigator.dart';
 import 'markdown/themed_gpt_markdown.dart';
 import 'tool_bubble/tool_timeline.dart';
 
@@ -17,19 +19,39 @@ class AssistantBubble extends StatelessWidget {
     this.onCopy,
     this.onRetry,
     this.onDelete,
+    this.onEdit,
+    this.onBranch,
+    this.onContinue,
+    this.onModelTap,
+    this.onModelLongPress,
+    this.onCycleVariant,
+    this.onSave,
+    this.onShare,
+    this.allMessages = const [],
     this.isStreaming = false,
   });
 
   final Message message;
+  final List<Message> allMessages;
   final VoidCallback? onCopy;
   final VoidCallback? onRetry;
   final VoidCallback? onDelete;
+  final VoidCallback? onEdit;
+  final VoidCallback? onBranch;
+  final VoidCallback? onContinue;
+  final void Function(Message message)? onSave;
+  final VoidCallback? onShare;
+  final VoidCallback? onModelTap;
+  final VoidCallback? onModelLongPress;
+  final void Function(int direction)? onCycleVariant;
   final bool isStreaming;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final muted =
+        isDark ? AppColors.darkMutedText : AppColors.lightMutedText;
 
     return Container(
       width: double.infinity,
@@ -37,6 +59,23 @@ class AssistantBubble extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          if (message.modelId != null &&
+              message.modelId!.isNotEmpty &&
+              !isStreaming)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 6),
+              child: GestureDetector(
+                onLongPress: onModelLongPress,
+                child: Text(
+                  message.modelId!,
+                  style: TextStyle(
+                    fontFamily: 'monospace',
+                    fontSize: 11,
+                    color: muted,
+                  ),
+                ),
+              ),
+            ),
           if (message.reasoningContent != null &&
               message.reasoningContent!.isNotEmpty)
             ReasoningWidget(
@@ -49,6 +88,16 @@ class AssistantBubble extends StatelessWidget {
             const TypingIndicator()
           else if (isStreaming)
             _StreamingContent(content: message.content, isDark: isDark)
+          else if (message.content.isEmpty &&
+              (message.reasoningContent?.isEmpty ?? true))
+            Text(
+              AppLocalizations.of(context)!.no_response,
+              style: TextStyle(
+                fontSize: 14,
+                fontStyle: FontStyle.italic,
+                color: muted,
+              ),
+            )
           else
             MarkdownContent(content: message.content, isDark: isDark),
           if (message.status == MessageStatus.error &&
@@ -83,17 +132,18 @@ class AssistantBubble extends StatelessWidget {
               padding: EdgeInsets.only(top: 8),
               child: _StreamingIndicator(),
             ),
+          if (!isStreaming && onCycleVariant != null)
+            MessageVariantNavigator(
+              message: message,
+              allMessages: allMessages,
+              onCycle: onCycleVariant!,
+            ),
           const SizedBox(height: 8),
           Row(
             children: [
               Text(
                 _formatTime(message.createdAt),
-                style: TextStyle(
-                  fontSize: 11,
-                  color: isDark
-                      ? AppColors.darkMutedText
-                      : AppColors.lightMutedText,
-                ),
+                style: TextStyle(fontSize: 11, color: muted),
               ),
               if (message.status == MessageStatus.error) ...[
                 const SizedBox(width: 4),
@@ -103,12 +153,28 @@ class AssistantBubble extends StatelessWidget {
               if (!isStreaming &&
                   (message.status == MessageStatus.complete ||
                       message.status == MessageStatus.error ||
-                      message.status == MessageStatus.cancelled))
+                      message.status == MessageStatus.cancelled ||
+                      message.content.isEmpty))
                 MessageActionBar(
-                  content: message.content,
+                  content: message.content.isEmpty
+                      ? AppLocalizations.of(context)!.no_response
+                      : message.content,
+                  messageId: message.id,
+                  conversationId: message.conversationId,
+                  tokenCount: message.tokenCount,
+                  inputTokenCount: message.inputTokenCount,
+                  generationTimeMs: message.generationTimeMs,
+                  ttftMs: message.ttftMs,
+                  tokensPerSecond: message.tokensPerSecond,
+                  stopReason: message.stopReason,
                   onCopy: onCopy,
                   onRetry: onRetry,
                   onDelete: onDelete,
+                  onEdit: onEdit,
+                  onBranch: onBranch,
+                  onContinue: onContinue,
+                  onSave: () => onSave?.call(message),
+                  onShare: onShare,
                 ),
             ],
           ),

@@ -1,4 +1,0 @@
-interface:
-  display_name: "Flutter Feature Architecture"
-  short_description: "Handwritten componentized Flutter features"
-  default_prompt: "Use $flutter-feature-based-architecture to add a handwritten, componentized Flutter feature with Riverpod."

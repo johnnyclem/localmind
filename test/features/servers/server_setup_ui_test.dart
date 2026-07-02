@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:localmind/core/theme/app_theme.dart';
-import 'package:localmind/features/onboarding/views/onboarding_server_type_screen.dart';
+import 'package:localmind/features/onboarding/screens/onboarding_server_type_screen.dart';
 import 'package:localmind/features/servers/views/components/https_scheme_hint.dart';
 import 'package:localmind/l10n/app_localizations.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';

@@ -1,0 +1,85 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
+import 'package:localmind/features/chat/providers/chat_params_providers.dart';
+import 'package:localmind/features/models/data/models/model_info.dart';
+import 'package:localmind/features/servers/providers/server_providers.dart';
+import 'package:localmind/l10n/app_localizations.dart';
+
+Future<void> showModelInfoSheet(
+  BuildContext context,
+  WidgetRef ref,
+  String modelId,
+) async {
+  final l10n = AppLocalizations.of(context)!;
+  final server = ref.read(activeServerProvider);
+  ModelInfo? model;
+  if (server != null) {
+    final models = await ref.read(availableModelsProvider(server.id).future);
+    for (final m in models) {
+      if (m is ModelInfo && m.id == modelId) {
+        model = m;
+        break;
+      }
+    }
+  }
+
+  if (!context.mounted) return;
+
+  final displayName = model?.displayName ?? modelId;
+  final contextLength = ref.read(chatParamsProvider).contextLength;
+  final identifier = model?.id ?? modelId;
+
+  await showShadSheet(
+    context: context,
+    builder: (ctx) => ShadSheet(
+      title: Text(l10n.model_info),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _ModelInfoRow(
+            label: l10n.model_name,
+            value: displayName,
+          ),
+          _ModelInfoRow(
+            label: l10n.model_identifier,
+            value: identifier,
+          ),
+          _ModelInfoRow(
+            label: l10n.context_length,
+            value: contextLength.toString(),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+class _ModelInfoRow extends StatelessWidget {
+  const _ModelInfoRow({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return ListTile(
+      title: Text(label, style: const TextStyle(fontSize: 12)),
+      subtitle: SelectableText(value),
+      trailing: IconButton(
+        icon: const Icon(Icons.copy, size: 18),
+        tooltip: l10n.copy,
+        onPressed: () async {
+          await Clipboard.setData(ClipboardData(text: value));
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(l10n.copied_to_clipboard)),
+            );
+          }
+        },
+      ),
+    );
+  }
+}

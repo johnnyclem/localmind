@@ -22,7 +22,7 @@ final _entities = <obx_int.ModelEntity>[
   obx_int.ModelEntity(
     id: const obx_int.IdUid(1, 6060443518060866028),
     name: 'ConversationEntity',
-    lastPropertyId: const obx_int.IdUid(19, 2437473986237603139),
+    lastPropertyId: const obx_int.IdUid(23, 3122805731877931734),
     flags: 0,
     properties: <obx_int.ModelProperty>[
       obx_int.ModelProperty(
@@ -140,6 +140,30 @@ final _entities = <obx_int.ModelEntity>[
         type: 9,
         flags: 0,
       ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(20, 6746128880040296628),
+        name: 'folderId',
+        type: 9,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(21, 4372897463643655414),
+        name: 'isTemporary',
+        type: 1,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(22, 2980396196878246454),
+        name: 'isArchived',
+        type: 1,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(23, 3122805731877931734),
+        name: 'characterCount',
+        type: 6,
+        flags: 0,
+      ),
     ],
     relations: <obx_int.ModelRelation>[],
     backlinks: <obx_int.ModelBacklink>[
@@ -153,7 +177,7 @@ final _entities = <obx_int.ModelEntity>[
   obx_int.ModelEntity(
     id: const obx_int.IdUid(2, 196881068437544233),
     name: 'MessageEntity',
-    lastPropertyId: const obx_int.IdUid(19, 5573835801528383007),
+    lastPropertyId: const obx_int.IdUid(28, 8162956617579414275),
     flags: 0,
     properties: <obx_int.ModelProperty>[
       obx_int.ModelProperty(
@@ -275,6 +299,60 @@ final _entities = <obx_int.ModelEntity>[
         type: 9,
         flags: 0,
       ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(20, 1744774964291030898),
+        name: 'variantGroupId',
+        type: 9,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(21, 6711322182948396736),
+        name: 'variantIndex',
+        type: 6,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(22, 5971161269391176967),
+        name: 'threadOrder',
+        type: 6,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(23, 245069546630142341),
+        name: 'isActiveVariant',
+        type: 1,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(24, 5960797950716320436),
+        name: 'parentMessageId',
+        type: 9,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(25, 1552629421552033386),
+        name: 'inputTokenCount',
+        type: 6,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(26, 1965067209419994290),
+        name: 'tokensPerSecond',
+        type: 8,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(27, 7785830711210478899),
+        name: 'ttftMs',
+        type: 6,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(28, 8162956617579414275),
+        name: 'stopReason',
+        type: 9,
+        flags: 0,
+      ),
     ],
     relations: <obx_int.ModelRelation>[],
     backlinks: <obx_int.ModelBacklink>[],
@@ -359,7 +437,7 @@ final _entities = <obx_int.ModelEntity>[
   obx_int.ModelEntity(
     id: const obx_int.IdUid(4, 6971506781199819057),
     name: 'ServerEntity',
-    lastPropertyId: const obx_int.IdUid(12, 4662365603702428254),
+    lastPropertyId: const obx_int.IdUid(13, 6207430374144016939),
     flags: 0,
     properties: <obx_int.ModelProperty>[
       obx_int.ModelProperty(
@@ -435,6 +513,167 @@ final _entities = <obx_int.ModelEntity>[
         type: 9,
         flags: 0,
       ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(13, 6207430374144016939),
+        name: 'pathPrefix',
+        type: 9,
+        flags: 0,
+      ),
+    ],
+    relations: <obx_int.ModelRelation>[],
+    backlinks: <obx_int.ModelBacklink>[],
+  ),
+  obx_int.ModelEntity(
+    id: const obx_int.IdUid(5, 8961477194169140955),
+    name: 'ConversationFolderEntity',
+    lastPropertyId: const obx_int.IdUid(5, 3017762750413225828),
+    flags: 0,
+    properties: <obx_int.ModelProperty>[
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(1, 6352437205361204397),
+        name: 'internalId',
+        type: 6,
+        flags: 1,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(2, 2340734036954615718),
+        name: 'id',
+        type: 9,
+        flags: 2048,
+        indexId: const obx_int.IdUid(7, 2357039312556022508),
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(3, 3556260745512005959),
+        name: 'name',
+        type: 9,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(4, 4019578934915258468),
+        name: 'sortOrder',
+        type: 6,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(5, 3017762750413225828),
+        name: 'createdAt',
+        type: 10,
+        flags: 0,
+      ),
+    ],
+    relations: <obx_int.ModelRelation>[],
+    backlinks: <obx_int.ModelBacklink>[],
+  ),
+  obx_int.ModelEntity(
+    id: const obx_int.IdUid(6, 152573122645768072),
+    name: 'SavedMessageEntity',
+    lastPropertyId: const obx_int.IdUid(10, 431621328894537301),
+    flags: 0,
+    properties: <obx_int.ModelProperty>[
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(1, 5595034332359148209),
+        name: 'internalId',
+        type: 6,
+        flags: 1,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(2, 5096668802007679304),
+        name: 'id',
+        type: 9,
+        flags: 2048,
+        indexId: const obx_int.IdUid(8, 22783346841342476),
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(3, 1050610104311264456),
+        name: 'sourceMessageId',
+        type: 9,
+        flags: 2048,
+        indexId: const obx_int.IdUid(9, 1110570128952634448),
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(4, 7798325361628325620),
+        name: 'conversationId',
+        type: 9,
+        flags: 2048,
+        indexId: const obx_int.IdUid(10, 8583926456518887322),
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(5, 3050316078893132430),
+        name: 'conversationTitle',
+        type: 9,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(6, 7383260001962467499),
+        name: 'roleIndex',
+        type: 5,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(7, 7504405387353170036),
+        name: 'content',
+        type: 9,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(8, 4458386748227842718),
+        name: 'modelId',
+        type: 9,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(9, 6741841406448273760),
+        name: 'folderId',
+        type: 9,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(10, 431621328894537301),
+        name: 'savedAt',
+        type: 10,
+        flags: 0,
+      ),
+    ],
+    relations: <obx_int.ModelRelation>[],
+    backlinks: <obx_int.ModelBacklink>[],
+  ),
+  obx_int.ModelEntity(
+    id: const obx_int.IdUid(7, 3071607342535269584),
+    name: 'SavedMessageFolderEntity',
+    lastPropertyId: const obx_int.IdUid(5, 3331891664317498140),
+    flags: 0,
+    properties: <obx_int.ModelProperty>[
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(1, 7591361223634591419),
+        name: 'internalId',
+        type: 6,
+        flags: 1,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(2, 2427537233466774281),
+        name: 'id',
+        type: 9,
+        flags: 2048,
+        indexId: const obx_int.IdUid(11, 4226689279810093888),
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(3, 2751147963490618792),
+        name: 'name',
+        type: 9,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(4, 3384073655383318255),
+        name: 'sortOrder',
+        type: 6,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(5, 3331891664317498140),
+        name: 'createdAt',
+        type: 10,
+        flags: 0,
+      ),
     ],
     relations: <obx_int.ModelRelation>[],
     backlinks: <obx_int.ModelBacklink>[],
@@ -484,8 +723,8 @@ obx_int.ModelDefinition getObjectBoxModel() {
     // Typically, this is done with `dart run build_runner build`.
     generatorVersion: obx_int.GeneratorVersion.v2025_12_16,
     entities: _entities,
-    lastEntityId: const obx_int.IdUid(4, 6971506781199819057),
-    lastIndexId: const obx_int.IdUid(6, 4529386251594949074),
+    lastEntityId: const obx_int.IdUid(7, 3071607342535269584),
+    lastIndexId: const obx_int.IdUid(11, 4226689279810093888),
     lastRelationId: const obx_int.IdUid(0, 0),
     lastSequenceId: const obx_int.IdUid(0, 0),
     retiredEntityUids: const [],
@@ -537,7 +776,10 @@ obx_int.ModelDefinition getObjectBoxModel() {
             object.smartRepliesLastMessageId == null
             ? null
             : fbb.writeString(object.smartRepliesLastMessageId!);
-        fbb.startTable(20);
+        final folderIdOffset = object.folderId == null
+            ? null
+            : fbb.writeString(object.folderId!);
+        fbb.startTable(24);
         fbb.addInt64(0, object.internalId);
         fbb.addOffset(1, idOffset);
         fbb.addOffset(2, titleOffset);
@@ -557,6 +799,10 @@ obx_int.ModelDefinition getObjectBoxModel() {
         fbb.addBool(16, object.mcpEnabled);
         fbb.addOffset(17, smartRepliesJsonOffset);
         fbb.addOffset(18, smartRepliesLastMessageIdOffset);
+        fbb.addOffset(19, folderIdOffset);
+        fbb.addBool(20, object.isTemporary);
+        fbb.addBool(21, object.isArchived);
+        fbb.addInt64(22, object.characterCount);
         fbb.finish(fbb.endTable());
         return object.internalId;
       },
@@ -639,6 +885,27 @@ obx_int.ModelDefinition getObjectBoxModel() {
         final smartRepliesLastMessageIdParam = const fb.StringReader(
           asciiOptimization: true,
         ).vTableGetNullable(buffer, rootOffset, 40);
+        final folderIdParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGetNullable(buffer, rootOffset, 42);
+        final isTemporaryParam = const fb.BoolReader().vTableGet(
+          buffer,
+          rootOffset,
+          44,
+          false,
+        );
+        final isArchivedParam = const fb.BoolReader().vTableGet(
+          buffer,
+          rootOffset,
+          46,
+          false,
+        );
+        final characterCountParam = const fb.Int64Reader().vTableGet(
+          buffer,
+          rootOffset,
+          48,
+          0,
+        );
         final object = ConversationEntity(
           internalId: internalIdParam,
           id: idParam,
@@ -659,6 +926,10 @@ obx_int.ModelDefinition getObjectBoxModel() {
           mcpEnabled: mcpEnabledParam,
           smartRepliesJson: smartRepliesJsonParam,
           smartRepliesLastMessageId: smartRepliesLastMessageIdParam,
+          folderId: folderIdParam,
+          isTemporary: isTemporaryParam,
+          isArchived: isArchivedParam,
+          characterCount: characterCountParam,
         );
         obx_int.InternalToManyAccess.setRelInfo<ConversationEntity>(
           object.messages,
@@ -708,7 +979,16 @@ obx_int.ModelDefinition getObjectBoxModel() {
         final toolEventsJsonOffset = object.toolEventsJson == null
             ? null
             : fbb.writeString(object.toolEventsJson!);
-        fbb.startTable(20);
+        final variantGroupIdOffset = object.variantGroupId == null
+            ? null
+            : fbb.writeString(object.variantGroupId!);
+        final parentMessageIdOffset = object.parentMessageId == null
+            ? null
+            : fbb.writeString(object.parentMessageId!);
+        final stopReasonOffset = object.stopReason == null
+            ? null
+            : fbb.writeString(object.stopReason!);
+        fbb.startTable(29);
         fbb.addInt64(0, object.internalId);
         fbb.addOffset(1, idOffset);
         fbb.addInt64(2, object.conversation.targetId);
@@ -728,6 +1008,15 @@ obx_int.ModelDefinition getObjectBoxModel() {
         fbb.addBool(16, object.isProcessing);
         fbb.addOffset(17, toolSessionIdOffset);
         fbb.addOffset(18, toolEventsJsonOffset);
+        fbb.addOffset(19, variantGroupIdOffset);
+        fbb.addInt64(20, object.variantIndex);
+        fbb.addInt64(21, object.threadOrder);
+        fbb.addBool(22, object.isActiveVariant);
+        fbb.addOffset(23, parentMessageIdOffset);
+        fbb.addInt64(24, object.inputTokenCount);
+        fbb.addFloat64(25, object.tokensPerSecond);
+        fbb.addInt64(26, object.ttftMs);
+        fbb.addOffset(27, stopReasonOffset);
         fbb.finish(fbb.endTable());
         return object.internalId;
       },
@@ -772,6 +1061,24 @@ obx_int.ModelDefinition getObjectBoxModel() {
           rootOffset,
           22,
         );
+        final inputTokenCountParam = const fb.Int64Reader().vTableGetNullable(
+          buffer,
+          rootOffset,
+          52,
+        );
+        final tokensPerSecondParam = const fb.Float64Reader().vTableGetNullable(
+          buffer,
+          rootOffset,
+          54,
+        );
+        final ttftMsParam = const fb.Int64Reader().vTableGetNullable(
+          buffer,
+          rootOffset,
+          56,
+        );
+        final stopReasonParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGetNullable(buffer, rootOffset, 58);
         final errorMessageParam = const fb.StringReader(
           asciiOptimization: true,
         ).vTableGetNullable(buffer, rootOffset, 24);
@@ -804,6 +1111,30 @@ obx_int.ModelDefinition getObjectBoxModel() {
         final toolEventsJsonParam = const fb.StringReader(
           asciiOptimization: true,
         ).vTableGetNullable(buffer, rootOffset, 40);
+        final variantGroupIdParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGetNullable(buffer, rootOffset, 42);
+        final variantIndexParam = const fb.Int64Reader().vTableGet(
+          buffer,
+          rootOffset,
+          44,
+          0,
+        );
+        final threadOrderParam = const fb.Int64Reader().vTableGet(
+          buffer,
+          rootOffset,
+          46,
+          0,
+        );
+        final isActiveVariantParam = const fb.BoolReader().vTableGet(
+          buffer,
+          rootOffset,
+          48,
+          false,
+        );
+        final parentMessageIdParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGetNullable(buffer, rootOffset, 50);
         final object = MessageEntity(
           internalId: internalIdParam,
           id: idParam,
@@ -814,6 +1145,10 @@ obx_int.ModelDefinition getObjectBoxModel() {
           statusIndex: statusIndexParam,
           modelId: modelIdParam,
           tokenCount: tokenCountParam,
+          inputTokenCount: inputTokenCountParam,
+          tokensPerSecond: tokensPerSecondParam,
+          ttftMs: ttftMsParam,
+          stopReason: stopReasonParam,
           errorMessage: errorMessageParam,
           attachmentPathsJson: attachmentPathsJsonParam,
           generationTimeMs: generationTimeMsParam,
@@ -823,6 +1158,11 @@ obx_int.ModelDefinition getObjectBoxModel() {
           isProcessing: isProcessingParam,
           toolSessionId: toolSessionIdParam,
           toolEventsJson: toolEventsJsonParam,
+          variantGroupId: variantGroupIdParam,
+          variantIndex: variantIndexParam,
+          threadOrder: threadOrderParam,
+          isActiveVariant: isActiveVariantParam,
+          parentMessageId: parentMessageIdParam,
         );
         object.conversation.targetId = const fb.Int64Reader().vTableGet(
           buffer,
@@ -948,7 +1288,10 @@ obx_int.ModelDefinition getObjectBoxModel() {
         final iconNameOffset = object.iconName == null
             ? null
             : fbb.writeString(object.iconName!);
-        fbb.startTable(13);
+        final pathPrefixOffset = object.pathPrefix == null
+            ? null
+            : fbb.writeString(object.pathPrefix!);
+        fbb.startTable(14);
         fbb.addInt64(0, object.internalId);
         fbb.addOffset(1, idOffset);
         fbb.addOffset(2, nameOffset);
@@ -961,6 +1304,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
         fbb.addInt64(9, object.lastConnectedAt.millisecondsSinceEpoch);
         fbb.addInt32(10, object.statusIndex);
         fbb.addOffset(11, iconNameOffset);
+        fbb.addOffset(12, pathPrefixOffset);
         fbb.finish(fbb.endTable());
         return object.internalId;
       },
@@ -1018,6 +1362,9 @@ obx_int.ModelDefinition getObjectBoxModel() {
         final iconNameParam = const fb.StringReader(
           asciiOptimization: true,
         ).vTableGetNullable(buffer, rootOffset, 26);
+        final pathPrefixParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGetNullable(buffer, rootOffset, 28);
         final object = ServerEntity(
           internalId: internalIdParam,
           id: idParam,
@@ -1031,11 +1378,215 @@ obx_int.ModelDefinition getObjectBoxModel() {
           lastConnectedAt: lastConnectedAtParam,
           statusIndex: statusIndexParam,
           iconName: iconNameParam,
+          pathPrefix: pathPrefixParam,
         );
 
         return object;
       },
     ),
+    ConversationFolderEntity:
+        obx_int.EntityDefinition<ConversationFolderEntity>(
+          model: _entities[4],
+          toOneRelations: (ConversationFolderEntity object) => [],
+          toManyRelations: (ConversationFolderEntity object) => {},
+          getId: (ConversationFolderEntity object) => object.internalId,
+          setId: (ConversationFolderEntity object, int id) {
+            object.internalId = id;
+          },
+          objectToFB: (ConversationFolderEntity object, fb.Builder fbb) {
+            final idOffset = fbb.writeString(object.id);
+            final nameOffset = fbb.writeString(object.name);
+            fbb.startTable(6);
+            fbb.addInt64(0, object.internalId);
+            fbb.addOffset(1, idOffset);
+            fbb.addOffset(2, nameOffset);
+            fbb.addInt64(3, object.sortOrder);
+            fbb.addInt64(4, object.createdAt.millisecondsSinceEpoch);
+            fbb.finish(fbb.endTable());
+            return object.internalId;
+          },
+          objectFromFB: (obx.Store store, ByteData fbData) {
+            final buffer = fb.BufferContext(fbData);
+            final rootOffset = buffer.derefObject(0);
+            final internalIdParam = const fb.Int64Reader().vTableGet(
+              buffer,
+              rootOffset,
+              4,
+              0,
+            );
+            final idParam = const fb.StringReader(
+              asciiOptimization: true,
+            ).vTableGet(buffer, rootOffset, 6, '');
+            final nameParam = const fb.StringReader(
+              asciiOptimization: true,
+            ).vTableGet(buffer, rootOffset, 8, '');
+            final sortOrderParam = const fb.Int64Reader().vTableGet(
+              buffer,
+              rootOffset,
+              10,
+              0,
+            );
+            final createdAtParam = DateTime.fromMillisecondsSinceEpoch(
+              const fb.Int64Reader().vTableGet(buffer, rootOffset, 12, 0),
+            );
+            final object = ConversationFolderEntity(
+              internalId: internalIdParam,
+              id: idParam,
+              name: nameParam,
+              sortOrder: sortOrderParam,
+              createdAt: createdAtParam,
+            );
+
+            return object;
+          },
+        ),
+    SavedMessageEntity: obx_int.EntityDefinition<SavedMessageEntity>(
+      model: _entities[5],
+      toOneRelations: (SavedMessageEntity object) => [],
+      toManyRelations: (SavedMessageEntity object) => {},
+      getId: (SavedMessageEntity object) => object.internalId,
+      setId: (SavedMessageEntity object, int id) {
+        object.internalId = id;
+      },
+      objectToFB: (SavedMessageEntity object, fb.Builder fbb) {
+        final idOffset = fbb.writeString(object.id);
+        final sourceMessageIdOffset = fbb.writeString(object.sourceMessageId);
+        final conversationIdOffset = fbb.writeString(object.conversationId);
+        final conversationTitleOffset = fbb.writeString(
+          object.conversationTitle,
+        );
+        final contentOffset = fbb.writeString(object.content);
+        final modelIdOffset = object.modelId == null
+            ? null
+            : fbb.writeString(object.modelId!);
+        final folderIdOffset = object.folderId == null
+            ? null
+            : fbb.writeString(object.folderId!);
+        fbb.startTable(11);
+        fbb.addInt64(0, object.internalId);
+        fbb.addOffset(1, idOffset);
+        fbb.addOffset(2, sourceMessageIdOffset);
+        fbb.addOffset(3, conversationIdOffset);
+        fbb.addOffset(4, conversationTitleOffset);
+        fbb.addInt32(5, object.roleIndex);
+        fbb.addOffset(6, contentOffset);
+        fbb.addOffset(7, modelIdOffset);
+        fbb.addOffset(8, folderIdOffset);
+        fbb.addInt64(9, object.savedAt.millisecondsSinceEpoch);
+        fbb.finish(fbb.endTable());
+        return object.internalId;
+      },
+      objectFromFB: (obx.Store store, ByteData fbData) {
+        final buffer = fb.BufferContext(fbData);
+        final rootOffset = buffer.derefObject(0);
+        final internalIdParam = const fb.Int64Reader().vTableGet(
+          buffer,
+          rootOffset,
+          4,
+          0,
+        );
+        final idParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGet(buffer, rootOffset, 6, '');
+        final sourceMessageIdParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGet(buffer, rootOffset, 8, '');
+        final conversationIdParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGet(buffer, rootOffset, 10, '');
+        final conversationTitleParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGet(buffer, rootOffset, 12, '');
+        final roleIndexParam = const fb.Int32Reader().vTableGet(
+          buffer,
+          rootOffset,
+          14,
+          0,
+        );
+        final contentParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGet(buffer, rootOffset, 16, '');
+        final modelIdParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGetNullable(buffer, rootOffset, 18);
+        final folderIdParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGetNullable(buffer, rootOffset, 20);
+        final savedAtParam = DateTime.fromMillisecondsSinceEpoch(
+          const fb.Int64Reader().vTableGet(buffer, rootOffset, 22, 0),
+        );
+        final object = SavedMessageEntity(
+          internalId: internalIdParam,
+          id: idParam,
+          sourceMessageId: sourceMessageIdParam,
+          conversationId: conversationIdParam,
+          conversationTitle: conversationTitleParam,
+          roleIndex: roleIndexParam,
+          content: contentParam,
+          modelId: modelIdParam,
+          folderId: folderIdParam,
+          savedAt: savedAtParam,
+        );
+
+        return object;
+      },
+    ),
+    SavedMessageFolderEntity:
+        obx_int.EntityDefinition<SavedMessageFolderEntity>(
+          model: _entities[6],
+          toOneRelations: (SavedMessageFolderEntity object) => [],
+          toManyRelations: (SavedMessageFolderEntity object) => {},
+          getId: (SavedMessageFolderEntity object) => object.internalId,
+          setId: (SavedMessageFolderEntity object, int id) {
+            object.internalId = id;
+          },
+          objectToFB: (SavedMessageFolderEntity object, fb.Builder fbb) {
+            final idOffset = fbb.writeString(object.id);
+            final nameOffset = fbb.writeString(object.name);
+            fbb.startTable(6);
+            fbb.addInt64(0, object.internalId);
+            fbb.addOffset(1, idOffset);
+            fbb.addOffset(2, nameOffset);
+            fbb.addInt64(3, object.sortOrder);
+            fbb.addInt64(4, object.createdAt.millisecondsSinceEpoch);
+            fbb.finish(fbb.endTable());
+            return object.internalId;
+          },
+          objectFromFB: (obx.Store store, ByteData fbData) {
+            final buffer = fb.BufferContext(fbData);
+            final rootOffset = buffer.derefObject(0);
+            final internalIdParam = const fb.Int64Reader().vTableGet(
+              buffer,
+              rootOffset,
+              4,
+              0,
+            );
+            final idParam = const fb.StringReader(
+              asciiOptimization: true,
+            ).vTableGet(buffer, rootOffset, 6, '');
+            final nameParam = const fb.StringReader(
+              asciiOptimization: true,
+            ).vTableGet(buffer, rootOffset, 8, '');
+            final sortOrderParam = const fb.Int64Reader().vTableGet(
+              buffer,
+              rootOffset,
+              10,
+              0,
+            );
+            final createdAtParam = DateTime.fromMillisecondsSinceEpoch(
+              const fb.Int64Reader().vTableGet(buffer, rootOffset, 12, 0),
+            );
+            final object = SavedMessageFolderEntity(
+              internalId: internalIdParam,
+              id: idParam,
+              name: nameParam,
+              sortOrder: sortOrderParam,
+              createdAt: createdAtParam,
+            );
+
+            return object;
+          },
+        ),
   };
 
   return obx_int.ModelDefinition(model, bindings);
@@ -1136,6 +1687,26 @@ class ConversationEntity_ {
   /// See [ConversationEntity.smartRepliesLastMessageId].
   static final smartRepliesLastMessageId =
       obx.QueryStringProperty<ConversationEntity>(_entities[0].properties[18]);
+
+  /// See [ConversationEntity.folderId].
+  static final folderId = obx.QueryStringProperty<ConversationEntity>(
+    _entities[0].properties[19],
+  );
+
+  /// See [ConversationEntity.isTemporary].
+  static final isTemporary = obx.QueryBooleanProperty<ConversationEntity>(
+    _entities[0].properties[20],
+  );
+
+  /// See [ConversationEntity.isArchived].
+  static final isArchived = obx.QueryBooleanProperty<ConversationEntity>(
+    _entities[0].properties[21],
+  );
+
+  /// See [ConversationEntity.characterCount].
+  static final characterCount = obx.QueryIntegerProperty<ConversationEntity>(
+    _entities[0].properties[22],
+  );
 
   /// see [ConversationEntity.messages]
   static final messages =
@@ -1240,6 +1811,51 @@ class MessageEntity_ {
   /// See [MessageEntity.toolEventsJson].
   static final toolEventsJson = obx.QueryStringProperty<MessageEntity>(
     _entities[1].properties[18],
+  );
+
+  /// See [MessageEntity.variantGroupId].
+  static final variantGroupId = obx.QueryStringProperty<MessageEntity>(
+    _entities[1].properties[19],
+  );
+
+  /// See [MessageEntity.variantIndex].
+  static final variantIndex = obx.QueryIntegerProperty<MessageEntity>(
+    _entities[1].properties[20],
+  );
+
+  /// See [MessageEntity.threadOrder].
+  static final threadOrder = obx.QueryIntegerProperty<MessageEntity>(
+    _entities[1].properties[21],
+  );
+
+  /// See [MessageEntity.isActiveVariant].
+  static final isActiveVariant = obx.QueryBooleanProperty<MessageEntity>(
+    _entities[1].properties[22],
+  );
+
+  /// See [MessageEntity.parentMessageId].
+  static final parentMessageId = obx.QueryStringProperty<MessageEntity>(
+    _entities[1].properties[23],
+  );
+
+  /// See [MessageEntity.inputTokenCount].
+  static final inputTokenCount = obx.QueryIntegerProperty<MessageEntity>(
+    _entities[1].properties[24],
+  );
+
+  /// See [MessageEntity.tokensPerSecond].
+  static final tokensPerSecond = obx.QueryDoubleProperty<MessageEntity>(
+    _entities[1].properties[25],
+  );
+
+  /// See [MessageEntity.ttftMs].
+  static final ttftMs = obx.QueryIntegerProperty<MessageEntity>(
+    _entities[1].properties[26],
+  );
+
+  /// See [MessageEntity.stopReason].
+  static final stopReason = obx.QueryStringProperty<MessageEntity>(
+    _entities[1].properties[27],
   );
 }
 
@@ -1361,5 +1977,119 @@ class ServerEntity_ {
   /// See [ServerEntity.iconName].
   static final iconName = obx.QueryStringProperty<ServerEntity>(
     _entities[3].properties[11],
+  );
+
+  /// See [ServerEntity.pathPrefix].
+  static final pathPrefix = obx.QueryStringProperty<ServerEntity>(
+    _entities[3].properties[12],
+  );
+}
+
+/// [ConversationFolderEntity] entity fields to define ObjectBox queries.
+class ConversationFolderEntity_ {
+  /// See [ConversationFolderEntity.internalId].
+  static final internalId = obx.QueryIntegerProperty<ConversationFolderEntity>(
+    _entities[4].properties[0],
+  );
+
+  /// See [ConversationFolderEntity.id].
+  static final id = obx.QueryStringProperty<ConversationFolderEntity>(
+    _entities[4].properties[1],
+  );
+
+  /// See [ConversationFolderEntity.name].
+  static final name = obx.QueryStringProperty<ConversationFolderEntity>(
+    _entities[4].properties[2],
+  );
+
+  /// See [ConversationFolderEntity.sortOrder].
+  static final sortOrder = obx.QueryIntegerProperty<ConversationFolderEntity>(
+    _entities[4].properties[3],
+  );
+
+  /// See [ConversationFolderEntity.createdAt].
+  static final createdAt = obx.QueryDateProperty<ConversationFolderEntity>(
+    _entities[4].properties[4],
+  );
+}
+
+/// [SavedMessageEntity] entity fields to define ObjectBox queries.
+class SavedMessageEntity_ {
+  /// See [SavedMessageEntity.internalId].
+  static final internalId = obx.QueryIntegerProperty<SavedMessageEntity>(
+    _entities[5].properties[0],
+  );
+
+  /// See [SavedMessageEntity.id].
+  static final id = obx.QueryStringProperty<SavedMessageEntity>(
+    _entities[5].properties[1],
+  );
+
+  /// See [SavedMessageEntity.sourceMessageId].
+  static final sourceMessageId = obx.QueryStringProperty<SavedMessageEntity>(
+    _entities[5].properties[2],
+  );
+
+  /// See [SavedMessageEntity.conversationId].
+  static final conversationId = obx.QueryStringProperty<SavedMessageEntity>(
+    _entities[5].properties[3],
+  );
+
+  /// See [SavedMessageEntity.conversationTitle].
+  static final conversationTitle = obx.QueryStringProperty<SavedMessageEntity>(
+    _entities[5].properties[4],
+  );
+
+  /// See [SavedMessageEntity.roleIndex].
+  static final roleIndex = obx.QueryIntegerProperty<SavedMessageEntity>(
+    _entities[5].properties[5],
+  );
+
+  /// See [SavedMessageEntity.content].
+  static final content = obx.QueryStringProperty<SavedMessageEntity>(
+    _entities[5].properties[6],
+  );
+
+  /// See [SavedMessageEntity.modelId].
+  static final modelId = obx.QueryStringProperty<SavedMessageEntity>(
+    _entities[5].properties[7],
+  );
+
+  /// See [SavedMessageEntity.folderId].
+  static final folderId = obx.QueryStringProperty<SavedMessageEntity>(
+    _entities[5].properties[8],
+  );
+
+  /// See [SavedMessageEntity.savedAt].
+  static final savedAt = obx.QueryDateProperty<SavedMessageEntity>(
+    _entities[5].properties[9],
+  );
+}
+
+/// [SavedMessageFolderEntity] entity fields to define ObjectBox queries.
+class SavedMessageFolderEntity_ {
+  /// See [SavedMessageFolderEntity.internalId].
+  static final internalId = obx.QueryIntegerProperty<SavedMessageFolderEntity>(
+    _entities[6].properties[0],
+  );
+
+  /// See [SavedMessageFolderEntity.id].
+  static final id = obx.QueryStringProperty<SavedMessageFolderEntity>(
+    _entities[6].properties[1],
+  );
+
+  /// See [SavedMessageFolderEntity.name].
+  static final name = obx.QueryStringProperty<SavedMessageFolderEntity>(
+    _entities[6].properties[2],
+  );
+
+  /// See [SavedMessageFolderEntity.sortOrder].
+  static final sortOrder = obx.QueryIntegerProperty<SavedMessageFolderEntity>(
+    _entities[6].properties[3],
+  );
+
+  /// See [SavedMessageFolderEntity.createdAt].
+  static final createdAt = obx.QueryDateProperty<SavedMessageFolderEntity>(
+    _entities[6].properties[4],
   );
 }

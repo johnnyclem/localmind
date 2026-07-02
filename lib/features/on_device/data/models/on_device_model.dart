@@ -1,9 +1,10 @@
 import 'package:flutter_gemma/flutter_gemma.dart';
 
 import '../../../../core/models/enums.dart';
-import '../../../../core/models/on_device_model_types.dart';
 
-export '../../../../core/models/on_device_model_types.dart';
+enum OnDeviceModelRuntime { gemma, llamaCpp }
+
+enum OnDeviceModelFormat { litertlm, task, binary, gguf }
 
 enum OnDeviceImportedSource { localFile, huggingFace }
 

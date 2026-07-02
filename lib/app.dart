@@ -9,25 +9,29 @@ import 'core/models/enums.dart';
 import 'core/providers/app_providers.dart';
 import 'core/routes/app_routes.dart';
 import 'core/theme/app_theme.dart';
+import 'features/chat/providers/chat_providers.dart';
+import 'features/conversations/providers/conversation_providers.dart'
+    as conv;
 import 'features/chat/views/chat_screen.dart';
 import 'features/conversations/views/chat_history_screen.dart';
 import 'features/mcp/views/mcp_tools_screen.dart';
 import 'features/on_device/views/model_manager_screen.dart';
-import 'features/onboarding/views/onboarding_language_screen.dart';
-import 'features/onboarding/views/onboarding_model_download_screen.dart';
-import 'features/onboarding/views/onboarding_notification_permission_screen.dart';
-import 'features/onboarding/views/onboarding_server_setup_screen.dart';
-import 'features/onboarding/views/onboarding_server_type_screen.dart';
-import 'features/onboarding/views/onboarding_theme_screen.dart';
+import 'features/onboarding/screens/onboarding_language_screen.dart';
+import 'features/onboarding/screens/onboarding_model_download_screen.dart';
+import 'features/onboarding/screens/onboarding_notification_permission_screen.dart';
+import 'features/onboarding/screens/onboarding_server_setup_screen.dart';
+import 'features/onboarding/screens/onboarding_server_type_screen.dart';
+import 'features/onboarding/screens/onboarding_theme_screen.dart';
 import 'features/personas/views/create_persona_screen.dart';
 import 'features/personas/views/persona_list_screen.dart';
 import 'features/servers/data/models/server.dart';
 import 'features/servers/views/add_server_screen.dart';
 import 'features/servers/views/server_list_screen.dart';
 import 'features/tts/views/tts_model_manager_screen.dart';
+import 'features/saved_messages/views/saved_messages_screen.dart';
 import 'features/settings/views/settings_screen.dart';
-import 'features/sidebar/views/components/sidebar_widget.dart';
-import 'features/sidebar/views/sidebar_drawer.dart';
+import 'features/sidebar/sidebar_drawer.dart';
+import 'features/sidebar/sidebar_widget.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorKey = GlobalKey<NavigatorState>();
@@ -131,7 +135,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: AppRoutes.settings,
             pageBuilder: (context, state) =>
-            const NoTransitionPage(child: SettingsScreen()),
+                const NoTransitionPage(child: SettingsViews()),
           ),
           GoRoute(
             path: AppRoutes.chatHistory,
@@ -152,6 +156,11 @@ final routerProvider = Provider<GoRouter>((ref) {
             path: AppRoutes.ttsModels,
             pageBuilder: (context, state) =>
                 const NoTransitionPage(child: TtsModelManagerScreen()),
+          ),
+          GoRoute(
+            path: AppRoutes.savedMessages,
+            pageBuilder: (context, state) =>
+                const NoTransitionPage(child: SavedMessagesScreen()),
           ),
         ],
       ),
@@ -225,6 +234,7 @@ class App extends ConsumerWidget {
             Locale('hi'),
             Locale('it'),
             Locale('ja'),
+            Locale('ru'),
           ],
           locale: localeCode != null ? Locale(localeCode) : null,
           localeResolutionCallback: (locale, supportedLocales) {
@@ -246,7 +256,7 @@ class App extends ConsumerWidget {
   }
 }
 
-class AppShell extends StatelessWidget {
+class AppShell extends ConsumerWidget {
   final Widget child;
 
   const AppShell({super.key, required this.child});
@@ -256,39 +266,55 @@ class AppShell extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final location = GoRouterState.of(context).uri.path;
+    final isHome = location == AppRoutes.home;
+    final hasActiveChat = ref.watch(conv.activeConversationProvider) != null;
 
-    return ShadResponsiveBuilder(
-      builder: (context, breakpoint) {
-        final isDesktop = breakpoint >= ShadTheme.of(context).breakpoints.md;
-
-        if (isDesktop) {
-          return Scaffold(
-            body: Row(
-              children: [
-                const SidebarWidget(),
-                VerticalDivider(
-                  width: 1,
-                  thickness: 1,
-                  color: isDark
-                      ? const Color(0xFF1A1A1A)
-                      : const Color(0xFFE5E5E5),
-                ),
-                Expanded(
-                  child: child,
-                ),
-              ],
-            ),
-          );
+    return PopScope(
+      canPop: isHome && !hasActiveChat,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        if (isHome && hasActiveChat) {
+          ref.read(chatProvider.notifier).startNewConversation();
+          return;
         }
-
-        return Scaffold(
-          body: child,
-          drawer: const ConversationDrawer(),
-        );
+        if (!isHome) {
+          context.go(AppRoutes.home);
+        }
       },
+      child: ShadResponsiveBuilder(
+        builder: (context, breakpoint) {
+          final isDesktop = breakpoint >= ShadTheme.of(context).breakpoints.md;
+
+          if (isDesktop) {
+            return Scaffold(
+              body: Row(
+                children: [
+                  const SidebarWidget(),
+                  VerticalDivider(
+                    width: 1,
+                    thickness: 1,
+                    color: isDark
+                        ? const Color(0xFF1A1A1A)
+                        : const Color(0xFFE5E5E5),
+                  ),
+                  Expanded(
+                    child: child,
+                  ),
+                ],
+              ),
+            );
+          }
+
+          return Scaffold(
+            body: child,
+            drawer: const ConversationDrawer(),
+          );
+        },
+      ),
     );
   }
 }

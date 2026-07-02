@@ -1,13 +1,20 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:localmind/l10n/app_localizations.dart';
+import 'package:localmind/core/providers/storage_providers.dart';
+import 'package:localmind/core/services/data_backup_service.dart';
 import '../../../../core/routes/app_routes.dart';
 import '../../../chat/providers/chat_providers.dart';
 import '../../data/models/conversation.dart';
 import '../../providers/conversation_providers.dart';
-import 'conversation_tile.dart';
+import 'rename_conversation_dialog.dart';
 import 'date_section_header.dart';
+import 'conversation_tile.dart';
 
 class ConversationList extends ConsumerWidget {
   const ConversationList({
@@ -76,6 +83,26 @@ class ConversationList extends ConsumerWidget {
                 onDelete: () {
                   _showDeleteConfirmation(context, ref, l10n, conversation);
                 },
+                onDuplicate: () {
+                  ref
+                      .read(conversationsProvider.notifier)
+                      .duplicateConversation(conversation.id);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(l10n.duplicate_chat_success)),
+                  );
+                },
+                onMoveToFolder: () {
+                  _showMoveToFolderSheet(context, ref, l10n, conversation);
+                },
+                onExport: () {
+                  _exportConversation(context, ref, l10n, conversation);
+                },
+                onArchive: () {
+                  ref.read(conversationsProvider.notifier).setArchived(
+                        conversation.id,
+                        !conversation.isArchived,
+                      );
+                },
               );
             }),
           ],
@@ -90,42 +117,7 @@ class ConversationList extends ConsumerWidget {
     AppLocalizations l10n,
     Conversation conversation,
   ) {
-    final controller = TextEditingController(text: conversation.title);
-
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text(l10n.rename_conversation),
-          content: TextField(
-            controller: controller,
-            autofocus: true,
-            decoration: InputDecoration(
-              hintText: l10n.enter_new_title,
-              border: const OutlineInputBorder(),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text(l10n.cancel),
-            ),
-            TextButton(
-              onPressed: () {
-                final newTitle = controller.text.trim();
-                if (newTitle.isNotEmpty) {
-                  ref
-                      .read(conversationsProvider.notifier)
-                      .renameConversation(conversation.id, newTitle);
-                }
-                Navigator.pop(context);
-              },
-              child: Text(l10n.rename),
-            ),
-          ],
-        );
-      },
-    );
+    showRenameConversationDialog(context, ref, conversation: conversation);
   }
 
   void _showDeleteConfirmation(
@@ -159,5 +151,73 @@ class ConversationList extends ConsumerWidget {
         );
       },
     );
+  }
+
+  void _showMoveToFolderSheet(
+    BuildContext context,
+    WidgetRef ref,
+    AppLocalizations l10n,
+    Conversation conversation,
+  ) {
+    final folders = ref.read(conversationFoldersProvider).value ?? [];
+
+    showModalBottomSheet<void>(
+      context: context,
+      builder: (ctx) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.folder_off_outlined),
+                title: Text(l10n.remove_from_folder),
+                onTap: () async {
+                  Navigator.pop(ctx);
+                  await ref
+                      .read(conversationsProvider.notifier)
+                      .moveConversationToFolder(conversation.id, null);
+                },
+              ),
+              ...folders.map(
+                (folder) => ListTile(
+                  leading: const Icon(Icons.folder_outlined),
+                  title: Text(folder.name),
+                  onTap: () async {
+                    Navigator.pop(ctx);
+                    await ref
+                        .read(conversationsProvider.notifier)
+                        .moveConversationToFolder(conversation.id, folder.id);
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _exportConversation(
+    BuildContext context,
+    WidgetRef ref,
+    AppLocalizations l10n,
+    Conversation conversation,
+  ) async {
+    final db = ref.read(databaseProvider);
+    final json = DataBackupService()
+        .exportConversationAsJson(db.store, conversation.id);
+    final saved = await FilePicker.saveFile(
+      dialogTitle: l10n.export_conversation,
+      fileName:
+          'localmind_${conversation.title.replaceAll(RegExp(r'[^\w\-]+'), '_')}_${DateTime.now().millisecondsSinceEpoch}.json',
+      type: FileType.custom,
+      allowedExtensions: const ['json'],
+      bytes: Uint8List.fromList(utf8.encode(json)),
+    );
+    if (saved != null && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.export_data_success)),
+      );
+    }
   }
 }

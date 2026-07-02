@@ -2,5 +2,5 @@ export 'chat_notifier.dart';
 export 'chat_params_providers.dart';
 export 'chat_service_providers.dart';
 export 'model_loading_providers.dart';
-export '../../../core/providers/model_selection_providers.dart';
+export 'model_selection_providers.dart';
 export 'smart_reply_providers.dart';

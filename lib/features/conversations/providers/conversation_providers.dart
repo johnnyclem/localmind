@@ -5,7 +5,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/providers/storage_providers.dart';
 import '../../../core/storage/entities.dart';
 import '../../../objectbox.g.dart';
+import '../data/message_search_service.dart';
+import '../data/models/message_search_hit.dart';
 import '../data/models/conversation.dart';
+import '../data/models/conversation_folder.dart';
 
 final conversationsProvider =
     AsyncNotifierProvider<ConversationsNotifier, List<Conversation>>(() {
@@ -49,6 +52,7 @@ class ConversationsNotifier extends AsyncNotifier<List<Conversation>> {
     String? serverId,
     String? modelId,
     bool? mcpEnabled,
+    bool isTemporary = false,
   }) async {
     final db = ref.read(databaseProvider);
     final now = DateTime.now();
@@ -67,6 +71,7 @@ class ConversationsNotifier extends AsyncNotifier<List<Conversation>> {
       lastMessagePreview: null,
       systemPrompt: systemPrompt,
       mcpEnabled: mcpEnabled,
+      isTemporary: isTemporary,
     );
 
     db.conversationBox.put(ConversationEntity.fromDomain(conversation));
@@ -127,6 +132,56 @@ class ConversationsNotifier extends AsyncNotifier<List<Conversation>> {
     db.conversationBox.put(entity);
 
     state = AsyncData(await _loadAll());
+
+    final activeId = ref.read(activeConversationProvider)?.id;
+    if (activeId == id) {
+      final refreshed = state.value?.firstWhere(
+        (c) => c.id == id,
+        orElse: () => updated,
+      );
+      ref
+          .read(activeConversationProvider.notifier)
+          .setActiveConversation(refreshed);
+    }
+  }
+
+  Future<void> setTemporary(String id, bool isTemporary) async {
+    final db = ref.read(databaseProvider);
+    final conversations = state.value ?? [];
+    final existing = conversations.firstWhere(
+      (c) => c.id == id,
+      orElse: () => throw Exception('Conversation not found in state'),
+    );
+
+    final updated = existing.copyWith(
+      isTemporary: isTemporary,
+      updatedAt: DateTime.now(),
+    );
+
+    final query = db.conversationBox
+        .query(ConversationEntity_.id.equals(id))
+        .build();
+    final existingEntity = query.findFirst();
+    query.close();
+
+    final entity = ConversationEntity.fromDomain(updated);
+    if (existingEntity != null) {
+      entity.internalId = existingEntity.internalId;
+    }
+    db.conversationBox.put(entity);
+
+    state = AsyncData(await _loadAll());
+
+    final activeId = ref.read(activeConversationProvider)?.id;
+    if (activeId == id) {
+      final refreshed = state.value?.firstWhere(
+        (c) => c.id == id,
+        orElse: () => updated,
+      );
+      ref
+          .read(activeConversationProvider.notifier)
+          .setActiveConversation(refreshed);
+    }
   }
 
   Future<void> deleteConversation(String id) async {
@@ -177,11 +232,41 @@ class ConversationsNotifier extends AsyncNotifier<List<Conversation>> {
     state = AsyncData(await _loadAll());
   }
 
+  Future<void> setArchived(String id, bool archived) async {
+    final db = ref.read(databaseProvider);
+    final conversations = state.value ?? [];
+    final existing = conversations.firstWhere(
+      (c) => c.id == id,
+      orElse: () => throw Exception('Conversation not found in state'),
+    );
+
+    final updated = existing.copyWith(
+      isArchived: archived,
+      updatedAt: DateTime.now(),
+    );
+
+    final query = db.conversationBox
+        .query(ConversationEntity_.id.equals(id))
+        .build();
+    final existingEntity = query.findFirst();
+    query.close();
+
+    final entity = ConversationEntity.fromDomain(updated);
+    if (existingEntity != null) {
+      entity.internalId = existingEntity.internalId;
+    }
+    db.conversationBox.put(entity);
+
+    state = AsyncData(await _loadAll());
+  }
+
   Future<void> updatePreview(
     String id,
     String preview,
     DateTime updatedAt, {
     int? messageCount,
+    int? characterCountDelta,
+    int? characterCount,
   }) async {
     final db = ref.read(databaseProvider);
     final conversations = state.value ?? [];
@@ -192,6 +277,10 @@ class ConversationsNotifier extends AsyncNotifier<List<Conversation>> {
         lastMessagePreview: preview,
         updatedAt: updatedAt,
         messageCount: messageCount ?? existing.messageCount + 1,
+        characterCount: characterCount ??
+            (characterCountDelta != null
+                ? existing.characterCount + characterCountDelta
+                : existing.characterCount),
       );
 
       final query = db.conversationBox
@@ -326,6 +415,71 @@ class ConversationsNotifier extends AsyncNotifier<List<Conversation>> {
     state = AsyncData(await _loadAll());
   }
 
+  Future<Conversation> duplicateConversation(String id) async {
+    final db = ref.read(databaseProvider);
+    final conversations = state.value ?? [];
+    final source = conversations.firstWhere((c) => c.id == id);
+
+    final now = DateTime.now();
+    final newId = _generateUuid();
+    final duplicate = source.copyWith(
+      id: newId,
+      title: '${source.title} (copy)',
+      createdAt: now,
+      updatedAt: now,
+      isPinned: false,
+    );
+
+    db.conversationBox.put(ConversationEntity.fromDomain(duplicate));
+
+    final msgQuery = db.messageBox
+        .query(MessageEntity_.conversationUid.equals(id))
+        .build();
+    final sourceMessages = msgQuery.find();
+    msgQuery.close();
+
+    final convQuery = db.conversationBox
+        .query(ConversationEntity_.id.equals(newId))
+        .build();
+    final convEntity = convQuery.findFirst();
+    convQuery.close();
+
+    if (convEntity != null) {
+      for (final entity in sourceMessages) {
+        final message = entity.toDomain().copyWith(
+          id: _generateUuid(),
+          conversationId: newId,
+        );
+        final copyEntity = MessageEntity.fromDomain(message)
+          ..conversation.target = convEntity;
+        db.messageBox.put(copyEntity);
+      }
+    }
+
+    state = AsyncData(await _loadAll());
+    return duplicate;
+  }
+
+  Future<void> moveConversationToFolder(String id, String? folderId) async {
+    final db = ref.read(databaseProvider);
+    final conversations = state.value ?? [];
+    final existing = conversations.firstWhere((c) => c.id == id);
+    final updated = existing.copyWith(
+      folderId: folderId,
+      clearFolderId: folderId == null,
+      updatedAt: DateTime.now(),
+    );
+
+    final query = db.conversationBox.query(ConversationEntity_.id.equals(id)).build();
+    final existingEntity = query.findFirst();
+    query.close();
+
+    final entity = ConversationEntity.fromDomain(updated);
+    if (existingEntity != null) entity.internalId = existingEntity.internalId;
+    db.conversationBox.put(entity);
+    state = AsyncData(await _loadAll());
+  }
+
   String _generateUuid() {
     final secure = Random.secure();
     final now = DateTime.now().microsecondsSinceEpoch.toRadixString(16);
@@ -385,10 +539,32 @@ final filteredConversationsProvider = Provider<AsyncValue<List<Conversation>>>((
 ) {
   final conversationsAsync = ref.watch(conversationsProvider);
   final query = ref.watch(conversationSearchProvider).toLowerCase();
+  final folderFilter = ref.watch(historyFolderFilterProvider);
+  final listFilter = ref.watch(historyListFilterProvider);
 
   return conversationsAsync.whenData((conversations) {
-    if (query.isEmpty) return conversations;
-    return conversations.where((c) {
+    var filtered = conversations.where((c) => !c.isTemporary).toList();
+
+    switch (listFilter) {
+      case HistoryListFilter.archived:
+        filtered = filtered.where((c) => c.isArchived).toList();
+      case HistoryListFilter.pinned:
+        filtered = filtered.where((c) => c.isPinned && !c.isArchived).toList();
+      case HistoryListFilter.all:
+        filtered = filtered.where((c) => !c.isArchived).toList();
+    }
+
+    if (folderFilter != null) {
+      if (folderFilter.isEmpty) {
+        filtered = filtered
+            .where((c) => c.folderId == null || c.folderId!.isEmpty)
+            .toList();
+      } else {
+        filtered = filtered.where((c) => c.folderId == folderFilter).toList();
+      }
+    }
+    if (query.isEmpty) return filtered;
+    return filtered.where((c) {
       return c.title.toLowerCase().contains(query) ||
           (c.lastMessagePreview?.toLowerCase().contains(query) ?? false);
     }).toList();
@@ -398,7 +574,7 @@ final filteredConversationsProvider = Provider<AsyncValue<List<Conversation>>>((
 final recentConversationsProvider = Provider<List<Conversation>>((ref) {
   final allAsync = ref.watch(conversationsProvider);
   final all = allAsync.value ?? [];
-  return all.take(3).toList();
+  return all.where((c) => !c.isTemporary).take(3).toList();
 });
 
 final groupedConversationsProvider =
@@ -442,3 +618,159 @@ final groupedConversationsProvider =
         return grouped;
       });
     });
+
+final historyFolderFilterProvider =
+    NotifierProvider<HistoryFolderFilterNotifier, String?>(() {
+      return HistoryFolderFilterNotifier();
+    });
+
+enum HistoryListFilter { all, pinned, archived }
+
+final historyListFilterProvider =
+    NotifierProvider<HistoryListFilterNotifier, HistoryListFilter>(() {
+      return HistoryListFilterNotifier();
+    });
+
+class HistoryListFilterNotifier extends Notifier<HistoryListFilter> {
+  @override
+  HistoryListFilter build() => HistoryListFilter.all;
+
+  void setFilter(HistoryListFilter filter) => state = filter;
+}
+
+class HistoryFolderFilterNotifier extends Notifier<String?> {
+  @override
+  String? build() => null;
+
+  void setFilter(String? folderId) => state = folderId;
+}
+
+final conversationFoldersProvider =
+    AsyncNotifierProvider<ConversationFoldersNotifier, List<ConversationFolder>>(
+      () => ConversationFoldersNotifier(),
+    );
+
+class ConversationFoldersNotifier extends AsyncNotifier<List<ConversationFolder>> {
+  @override
+  Future<List<ConversationFolder>> build() async => _loadAll();
+
+  Future<List<ConversationFolder>> _loadAll() async {
+    final db = ref.read(databaseProvider);
+    return db.store.runInTransactionAsync(
+      TxMode.read,
+      _loadFoldersInBackground,
+      null,
+    );
+  }
+
+  static List<ConversationFolder> _loadFoldersInBackground(Store store, _) {
+    final entities = store.box<ConversationFolderEntity>().getAll();
+    final folders = entities
+        .map(
+          (e) => ConversationFolder(
+            id: e.id,
+            name: e.name,
+            sortOrder: e.sortOrder,
+            createdAt: e.createdAt,
+          ),
+        )
+        .toList();
+    folders.sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
+    return folders;
+  }
+
+  Future<ConversationFolder> createFolder(String name) async {
+    final db = ref.read(databaseProvider);
+    final folder = ConversationFolder(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      name: name,
+      sortOrder: (state.value ?? []).length,
+      createdAt: DateTime.now(),
+    );
+    db.conversationFolderBox.put(
+      ConversationFolderEntity(
+        id: folder.id,
+        name: folder.name,
+        sortOrder: folder.sortOrder,
+        createdAt: folder.createdAt,
+      ),
+    );
+    state = AsyncData(await _loadAll());
+    return folder;
+  }
+
+  Future<void> deleteFolder(String id) async {
+    final db = ref.read(databaseProvider);
+    final query = db.conversationFolderBox
+        .query(ConversationFolderEntity_.id.equals(id))
+        .build();
+    db.conversationFolderBox.removeMany(query.findIds());
+    query.close();
+
+    final convQuery = db.conversationBox
+        .query(ConversationEntity_.folderId.equals(id))
+        .build();
+    for (final entity in convQuery.find()) {
+      entity.folderId = null;
+      db.conversationBox.put(entity);
+    }
+    convQuery.close();
+
+    ref.invalidate(conversationsProvider);
+    state = AsyncData(await _loadAll());
+  }
+}
+
+final searchMessageContentsProvider =
+    NotifierProvider<SearchMessageContentsNotifier, bool>(() {
+      return SearchMessageContentsNotifier();
+    });
+
+class SearchMessageContentsNotifier extends Notifier<bool> {
+  @override
+  bool build() => false;
+
+  void toggle() => state = !state;
+
+  void setEnabled(bool enabled) => state = enabled;
+}
+
+final scrollToMessageIdProvider =
+    NotifierProvider<ScrollToMessageNotifier, String?>(() {
+      return ScrollToMessageNotifier();
+    });
+
+final focusHistorySearchProvider =
+    NotifierProvider<FocusHistorySearchNotifier, int>(() {
+      return FocusHistorySearchNotifier();
+    });
+
+class FocusHistorySearchNotifier extends Notifier<int> {
+  @override
+  int build() => 0;
+
+  void requestFocus() => state++;
+
+  void clear() => state = 0;
+}
+
+class ScrollToMessageNotifier extends Notifier<String?> {
+  @override
+  String? build() => null;
+
+  void scrollTo(String messageId) => state = messageId;
+
+  void clear() => state = null;
+}
+
+const _messageSearchService = MessageSearchService();
+
+final messageSearchResultsProvider = Provider<List<MessageSearchHit>>((ref) {
+  final query = ref.watch(conversationSearchProvider);
+  if (query.trim().isEmpty || !ref.watch(searchMessageContentsProvider)) {
+    return const [];
+  }
+
+  final db = ref.watch(databaseProvider);
+  return _messageSearchService.searchMessages(db, query: query);
+});

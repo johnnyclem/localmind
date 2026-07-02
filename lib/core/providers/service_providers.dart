@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dio/dio.dart';
 import '../constants/app_constants.dart';
-import '../../features/servers/data/repositories/server_api_service.dart';
+import '../../features/servers/data/server_api_service.dart';
 
 final dioProvider = Provider<Dio>((ref) {
   final dio = Dio(
@@ -96,3 +96,4 @@ class RedirectInterceptor extends Interceptor {
     );
   }
 }
+

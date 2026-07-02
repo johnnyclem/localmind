@@ -12,6 +12,10 @@ class Message {
   final MessageStatus status;
   final String? modelId;
   final int? tokenCount;
+  final int? inputTokenCount;
+  final double? tokensPerSecond;
+  final int? ttftMs;
+  final String? stopReason;
   final String? errorMessage;
   final List<String>? attachmentPaths;
   final int? generationTimeMs;
@@ -21,6 +25,11 @@ class Message {
   final bool isProcessing;
   final String? toolSessionId;
   final List<ToolEvent>? toolEvents;
+  final String? variantGroupId;
+  final int variantIndex;
+  final int threadOrder;
+  final bool isActiveVariant;
+  final String? parentMessageId;
 
   Message({
     required this.id,
@@ -31,6 +40,10 @@ class Message {
     this.status = MessageStatus.complete,
     this.modelId,
     this.tokenCount,
+    this.inputTokenCount,
+    this.tokensPerSecond,
+    this.ttftMs,
+    this.stopReason,
     this.errorMessage,
     this.attachmentPaths,
     this.generationTimeMs,
@@ -40,6 +53,11 @@ class Message {
     this.isProcessing = false,
     this.toolSessionId,
     this.toolEvents,
+    this.variantGroupId,
+    this.variantIndex = 0,
+    this.threadOrder = 0,
+    this.isActiveVariant = true,
+    this.parentMessageId,
   });
 
   Message copyWith({
@@ -51,6 +69,10 @@ class Message {
     MessageStatus? status,
     String? modelId,
     int? tokenCount,
+    int? inputTokenCount,
+    double? tokensPerSecond,
+    int? ttftMs,
+    String? stopReason,
     String? errorMessage,
     List<String>? attachmentPaths,
     int? generationTimeMs,
@@ -60,6 +82,11 @@ class Message {
     bool? isProcessing,
     String? toolSessionId,
     List<ToolEvent>? toolEvents,
+    String? variantGroupId,
+    int? variantIndex,
+    int? threadOrder,
+    bool? isActiveVariant,
+    String? parentMessageId,
   }) {
     return Message(
       id: id ?? this.id,
@@ -70,6 +97,10 @@ class Message {
       status: status ?? this.status,
       modelId: modelId ?? this.modelId,
       tokenCount: tokenCount ?? this.tokenCount,
+      inputTokenCount: inputTokenCount ?? this.inputTokenCount,
+      tokensPerSecond: tokensPerSecond ?? this.tokensPerSecond,
+      ttftMs: ttftMs ?? this.ttftMs,
+      stopReason: stopReason ?? this.stopReason,
       errorMessage: errorMessage ?? this.errorMessage,
       attachmentPaths: attachmentPaths ?? this.attachmentPaths,
       generationTimeMs: generationTimeMs ?? this.generationTimeMs,
@@ -79,6 +110,11 @@ class Message {
       isProcessing: isProcessing ?? this.isProcessing,
       toolSessionId: toolSessionId ?? this.toolSessionId,
       toolEvents: toolEvents ?? this.toolEvents,
+      variantGroupId: variantGroupId ?? this.variantGroupId,
+      variantIndex: variantIndex ?? this.variantIndex,
+      threadOrder: threadOrder ?? this.threadOrder,
+      isActiveVariant: isActiveVariant ?? this.isActiveVariant,
+      parentMessageId: parentMessageId ?? this.parentMessageId,
     );
   }
 }

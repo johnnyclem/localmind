@@ -3,12 +3,13 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:localmind/core/models/enums.dart';
 import 'package:localmind/core/providers/app_providers.dart';
-import 'package:localmind/core/providers/conversation_providers.dart' as conv;
-import 'package:localmind/core/providers/server_providers.dart';
+import 'package:localmind/features/conversations/providers/conversation_providers.dart'
+    as conv;
+import 'package:localmind/features/servers/providers/server_providers.dart';
 import 'chat_notifier.dart';
 import 'chat_params_providers.dart';
 import 'chat_service_providers.dart';
-import '../../../core/providers/model_selection_providers.dart';
+import 'model_selection_providers.dart';
 
 final smartRepliesProvider = FutureProvider<List<String>>((ref) async {
   final isStreaming = ref.watch(chatProvider.select((s) => s.isStreaming));

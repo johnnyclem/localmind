@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
-import 'package:localmind/core/components/server/server_icon_picker.dart';
 import 'package:localmind/l10n/app_localizations.dart';
 import '../../../../core/models/enums.dart';
 import '../../data/models/server.dart';
 import 'connection_status_indicator.dart';
+import 'server_icon_picker.dart';
 
 class ServerCard extends StatelessWidget {
   final Server server;

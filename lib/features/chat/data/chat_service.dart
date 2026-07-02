@@ -13,6 +13,7 @@ import '../../../core/logger/app_logger.dart';
 import '../../on_device/data/on_device_gemma_service.dart';
 import '../../on_device/data/on_device_chat_service.dart';
 import 'tools/adapters/tool_transport_adapter.dart';
+import '../utils/attachment_helpers.dart';
 import 'tools/adapters/openai_tool_adapter.dart';
 import 'tools/adapters/openrouter_tool_adapter.dart';
 import 'tools/adapters/ollama_tool_adapter.dart';
@@ -26,6 +27,7 @@ abstract class ChatService {
     List<McpIntegration>? integrations,
     List<ToolDefinition>? tools,
     String? previousResponseId,
+    bool continueGeneration = false,
   });
 
   void cancelStream();
@@ -155,10 +157,32 @@ class LMStudioChatService implements ChatService {
     List<McpIntegration>? integrations,
     List<ToolDefinition>? tools,
     String? previousResponseId,
+    bool continueGeneration = false,
   }) async* {
     _cancelToken = CancelToken();
 
-    final formattedInput = await _formatInputWithImages(messages);
+    final dynamic formattedInput;
+    if (continueGeneration &&
+        messages.isNotEmpty &&
+        messages.last.role == MessageRole.assistant) {
+      final assistantText = messages.last.content.trim();
+      final priorMessages = messages.sublist(0, messages.length - 1);
+      formattedInput = await _formatInputWithImages(priorMessages);
+      if (assistantText.isNotEmpty) {
+        formattedInput.add({
+          'type': 'text',
+          'content':
+              'Continue your previous assistant reply from exactly where it stopped. '
+              'Write ONLY the next part of the assistant reply. '
+              'Do not repeat earlier text, do not write a user message, '
+              'and do not restart the reply.\n\n'
+              'Assistant reply so far:\n<<<\n$assistantText\n>>>\n\n'
+              'Continuation:',
+        });
+      }
+    } else {
+      formattedInput = await _formatInputWithImages(messages);
+    }
 
     final body = <String, dynamic>{
       'model': modelId,
@@ -166,7 +190,6 @@ class LMStudioChatService implements ChatService {
       'temperature': params.temperature,
       'top_p': params.topP,
       'max_output_tokens': params.maxTokens,
-      'context_length': params.contextLength,
       'stream': true,
       'store': true,
     };
@@ -393,9 +416,11 @@ class LMStudioChatService implements ChatService {
       case 'error':
         final error = json['error'] as Map<String, dynamic>?;
         if (error != null) {
+          final type = error['type']?.toString();
+          final message = error['message']?.toString() ?? 'Unknown error';
           yield ChatResponse(
             type: ChatResponseType.error,
-            content: 'Error: ${error['message'] ?? 'Unknown error'}',
+            content: type != null ? '$type: $message' : message,
           );
         }
         break;
@@ -405,36 +430,58 @@ class LMStudioChatService implements ChatService {
   Future<dynamic> _formatInputWithImages(List<Message> messages) async {
     final formattedInputs = <Map<String, dynamic>>[];
     for (final m in messages) {
-      if (m.role != MessageRole.system) {
-        if (m.attachmentPaths != null && m.attachmentPaths!.isNotEmpty) {
-          formattedInputs.add({'type': 'text', 'content': m.content});
-          for (final path in m.attachmentPaths!) {
-            try {
-              final base64Image = await Isolate.run(() async {
-                final file = File(path);
-                if (await file.exists()) {
-                  final bytes = await file.readAsBytes();
-                  return base64Encode(bytes);
-                }
-                return null;
-              });
+      if (m.role == MessageRole.system) continue;
 
-              if (base64Image != null) {
-                final ext = path.split('.').last.toLowerCase();
-                final mimeType = (ext == 'png')
-                    ? 'image/png'
-                    : (ext == 'webp' ? 'image/webp' : 'image/jpeg');
-                formattedInputs.add({
-                  'type': 'image',
-                  'data_url': 'data:$mimeType;base64,$base64Image',
-                });
-              }
-            } catch (e) {
-              Log.error('Failed to read attachment for LMStudio format: $e');
-            }
+      var textContent = m.content;
+      final hasAttachments =
+          m.attachmentPaths != null && m.attachmentPaths!.isNotEmpty;
+
+      if (hasAttachments) {
+        for (final path in m.attachmentPaths!) {
+          if (!AttachmentHelpers.isTextPath(path)) continue;
+          final text = await AttachmentHelpers.readTextFile(path);
+          if (text != null) {
+            textContent = AttachmentHelpers.appendTextAttachment(
+              textContent,
+              AttachmentHelpers.fileNameOf(path),
+              text,
+            );
           }
-        } else {
-          formattedInputs.add({'type': 'text', 'content': m.content});
+        }
+      }
+
+      final isEmptyAssistant =
+          m.role == MessageRole.assistant && textContent.trim().isEmpty;
+
+      if (textContent.trim().isNotEmpty && !isEmptyAssistant) {
+        formattedInputs.add({'type': 'text', 'content': textContent});
+      }
+
+      if (hasAttachments) {
+        for (final path in m.attachmentPaths!) {
+          if (!AttachmentHelpers.isImagePath(path)) continue;
+          try {
+            final file = File(path);
+            if (!await file.exists()) continue;
+            final fileBytes = await file.readAsBytes();
+            final base64Image = await Isolate.run(() {
+              try {
+                return base64Encode(fileBytes);
+              } catch (_) {
+                return null;
+              }
+            });
+
+            if (base64Image != null) {
+              final mimeType = AttachmentHelpers.mimeTypeForImage(path);
+              formattedInputs.add({
+                'type': 'image',
+                'data_url': 'data:$mimeType;base64,$base64Image',
+              });
+            }
+          } catch (e) {
+            Log.error('Failed to read attachment for LMStudio format: $e');
+          }
         }
       }
     }
@@ -463,6 +510,7 @@ class OpenAICompatibleChatService implements ChatService {
     List<McpIntegration>? integrations,
     List<ToolDefinition>? tools,
     String? previousResponseId,
+    bool continueGeneration = false,
   }) async* {
     _cancelToken = CancelToken();
     final toolAdapter = OpenAiToolAdapter();
@@ -470,12 +518,19 @@ class OpenAICompatibleChatService implements ChatService {
     final apiMessages = messages.map(_messageToApiMap).toList();
     // Strip trailing empty assistant messages to avoid "prefill incompatible
     // with enable_thinking" errors from servers running thinking models
-    while (apiMessages.isNotEmpty &&
-        apiMessages.last['role'] == 'assistant' &&
-        (apiMessages.last['content'] == null ||
-            (apiMessages.last['content'] is String &&
-                (apiMessages.last['content'] as String).isEmpty))) {
-      apiMessages.removeLast();
+    if (!continueGeneration) {
+      while (apiMessages.isNotEmpty &&
+          apiMessages.last['role'] == 'assistant' &&
+          (apiMessages.last['content'] == null ||
+              (apiMessages.last['content'] is String &&
+                  (apiMessages.last['content'] as String).isEmpty))) {
+        apiMessages.removeLast();
+      }
+    } else if (apiMessages.isNotEmpty &&
+        apiMessages.last['role'] == 'assistant') {
+      // Keep the assistant prefill for continuation; ensure content is a string.
+      final last = apiMessages.last;
+      last['content'] = (last['content'] as String?) ?? '';
     }
 
     final body = {
@@ -697,6 +752,7 @@ class OllamaChatService implements ChatService {
     List<McpIntegration>? integrations,
     List<ToolDefinition>? tools,
     String? previousResponseId,
+    bool continueGeneration = false,
   }) async* {
     _cancelToken = CancelToken();
     final toolAdapter = OllamaToolAdapter();
@@ -818,6 +874,7 @@ class OpenRouterChatService implements ChatService {
     List<McpIntegration>? integrations,
     List<ToolDefinition>? tools,
     String? previousResponseId,
+    bool continueGeneration = false,
   }) async* {
     _cancelToken = CancelToken();
     final toolAdapter = OpenRouterToolAdapter();

@@ -660,6 +660,14 @@
   "@enable_smart_reply": {
     "description": "Toggle for on-device smart reply suggestions"
   },
+  "ai_user_response_enabled": "AI user message button",
+  "@ai_user_response_enabled": {
+    "description": "Settings toggle for AI-generated user message button in chat input"
+  },
+  "ai_user_response_tooltip": "Generate user message with AI",
+  "@ai_user_response_tooltip": {
+    "description": "Tooltip for the AI user message button next to send"
+  },
   "streaming_responses": "Streaming Responses",
   "@streaming_responses": {
     "description": "Toggle for streaming responses"
@@ -824,7 +832,7 @@
   "@stop_generation_tooltip": {
     "description": "Tooltip for stop button"
   },
-  "attach_images_tooltip": "Attach images",
+  "attach_images_tooltip": "Attach images or text",
   "@attach_images_tooltip": {
     "description": "Tooltip for attach button"
   },
@@ -2148,6 +2156,46 @@
       }
     }
   },
+  "unload_all_models": "Unload all",
+  "@unload_all_models": {
+    "description": "Button to unload all loaded models"
+  },
+  "loaded_models_count": "{count} loaded",
+  "@loaded_models_count": {
+    "description": "Count of currently loaded models",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "all_models_unloaded": "All models unloaded",
+  "@all_models_unloaded": {
+    "description": "Snackbar after unloading all models"
+  },
+  "branch_chat": "Branch chat",
+  "@branch_chat": {
+    "description": "Branch conversation from a message"
+  },
+  "branch_chat_desc": "Start a new conversation from this message",
+  "@branch_chat_desc": {
+    "description": "Branch chat option description"
+  },
+  "edit_assistant_message_desc": "Edit the assistant response text.",
+  "@edit_assistant_message_desc": {
+    "description": "Description shown when editing an assistant message"
+  },
+  "switch_to_model": "Switch to {modelName}",
+  "@switch_to_model": {
+    "description": "Tooltip for switching to the model used in a message",
+    "placeholders": {
+      "modelName": {
+        "type": "String",
+        "example": "Gemma 4"
+      }
+    }
+  },
   "download_notification_title": "Downloading {modelName}...",
   "@download_notification_title": {
     "description": "Download notification title",
@@ -2455,5 +2503,180 @@
   "tool_status_rejected": "Rejected",
   "tool_status_running": "Running",
   "tool_status_done": "Done",
-  "tool_status_failed": "Failed"
+  "tool_status_failed": "Failed",
+  "model_favorite_toggle": "Toggle favorite",
+  "@model_favorite_toggle": {
+    "description": "Long-press menu option to favorite a model"
+  },
+  "model_note_label": "Note",
+  "@model_note_label": {
+    "description": "Label for model note text field"
+  },
+  "model_note_hint": "Add a note about this model…",
+  "@model_note_hint": {
+    "description": "Hint for model note text field"
+  },
+  "unload_models_before_load": "Unload all models before loading a new one",
+  "@unload_models_before_load": {
+    "description": "Setting to unload every loaded model instance before loading another"
+  },
+  "export_all_data": "Export all data",
+  "@export_all_data": {
+    "description": "Export conversations and personas to a JSON file"
+  },
+  "import_all_data": "Import all data",
+  "@import_all_data": {
+    "description": "Import conversations and personas from a JSON backup"
+  },
+  "export_data_success": "Backup exported successfully",
+  "@export_data_success": {
+    "description": "Snackbar after exporting backup"
+  },
+  "import_data_success": "Backup imported successfully",
+  "@import_data_success": {
+    "description": "Snackbar after importing backup"
+  },
+  "import_data_failed": "Failed to import backup: {error}",
+  "@import_data_failed": {
+    "description": "Snackbar when import fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Invalid format"
+      }
+    }
+  },
+  "import_data_confirm": "Import conversations and custom personas from this backup? Existing items with the same IDs will be updated.",
+  "import_settings_confirm": "Replace current settings with the imported backup?",
+  "export_conversations": "Export conversations",
+  "import_conversations": "Import conversations",
+  "export_personas": "Export personas",
+  "import_personas": "Import personas",
+  "export_settings": "Export settings",
+  "import_settings": "Import settings",
+  "export_all_zip": "Export all (ZIP)",
+  "import_all_zip": "Import all (ZIP)",
+  "duplicate_chat": "Duplicate chat",
+  "duplicate_chat_success": "Chat duplicated",
+  "move_to_folder": "Move to folder",
+  "remove_from_folder": "Remove from folder",
+  "create_folder": "Create folder",
+  "new_folder": "New folder",
+  "folder_name_hint": "Folder name",
+  "all_chats": "All",
+  "unfiled_chats": "Unfiled",
+  "create": "Create",
+  "server_path_prefix_label": "API path prefix",
+  "server_path_prefix_hint": "/your-secret-token",
+  "search_message_contents": "Search message contents",
+  "message_search_results": "Message matches",
+  "saved_messages_title": "Saved Messages",
+  "nav_saved_messages": "Saved Messages",
+  "saved_messages_empty": "No saved messages yet. Bookmark a message from its options menu.",
+  "save_message": "Save message",
+  "message_saved": "Message saved",
+  "token_count": "{count} tokens",
+  "@token_count": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "estimated_token_count": "~{count} tokens (estimated)",
+  "@estimated_token_count": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "test_tts_section_title": "Test voice",
+  "test_tts_hint": "Enter text to hear the current TTS engine…",
+  "test_speak_button": "Speak",
+  "scroll_to_bottom": "Scroll to bottom",
+  "generate_ai_response": "Generate AI response",
+  "no_response": "No response",
+  "export": "Export",
+  "import": "Import",
+  "conversations_label": "Conversations",
+  "personas_label": "Personas",
+  "settings_label": "Settings",
+  "export_conversation": "Export conversation",
+  "tts_process_markdown": "Process markdown for speech",
+  "tts_process_markdown_desc": "Strip formatting like **bold** before reading aloud",
+  "tts_skip_seconds": "Skip interval",
+  "tts_skip_seconds_desc": "Forward and rewind jump size during playback",
+  "tts_skip_seconds_value": "{seconds}s",
+  "@tts_skip_seconds_value": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "preview_system_prompts": "Preview system prompts",
+  "welcome_message_1": "What can I help you with today?",
+  "welcome_message_2": "Ask me anything — I'm ready when you are.",
+  "welcome_message_3": "Start a conversation below.",
+  "welcome_message_4": "Need ideas? Try one of the quick prompts.",
+  "temporary_chat": "Temporary chat",
+  "temporary_chat_desc": "Chats aren't saved to history.",
+  "temporary_chat_banner": "Temporary chat — not saved to history",
+  "temporary_chat_save_warning_title": "Save message in temporary chat?",
+  "temporary_chat_save_warning_body": "This chat is temporary and hidden from history. The saved message will still appear in Saved Messages.",
+  "save_to_history": "Save to history",
+  "share_conversation": "Share conversation",
+  "download_tts_audio": "Download audio",
+  "tts_download_unavailable": "Download is only available for Piper and Kitten TTS",
+  "tts_download_no_audio": "No audio available to download yet",
+  "tts_download_success": "Audio saved",
+  "return_to_chat": "Return to chat",
+  "return_to_temp_chat": "Return to temporary chat",
+  "insert_saved_message": "Insert saved message",
+  "insert_saved_message_desc": "Choose a saved message to add to your input",
+  "model_info": "Model info",
+  "model_name": "Model name",
+  "model_identifier": "Identifier",
+  "not_available": "Not available",
+  "save_message_folders": "Save message",
+  "remove_from_saved": "Remove from saved",
+  "message_already_saved": "Saved",
+  "stream_ttft": "Time to first token",
+  "stream_tokens_per_sec": "Tokens per second",
+  "stream_stop_reason": "Stop reason",
+  "stream_input_tokens": "Input tokens",
+  "stream_output_tokens": "Output tokens",
+  "stream_generation_time": "Generation time",
+  "attach_image": "Image",
+  "attach_text_document": "Text document",
+  "add_attachment": "Add attachment",
+  "photo_permission_denied": "Photo access is required to attach images",
+  "characters_label": "Characters",
+  "exit_temporary_chat_title": "Exit temporary chat?",
+  "exit_temporary_chat_body": "This will discard the current temporary chat and return to a new chat.",
+  "saved_message_temp_snap_unavailable": "This message was saved from a temporary chat and can't be opened in its original conversation.",
+  "filter_title": "Filter",
+  "filter_pinned": "Pinned",
+  "filter_archived": "Archived",
+  "filter_temp_chats": "Temporary chats",
+  "filter_user_messages": "User messages",
+  "filter_assistant_messages": "Assistant messages",
+  "archive_chat": "Archive",
+  "unarchive_chat": "Unarchive",
+  "conversation_message_count": "{count, plural, one{1 message} other{{count} messages}}",
+  "@conversation_message_count": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "conversation_character_count": "{count} chars",
+  "@conversation_character_count": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "generate_title_with_ai": "Generate with AI",
+  "generating_title": "Generating...",
+  "generate_title_failed": "Could not generate a title"
 }

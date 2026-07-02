@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:localmind/core/providers/storage_providers.dart';
-import 'package:localmind/features/on_device/data/repositories/imported_gguf_model_repository.dart';
+import 'package:localmind/features/on_device/data/imported_gguf_model_repository.dart';
 import 'package:localmind/features/on_device/data/models/on_device_model.dart';
 import 'package:localmind/features/on_device/data/on_device_gemma_service.dart';
 import 'package:localmind/features/on_device/providers/on_device_providers.dart';

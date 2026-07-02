@@ -37,9 +37,13 @@ class AppSettings {
   final double ttsSpeed;
   final KittenTtsModelVariant kittenTtsModelVariant;
   final bool autoSpeakEnabled;
+  final bool ttsProcessMarkdown;
+  final int ttsSkipSeconds;
   final bool smartReplyEnabled;
+  final bool aiUserResponseEnabled;
   final String? localeCode;
   final String? huggingFaceToken;
+  final bool unloadModelsBeforeLoad;
 
   AppSettings({
     this.temperature = 0.7,
@@ -68,9 +72,13 @@ class AppSettings {
     this.ttsSpeed = 1.0,
     this.kittenTtsModelVariant = KittenTtsModelVariant.nanoInt8,
     this.autoSpeakEnabled = false,
+    this.ttsProcessMarkdown = true,
+    this.ttsSkipSeconds = 10,
     this.smartReplyEnabled = true,
+    this.aiUserResponseEnabled = false,
     this.localeCode,
     this.huggingFaceToken,
+    this.unloadModelsBeforeLoad = false,
   });
 
   AppSettings copyWith({
@@ -100,9 +108,13 @@ class AppSettings {
     double? ttsSpeed,
     KittenTtsModelVariant? kittenTtsModelVariant,
     bool? autoSpeakEnabled,
+    bool? ttsProcessMarkdown,
+    int? ttsSkipSeconds,
     bool? smartReplyEnabled,
+    bool? aiUserResponseEnabled,
     Object? localeCode = _unset,
     Object? huggingFaceToken = _unset,
+    bool? unloadModelsBeforeLoad,
   }) {
     return AppSettings(
       temperature: temperature ?? this.temperature,
@@ -137,13 +149,19 @@ class AppSettings {
       kittenTtsModelVariant:
           kittenTtsModelVariant ?? this.kittenTtsModelVariant,
       autoSpeakEnabled: autoSpeakEnabled ?? this.autoSpeakEnabled,
+      ttsProcessMarkdown: ttsProcessMarkdown ?? this.ttsProcessMarkdown,
+      ttsSkipSeconds: ttsSkipSeconds ?? this.ttsSkipSeconds,
       smartReplyEnabled: smartReplyEnabled ?? this.smartReplyEnabled,
+      aiUserResponseEnabled:
+          aiUserResponseEnabled ?? this.aiUserResponseEnabled,
       localeCode: identical(localeCode, _unset)
           ? this.localeCode
           : localeCode as String?,
       huggingFaceToken: identical(huggingFaceToken, _unset)
           ? this.huggingFaceToken
           : huggingFaceToken as String?,
+      unloadModelsBeforeLoad:
+          unloadModelsBeforeLoad ?? this.unloadModelsBeforeLoad,
     );
   }
 
@@ -175,9 +193,13 @@ class AppSettings {
       'ttsSpeed': ttsSpeed,
       'kittenTtsModelVariant': kittenTtsModelVariant.name,
       'autoSpeakEnabled': autoSpeakEnabled,
+      'ttsProcessMarkdown': ttsProcessMarkdown,
+      'ttsSkipSeconds': ttsSkipSeconds,
       'smartReplyEnabled': smartReplyEnabled,
+      'aiUserResponseEnabled': aiUserResponseEnabled,
       'localeCode': localeCode,
       'huggingFaceToken': huggingFaceToken,
+      'unloadModelsBeforeLoad': unloadModelsBeforeLoad,
     };
   }
 
@@ -209,9 +231,13 @@ class AppSettings {
       ttsSpeed: map['ttsSpeed']?.toDouble() ?? 1.0,
       kittenTtsModelVariant: _parseKittenVariant(map['kittenTtsModelVariant']),
       autoSpeakEnabled: map['autoSpeakEnabled'] ?? false,
+      ttsProcessMarkdown: map['ttsProcessMarkdown'] ?? true,
+      ttsSkipSeconds: _parseTtsSkipSeconds(map['ttsSkipSeconds']),
       smartReplyEnabled: map['smartReplyEnabled'] ?? true,
+      aiUserResponseEnabled: map['aiUserResponseEnabled'] ?? false,
       localeCode: map['localeCode'] as String?,
       huggingFaceToken: map['huggingFaceToken'] as String?,
+      unloadModelsBeforeLoad: map['unloadModelsBeforeLoad'] ?? false,
     );
   }
 
@@ -242,6 +268,12 @@ class AppSettings {
       } catch (_) {}
     }
     return KittenTtsModelVariant.nanoInt8;
+  }
+
+  static int _parseTtsSkipSeconds(dynamic value) {
+    const allowed = {5, 10, 15, 30};
+    if (value is int && allowed.contains(value)) return value;
+    return 10;
   }
 
   String toJson() => json.encode(toMap());
