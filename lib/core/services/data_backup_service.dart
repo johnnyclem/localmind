@@ -160,7 +160,7 @@ class DataBackupService {
       'savedMessages': _exportSavedMessages(store),
       'savedMessageFolders': _exportSavedMessageFolders(store),
       'servers': _exportServers(store),
-      if (modelMetadata != null) 'modelMetadata': modelMetadata,
+      'modelMetadata': ?modelMetadata,
     };
   }
 

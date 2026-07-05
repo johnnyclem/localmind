@@ -239,8 +239,9 @@ class _MessageList extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final selectionMode = ref.watch(messageSelectionModeProvider);
     final selectedIds = ref.watch(selectedMessageIdsProvider);
-    final showSystemMessages =
-        ref.watch(settingsProvider.select((s) => s.showSystemMessagesInChat));
+    final showSystemMessages = ref.watch(
+      settingsProvider.select((s) => s.showSystemMessagesInChat),
+    );
     final visibleMessages = <Message>[];
 
     // The streaming message only belongs at the end of the currently
@@ -248,7 +249,8 @@ class _MessageList extends ConsumerWidget {
     // to it — otherwise the user has cycled to a different variant while
     // a sibling variant is still generating in the background, and the
     // live bubble must not be appended to whatever branch is now on screen.
-    final streamingBelongsToActiveTimeline = streamingMessage != null &&
+    final streamingBelongsToActiveTimeline =
+        streamingMessage != null &&
         messages.any((m) => m.id == streamingMessage!.id);
 
     for (final message in messages) {
@@ -272,15 +274,13 @@ class _MessageList extends ConsumerWidget {
         top: 16,
         bottom: 120 + (hasSmartReplies ? 64 : 0) + bottomInset,
       ),
-      itemCount:
-          visibleMessages.length +
-          (showTrailingStreamingBubble ? 1 : 0),
+      itemCount: visibleMessages.length + (showTrailingStreamingBubble ? 1 : 0),
       itemBuilder: (context, index) {
         if (showTrailingStreamingBubble && index == visibleMessages.length) {
           return ChatBubble(
             key: ValueKey(streamingMessage!.id),
             message: streamingMessage!,
-            allMessages: this.allMessages,
+            allMessages: allMessages,
             isStreaming: true,
             onModelTap: onModelPicker,
           );
@@ -288,14 +288,14 @@ class _MessageList extends ConsumerWidget {
 
         final message = visibleMessages[index];
         final isLast = index == visibleMessages.length - 1;
-        final itemKey =
-            messageKeys.putIfAbsent(message.id, GlobalKey.new);
+        final itemKey = messageKeys.putIfAbsent(message.id, GlobalKey.new);
 
         final bubble = ChatBubble(
           key: itemKey,
           message: message,
           allMessages: this.allMessages,
-          isStreaming: isLast &&
+          isStreaming:
+              isLast &&
               showTrailingStreamingBubble &&
               message.id == streamingMessage?.id,
           onRetry: () => onRetry(message.id),
@@ -303,24 +303,22 @@ class _MessageList extends ConsumerWidget {
           onEdit: message.role == MessageRole.user
               ? () => onEdit(message.id, message.content)
               : message.role == MessageRole.assistant
-                  ? () => onEditAssistant(message.id, message.content)
-                  : null,
+              ? () => onEditAssistant(message.id, message.content)
+              : null,
           onBranch: () => onBranch(message.id),
           onContinue: message.role == MessageRole.assistant && isLast
               ? () => onContinue(message.id)
               : null,
-          onCycleVariant: (direction) =>
-              onCycleVariant(message.id, direction),
+          onCycleVariant: (direction) => onCycleVariant(message.id, direction),
           onModelTap: onModelPicker,
-          onModelLongPress: message.modelId != null &&
+          onModelLongPress:
+              message.modelId != null &&
                   message.role == MessageRole.assistant &&
                   onModelLongPress != null
               ? () => onModelLongPress!(message.modelId!)
               : null,
           onSave: onSave,
-          onShare: onShare == null
-              ? null
-              : () => onShare!(message),
+          onShare: onShare == null ? null : () => onShare!(message),
         );
 
         return Column(

@@ -154,7 +154,7 @@ class SavedMessagesScreen extends ConsumerWidget {
               return ListView.separated(
                 padding: const EdgeInsets.only(bottom: 8),
                 itemCount: messages.length,
-                separatorBuilder: (_, __) => Divider(
+                separatorBuilder: (_, _) => Divider(
                   height: 1,
                   color: isDark
                       ? const Color(0xFF2A2A2A)

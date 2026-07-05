@@ -115,7 +115,7 @@ class _EmptyStateState extends State<EmptyState>
                 duration: const Duration(milliseconds: 400),
                 layoutBuilder: (current, previous) => Stack(
                   alignment: Alignment.center,
-                  children: [...previous, if (current != null) current],
+                  children: [...previous, ?current],
                 ),
                 child: Text(
                   _welcomeMessages(l10n)[_welcomeIndex],

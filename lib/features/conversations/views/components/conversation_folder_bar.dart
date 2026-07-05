@@ -52,7 +52,7 @@ class ConversationFolderBar extends ConsumerWidget {
         onCreateFolder: () => _createFolder(context, ref),
       ),
       loading: () => const SizedBox(height: 44),
-      error: (_, __) => const SizedBox.shrink(),
+      error: (_, _) => const SizedBox.shrink(),
     );
   }
 }

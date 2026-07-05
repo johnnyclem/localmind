@@ -55,7 +55,7 @@ class SavedMessageFolderBar extends ConsumerWidget {
         showCreateFolder: showCreateFolder,
       ),
       loading: () => const SizedBox(height: 44),
-      error: (_, __) => const SizedBox.shrink(),
+      error: (_, _) => const SizedBox.shrink(),
     );
   }
 }

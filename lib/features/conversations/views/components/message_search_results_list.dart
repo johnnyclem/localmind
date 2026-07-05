@@ -33,7 +33,7 @@ class MessageSearchResultsList extends ConsumerWidget {
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           itemCount: hits.length,
-          separatorBuilder: (_, __) => const Divider(height: 1, indent: 16),
+          separatorBuilder: (_, _) => const Divider(height: 1, indent: 16),
           itemBuilder: (context, index) {
             final hit = hits[index];
             return ListTile(
