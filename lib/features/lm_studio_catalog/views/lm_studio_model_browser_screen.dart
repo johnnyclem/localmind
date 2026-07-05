@@ -341,7 +341,7 @@ class _ModelListTile extends StatelessWidget {
                         width: 40,
                         height: 40,
                         fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) =>
+                        errorBuilder: (_, _, _) =>
                             _FallbackIcon(model: model),
                       )
                     : _FallbackIcon(model: model),
@@ -689,14 +689,14 @@ class _ModelDetailPanelState extends ConsumerState<_ModelDetailPanel> {
                                 Icon(Icons.favorite_border,
                                     size: 16, color: theme.hintColor),
                                 const SizedBox(width: 4),
-                                Text('${_formatCount(widget.model.likes)}'),
+                                Text(_formatCount(widget.model.likes)),
                                 const SizedBox(width: 16),
                               ],
                               if (widget.model.downloads > 0) ...[
                                 Icon(Icons.download_outlined,
                                     size: 16, color: theme.hintColor),
                                 const SizedBox(width: 4),
-                                Text('${_formatCount(widget.model.downloads)}'),
+                                Text(_formatCount(widget.model.downloads)),
                               ],
                             ],
                           ),

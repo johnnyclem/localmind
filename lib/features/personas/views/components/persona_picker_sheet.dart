@@ -212,7 +212,7 @@ class _PersonaPickerSheetState extends ConsumerState<PersonaPickerSheet> {
                   return ListView.separated(
                     shrinkWrap: true,
                     itemCount: personas.length,
-                    separatorBuilder: (_, __) => const Divider(height: 1),
+                    separatorBuilder: (_, _) => const Divider(height: 1),
                     itemBuilder: (context, index) {
                       final persona = personas[index];
                       final selected = _selectedIds.contains(persona.id);

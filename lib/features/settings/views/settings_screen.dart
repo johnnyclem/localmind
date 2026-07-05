@@ -16,6 +16,7 @@ import '../../on_device/providers/on_device_providers.dart';
 import '../../personas/providers/personas_providers.dart';
 import '../../servers/providers/server_providers.dart';
 import '../data/models/app_settings.dart';
+import 'data_backup_actions.dart';
 
 
 class SettingsViews extends ConsumerWidget {

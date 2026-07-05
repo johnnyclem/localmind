@@ -137,7 +137,7 @@ class _LmDownloadsSheet extends ConsumerWidget {
                 child: ListView.separated(
                   shrinkWrap: true,
                   itemCount: jobs.length,
-                  separatorBuilder: (_, __) => const Divider(height: 1),
+                  separatorBuilder: (_, _) => const Divider(height: 1),
                   itemBuilder: (context, index) {
                     final job = jobs[index];
                     return _DownloadJobTile(job: job);
