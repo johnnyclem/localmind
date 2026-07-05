@@ -29,6 +29,9 @@ import '../../../servers/providers/server_providers.dart';
 
 import '../../../stt/providers/stt_providers.dart';
 import '../../providers/chat_providers.dart';
+import '../../utils/attachment_helpers.dart';
+import '../../utils/image_upload_utils.dart';
+import 'image_preview_dialog.dart';
 import '../../../saved_messages/views/components/saved_message_picker_sheet.dart';
 
 
@@ -51,6 +54,8 @@ class ChatInputBar extends ConsumerStatefulWidget {
 
     this.focusNode,
 
+    this.keyboardIncognito = false,
+
   });
 
 
@@ -67,6 +72,8 @@ class ChatInputBar extends ConsumerStatefulWidget {
 
   final FocusNode? focusNode;
 
+  final bool keyboardIncognito;
+
 
 
   @override
@@ -81,13 +88,22 @@ class ChatInputBarState extends ConsumerState<ChatInputBar>
 
     with TickerProviderStateMixin {
 
-  final _controller = TextEditingController();
-
+  final _normalController = TextEditingController();
+  final _incognitoController = TextEditingController();
   late final FocusNode _focusNode;
+  late final FocusNode _incognitoFocus;
+
+  TextEditingController get _controller =>
+      widget.keyboardIncognito ? _incognitoController : _normalController;
+
+  FocusNode get _activeFocus =>
+      widget.keyboardIncognito ? _incognitoFocus : _focusNode;
 
   final List<File> _attachedFiles = [];
 
   bool _isGeneratingAiUser = false;
+  bool _sendAsAssistant = false;
+  bool _holdTriggered = false;
 
   late AnimationController _sendButtonAnimController;
 
@@ -95,17 +111,21 @@ class ChatInputBarState extends ConsumerState<ChatInputBar>
 
   late AnimationController _micAnimController;
 
+  /// Drives the clockwise ring drawn around the send button while it's held
+  /// down. Reaching the end (3s) triggers AI-generated-user-message instead
+  /// of the normal tap/short-hold actions.
+  late AnimationController _holdProgressController;
+
   String _preSpeechText = '';
 
 
 
   @override
-
   void initState() {
-
     super.initState();
 
     _focusNode = widget.focusNode ?? FocusNode();
+    _incognitoFocus = FocusNode();
 
     _sendButtonAnimController = AnimationController(
 
@@ -129,6 +149,40 @@ class ChatInputBarState extends ConsumerState<ChatInputBar>
 
     );
 
+    _holdProgressController = AnimationController(
+      duration: _holdDuration,
+      vsync: this,
+    )..addStatusListener((status) {
+        if (status == AnimationStatus.completed) {
+          _holdTriggered = true;
+          _holdProgressController.value = 0;
+          _handleGenerateAiUser();
+        }
+      });
+
+  }
+
+
+
+  @override
+  void didUpdateWidget(ChatInputBar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.keyboardIncognito == widget.keyboardIncognito) return;
+
+    final text = _normalController.text;
+    final selection = _normalController.selection;
+
+    if (widget.keyboardIncognito) {
+      _incognitoController.value = TextEditingValue(text: text, selection: selection);
+      if (_focusNode.hasFocus) {
+        _incognitoFocus.requestFocus();
+      }
+    } else {
+      _normalController.value = TextEditingValue(text: text, selection: selection);
+      if (_incognitoFocus.hasFocus) {
+        _focusNode.requestFocus();
+      }
+    }
   }
 
 
@@ -137,17 +191,19 @@ class ChatInputBarState extends ConsumerState<ChatInputBar>
 
   void dispose() {
 
-    _controller.dispose();
+    _normalController.dispose();
+    _incognitoController.dispose();
 
     if (widget.focusNode == null) {
-
       _focusNode.dispose();
-
     }
+    _incognitoFocus.dispose();
 
     _sendButtonAnimController.dispose();
 
     _micAnimController.dispose();
+
+    _holdProgressController.dispose();
 
     super.dispose();
 
@@ -175,7 +231,7 @@ class ChatInputBarState extends ConsumerState<ChatInputBar>
 
     setState(() {});
 
-    _focusNode.requestFocus();
+    _activeFocus.requestFocus();
 
     _controller.selection = TextSelection.fromPosition(
 
@@ -249,12 +305,20 @@ class ChatInputBarState extends ConsumerState<ChatInputBar>
 
     if (images.isEmpty) return;
 
-
+    final settings = ref.read(settingsProvider);
+    final compressed = <File>[];
+    for (final image in images) {
+      compressed.add(
+        await ImageUploadUtils.prepareImageFile(
+          File(image.path),
+          enabled: settings.imageCompressionEnabled,
+          level: settings.imageCompressionLevel,
+        ),
+      );
+    }
 
     setState(() {
-
-      _attachedFiles.addAll(images.map((x) => File(x.path)));
-
+      _attachedFiles.addAll(compressed);
     });
 
     widget.onAttach?.call(_attachedFiles);
@@ -326,35 +390,20 @@ class ChatInputBarState extends ConsumerState<ChatInputBar>
           children: [
 
             ListTile(
-
-              leading: const Icon(Icons.image_outlined),
-
-              title: Text(l10n.attach_image),
-
-              onTap: () {
-
-                Navigator.pop(ctx);
-
-                _pickImages();
-
-              },
-
-            ),
-
-            ListTile(
-
               leading: const Icon(Icons.description_outlined),
-
               title: Text(l10n.attach_text_document),
-
               onTap: () {
-
                 Navigator.pop(ctx);
-
                 _pickTextDocument();
-
               },
-
+            ),
+            ListTile(
+              leading: const Icon(Icons.image_outlined),
+              title: Text(l10n.attach_image),
+              onTap: () {
+                Navigator.pop(ctx);
+                _pickImages();
+              },
             ),
 
             ListTile(
@@ -551,16 +600,43 @@ class ChatInputBarState extends ConsumerState<ChatInputBar>
 
     Haptics.vibrate(HapticsType.medium);
 
-    widget.onSend(text, attachments: List.from(_attachedFiles));
+    if (_sendAsAssistant) {
+      ref.read(chatProvider.notifier).insertMessageWithoutGenerating(
+            text,
+            role: MessageRole.assistant,
+            attachments: List.from(_attachedFiles),
+          );
+    } else {
+      widget.onSend(text, attachments: List.from(_attachedFiles));
+    }
 
     _controller.clear();
 
     setState(() {
 
       _attachedFiles.clear();
+      _sendAsAssistant = false;
 
     });
 
+  }
+
+  void _handleInsertWithoutGenerating() {
+    final text = _controller.text.trim();
+    if (text.isEmpty && _attachedFiles.isEmpty) return;
+
+    Haptics.vibrate(HapticsType.medium);
+    ref.read(chatProvider.notifier).insertMessageWithoutGenerating(
+          text,
+          role: _sendAsAssistant ? MessageRole.assistant : MessageRole.user,
+          attachments: List.from(_attachedFiles),
+        );
+
+    _controller.clear();
+    setState(() {
+      _attachedFiles.clear();
+      _sendAsAssistant = false;
+    });
   }
 
 
@@ -585,32 +661,133 @@ class ChatInputBarState extends ConsumerState<ChatInputBar>
     }
   }
 
-  Widget _buildAiUserButton(bool isConnected, ThemeData theme) {
+  Widget _buildRoleSwapButton(ThemeData theme) {
     final l10n = AppLocalizations.of(context)!;
-    final enabled = isConnected && widget.enabled && !widget.isStreaming;
 
-    return IconButton(
-      visualDensity: VisualDensity.compact,
-      padding: const EdgeInsets.all(8),
-      constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
-      tooltip: l10n.ai_user_response_tooltip,
-      onPressed: enabled && !_isGeneratingAiUser ? _handleGenerateAiUser : null,
-      icon: _isGeneratingAiUser
-          ? SizedBox(
-              width: 18,
-              height: 18,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                color: theme.colorScheme.primary,
-              ),
-            )
-          : Icon(
-              Icons.person_outline,
-              size: 22,
-              color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
-            ),
+    return SizedBox(
+      width: 36,
+      height: 36,
+      child: IconButton(
+        padding: EdgeInsets.zero,
+        tooltip: _sendAsAssistant
+            ? l10n.send_as_assistant_tooltip
+            : l10n.send_as_user_tooltip,
+        onPressed: widget.enabled
+            ? () {
+                Haptics.vibrate(HapticsType.light);
+                setState(() => _sendAsAssistant = !_sendAsAssistant);
+              }
+            : null,
+        icon: Icon(
+          Icons.swap_horiz_rounded,
+          size: 20,
+          color: _sendAsAssistant
+              ? theme.colorScheme.primary
+              : theme.colorScheme.onSurface.withValues(alpha: 0.7),
+        ),
+      ),
     );
   }
+
+  String _effortLabel(ReasoningEffort effort) {
+    final l10n = AppLocalizations.of(context)!;
+    return switch (effort) {
+      ReasoningEffort.low => l10n.reasoning_effort_low,
+      ReasoningEffort.medium => l10n.reasoning_effort_medium,
+      ReasoningEffort.high => l10n.reasoning_effort_high,
+    };
+  }
+
+  Widget _buildThinkButton(ThemeData theme) {
+    final selectedModel = ref.watch(selectedModelProvider);
+    if (selectedModel?.supportsReasoning != true) {
+      return const SizedBox.shrink();
+    }
+
+    final l10n = AppLocalizations.of(context)!;
+    final reasoningConfig = ref.watch(chatReasoningConfigProvider);
+    final enabled = reasoningConfig.enabled;
+    final activeColor = theme.colorScheme.primary;
+    final fgColor = enabled
+        ? activeColor
+        : theme.colorScheme.onSurface.withValues(alpha: 0.6);
+
+    return Padding(
+      padding: const EdgeInsets.only(left: 6),
+      child: Container(
+        height: 32,
+        decoration: BoxDecoration(
+          color: enabled
+              ? activeColor.withValues(alpha: 0.15)
+              : theme.colorScheme.onSurface.withValues(alpha: 0.06),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            InkWell(
+              borderRadius: BorderRadius.circular(16),
+              onTap: () {
+                Haptics.vibrate(HapticsType.light);
+                ref
+                    .read(chatReasoningConfigProvider.notifier)
+                    .setEnabled(!enabled);
+              },
+              child: Padding(
+                padding: const EdgeInsetsDirectional.only(
+                  start: 10,
+                  end: 4,
+                  top: 6,
+                  bottom: 6,
+                ),
+                child: Icon(
+                  enabled ? Icons.check_box : Icons.check_box_outline_blank,
+                  size: 18,
+                  color: fgColor,
+                ),
+              ),
+            ),
+            PopupMenuButton<ReasoningEffort>(
+              tooltip: '',
+              padding: EdgeInsets.zero,
+              onSelected: (effort) {
+                Haptics.vibrate(HapticsType.light);
+                ref
+                    .read(chatReasoningConfigProvider.notifier)
+                    .setEffort(effort);
+              },
+              itemBuilder: (context) => ReasoningEffort.values
+                  .map(
+                    (effort) => PopupMenuItem(
+                      value: effort,
+                      child: Text(_effortLabel(effort)),
+                    ),
+                  )
+                  .toList(),
+              child: Padding(
+                padding: const EdgeInsetsDirectional.only(
+                  end: 12,
+                  top: 6,
+                  bottom: 6,
+                ),
+                child: Text(
+                  '${l10n.think_button_label} (${_effortLabel(reasoningConfig.effort)})',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: fgColor,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  static const _holdDuration = Duration(milliseconds: 3000);
+  static const _insertHoldThreshold = 500 / 3000;
 
   Widget _buildActionButton(bool canSend, ThemeData theme) {
 
@@ -628,100 +805,141 @@ class ChatInputBarState extends ConsumerState<ChatInputBar>
 
         : theme.colorScheme.onPrimary;
 
+    final connectionStatus = ref.watch(connectionStatusProvider);
+    final isConnected = connectionStatus == ConnectionStatus.connected;
+    final aiUserHoldEnabled =
+        ref.watch(settingsProvider.select((s) => s.aiUserResponseEnabled)) &&
+            isConnected &&
+            widget.enabled;
 
+    void handleTapDown() {
+      _holdTriggered = false;
+      if (canSend) _sendButtonAnimController.forward();
+      if (!widget.isStreaming && !_isGeneratingAiUser && aiUserHoldEnabled) {
+        _holdProgressController.forward(from: 0);
+      }
+    }
 
-    return GestureDetector(
+    void resetHold() {
+      _holdProgressController.stop();
+      _holdProgressController.value = 0;
+    }
 
-      onTapDown: canSend ? (_) => _sendButtonAnimController.forward() : null,
+    void handleTapUp() {
+      if (canSend) _sendButtonAnimController.reverse();
+      final holdFraction = _holdProgressController.value;
+      final wasTriggered = _holdTriggered;
+      resetHold();
+      _holdTriggered = false;
 
-      onTapUp: canSend ? (_) => _sendButtonAnimController.reverse() : null,
+      if (wasTriggered || _isGeneratingAiUser) return;
 
-      onTapCancel: canSend ? () => _sendButtonAnimController.reverse() : null,
+      if (widget.isStreaming) {
+        _handleStop();
+        return;
+      }
 
-      child: ScaleTransition(
+      if (holdFraction >= _insertHoldThreshold) {
+        _handleInsertWithoutGenerating();
+      } else if (canSend) {
+        _handleSubmit();
+      }
+    }
 
-        scale: _sendButtonScale,
+    void handleTapCancel() {
+      if (canSend) _sendButtonAnimController.reverse();
+      resetHold();
+      _holdTriggered = false;
+    }
 
-        child: AnimatedContainer(
+    // Uses raw pointer callbacks instead of GestureDetector's onTapDown/
+    // onTapUp: those depend on winning the gesture arena, but a nested
+    // interactive descendant (the button's own tap target) can win instead,
+    // silently swallowing onTapUp and breaking the hold-timing logic below.
+    // Listener always fires regardless of who else claims the gesture.
+    return Listener(
 
-          duration: const Duration(milliseconds: 200),
+      onPointerDown: (_) => handleTapDown(),
 
-          curve: Curves.easeOut,
+      onPointerUp: (_) => handleTapUp(),
 
-          width: 36,
+      onPointerCancel: (_) => handleTapCancel(),
 
-          height: 36,
-
-          decoration: BoxDecoration(
-
-            color: backgroundColor.withValues(
-
-              alpha: (canSend || widget.isStreaming) ? 1.0 : 0.2,
-
-            ),
-
-            shape: BoxShape.circle,
-
-          ),
-
-          child: IconButton(
-
-            padding: EdgeInsets.zero,
-
-            icon: AnimatedSwitcher(
-
-              duration: const Duration(milliseconds: 150),
-
-              transitionBuilder: (child, animation) {
-
-                return ScaleTransition(scale: animation, child: child);
-
-              },
-
-              child: widget.isStreaming
-
-                  ? HugeIcon(
-
-                      icon: HugeIcons.strokeRoundedStop,
-
-                      key: const ValueKey('stop'),
-
-                      color: iconColor,
-
-                      size: 18,
-
-                    )
-
-                  : HugeIcon(
-
-                      icon: HugeIcons.strokeRoundedArrowUp01,
-
-                      key: ValueKey(canSend),
-
-                      color: iconColor,
-
-                      size: 18,
-
+      child: Tooltip(
+        message: widget.isStreaming
+            ? l10n.stop_generation_tooltip
+            : l10n.send_message_tooltip,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            AnimatedBuilder(
+              animation: _holdProgressController,
+              builder: (context, child) {
+                if (_holdProgressController.value <= 0) {
+                  return const SizedBox(width: 44, height: 44);
+                }
+                return SizedBox(
+                  width: 44,
+                  height: 44,
+                  child: CircularProgressIndicator(
+                    value: _holdProgressController.value,
+                    strokeWidth: 2.5,
+                    backgroundColor: Colors.transparent,
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      theme.colorScheme.primary,
                     ),
-
+                  ),
+                );
+              },
             ),
-
-            onPressed: widget.isStreaming
-
-                ? _handleStop
-
-                : (canSend ? _handleSubmit : null),
-
-            tooltip: widget.isStreaming
-
-                ? l10n.stop_generation_tooltip
-
-                : l10n.send_message_tooltip,
-
-          ),
-
+            ScaleTransition(
+              scale: _sendButtonScale,
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                curve: Curves.easeOut,
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: backgroundColor.withValues(
+                    alpha: (canSend || widget.isStreaming) ? 1.0 : 0.2,
+                  ),
+                  shape: BoxShape.circle,
+                ),
+                child: Center(
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 150),
+                    transitionBuilder: (child, animation) {
+                      return ScaleTransition(scale: animation, child: child);
+                    },
+                    child: _isGeneratingAiUser
+                        ? SizedBox(
+                            key: const ValueKey('ai-user-generating'),
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: iconColor,
+                            ),
+                          )
+                        : widget.isStreaming
+                            ? HugeIcon(
+                                icon: HugeIcons.strokeRoundedStop,
+                                key: const ValueKey('stop'),
+                                color: iconColor,
+                                size: 18,
+                              )
+                            : HugeIcon(
+                                icon: HugeIcons.strokeRoundedArrowUp01,
+                                key: ValueKey(canSend),
+                                color: iconColor,
+                                size: 18,
+                              ),
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
-
       ),
 
     );
@@ -793,7 +1011,8 @@ class ChatInputBarState extends ConsumerState<ChatInputBar>
     final connectionStatus = ref.watch(connectionStatusProvider);
 
     final isConnected = connectionStatus == ConnectionStatus.connected;
-    final showAiUserButton = ref.watch(settingsProvider).aiUserResponseEnabled;
+    final showRoleSwapButton =
+        ref.watch(settingsProvider).roleSwapButtonEnabled;
 
 
 
@@ -869,7 +1088,7 @@ class ChatInputBarState extends ConsumerState<ChatInputBar>
 
       child: Container(
 
-        margin: const EdgeInsets.only(left: 16, right: 16, top: 8, bottom: 12),
+        margin: const EdgeInsets.only(left: 16, right: 16, top: 8, bottom: 6),
 
         padding: const EdgeInsets.fromLTRB(12, 10, 12, 8),
 
@@ -912,10 +1131,7 @@ class ChatInputBarState extends ConsumerState<ChatInputBar>
                   itemBuilder: (context, index) {
 
                     final file = _attachedFiles[index];
-
-                    final ext = file.path.split('.').last.toLowerCase();
-
-                    final isImage = !['txt', 'md'].contains(ext);
+                    final isImage = AttachmentHelpers.isImagePath(file.path);
 
                     return Stack(
 
@@ -946,17 +1162,15 @@ class ChatInputBarState extends ConsumerState<ChatInputBar>
                             borderRadius: BorderRadius.circular(9),
 
                             child: isImage
-
-                                ? Image.file(
-
-                                    file,
-
-                                    width: 48,
-
-                                    height: 48,
-
-                                    fit: BoxFit.cover,
-
+                                ? GestureDetector(
+                                    onTap: () =>
+                                        showImagePreview(context, file.path),
+                                    child: Image.file(
+                                      file,
+                                      width: 48,
+                                      height: 48,
+                                      fit: BoxFit.cover,
+                                    ),
                                   )
 
                                 : Container(
@@ -1037,60 +1251,91 @@ class ChatInputBarState extends ConsumerState<ChatInputBar>
 
               ),
 
-            TextField(
-
-              controller: _controller,
-
-              focusNode: _focusNode,
-
-              enabled: widget.enabled,
-
-              maxLines: 6,
-
-              minLines: 1,
-
-              textInputAction: TextInputAction.newline,
-
-              keyboardType: TextInputType.multiline,
-
-              onChanged: (_) => setState(() {}),
-
-              style: TextStyle(
-
-                fontSize: 15,
-
-                color: theme.colorScheme.onSurface,
-
-              ),
-
-              decoration: InputDecoration(
-
-                filled: false,
-
-                border: InputBorder.none,
-
-                enabledBorder: InputBorder.none,
-
-                focusedBorder: InputBorder.none,
-
-                disabledBorder: InputBorder.none,
-
-                hintText: l10n.chat_input_hint,
-
-                hintStyle: TextStyle(
-
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.38),
-
-                  fontSize: 15,
-
+            Stack(
+              children: [
+                IgnorePointer(
+                  ignoring: widget.keyboardIncognito,
+                  child: Opacity(
+                    opacity: widget.keyboardIncognito ? 0 : 1,
+                    child: TextField(
+                      controller: _normalController,
+                      focusNode: _focusNode,
+                      enabled: widget.enabled,
+                      maxLines: 6,
+                      minLines: 1,
+                      textInputAction: TextInputAction.newline,
+                      keyboardType: TextInputType.multiline,
+                      enableSuggestions: true,
+                      autocorrect: true,
+                      enableIMEPersonalizedLearning: true,
+                      onChanged: (_) => setState(() {}),
+                      style: TextStyle(
+                        fontSize: 15,
+                        color: theme.colorScheme.onSurface,
+                      ),
+                      decoration: InputDecoration(
+                        filled: false,
+                        border: InputBorder.none,
+                        enabledBorder: InputBorder.none,
+                        focusedBorder: InputBorder.none,
+                        disabledBorder: InputBorder.none,
+                        hintText: l10n.chat_input_hint,
+                        hintStyle: TextStyle(
+                          color: theme.colorScheme.onSurface
+                              .withValues(alpha: 0.38),
+                          fontSize: 15,
+                        ),
+                        isDense: true,
+                        contentPadding:
+                            const EdgeInsets.symmetric(vertical: 4),
+                      ),
+                    ),
+                  ),
                 ),
-
-                isDense: true,
-
-                contentPadding: const EdgeInsets.symmetric(vertical: 4),
-
-              ),
-
+                IgnorePointer(
+                  ignoring: !widget.keyboardIncognito,
+                  child: Opacity(
+                    opacity: widget.keyboardIncognito ? 1 : 0,
+                    child: TextField(
+                      controller: _incognitoController,
+                      focusNode: _incognitoFocus,
+                      enabled: widget.enabled,
+                      maxLines: 6,
+                      minLines: 1,
+                      textInputAction: TextInputAction.newline,
+                      keyboardType: TextInputType.multiline,
+                      enableSuggestions: false,
+                      autocorrect: false,
+                      enableIMEPersonalizedLearning: false,
+                      spellCheckConfiguration:
+                          const SpellCheckConfiguration.disabled(),
+                      smartDashesType: SmartDashesType.disabled,
+                      smartQuotesType: SmartQuotesType.disabled,
+                      onChanged: (_) => setState(() {}),
+                    style: TextStyle(
+                      fontSize: 15,
+                      color: theme.colorScheme.onSurface,
+                    ),
+                    decoration: InputDecoration(
+                      filled: false,
+                      border: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      focusedBorder: InputBorder.none,
+                      disabledBorder: InputBorder.none,
+                      hintText: l10n.chat_input_hint,
+                      hintStyle: TextStyle(
+                        color: theme.colorScheme.onSurface
+                            .withValues(alpha: 0.38),
+                        fontSize: 15,
+                      ),
+                      isDense: true,
+                      contentPadding:
+                          const EdgeInsets.symmetric(vertical: 4),
+                    ),
+                    ),
+                  ),
+                ),
+              ],
             ),
 
             const SizedBox(height: 6),
@@ -1123,16 +1368,18 @@ class ChatInputBarState extends ConsumerState<ChatInputBar>
 
                 ),
 
+                _buildThinkButton(theme),
+
                 const Spacer(),
+
+                if (showRoleSwapButton) ...[
+                  _buildRoleSwapButton(theme),
+                  const SizedBox(width: 6),
+                ],
 
                 _buildMicButton(isListening, theme),
 
                 const SizedBox(width: 6),
-
-                if (showAiUserButton) ...[
-                  _buildAiUserButton(isConnected, theme),
-                  const SizedBox(width: 6),
-                ],
 
                 _buildActionButton(canSend, theme),
 

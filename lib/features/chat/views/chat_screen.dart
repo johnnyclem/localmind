@@ -1,7 +1,5 @@
 import 'dart:convert';
-import 'dart:typed_data';
 
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -10,14 +8,17 @@ import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:localmind/core/models/enums.dart';
 import 'package:localmind/core/providers/app_providers.dart';
 import 'package:localmind/core/routes/app_routes.dart';
+import 'package:localmind/core/theme/colors.dart';
 import 'package:localmind/core/utils/system_insets.dart';
 import 'package:localmind/l10n/app_localizations.dart';
 import 'package:localmind/core/providers/storage_providers.dart';
 import 'package:localmind/core/services/data_backup_service.dart';
+import 'package:localmind/core/services/export_choice_dialog.dart';
 import 'package:localmind/core/services/share_service.dart';
 import 'package:localmind/features/conversations/data/models/conversation.dart';
 import 'package:localmind/features/conversations/providers/conversation_providers.dart'
     as conv;
+import 'package:localmind/features/conversations/views/components/conversation_list.dart';
 import 'package:localmind/features/conversations/views/components/rename_conversation_dialog.dart';
 import 'package:localmind/features/models/screens/model_picker_sheet.dart';
 import 'package:localmind/features/personas/providers/personas_providers.dart';
@@ -42,6 +43,11 @@ import 'components/top_bar/connection_banner.dart';
 import 'components/top_bar/persona_indicator.dart';
 import 'components/top_bar/smart_reply_chips.dart';
 import 'package:localmind/features/personas/views/components/persona_picker_sheet.dart';
+
+/// Height the always-on token usage row adds below the input box (its own
+/// content height plus the padding around it) — added to the message list's
+/// bottom padding so streamed content never ends up hidden behind it.
+const double _tokenIndicatorRowHeight = 22;
 
 class ChatScreen extends ConsumerStatefulWidget {
   const ChatScreen({super.key});
@@ -125,17 +131,20 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
         _shareConversation(context);
       case 'persona':
         showPersonaPickerSheet(context);
-      case 'remove_persona':
-        final activeConv = ref.read(conv.activeConversationProvider);
-        if (activeConv != null) {
-          ref
-              .read(conv.conversationsProvider.notifier)
-              .updatePersona(activeConv.id, null, null);
-        }
       case 'rename':
         final activeConv = ref.read(conv.activeConversationProvider);
         if (activeConv != null) {
           _showRenameDialog(context, activeConv);
+        }
+      case 'move_to_folder':
+        final activeConv = ref.read(conv.activeConversationProvider);
+        if (activeConv != null) {
+          showMoveToFolderSheet(
+            context,
+            ref,
+            AppLocalizations.of(context)!,
+            activeConv,
+          );
         }
       case 'export_chat':
         _exportConversation(context);
@@ -179,53 +188,24 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
   }
 
   Future<void> _exportConversation(BuildContext context) async {
-    final l10n = AppLocalizations.of(context)!;
     final messages = ref.read(chatProvider).messages;
     if (messages.isEmpty) return;
 
     final activeConv = ref.read(conv.activeConversationProvider);
     final isTemporary = ref.read(chatProvider.select((s) => s.isTemporary));
     final title = isTemporary
-        ? l10n.temporary_chat
+        ? AppLocalizations.of(context)!.temporary_chat
         : activeConv?.title;
 
-    if (activeConv != null && !isTemporary) {
-      final db = ref.read(databaseProvider);
-      final json = DataBackupService()
-          .exportConversationAsJson(db.store, activeConv.id);
-      final saved = await FilePicker.saveFile(
-        dialogTitle: l10n.export_conversation,
-        fileName:
-            'localmind_${activeConv.title.replaceAll(RegExp(r'[^\w\-]+'), '_')}_${DateTime.now().millisecondsSinceEpoch}.json',
-        type: FileType.custom,
-        allowedExtensions: const ['json'],
-        bytes: Uint8List.fromList(utf8.encode(json)),
-      );
-      if (saved != null && context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.export_data_success)),
-        );
-      }
-      return;
-    }
+    final content = activeConv != null && !isTemporary
+        ? DataBackupService().exportConversationAsJson(
+            ref.read(databaseProvider).store,
+            activeConv.id,
+          )
+        : await ExportService.exportAsMarkdown(messages, title: title);
 
-    final markdown = await ExportService.exportAsMarkdown(
-      messages,
-      title: title,
-    );
-    final saved = await FilePicker.saveFile(
-      dialogTitle: l10n.export_conversation,
-      fileName:
-          'localmind_${(title ?? 'chat').replaceAll(RegExp(r'[^\w\-]+'), '_')}_${DateTime.now().millisecondsSinceEpoch}.md',
-      type: FileType.custom,
-      allowedExtensions: const ['md'],
-      bytes: Uint8List.fromList(utf8.encode(markdown)),
-    );
-    if (saved != null && context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.export_data_success)),
-      );
-    }
+    if (!context.mounted) return;
+    await showExportChoiceDialog(context, content: content, subject: title);
   }
 
   void _showRenameDialog(BuildContext context, Conversation conversation) {
@@ -317,15 +297,18 @@ class _ChatBody extends ConsumerWidget {
     final connectionStatus = ref.watch(connectionStatusProvider);
     final activeConversation = ref.watch(conv.activeConversationProvider);
     final isTemporary = ref.watch(chatProvider.select((s) => s.isTemporary));
-    final personaId = activeConversation?.personaId;
-    final persona = personaId != null
-        ? ref.watch(personaByIdProvider(personaId))
-        : null;
+    final personas = ref.watch(
+      personasForConversationProvider(activeConversation?.personaId),
+    );
+    final hasPersonas = personas.isNotEmpty;
     final keyboardBottomInset = bottomKeyboardInset(context);
     final systemBottomInset = bottomSystemInset(context);
+    // The token usage row (below the input box) is hidden while the
+    // keyboard is open, same as the smart-reply chips, so only reserve
+    // extra scroll space for it when it's actually visible.
     final effectiveBottomInset = keyboardBottomInset > 0
         ? 0.0
-        : systemBottomInset;
+        : systemBottomInset + _tokenIndicatorRowHeight;
 
     final needsScroll = autoScroll.checkAndUpdate(
       messageCount: messages.length,
@@ -345,7 +328,7 @@ class _ChatBody extends ConsumerWidget {
         _ScreenAppBar(
           activeConversation: activeConversation,
           isDark: isDark,
-          persona: persona,
+          hasPersonas: hasPersonas,
           isTemporary: isTemporary,
           hasMessages: messages.isNotEmpty,
           onMenuAction: onMenuAction,
@@ -357,23 +340,15 @@ class _ChatBody extends ConsumerWidget {
             isTemporary: isTemporary,
           ),
         ),
+        PersonaIndicator(
+          personas: personas,
+          onTap: () => showPersonaPickerSheet(context),
+          onClear: () => _clearPersonas(ref),
+        ),
         const NotificationPermissionBanner(),
         if (connectionStatus == ConnectionStatus.disconnected ||
             connectionStatus == ConnectionStatus.error)
           ConnectionBanner(status: connectionStatus),
-        if (persona != null)
-          PersonaIndicator(
-            persona: persona,
-            onTap: () => showPersonaPickerSheet(context),
-            onRemove: () {
-              final activeConv = ref.read(conv.activeConversationProvider);
-              if (activeConv != null) {
-                ref
-                    .read(conv.conversationsProvider.notifier)
-                    .updatePersona(activeConv.id, null, null);
-              }
-            },
-          ),
         const TtsPlayerBar(),
         Expanded(
           child: DecoratedBox(
@@ -474,7 +449,7 @@ class _MessageArea extends ConsumerWidget {
         onSeeAll: () => context.push(AppRoutes.chatHistory),
         selectedModel: selectedModel,
         onModelTap: onModelPicker,
-        selectedPersona: ref.watch(selectedPersonaProvider),
+        selectedPersonas: ref.watch(selectedPersonasProvider),
         onPersonaTap: () => showPersonaPickerSheet(
           context,
           mode: PersonaPickerMode.preselection,
@@ -548,6 +523,18 @@ class _MessageArea extends ConsumerWidget {
   }
 }
 
+void _clearPersonas(WidgetRef ref) {
+  final activeConv = ref.read(conv.activeConversationProvider);
+  if (activeConv != null) {
+    ref.read(conv.conversationsProvider.notifier).updatePersonas(
+          activeConv.id,
+          const [],
+        );
+  } else {
+    ref.read(selectedPersonasProvider.notifier).clear();
+  }
+}
+
 void _handleChatModeAction(
   BuildContext context,
   WidgetRef ref, {
@@ -575,6 +562,7 @@ void _handleChatModeAction(
           TextButton(
             onPressed: () {
               Navigator.pop(ctx);
+              FocusManager.instance.primaryFocus?.unfocus();
               ref.read(chatProvider.notifier).startNewConversation();
             },
             child: Text(l10n.nav_new_chat),
@@ -585,6 +573,7 @@ void _handleChatModeAction(
     return;
   }
 
+  FocusManager.instance.primaryFocus?.unfocus();
   ref.read(chatProvider.notifier).startNewConversation();
 }
 
@@ -592,7 +581,7 @@ class _ScreenAppBar extends ConsumerWidget {
   const _ScreenAppBar({
     required this.activeConversation,
     required this.isDark,
-    required this.persona,
+    required this.hasPersonas,
     required this.isTemporary,
     required this.hasMessages,
     required this.onMenuAction,
@@ -602,7 +591,7 @@ class _ScreenAppBar extends ConsumerWidget {
 
   final Conversation? activeConversation;
   final bool isDark;
-  final dynamic persona;
+  final bool hasPersonas;
   final bool isTemporary;
   final bool hasMessages;
   final void Function(String) onMenuAction;
@@ -615,6 +604,44 @@ class _ScreenAppBar extends ConsumerWidget {
     final settings = ref.watch(settingsProvider);
     final mcpConfig = ref.watch(chatMcpConfigProvider);
     final isMcpEnabled = settings.mcpEnabled && mcpConfig.enabled;
+    final messageSelectionMode = ref.watch(messageSelectionModeProvider);
+    final selectedMessageIds = ref.watch(selectedMessageIdsProvider);
+
+    if (messageSelectionMode) {
+      return Container(
+        height: 56,
+        padding: const EdgeInsets.symmetric(horizontal: 4),
+        child: Row(
+          children: [
+            IconButton(
+              icon: const Icon(Icons.close),
+              onPressed: () =>
+                  ref.read(messageSelectionModeProvider.notifier).disable(),
+            ),
+            Expanded(
+              child: Text(
+                l10n.selected_count(selectedMessageIds.length),
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              ),
+            ),
+            IconButton(
+              icon: const Icon(Icons.ios_share),
+              tooltip: l10n.export_conversation,
+              onPressed: selectedMessageIds.isEmpty
+                  ? null
+                  : () => _shareSelectedMessages(context, ref, selectedMessageIds),
+            ),
+            IconButton(
+              icon: const Icon(Icons.delete_outline, color: Colors.red),
+              tooltip: l10n.delete,
+              onPressed: selectedMessageIds.isEmpty
+                  ? null
+                  : () => _deleteSelectedMessages(context, ref, selectedMessageIds),
+            ),
+          ],
+        ),
+      );
+    }
 
     return Container(
       height: 56,
@@ -691,7 +718,7 @@ class _ScreenAppBar extends ConsumerWidget {
                   contentPadding: EdgeInsets.zero,
                 ),
               ),
-              if (activeConversation != null && !isTemporary)
+              if (activeConversation != null && !isTemporary) ...[
                 PopupMenuItem(
                   value: 'rename',
                   child: ListTile(
@@ -700,6 +727,15 @@ class _ScreenAppBar extends ConsumerWidget {
                     contentPadding: EdgeInsets.zero,
                   ),
                 ),
+                PopupMenuItem(
+                  value: 'move_to_folder',
+                  child: ListTile(
+                    leading: const Icon(Icons.folder_outlined),
+                    title: Text(l10n.move_to_folder),
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                ),
+              ],
               if (hasMessages) ...[
                 PopupMenuItem(
                   value: 'export_chat',
@@ -722,25 +758,14 @@ class _ScreenAppBar extends ConsumerWidget {
                 value: 'persona',
                 child: ListTile(
                   leading: Icon(
-                    persona != null
-                        ? Icons.swap_horiz
-                        : Icons.smart_toy_outlined,
+                    hasPersonas ? Icons.swap_horiz : Icons.smart_toy_outlined,
                   ),
                   title: Text(
-                    persona != null ? l10n.change_persona : l10n.set_persona,
+                    hasPersonas ? l10n.change_persona : l10n.set_persona,
                   ),
                   contentPadding: EdgeInsets.zero,
                 ),
               ),
-              if (persona != null)
-                PopupMenuItem(
-                  value: 'remove_persona',
-                  child: ListTile(
-                    leading: const Icon(Icons.person_remove_outlined),
-                    title: Text(l10n.remove_persona),
-                    contentPadding: EdgeInsets.zero,
-                  ),
-                ),
               PopupMenuItem(
                 value: 'clear',
                 child: ListTile(
@@ -762,6 +787,57 @@ class _ScreenAppBar extends ConsumerWidget {
       return activeConversation!.title;
     }
     return l10n.nav_new_chat;
+  }
+
+  Future<void> _shareSelectedMessages(
+    BuildContext context,
+    WidgetRef ref,
+    Set<String> selectedIds,
+  ) async {
+    final messages = ref
+        .read(chatProvider)
+        .messages
+        .where((m) => selectedIds.contains(m.id))
+        .toList();
+    if (messages.isEmpty) return;
+    final text = ExportService.exportAsText(messages);
+    ref.read(messageSelectionModeProvider.notifier).disable();
+    if (!context.mounted) return;
+    await showExportChoiceDialog(context, content: text);
+  }
+
+  void _deleteSelectedMessages(
+    BuildContext context,
+    WidgetRef ref,
+    Set<String> selectedIds,
+  ) {
+    final l10n = AppLocalizations.of(context)!;
+    showDialog<void>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: Text(l10n.delete_message_title),
+          content: Text(l10n.selected_count(selectedIds.length)),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: Text(l10n.cancel),
+            ),
+            TextButton(
+              onPressed: () async {
+                Navigator.pop(dialogContext);
+                for (final id in selectedIds) {
+                  await ref.read(chatProvider.notifier).deleteMessage(id);
+                }
+                ref.read(messageSelectionModeProvider.notifier).disable();
+              },
+              style: TextButton.styleFrom(foregroundColor: Colors.red),
+              child: Text(l10n.delete),
+            ),
+          ],
+        );
+      },
+    );
   }
 }
 
@@ -841,6 +917,13 @@ class _ChatBottomBar extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final isTemporary = ref.watch(chatProvider.select((s) => s.isTemporary));
+    final keyboardIncognito = isTemporary &&
+        ref.watch(settingsProvider.select((s) => s.tempChatKeyboardIncognito));
+    final totalTokenCount = ref.watch(
+      conv.activeConversationProvider.select((c) => c?.totalTokenCount),
+    );
+
     return Positioned(
       bottom: 0,
       left: 0,
@@ -868,6 +951,7 @@ class _ChatBottomBar extends ConsumerWidget {
             ChatInputBar(
               focusNode: inputFocusNode,
               isStreaming: isStreaming,
+              keyboardIncognito: keyboardIncognito,
               onSend: (message, {attachments}) {
                 ref
                     .read(chatProvider.notifier)
@@ -875,8 +959,139 @@ class _ChatBottomBar extends ConsumerWidget {
               },
               onStop: () => ref.read(chatProvider.notifier).cancelStream(),
             ),
+            if (keyboardBottomInset == 0)
+              Padding(
+                padding: const EdgeInsetsDirectional.only(bottom: 6, end: 16),
+                child: Align(
+                  alignment: AlignmentDirectional.centerEnd,
+                  child: _TokenUsageIndicator(
+                    totalTokenCount: totalTokenCount ?? 0,
+                  ),
+                ),
+              ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _TokenUsageIndicator extends ConsumerWidget {
+  const _TokenUsageIndicator({required this.totalTokenCount});
+
+  final int totalTokenCount;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final liveContextLength =
+        ref.watch(activeModelContextLengthProvider).value;
+    final fallbackContextLength =
+        ref.watch(settingsProvider.select((s) => s.contextLength));
+    final int contextLength = liveContextLength ?? fallbackContextLength;
+
+    // totalTokenCount only updates once a response finishes (it's the real
+    // server-reported count), so while one is streaming in, grow the ring
+    // with a rough chars-per-token estimate of the in-progress reply —
+    // corrected back to the exact figure the moment the stream ends.
+    final isStreaming = ref.watch(chatProvider.select((s) => s.isStreaming));
+    final streamingLength = ref.watch(
+      chatProvider.select((s) => s.streamingMessage?.content.length ?? 0),
+    );
+    final estimatedTokenCount = isStreaming
+        ? totalTokenCount + (streamingLength / 4).round()
+        : totalTokenCount;
+
+    final ratio = contextLength > 0
+        ? (estimatedTokenCount / contextLength).clamp(0.0, 1.0)
+        : 0.0;
+    final ringColor = ratio >= 0.9 ? Colors.red : theme.colorScheme.primary;
+
+    return GestureDetector(
+      onTap: () => _showTokenUsageSheet(context, contextLength, ratio),
+      child: SizedBox(
+        height: 16,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              width: 12,
+              height: 12,
+              child: CircularProgressIndicator(
+                value: ratio,
+                strokeWidth: 2,
+                backgroundColor: (isDark ? Colors.white : Colors.black)
+                    .withValues(alpha: 0.12),
+                valueColor: AlwaysStoppedAnimation<Color>(ringColor),
+              ),
+            ),
+            const SizedBox(width: 4),
+            Text(
+              '${(ratio * 100).round()}%',
+              style: TextStyle(
+                fontSize: 10,
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showTokenUsageSheet(
+    BuildContext context,
+    int contextLength,
+    double ratio,
+  ) {
+    final l10n = AppLocalizations.of(context)!;
+    showModalBottomSheet(
+      context: context,
+      builder: (ctx) {
+        final sheetTheme = Theme.of(ctx);
+        final isDark = sheetTheme.brightness == Brightness.dark;
+        final muted =
+            isDark ? AppColors.darkMutedText : AppColors.lightMutedText;
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l10n.token_usage_title,
+                  style: sheetTheme.textTheme.titleMedium,
+                ),
+                const SizedBox(height: 12),
+                _usageRow(l10n.total_tokens_label, '$totalTokenCount', muted),
+                _usageRow(l10n.context_length, '$contextLength', muted),
+                _usageRow(
+                  l10n.usage_percent_label,
+                  '${(ratio * 100).toStringAsFixed(1)}%',
+                  muted,
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _usageRow(String label, String value, Color muted) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label, style: TextStyle(fontSize: 13, color: muted)),
+          Text(
+            value,
+            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+          ),
+        ],
       ),
     );
   }

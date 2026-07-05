@@ -364,6 +364,198 @@
   "@delete_persona_body": {
     "description": "Delete persona dialog body"
   },
+  "delete_builtin_persona_body": "This is a built-in persona. You can restore it later from Settings.",
+  "@delete_builtin_persona_body": {
+    "description": "Delete built-in persona dialog body"
+  },
+  "restore_builtin_personas": "Restore default personas",
+  "@restore_builtin_personas": {
+    "description": "Settings action to re-add any deleted built-in personas"
+  },
+  "restore_builtin_personas_desc": "Re-add any built-in personas you've deleted",
+  "@restore_builtin_personas_desc": {
+    "description": "Settings description for restore built-in personas"
+  },
+  "restore_builtin_personas_success": "Default personas restored",
+  "@restore_builtin_personas_success": {
+    "description": "Snackbar after restoring built-in personas"
+  },
+  "clear_personas": "Clear personas",
+  "@clear_personas": {
+    "description": "Button to clear all selected personas in the picker"
+  },
+  "enable_image_compression": "Compress images before sending",
+  "@enable_image_compression": {
+    "description": "Settings toggle to enable/disable automatic image compression"
+  },
+  "enable_image_compression_desc": "Resize and compress attached images so uploads stay within server limits",
+  "@enable_image_compression_desc": {
+    "description": "Description for the image compression toggle"
+  },
+  "image_compression_level": "Compression aggressiveness",
+  "@image_compression_level": {
+    "description": "Label for the image compression level selector"
+  },
+  "image_compression_level_desc": "Higher aggressiveness produces smaller uploads at lower quality",
+  "@image_compression_level_desc": {
+    "description": "Description for the image compression level selector"
+  },
+  "image_compression_level_low": "Low",
+  "@image_compression_level_low": {
+    "description": "Low image compression aggressiveness"
+  },
+  "image_compression_level_medium": "Medium",
+  "@image_compression_level_medium": {
+    "description": "Medium image compression aggressiveness"
+  },
+  "image_compression_level_high": "High",
+  "@image_compression_level_high": {
+    "description": "High image compression aggressiveness"
+  },
+  "sort_models_tooltip": "Sort models",
+  "@sort_models_tooltip": {
+    "description": "Tooltip for the model list sort button"
+  },
+  "sort_by_favorites": "Favorites first",
+  "@sort_by_favorites": {
+    "description": "Sort models with favorites first, then alphabetically"
+  },
+  "sort_by_name": "Name (A-Z)",
+  "@sort_by_name": {
+    "description": "Sort models alphabetically by name"
+  },
+  "sort_by_size_smallest": "Size (smallest first)",
+  "@sort_by_size_smallest": {
+    "description": "Sort models by file size, smallest first"
+  },
+  "sort_by_size_largest": "Size (largest first)",
+  "@sort_by_size_largest": {
+    "description": "Sort models by file size, largest first"
+  },
+  "sort_by_context_length": "Context length",
+  "@sort_by_context_length": {
+    "description": "Sort models by max context length, largest first"
+  },
+  "bulk_ai_rename_progress": "Renaming {done}/{total}...",
+  "@bulk_ai_rename_progress": {
+    "description": "Progress text while AI-renaming multiple conversations",
+    "placeholders": {
+      "done": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  "selected_count": "{count} selected",
+  "@selected_count": {
+    "description": "Header shown in selection mode",
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "ai_rename_tooltip": "Rename selected with AI",
+  "@ai_rename_tooltip": {
+    "description": "Tooltip for bulk AI rename button"
+  },
+  "new_chat_in_folder_tooltip": "New chat in this folder",
+  "@new_chat_in_folder_tooltip": {
+    "description": "Tooltip for the history screen new-chat FAB"
+  },
+  "total_tokens_count": "{count} tokens",
+  "@total_tokens_count": {
+    "description": "Total token count shown under the chat text field",
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "smart_replies_use_persona": "Use persona in smart replies",
+  "@smart_replies_use_persona": {
+    "description": "Settings toggle to include persona system prompt when generating smart reply suggestions"
+  },
+  "smart_replies_use_persona_desc": "Suggested replies match the tone of the active persona instead of a generic assistant",
+  "@smart_replies_use_persona_desc": {
+    "description": "Description for the smart-replies-use-persona toggle"
+  },
+  "keep_persona_on_new_chat": "Keep persona on new chat",
+  "@keep_persona_on_new_chat": {
+    "description": "Settings toggle to not clear persona selection when starting a new chat"
+  },
+  "keep_persona_on_new_chat_desc": "Don't clear the selected persona(s) after starting a new chat",
+  "@keep_persona_on_new_chat_desc": {
+    "description": "Description for the keep-persona-on-new-chat toggle"
+  },
+  "role_swap_button_enabled": "Show role-swap button",
+  "@role_swap_button_enabled": {
+    "description": "Settings toggle to show a button that lets the user send a message as the assistant role"
+  },
+  "role_swap_button_enabled_desc": "Show a button in the chat input to send your message as the assistant instead of the user, without generating a response",
+  "@role_swap_button_enabled_desc": {
+    "description": "Description for the role-swap-button-enabled toggle"
+  },
+  "send_as_user_tooltip": "Send as user",
+  "@send_as_user_tooltip": {
+    "description": "Tooltip for the role-swap button when it will send as the user role"
+  },
+  "send_as_assistant_tooltip": "Send as assistant (no response)",
+  "@send_as_assistant_tooltip": {
+    "description": "Tooltip for the role-swap button when it will send as the assistant role"
+  },
+  "insert_without_generating_tooltip": "Insert without generating",
+  "@insert_without_generating_tooltip": {
+    "description": "Tooltip shown for long-pressing the send button to insert a message without generating a response"
+  },
+  "token_usage_title": "Token Usage",
+  "@token_usage_title": {
+    "description": "Title of the sheet shown when tapping the token usage indicator"
+  },
+  "total_tokens_label": "Tokens used",
+  "@total_tokens_label": {
+    "description": "Label for the total token count row in the token usage sheet"
+  },
+  "usage_percent_label": "Context used",
+  "@usage_percent_label": {
+    "description": "Label for the percentage-of-context-length row in the token usage sheet"
+  },
+  "export_choice_title": "Export",
+  "@export_choice_title": {
+    "description": "Title for the copy-vs-share export choice dialog"
+  },
+  "export_choice_body": "How would you like to export this?",
+  "@export_choice_body": {
+    "description": "Body text for the copy-vs-share export choice dialog"
+  },
+  "copy_to_clipboard": "Copy to Clipboard",
+  "@copy_to_clipboard": {
+    "description": "Button to copy export content to the clipboard"
+  },
+  "bulk_export_conversations_success": "Exported {count} conversations",
+  "@bulk_export_conversations_success": {
+    "description": "Success message after bulk-exporting conversations",
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "bulk_ai_rename_confirm_title": "Rename with AI?",
+  "@bulk_ai_rename_confirm_title": {
+    "description": "Title for the bulk AI rename confirmation dialog"
+  },
+  "bulk_ai_rename_confirm_body": "This will ask the AI to generate a new title for each of the {count} selected conversations, replacing their current titles. This can take a while and cannot be undone.",
+  "@bulk_ai_rename_confirm_body": {
+    "description": "Body text for the bulk AI rename confirmation dialog",
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "sort_by_modified_date": "Last modified",
+  "@sort_by_modified_date": {
+    "description": "Sort history by last modified date"
+  },
+  "sort_by_created_date": "Date created",
+  "@sort_by_created_date": {
+    "description": "Sort history by creation date"
+  },
+  "sort_title": "Sort",
+  "@sort_title": {
+    "description": "Tooltip for the history sort button"
+  },
   "clear_conversation_title": "Clear conversation?",
   "@clear_conversation_title": {
     "description": "Clear conversation dialog title"
@@ -660,9 +852,13 @@
   "@enable_smart_reply": {
     "description": "Toggle for on-device smart reply suggestions"
   },
-  "ai_user_response_enabled": "AI user message button",
+  "ai_user_response_enabled": "AI user message (hold send)",
   "@ai_user_response_enabled": {
-    "description": "Settings toggle for AI-generated user message button in chat input"
+    "description": "Settings toggle for AI-generated user message triggered by holding the send button"
+  },
+  "ai_user_response_enabled_desc": "Hold the send button for 3 seconds to have the AI write and send your next message",
+  "@ai_user_response_enabled_desc": {
+    "description": "Description for the hold-to-generate-AI-user-message toggle"
   },
   "ai_user_response_tooltip": "Generate user message with AI",
   "@ai_user_response_tooltip": {
@@ -680,9 +876,21 @@
   "@send_on_enter": {
     "description": "Toggle for send on enter behavior"
   },
-  "show_system_messages": "Show System Messages",
+  "show_system_messages": "Send Default System Prompt",
   "@show_system_messages": {
-    "description": "Toggle for system messages visibility"
+    "description": "Toggle for sending a default 'You are LocalMind' system prompt to the model when no persona is selected"
+  },
+  "show_system_messages_desc": "When no persona is selected, send a default assistant system prompt with each request",
+  "@show_system_messages_desc": {
+    "description": "Description for the send-default-system-prompt toggle"
+  },
+  "show_system_messages_in_chat": "Show System Messages in Chat",
+  "@show_system_messages_in_chat": {
+    "description": "Toggle for whether system-role messages are displayed as bubbles in the chat transcript"
+  },
+  "show_system_messages_in_chat_desc": "Display system messages (e.g. from an imported backup) as visible bubbles in the conversation",
+  "@show_system_messages_in_chat_desc": {
+    "description": "Description for the show-system-messages-in-chat toggle"
   },
   "haptic_feedback": "Haptic Feedback",
   "@haptic_feedback": {
@@ -753,6 +961,11 @@
     "description": "Model selection placeholder"
   },
   "select_persona": "Select Persona",
+  "manage_personas": "Manage personas",
+  "personas_combine_hint": "Select multiple personas in chat to stack their system prompts.",
+  "@personas_combine_hint": {
+    "description": "Hint in persona manager about combining personas"
+  },
   "@select_persona": {
     "description": "Persona selection sheet title"
   },
@@ -2520,6 +2733,22 @@
   "@unload_models_before_load": {
     "description": "Setting to unload every loaded model instance before loading another"
   },
+  "temp_chat_keyboard_incognito": "Incognito keyboard in temporary chat",
+  "@temp_chat_keyboard_incognito": {
+    "description": "Use private/incognito keyboard mode while in a temporary chat"
+  },
+  "temp_chat_keyboard_incognito_desc": "Disables keyboard learning and suggestions in temporary chats (e.g. SwiftKey incognito).",
+  "@temp_chat_keyboard_incognito_desc": {
+    "description": "Description for temporary chat incognito keyboard setting"
+  },
+  "resume_last_chat": "Resume last chat on launch",
+  "@resume_last_chat": {
+    "description": "Reopen the most recently active conversation when the app starts"
+  },
+  "resume_last_chat_desc": "Restore your last open conversation when reopening the app.",
+  "@resume_last_chat_desc": {
+    "description": "Description for resume last chat setting"
+  },
   "export_all_data": "Export all data",
   "@export_all_data": {
     "description": "Export conversations and personas to a JSON file"
@@ -2678,5 +2907,71 @@
   },
   "generate_title_with_ai": "Generate with AI",
   "generating_title": "Generating...",
-  "generate_title_failed": "Could not generate a title"
+  "generate_title_failed": "Could not generate a title",
+  "lm_studio_model_browser_title": "Browse models",
+  "lm_studio_model_search_hint": "Search models by name or author…",
+  "lm_studio_staff_picks": "Staff picks",
+  "lm_studio_community_models": "Community models",
+  "lm_studio_no_models": "No models found",
+  "lm_studio_models_count": "{count} models",
+  "@lm_studio_models_count": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "lm_studio_browse_models": "Browse & download",
+  "lm_studio_model_search": "LMS Model Search",
+  "lm_studio_downloads_title": "Downloads",
+  "lm_studio_choose_quant": "Choose a download option",
+  "lm_studio_use_default_quant": "Use default",
+  "lm_studio_recommended": "Recommended",
+  "lm_studio_clear_downloads": "Clear finished",
+  "lm_studio_no_downloads": "No downloads yet",
+  "lm_studio_downloads_disclaimer": "Downloads run on the LM Studio host. Pausing, stopping, and deleting models must be done on that computer — not from this app.",
+  "lm_studio_staff_pick": "Staff pick",
+  "lm_studio_params": "PARAMS",
+  "lm_studio_arch": "ARCH",
+  "lm_studio_domain": "DOMAIN",
+  "lm_studio_format": "FORMAT",
+  "lm_studio_vision": "Vision",
+  "lm_studio_tool_use": "Tool use",
+  "lm_studio_reasoning": "Reasoning",
+  "lm_studio_download_options": "Download options",
+  "lm_studio_download": "Download",
+  "lm_studio_download_size": "Download {size}",
+  "@lm_studio_download_size": {
+    "placeholders": {
+      "size": { "type": "String" }
+    }
+  },
+  "lm_studio_downloading_percent": "Downloading {percent}%",
+  "@lm_studio_downloading_percent": {
+    "placeholders": {
+      "percent": { "type": "int" }
+    }
+  },
+  "lm_studio_readme_unavailable": "README not available for this model.",
+  "lm_studio_full_gpu_offload": "Full GPU offload possible",
+  "lm_studio_partial_gpu_offload": "Partial GPU offload possible",
+  "lm_studio_likely_too_large": "Likely too large",
+  "lm_studio_available_ram_gb": "Available RAM (GB, optional)",
+  "lm_studio_available_vram_gb": "Available VRAM (GB, optional)",
+  "lm_studio_memory_settings_title": "Memory for recommendations",
+  "lm_studio_memory_settings_desc": "Used to estimate whether models fit on your machine in the model browser.",
+  "think_button_label": "Think",
+  "@think_button_label": {
+    "description": "Label for the reasoning-toggle button shown for reasoning-capable models"
+  },
+  "reasoning_effort_low": "Low",
+  "@reasoning_effort_low": {
+    "description": "Low reasoning effort level"
+  },
+  "reasoning_effort_medium": "Medium",
+  "@reasoning_effort_medium": {
+    "description": "Medium reasoning effort level"
+  },
+  "reasoning_effort_high": "High",
+  "@reasoning_effort_high": {
+    "description": "High reasoning effort level"
+  }
 }

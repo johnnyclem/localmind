@@ -15,6 +15,7 @@ class SmartReplyService {
     required String modelId,
     required List<Message> messages,
     required ChatParameters params,
+    String? personaSystemPrompt,
   }) async {
     if (messages.isEmpty) return [];
 
@@ -36,11 +37,16 @@ class SmartReplyService {
       promptMessage,
     ];
 
+    const baseInstruction =
+        'You are a smart reply assistant. Your job is to output exactly a JSON array containing 3 suggested short replies for the user. Do not output anything other than the JSON array.';
+
     // Use low temperature and small tokens for fast, cheap, and deterministic suggestions
     final suggestionParams = params.copyWith(
       temperature: 0.2,
       maxTokens: 128,
-      systemPrompt: 'You are a smart reply assistant. Your job is to output exactly a JSON array containing 3 suggested short replies for the user. Do not output anything other than the JSON array.',
+      systemPrompt: personaSystemPrompt != null && personaSystemPrompt.trim().isNotEmpty
+          ? '$personaSystemPrompt\n\n$baseInstruction'
+          : baseInstruction,
     );
 
     try {
@@ -111,6 +117,22 @@ class SmartReplyService {
   }) async {
     if (messages.isEmpty) return null;
 
+    return _generateUserMessageViaChat(
+      chatService: chatService,
+      server: server,
+      modelId: modelId,
+      messages: messages,
+      params: params,
+    );
+  }
+
+  Future<String?> _generateUserMessageViaChat({
+    required ChatService chatService,
+    required Server server,
+    required String modelId,
+    required List<Message> messages,
+    required ChatParameters params,
+  }) async {
     final promptMessage = Message(
       id: 'ai-user-response-prompt',
       conversationId: messages.last.conversationId,
@@ -176,16 +198,21 @@ class SmartReplyService {
         },
       );
 
-      final cleaned = rawResponse.trim();
-      if (cleaned.isEmpty) return null;
-      if (cleaned.startsWith('"') && cleaned.endsWith('"')) {
-        return cleaned.substring(1, cleaned.length - 1).trim();
-      }
-      return cleaned;
+      return _cleanGeneratedUserMessage(rawResponse);
     } catch (e) {
       Log.warning('AI user message generation failed: $e');
       return null;
     }
+  }
+
+  String? _cleanGeneratedUserMessage(String? rawResponse) {
+    if (rawResponse == null) return null;
+    final cleaned = rawResponse.trim();
+    if (cleaned.isEmpty) return null;
+    if (cleaned.startsWith('"') && cleaned.endsWith('"')) {
+      return cleaned.substring(1, cleaned.length - 1).trim();
+    }
+    return cleaned;
   }
 
   List<String> _parseSuggestions(String text) {

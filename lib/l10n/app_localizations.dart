@@ -593,6 +593,270 @@ abstract class AppLocalizations {
   /// **'This cannot be undone.'**
   String get delete_persona_body;
 
+  /// Delete built-in persona dialog body
+  ///
+  /// In en, this message translates to:
+  /// **'This is a built-in persona. You can restore it later from Settings.'**
+  String get delete_builtin_persona_body;
+
+  /// Settings action to re-add any deleted built-in personas
+  ///
+  /// In en, this message translates to:
+  /// **'Restore default personas'**
+  String get restore_builtin_personas;
+
+  /// Settings description for restore built-in personas
+  ///
+  /// In en, this message translates to:
+  /// **'Re-add any built-in personas you\'ve deleted'**
+  String get restore_builtin_personas_desc;
+
+  /// Snackbar after restoring built-in personas
+  ///
+  /// In en, this message translates to:
+  /// **'Default personas restored'**
+  String get restore_builtin_personas_success;
+
+  /// Button to clear all selected personas in the picker
+  ///
+  /// In en, this message translates to:
+  /// **'Clear personas'**
+  String get clear_personas;
+
+  /// Settings toggle to enable/disable automatic image compression
+  ///
+  /// In en, this message translates to:
+  /// **'Compress images before sending'**
+  String get enable_image_compression;
+
+  /// Description for the image compression toggle
+  ///
+  /// In en, this message translates to:
+  /// **'Resize and compress attached images so uploads stay within server limits'**
+  String get enable_image_compression_desc;
+
+  /// Label for the image compression level selector
+  ///
+  /// In en, this message translates to:
+  /// **'Compression aggressiveness'**
+  String get image_compression_level;
+
+  /// Description for the image compression level selector
+  ///
+  /// In en, this message translates to:
+  /// **'Higher aggressiveness produces smaller uploads at lower quality'**
+  String get image_compression_level_desc;
+
+  /// Low image compression aggressiveness
+  ///
+  /// In en, this message translates to:
+  /// **'Low'**
+  String get image_compression_level_low;
+
+  /// Medium image compression aggressiveness
+  ///
+  /// In en, this message translates to:
+  /// **'Medium'**
+  String get image_compression_level_medium;
+
+  /// High image compression aggressiveness
+  ///
+  /// In en, this message translates to:
+  /// **'High'**
+  String get image_compression_level_high;
+
+  /// Tooltip for the model list sort button
+  ///
+  /// In en, this message translates to:
+  /// **'Sort models'**
+  String get sort_models_tooltip;
+
+  /// Sort models with favorites first, then alphabetically
+  ///
+  /// In en, this message translates to:
+  /// **'Favorites first'**
+  String get sort_by_favorites;
+
+  /// Sort models alphabetically by name
+  ///
+  /// In en, this message translates to:
+  /// **'Name (A-Z)'**
+  String get sort_by_name;
+
+  /// Sort models by file size, smallest first
+  ///
+  /// In en, this message translates to:
+  /// **'Size (smallest first)'**
+  String get sort_by_size_smallest;
+
+  /// Sort models by file size, largest first
+  ///
+  /// In en, this message translates to:
+  /// **'Size (largest first)'**
+  String get sort_by_size_largest;
+
+  /// Sort models by max context length, largest first
+  ///
+  /// In en, this message translates to:
+  /// **'Context length'**
+  String get sort_by_context_length;
+
+  /// Progress text while AI-renaming multiple conversations
+  ///
+  /// In en, this message translates to:
+  /// **'Renaming {done}/{total}...'**
+  String bulk_ai_rename_progress(int done, int total);
+
+  /// Header shown in selection mode
+  ///
+  /// In en, this message translates to:
+  /// **'{count} selected'**
+  String selected_count(int count);
+
+  /// Tooltip for bulk AI rename button
+  ///
+  /// In en, this message translates to:
+  /// **'Rename selected with AI'**
+  String get ai_rename_tooltip;
+
+  /// Tooltip for the history screen new-chat FAB
+  ///
+  /// In en, this message translates to:
+  /// **'New chat in this folder'**
+  String get new_chat_in_folder_tooltip;
+
+  /// Total token count shown under the chat text field
+  ///
+  /// In en, this message translates to:
+  /// **'{count} tokens'**
+  String total_tokens_count(int count);
+
+  /// Settings toggle to include persona system prompt when generating smart reply suggestions
+  ///
+  /// In en, this message translates to:
+  /// **'Use persona in smart replies'**
+  String get smart_replies_use_persona;
+
+  /// Description for the smart-replies-use-persona toggle
+  ///
+  /// In en, this message translates to:
+  /// **'Suggested replies match the tone of the active persona instead of a generic assistant'**
+  String get smart_replies_use_persona_desc;
+
+  /// Settings toggle to not clear persona selection when starting a new chat
+  ///
+  /// In en, this message translates to:
+  /// **'Keep persona on new chat'**
+  String get keep_persona_on_new_chat;
+
+  /// Description for the keep-persona-on-new-chat toggle
+  ///
+  /// In en, this message translates to:
+  /// **'Don\'t clear the selected persona(s) after starting a new chat'**
+  String get keep_persona_on_new_chat_desc;
+
+  /// Settings toggle to show a button that lets the user send a message as the assistant role
+  ///
+  /// In en, this message translates to:
+  /// **'Show role-swap button'**
+  String get role_swap_button_enabled;
+
+  /// Description for the role-swap-button-enabled toggle
+  ///
+  /// In en, this message translates to:
+  /// **'Show a button in the chat input to send your message as the assistant instead of the user, without generating a response'**
+  String get role_swap_button_enabled_desc;
+
+  /// Tooltip for the role-swap button when it will send as the user role
+  ///
+  /// In en, this message translates to:
+  /// **'Send as user'**
+  String get send_as_user_tooltip;
+
+  /// Tooltip for the role-swap button when it will send as the assistant role
+  ///
+  /// In en, this message translates to:
+  /// **'Send as assistant (no response)'**
+  String get send_as_assistant_tooltip;
+
+  /// Tooltip shown for long-pressing the send button to insert a message without generating a response
+  ///
+  /// In en, this message translates to:
+  /// **'Insert without generating'**
+  String get insert_without_generating_tooltip;
+
+  /// Title of the sheet shown when tapping the token usage indicator
+  ///
+  /// In en, this message translates to:
+  /// **'Token Usage'**
+  String get token_usage_title;
+
+  /// Label for the total token count row in the token usage sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Tokens used'**
+  String get total_tokens_label;
+
+  /// Label for the percentage-of-context-length row in the token usage sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Context used'**
+  String get usage_percent_label;
+
+  /// Title for the copy-vs-share export choice dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Export'**
+  String get export_choice_title;
+
+  /// Body text for the copy-vs-share export choice dialog
+  ///
+  /// In en, this message translates to:
+  /// **'How would you like to export this?'**
+  String get export_choice_body;
+
+  /// Button to copy export content to the clipboard
+  ///
+  /// In en, this message translates to:
+  /// **'Copy to Clipboard'**
+  String get copy_to_clipboard;
+
+  /// Success message after bulk-exporting conversations
+  ///
+  /// In en, this message translates to:
+  /// **'Exported {count} conversations'**
+  String bulk_export_conversations_success(int count);
+
+  /// Title for the bulk AI rename confirmation dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Rename with AI?'**
+  String get bulk_ai_rename_confirm_title;
+
+  /// Body text for the bulk AI rename confirmation dialog
+  ///
+  /// In en, this message translates to:
+  /// **'This will ask the AI to generate a new title for each of the {count} selected conversations, replacing their current titles. This can take a while and cannot be undone.'**
+  String bulk_ai_rename_confirm_body(int count);
+
+  /// Sort history by last modified date
+  ///
+  /// In en, this message translates to:
+  /// **'Last modified'**
+  String get sort_by_modified_date;
+
+  /// Sort history by creation date
+  ///
+  /// In en, this message translates to:
+  /// **'Date created'**
+  String get sort_by_created_date;
+
+  /// Tooltip for the history sort button
+  ///
+  /// In en, this message translates to:
+  /// **'Sort'**
+  String get sort_title;
+
   /// Clear conversation dialog title
   ///
   /// In en, this message translates to:
@@ -977,11 +1241,17 @@ abstract class AppLocalizations {
   /// **'On-Device Smart Replies'**
   String get enable_smart_reply;
 
-  /// Settings toggle for AI-generated user message button in chat input
+  /// Settings toggle for AI-generated user message triggered by holding the send button
   ///
   /// In en, this message translates to:
-  /// **'AI user message button'**
+  /// **'AI user message (hold send)'**
   String get ai_user_response_enabled;
+
+  /// Description for the hold-to-generate-AI-user-message toggle
+  ///
+  /// In en, this message translates to:
+  /// **'Hold the send button for 3 seconds to have the AI write and send your next message'**
+  String get ai_user_response_enabled_desc;
 
   /// Tooltip for the AI user message button next to send
   ///
@@ -1007,11 +1277,29 @@ abstract class AppLocalizations {
   /// **'Send on Enter'**
   String get send_on_enter;
 
-  /// Toggle for system messages visibility
+  /// Toggle for sending a default 'You are LocalMind' system prompt to the model when no persona is selected
   ///
   /// In en, this message translates to:
-  /// **'Show System Messages'**
+  /// **'Send Default System Prompt'**
   String get show_system_messages;
+
+  /// Description for the send-default-system-prompt toggle
+  ///
+  /// In en, this message translates to:
+  /// **'When no persona is selected, send a default assistant system prompt with each request'**
+  String get show_system_messages_desc;
+
+  /// Toggle for whether system-role messages are displayed as bubbles in the chat transcript
+  ///
+  /// In en, this message translates to:
+  /// **'Show System Messages in Chat'**
+  String get show_system_messages_in_chat;
+
+  /// Description for the show-system-messages-in-chat toggle
+  ///
+  /// In en, this message translates to:
+  /// **'Display system messages (e.g. from an imported backup) as visible bubbles in the conversation'**
+  String get show_system_messages_in_chat_desc;
 
   /// Toggle for haptic feedback
   ///
@@ -1120,6 +1408,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Select Persona'**
   String get select_persona;
+
+  /// No description provided for @manage_personas.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage personas'**
+  String get manage_personas;
+
+  /// Hint in persona manager about combining personas
+  ///
+  /// In en, this message translates to:
+  /// **'Select multiple personas in chat to stack their system prompts.'**
+  String get personas_combine_hint;
 
   /// Empty state heading
   ///
@@ -3791,6 +4091,30 @@ abstract class AppLocalizations {
   /// **'Unload all models before loading a new one'**
   String get unload_models_before_load;
 
+  /// Use private/incognito keyboard mode while in a temporary chat
+  ///
+  /// In en, this message translates to:
+  /// **'Incognito keyboard in temporary chat'**
+  String get temp_chat_keyboard_incognito;
+
+  /// Description for temporary chat incognito keyboard setting
+  ///
+  /// In en, this message translates to:
+  /// **'Disables keyboard learning and suggestions in temporary chats (e.g. SwiftKey incognito).'**
+  String get temp_chat_keyboard_incognito_desc;
+
+  /// Reopen the most recently active conversation when the app starts
+  ///
+  /// In en, this message translates to:
+  /// **'Resume last chat on launch'**
+  String get resume_last_chat;
+
+  /// Description for resume last chat setting
+  ///
+  /// In en, this message translates to:
+  /// **'Restore your last open conversation when reopening the app.'**
+  String get resume_last_chat_desc;
+
   /// Export conversations and personas to a JSON file
   ///
   /// In en, this message translates to:
@@ -4432,6 +4756,240 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not generate a title'**
   String get generate_title_failed;
+
+  /// No description provided for @lm_studio_model_browser_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Browse models'**
+  String get lm_studio_model_browser_title;
+
+  /// No description provided for @lm_studio_model_search_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search models by name or author…'**
+  String get lm_studio_model_search_hint;
+
+  /// No description provided for @lm_studio_staff_picks.
+  ///
+  /// In en, this message translates to:
+  /// **'Staff picks'**
+  String get lm_studio_staff_picks;
+
+  /// No description provided for @lm_studio_community_models.
+  ///
+  /// In en, this message translates to:
+  /// **'Community models'**
+  String get lm_studio_community_models;
+
+  /// No description provided for @lm_studio_no_models.
+  ///
+  /// In en, this message translates to:
+  /// **'No models found'**
+  String get lm_studio_no_models;
+
+  /// No description provided for @lm_studio_models_count.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} models'**
+  String lm_studio_models_count(int count);
+
+  /// No description provided for @lm_studio_browse_models.
+  ///
+  /// In en, this message translates to:
+  /// **'Browse & download'**
+  String get lm_studio_browse_models;
+
+  /// No description provided for @lm_studio_model_search.
+  ///
+  /// In en, this message translates to:
+  /// **'LMS Model Search'**
+  String get lm_studio_model_search;
+
+  /// No description provided for @lm_studio_downloads_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloads'**
+  String get lm_studio_downloads_title;
+
+  /// No description provided for @lm_studio_choose_quant.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a download option'**
+  String get lm_studio_choose_quant;
+
+  /// No description provided for @lm_studio_use_default_quant.
+  ///
+  /// In en, this message translates to:
+  /// **'Use default'**
+  String get lm_studio_use_default_quant;
+
+  /// No description provided for @lm_studio_recommended.
+  ///
+  /// In en, this message translates to:
+  /// **'Recommended'**
+  String get lm_studio_recommended;
+
+  /// No description provided for @lm_studio_clear_downloads.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear finished'**
+  String get lm_studio_clear_downloads;
+
+  /// No description provided for @lm_studio_no_downloads.
+  ///
+  /// In en, this message translates to:
+  /// **'No downloads yet'**
+  String get lm_studio_no_downloads;
+
+  /// No description provided for @lm_studio_downloads_disclaimer.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloads run on the LM Studio host. Pausing, stopping, and deleting models must be done on that computer — not from this app.'**
+  String get lm_studio_downloads_disclaimer;
+
+  /// No description provided for @lm_studio_staff_pick.
+  ///
+  /// In en, this message translates to:
+  /// **'Staff pick'**
+  String get lm_studio_staff_pick;
+
+  /// No description provided for @lm_studio_params.
+  ///
+  /// In en, this message translates to:
+  /// **'PARAMS'**
+  String get lm_studio_params;
+
+  /// No description provided for @lm_studio_arch.
+  ///
+  /// In en, this message translates to:
+  /// **'ARCH'**
+  String get lm_studio_arch;
+
+  /// No description provided for @lm_studio_domain.
+  ///
+  /// In en, this message translates to:
+  /// **'DOMAIN'**
+  String get lm_studio_domain;
+
+  /// No description provided for @lm_studio_format.
+  ///
+  /// In en, this message translates to:
+  /// **'FORMAT'**
+  String get lm_studio_format;
+
+  /// No description provided for @lm_studio_vision.
+  ///
+  /// In en, this message translates to:
+  /// **'Vision'**
+  String get lm_studio_vision;
+
+  /// No description provided for @lm_studio_tool_use.
+  ///
+  /// In en, this message translates to:
+  /// **'Tool use'**
+  String get lm_studio_tool_use;
+
+  /// No description provided for @lm_studio_reasoning.
+  ///
+  /// In en, this message translates to:
+  /// **'Reasoning'**
+  String get lm_studio_reasoning;
+
+  /// No description provided for @lm_studio_download_options.
+  ///
+  /// In en, this message translates to:
+  /// **'Download options'**
+  String get lm_studio_download_options;
+
+  /// No description provided for @lm_studio_download.
+  ///
+  /// In en, this message translates to:
+  /// **'Download'**
+  String get lm_studio_download;
+
+  /// No description provided for @lm_studio_download_size.
+  ///
+  /// In en, this message translates to:
+  /// **'Download {size}'**
+  String lm_studio_download_size(String size);
+
+  /// No description provided for @lm_studio_downloading_percent.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading {percent}%'**
+  String lm_studio_downloading_percent(int percent);
+
+  /// No description provided for @lm_studio_readme_unavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'README not available for this model.'**
+  String get lm_studio_readme_unavailable;
+
+  /// No description provided for @lm_studio_full_gpu_offload.
+  ///
+  /// In en, this message translates to:
+  /// **'Full GPU offload possible'**
+  String get lm_studio_full_gpu_offload;
+
+  /// No description provided for @lm_studio_partial_gpu_offload.
+  ///
+  /// In en, this message translates to:
+  /// **'Partial GPU offload possible'**
+  String get lm_studio_partial_gpu_offload;
+
+  /// No description provided for @lm_studio_likely_too_large.
+  ///
+  /// In en, this message translates to:
+  /// **'Likely too large'**
+  String get lm_studio_likely_too_large;
+
+  /// No description provided for @lm_studio_available_ram_gb.
+  ///
+  /// In en, this message translates to:
+  /// **'Available RAM (GB, optional)'**
+  String get lm_studio_available_ram_gb;
+
+  /// No description provided for @lm_studio_available_vram_gb.
+  ///
+  /// In en, this message translates to:
+  /// **'Available VRAM (GB, optional)'**
+  String get lm_studio_available_vram_gb;
+
+  /// No description provided for @lm_studio_memory_settings_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Memory for recommendations'**
+  String get lm_studio_memory_settings_title;
+
+  /// No description provided for @lm_studio_memory_settings_desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Used to estimate whether models fit on your machine in the model browser.'**
+  String get lm_studio_memory_settings_desc;
+
+  /// Label for the reasoning-toggle button shown for reasoning-capable models
+  ///
+  /// In en, this message translates to:
+  /// **'Think'**
+  String get think_button_label;
+
+  /// Low reasoning effort level
+  ///
+  /// In en, this message translates to:
+  /// **'Low'**
+  String get reasoning_effort_low;
+
+  /// Medium reasoning effort level
+  ///
+  /// In en, this message translates to:
+  /// **'Medium'**
+  String get reasoning_effort_medium;
+
+  /// High reasoning effort level
+  ///
+  /// In en, this message translates to:
+  /// **'High'**
+  String get reasoning_effort_high;
 }
 
 class _AppLocalizationsDelegate

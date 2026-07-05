@@ -35,6 +35,8 @@ class ServerEntity {
 
   String? iconName;
   String? pathPrefix;
+  int? availableRamGb;
+  int? availableVramGb;
 
   ServerEntity({
     this.internalId = 0,
@@ -50,6 +52,8 @@ class ServerEntity {
     required     this.statusIndex,
     this.iconName,
     this.pathPrefix,
+    this.availableRamGb,
+    this.availableVramGb,
   });
 
   factory ServerEntity.fromDomain(Server server) {
@@ -66,6 +70,8 @@ class ServerEntity {
       statusIndex: server.status.index,
       iconName: server.iconName,
       pathPrefix: server.pathPrefix,
+      availableRamGb: server.availableRamGb,
+      availableVramGb: server.availableVramGb,
     );
   }
 
@@ -87,6 +93,8 @@ class ServerEntity {
           : ConnectionStatus.values.first,
       iconName: iconName,
       pathPrefix: pathPrefix,
+      availableRamGb: availableRamGb,
+      availableVramGb: availableVramGb,
     );
   }
 }
@@ -205,6 +213,7 @@ class ConversationEntity {
   bool isTemporary;
   bool isArchived;
   int characterCount;
+  int? totalTokenCount;
 
   @Backlink()
   final messages = ToMany<MessageEntity>();
@@ -233,6 +242,7 @@ class ConversationEntity {
     this.isTemporary = false,
     this.isArchived = false,
     this.characterCount = 0,
+    this.totalTokenCount,
   });
 
   factory ConversationEntity.fromDomain(Conversation conversation) {
@@ -261,6 +271,7 @@ class ConversationEntity {
       isTemporary: conversation.isTemporary,
       isArchived: conversation.isArchived,
       characterCount: conversation.characterCount,
+      totalTokenCount: conversation.totalTokenCount,
     );
   }
 
@@ -300,6 +311,7 @@ class ConversationEntity {
       isTemporary: isTemporary,
       isArchived: isArchived,
       characterCount: characterCount,
+      totalTokenCount: totalTokenCount,
     );
   }
 
@@ -375,6 +387,8 @@ class SavedMessageEntity {
   @Property(type: PropertyType.date)
   DateTime savedAt;
 
+  bool isArchived;
+
   SavedMessageEntity({
     this.internalId = 0,
     required this.id,
@@ -386,6 +400,7 @@ class SavedMessageEntity {
     this.modelId,
     this.folderId,
     required this.savedAt,
+    this.isArchived = false,
   });
 }
 
@@ -433,6 +448,7 @@ class MessageEntity {
   int threadOrder;
   bool isActiveVariant;
   String? parentMessageId;
+  int? contentTokenCount;
 
   MessageEntity({
     this.internalId = 0,
@@ -462,6 +478,7 @@ class MessageEntity {
     this.threadOrder = 0,
     this.isActiveVariant = true,
     this.parentMessageId,
+    this.contentTokenCount,
   });
 
   factory MessageEntity.fromDomain(Message message) {
@@ -498,6 +515,7 @@ class MessageEntity {
       threadOrder: message.threadOrder,
       isActiveVariant: message.isActiveVariant,
       parentMessageId: message.parentMessageId,
+      contentTokenCount: message.contentTokenCount,
     );
   }
 
@@ -571,6 +589,7 @@ class MessageEntity {
       threadOrder: threadOrder,
       isActiveVariant: isActiveVariant,
       parentMessageId: parentMessageId,
+      contentTokenCount: contentTokenCount,
     );
   }
 }

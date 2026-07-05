@@ -4,27 +4,42 @@ import '../../../core/providers/storage_providers.dart';
 import '../../../core/storage/entities.dart';
 import '../../../objectbox.g.dart';
 import '../data/models/persona.dart';
+import '../utils/persona_prompt_utils.dart';
 
 final personaSearchQueryProvider =
     NotifierProvider<_PersonaSearchNotifier, String>(
       _PersonaSearchNotifier.new,
     );
 
-final selectedPersonaProvider =
-    NotifierProvider<SelectedPersonaNotifier, Persona?>(
-      SelectedPersonaNotifier.new,
+final selectedPersonasProvider =
+    NotifierProvider<SelectedPersonasNotifier, List<Persona>>(
+      SelectedPersonasNotifier.new,
     );
 
-class SelectedPersonaNotifier extends Notifier<Persona?> {
-  @override
-  Persona? build() => null;
+/// First selected persona, if any (legacy convenience).
+final selectedPersonaProvider = Provider<Persona?>((ref) {
+  final personas = ref.watch(selectedPersonasProvider);
+  return personas.isEmpty ? null : personas.first;
+});
 
-  void select(Persona? persona) {
-    state = persona;
+class SelectedPersonasNotifier extends Notifier<List<Persona>> {
+  @override
+  List<Persona> build() => const [];
+
+  void setPersonas(List<Persona> personas) {
+    state = List.unmodifiable(personas);
+  }
+
+  void toggle(Persona persona) {
+    if (state.any((p) => p.id == persona.id)) {
+      state = state.where((p) => p.id != persona.id).toList();
+    } else {
+      state = [...state, persona];
+    }
   }
 
   void clear() {
-    state = null;
+    state = const [];
   }
 }
 
@@ -74,21 +89,12 @@ class PersonasNotifier extends AsyncNotifier<List<Persona>> {
 
   Future<List<Persona>> _loadAndSeed() async {
     final db = ref.read(databaseProvider);
-    var entities = db.personaBox.getAll();
-
-    if (entities.isEmpty) {
+    if (db.personaBox.isEmpty()) {
       for (final preset in _builtInPersonas) {
         db.personaBox.put(PersonaEntity.fromDomain(preset));
       }
-      entities = db.personaBox.getAll();
     }
-
-    final personas = entities.map((e) => e.toDomain()).toList();
-    personas.sort((a, b) {
-      if (a.isBuiltIn != b.isBuiltIn) return a.isBuiltIn ? -1 : 1;
-      return a.name.compareTo(b.name);
-    });
-    return personas;
+    return _loadWithoutSeeding();
   }
 
   Future<Persona> createPersona({
@@ -138,19 +144,36 @@ class PersonasNotifier extends AsyncNotifier<List<Persona>> {
   }
 
   Future<void> deletePersona(String id) async {
-    final personas = state.value ?? [];
-    final persona = personas.firstWhere(
-      (p) => p.id == id,
-      orElse: () => throw Exception('Persona not found'),
-    );
-    if (persona.isBuiltIn) return;
-
     final db = ref.read(databaseProvider);
     final query = db.personaBox.query(PersonaEntity_.id.equals(id)).build();
     db.personaBox.removeMany(query.findIds());
     query.close();
 
-    state = AsyncData(await _loadAndSeed());
+    state = AsyncData(await _loadWithoutSeeding());
+  }
+
+  /// Re-adds any built-in personas that were deleted, without touching
+  /// custom ones or duplicating built-ins that are still present.
+  Future<void> restoreBuiltInPersonas() async {
+    final db = ref.read(databaseProvider);
+    final existingIds = db.personaBox.getAll().map((e) => e.id).toSet();
+    for (final preset in _builtInPersonas) {
+      if (!existingIds.contains(preset.id)) {
+        db.personaBox.put(PersonaEntity.fromDomain(preset));
+      }
+    }
+    state = AsyncData(await _loadWithoutSeeding());
+  }
+
+  Future<List<Persona>> _loadWithoutSeeding() async {
+    final db = ref.read(databaseProvider);
+    final entities = db.personaBox.getAll();
+    final personas = entities.map((e) => e.toDomain()).toList();
+    personas.sort((a, b) {
+      if (a.isBuiltIn != b.isBuiltIn) return a.isBuiltIn ? 1 : -1;
+      return a.name.compareTo(b.name);
+    });
+    return personas;
   }
 
   Future<Persona> clonePersona(String id) async {
@@ -309,4 +332,10 @@ final personaByIdProvider = Provider.family<Persona?, String>((ref, id) {
   } catch (_) {
     return null;
   }
+});
+
+final personasForConversationProvider =
+    Provider.family<List<Persona>, String?>((ref, personaIdsRaw) {
+  final personas = ref.watch(personasNotifierProvider).value ?? [];
+  return PersonaPromptUtils.resolvePersonas(personaIdsRaw, personas);
 });

@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:localmind/core/theme/colors.dart';
 import 'package:localmind/l10n/app_localizations.dart';
 import 'recent_conversation_item.dart';
@@ -15,7 +14,7 @@ class EmptyState extends StatefulWidget {
     required this.onSeeAll,
     required this.selectedModel,
     required this.onModelTap,
-    this.selectedPersona,
+    this.selectedPersonas = const [],
     required this.onPersonaTap,
   });
 
@@ -25,7 +24,7 @@ class EmptyState extends StatefulWidget {
   final VoidCallback onSeeAll;
   final dynamic selectedModel;
   final VoidCallback onModelTap;
-  final dynamic selectedPersona;
+  final List<dynamic> selectedPersonas;
   final VoidCallback onPersonaTap;
 
   @override
@@ -201,22 +200,27 @@ class _EmptyStateState extends State<EmptyState>
               isDark: isDark,
               theme: theme,
               child: Row(
-                mainAxisSize: MainAxisSize.min,
+                mainAxisSize: widget.selectedPersonas.isEmpty
+                    ? MainAxisSize.min
+                    : MainAxisSize.max,
                 children: [
-                  if (widget.selectedPersona != null) ...[
-                    Text(widget.selectedPersona!.emoji,
-                        style: const TextStyle(fontSize: 18)),
-                    const SizedBox(width: 8),
+                  if (widget.selectedPersonas.isNotEmpty) ...[
                     Flexible(
-                      child: Text(
-                        widget.selectedPersona!.name,
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                          color: isDark ? Colors.white : Colors.black,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
+                      child: Wrap(
+                        spacing: 4,
+                        runSpacing: 4,
+                        children: widget.selectedPersonas.map((persona) {
+                          return Text(
+                            '${persona.emoji} ${persona.name}',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: isDark ? Colors.white : Colors.black,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          );
+                        }).toList(),
                       ),
                     ),
                   ] else ...[

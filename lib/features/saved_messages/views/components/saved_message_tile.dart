@@ -13,6 +13,10 @@ class SavedMessageTile extends StatelessWidget {
     required this.onCopy,
     required this.onMoveToFolder,
     required this.onDelete,
+    required this.onArchive,
+    this.selectionMode = false,
+    this.isSelected = false,
+    this.onEnterSelectionMode,
   });
 
   final SavedMessage saved;
@@ -21,6 +25,10 @@ class SavedMessageTile extends StatelessWidget {
   final VoidCallback onCopy;
   final VoidCallback onMoveToFolder;
   final VoidCallback onDelete;
+  final VoidCallback onArchive;
+  final bool selectionMode;
+  final bool isSelected;
+  final VoidCallback? onEnterSelectionMode;
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +39,33 @@ class SavedMessageTile extends StatelessWidget {
     final mutedColor =
         isDark ? AppColors.darkMutedText : AppColors.lightMutedText;
 
-    return Material(
+    return Dismissible(
+      key: Key(saved.id),
+      direction: DismissDirection.horizontal,
+      background: Container(
+        alignment: AlignmentDirectional.centerStart,
+        padding: const EdgeInsetsDirectional.only(start: 16),
+        color: Colors.blue,
+        child: Icon(
+          saved.isArchived ? Icons.unarchive_outlined : Icons.archive_outlined,
+          color: Colors.white,
+        ),
+      ),
+      secondaryBackground: Container(
+        alignment: AlignmentDirectional.centerEnd,
+        padding: const EdgeInsetsDirectional.only(end: 16),
+        color: Colors.red,
+        child: const Icon(Icons.delete, color: Colors.white),
+      ),
+      confirmDismiss: (direction) async {
+        if (direction == DismissDirection.startToEnd) {
+          onArchive();
+        } else {
+          onDelete();
+        }
+        return false;
+      },
+      child: Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
@@ -41,13 +75,16 @@ class SavedMessageTile extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(
-                isUser
-                    ? Icons.person_outline
-                    : Icons.auto_awesome_outlined,
-                size: 20,
-                color: mutedColor,
-              ),
+              if (selectionMode)
+                Checkbox(value: isSelected, onChanged: (_) => onTap())
+              else
+                Icon(
+                  isUser
+                      ? Icons.person_outline
+                      : Icons.auto_awesome_outlined,
+                  size: 20,
+                  color: mutedColor,
+                ),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
@@ -109,6 +146,7 @@ class SavedMessageTile extends StatelessWidget {
           ),
         ),
       ),
+      ),
     );
   }
 
@@ -124,6 +162,15 @@ class SavedMessageTile extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              if (onEnterSelectionMode != null)
+                ListTile(
+                  leading: const Icon(Icons.checklist_outlined),
+                  title: Text(l10n.select),
+                  onTap: () {
+                    Navigator.pop(ctx);
+                    onEnterSelectionMode!();
+                  },
+                ),
               ListTile(
                 leading: const Icon(Icons.copy_outlined),
                 title: Text(l10n.copy),
@@ -138,6 +185,20 @@ class SavedMessageTile extends StatelessWidget {
                 onTap: () {
                   Navigator.pop(ctx);
                   onMoveToFolder();
+                },
+              ),
+              ListTile(
+                leading: Icon(
+                  saved.isArchived
+                      ? Icons.unarchive_outlined
+                      : Icons.archive_outlined,
+                ),
+                title: Text(
+                  saved.isArchived ? l10n.unarchive_chat : l10n.archive_chat,
+                ),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  onArchive();
                 },
               ),
               ListTile(

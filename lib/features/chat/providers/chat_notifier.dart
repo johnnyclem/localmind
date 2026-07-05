@@ -18,6 +18,7 @@ import 'package:localmind/features/conversations/providers/conversation_provider
 import 'package:localmind/features/models/data/models/model_info.dart';
 import 'package:localmind/features/on_device/providers/on_device_providers.dart';
 import 'package:localmind/features/personas/providers/personas_providers.dart';
+import 'package:localmind/features/personas/utils/persona_prompt_utils.dart';
 import 'package:localmind/features/servers/data/models/server.dart';
 import 'package:localmind/features/servers/providers/server_providers.dart';
 import 'package:localmind/objectbox.g.dart';
@@ -27,9 +28,13 @@ import '../data/title_generation_service.dart';
 import '../data/tools/tool_definition.dart';
 import '../data/tools/tool_execution_loop.dart';
 import '../data/tools/adapters/tool_transport_adapter.dart' show ParsedToolCall;
+import '../utils/attachment_helpers.dart';
 import 'chat_mcp_providers.dart';
+import 'chat_origin_provider.dart';
 import 'chat_params_providers.dart';
+import 'chat_reasoning_providers.dart';
 import 'chat_service_providers.dart';
+import 'message_selection_provider.dart';
 import 'model_selection_providers.dart';
 import 'tooling_providers.dart';
 import '../utils/message_variants.dart';
@@ -113,9 +118,13 @@ class ChatNotifier extends Notifier<ChatState> {
   MessageSaveService? _saveService;
   bool _pendingTemporaryChat = false;
   String? _ephemeralConversationId;
+  bool _attemptedResume = false;
+  static const _lastActiveConversationKey = 'lastActiveConversationId';
   ChatStats? _streamStats;
   DateTime? _streamStartTime;
   DateTime? _firstTokenTime;
+  bool _useFreshConversationSystemPrompt = false;
+  String? _freshConversationSystemPrompt;
 
   String? get _activeConversationId =>
       _currentConversationId ?? _ephemeralConversationId;
@@ -166,6 +175,87 @@ class ChatNotifier extends Notifier<ChatState> {
     );
   }
 
+  /// Updates the conversation's total token count from the most recent
+  /// assistant message's own end-of-stream stats (`inputTokenCount` +
+  /// `tokenCount`, populated from the server's real usage/stats payload) —
+  /// this is exactly the size of the context window the model saw on its
+  /// last turn, so it doubles as an accurate "context used" figure without
+  /// ever issuing an extra request just to count tokens.
+  void _recomputeConversationTotal(
+    String conversationId, {
+    List<Message>? messages,
+  }) {
+    final timeline = messages ?? state.messages;
+    final lastWithStats = timeline.reversed
+        .where(
+          (m) =>
+              m.role == MessageRole.assistant &&
+              (m.inputTokenCount != null || m.tokenCount != null),
+        )
+        .firstOrNull;
+    final total = lastWithStats == null
+        ? 0
+        : (lastWithStats.inputTokenCount ?? 0) + (lastWithStats.tokenCount ?? 0);
+    unawaited(
+      ref
+          .read(conv.conversationsProvider.notifier)
+          .updateTokenCount(conversationId, total),
+    );
+  }
+
+  /// Syncs the history-list preview/message-count/char-count/token-total
+  /// for [conversationId] after a generation finishes. Generation runs in
+  /// the background even after the user switches to a different
+  /// conversation, so this must never assume `state.messages` belongs to
+  /// [conversationId] — when it isn't the conversation currently on screen,
+  /// the active timeline is re-read from the database instead. Without
+  /// this, a background reply could overwrite the *foreground* conversation's
+  /// history preview with its own content.
+  Future<void> _syncConversationStatsAfterGeneration(
+    String conversationId,
+    Message finalMessage, {
+    required bool isCurrentContext,
+  }) async {
+    final timeline = isCurrentContext
+        ? state.messages
+        : MessageVariants.resolveActiveTimeline(
+            await ref
+                .read(databaseProvider)
+                .store
+                .runInTransactionAsync(
+                  TxMode.read,
+                  _loadMessagesInBackground,
+                  conversationId,
+                ),
+          );
+
+    final preview = finalMessage.content.length > 100
+        ? '${finalMessage.content.substring(0, 100)}...'
+        : finalMessage.content;
+    final totalChars = timeline.fold<int>(
+      0,
+      (sum, message) => sum + message.content.length,
+    );
+
+    await ref
+        .read(conv.conversationsProvider.notifier)
+        .syncConversationStats(
+          conversationId,
+          messageCount: timeline.length,
+          characterCount: totalChars,
+          preview: preview,
+        );
+    _recomputeConversationTotal(conversationId, messages: timeline);
+
+    if (isCurrentContext) {
+      final lastUserMessage =
+          timeline.where((m) => m.role == MessageRole.user).firstOrNull;
+      if (lastUserMessage != null) {
+        _maybeAutoGenerateTitleAfterFirstReply();
+      }
+    }
+  }
+
   void approveTool(bool approved) {
     final pending = state.pendingToolApproval;
     if (pending != null && !pending.completer.isCompleted) {
@@ -199,7 +289,44 @@ class ChatNotifier extends Notifier<ChatState> {
         pending.completer.complete(false);
       }
     });
+    if (!_attemptedResume) {
+      _attemptedResume = true;
+      Future.microtask(_tryResumeLastChat);
+    }
     return const ChatState();
+  }
+
+  Future<void> _tryResumeLastChat() async {
+    final settings = ref.read(settingsProvider);
+    if (!settings.resumeLastChat) return;
+    if (state.messages.isNotEmpty || _currentConversationId != null) return;
+
+    final prefs = ref.read(sharedPreferencesProvider);
+    final lastId = prefs.getString(_lastActiveConversationKey);
+    if (lastId == null || lastId.isEmpty) return;
+
+    try {
+      final conversations = await ref.read(conv.conversationsProvider.future);
+      Conversation? target;
+      for (final conversation in conversations) {
+        if (conversation.id == lastId && !conversation.isTemporary) {
+          target = conversation;
+          break;
+        }
+      }
+      if (target != null) {
+        await loadConversation(target);
+      }
+    } catch (e, st) {
+      Log.error('Failed to resume last chat: $e\n$st');
+    }
+  }
+
+  void _persistLastActiveConversation(String conversationId) {
+    if (!ref.read(settingsProvider).resumeLastChat) return;
+    ref
+        .read(sharedPreferencesProvider)
+        .setString(_lastActiveConversationKey, conversationId);
   }
 
   Future<void> loadConversation(Conversation conversation) async {
@@ -230,6 +357,10 @@ class ChatNotifier extends Notifier<ChatState> {
       ref
           .read(conv.activeConversationProvider.notifier)
           .setActiveConversation(conversation);
+
+      if (!conversation.isTemporary) {
+        _persistLastActiveConversation(conversation.id);
+      }
 
       ref
           .read(chatMcpConfigProvider.notifier)
@@ -347,6 +478,8 @@ class ChatNotifier extends Notifier<ChatState> {
     ref
         .read(conv.activeConversationProvider.notifier)
         .setActiveConversation(null);
+    ref.read(chatOriginProvider.notifier).clear();
+    ref.read(messageSelectionModeProvider.notifier).disable();
 
     final settings = ref.read(settingsProvider);
     ref
@@ -481,12 +614,77 @@ class ChatNotifier extends Notifier<ChatState> {
     _replaceMessageInAll(message, clearStreaming: clearStreaming);
   }
 
+  /// Creates a new conversation (or ephemeral in-memory chat) if one isn't
+  /// already active, mirroring the same persona/title/MCP setup [sendMessage]
+  /// has always done on the first message of a chat. Shared with
+  /// [insertMessageWithoutGenerating] so manually-inserted messages can also
+  /// start a brand new conversation.
+  Future<void> _ensureConversationExists(String titleSource) async {
+    if (_currentConversationId != null || _ephemeralConversationId != null) {
+      return;
+    }
+
+    final server = ref.read(activeServerProvider);
+    final selectedModel = ref.read(selectedModelProvider);
+    final settings = ref.read(settingsProvider);
+    if (server == null) return;
+
+    final isTemp = state.isTemporary || _pendingTemporaryChat;
+    if (isTemp) {
+      _ephemeralConversationId = generateUuid();
+      _pendingTemporaryChat = false;
+      state = state.copyWith(isTemporary: true);
+      return;
+    }
+
+    final titleService = ref.read(titleGenerationServiceProvider);
+    final initialTitle = settings.autoGenerateTitle
+        ? 'New Chat'
+        : titleService.truncateFirstMessageTitle(titleSource);
+    final preselected = ref.read(selectedPersonasProvider);
+    final newConversationSystemPrompt = preselected.isEmpty
+        ? null
+        : PersonaPromptUtils.combineSystemPrompts(preselected);
+    final conversation = await ref
+        .read(conv.conversationsProvider.notifier)
+        .createConversation(
+          title: initialTitle,
+          serverId: server.id,
+          modelId: selectedModel?.id,
+          personaId: preselected.isEmpty
+              ? null
+              : PersonaPromptUtils.joinPersonaIds(
+                  preselected.map((p) => p.id).toList(),
+                ),
+          systemPrompt: newConversationSystemPrompt,
+          mcpEnabled: settings.newChatMcpEnabled,
+          isTemporary: false,
+          folderId: ref.read(pendingNewChatFolderIdProvider.notifier).consume(),
+        );
+    _currentConversationId = conversation.id;
+    ref
+        .read(conv.activeConversationProvider.notifier)
+        .setActiveConversation(conversation);
+    _persistLastActiveConversation(conversation.id);
+    // A conversationsProvider refresh triggered later in this same send
+    // (e.g. syncConversationStats) rebuilds activeConversationProvider
+    // from the reloaded list; use this captured value for this send so
+    // the persona system prompt is never missed on the very first
+    // message of a brand new conversation.
+    _useFreshConversationSystemPrompt = true;
+    _freshConversationSystemPrompt = newConversationSystemPrompt;
+
+    ref.read(chatMcpConfigProvider.notifier).setEnabled(settings.newChatMcpEnabled);
+
+    if (!settings.keepPersonaOnNewChat) {
+      ref.read(selectedPersonasProvider.notifier).clear();
+    }
+  }
+
   Future<void> sendMessage(String content, {List<File>? attachments}) async {
     final server = ref.read(activeServerProvider);
     final selectedModel = ref.read(selectedModelProvider);
-    final chatParams = ref.read(chatParamsProvider);
     final chatService = ref.read(chatServiceProvider);
-    final settings = ref.read(settingsProvider);
 
     if (server == null) {
       state = state.copyWith(errorMessage: 'No server connected');
@@ -500,48 +698,19 @@ class ChatNotifier extends Notifier<ChatState> {
 
     final trimmedContent = content.trim();
 
-    if (_currentConversationId == null && _ephemeralConversationId == null) {
-      final isTemp = state.isTemporary || _pendingTemporaryChat;
-      if (isTemp) {
-        _ephemeralConversationId = generateUuid();
-        _pendingTemporaryChat = false;
-        state = state.copyWith(isTemporary: true);
-      } else {
-        final titleService = ref.read(titleGenerationServiceProvider);
-        final String initialTitle;
-        if (settings.autoGenerateTitle) {
-          initialTitle = 'New Chat';
-        } else {
-          final titleSource = trimmedContent.isNotEmpty
-              ? trimmedContent
-              : (attachments?.isNotEmpty == true
-                  ? attachments!.first.path.split(Platform.pathSeparator).last
-                  : 'New Chat');
-          initialTitle = titleService.truncateFirstMessageTitle(titleSource);
-        }
-        final conversation = await ref
-            .read(conv.conversationsProvider.notifier)
-            .createConversation(
-              title: initialTitle,
-              serverId: server.id,
-              modelId: selectedModel?.id,
-              personaId: ref.read(selectedPersonaProvider)?.id,
-              systemPrompt: ref.read(selectedPersonaProvider)?.systemPrompt,
-              mcpEnabled: settings.newChatMcpEnabled,
-              isTemporary: false,
-            );
-        _currentConversationId = conversation.id;
-        ref
-            .read(conv.activeConversationProvider.notifier)
-            .setActiveConversation(conversation);
+    final titleSource = trimmedContent.isNotEmpty
+        ? trimmedContent
+        : (attachments?.isNotEmpty == true
+            ? attachments!.first.path.split(Platform.pathSeparator).last
+            : 'New Chat');
+    await _ensureConversationExists(titleSource);
 
-        ref
-            .read(chatMcpConfigProvider.notifier)
-            .setEnabled(settings.newChatMcpEnabled);
-
-        ref.read(selectedPersonaProvider.notifier).clear();
-      }
-    }
+    // Read after the conversation (and its persona system prompt) is
+    // created above — chatParamsProvider derives systemPrompt from
+    // activeConversationProvider, which doesn't have it yet if read at the
+    // top of this function, causing the very first message's request to
+    // go out with no persona system prompt.
+    final chatParams = ref.read(chatParamsProvider);
 
     final convId = _activeConversationId;
     if (convId == null) return;
@@ -555,11 +724,9 @@ class ChatNotifier extends Notifier<ChatState> {
       }
 
       for (final file in attachments) {
-        final fileName = file.path.split('/').last;
-        final timestamp = DateTime.now().millisecondsSinceEpoch;
-        final newPath = '${attachmentsDir.path}/${timestamp}_$fileName';
-        await file.copy(newPath);
-        savedPaths.add(newPath);
+        final savedPath =
+            await AttachmentHelpers.saveAttachment(file, attachmentsDir);
+        if (savedPath != null) savedPaths.add(savedPath);
       }
     }
 
@@ -612,6 +779,24 @@ class ChatNotifier extends Notifier<ChatState> {
 
     await _saveMessage(userMessage);
     await _saveMessage(assistantMessage);
+
+    if (!_isInMemoryChat && _currentConversationId != null) {
+      final preview = trimmedContent.isNotEmpty
+          ? (trimmedContent.length > 100
+              ? '${trimmedContent.substring(0, 100)}...'
+              : trimmedContent)
+          : (attachments?.isNotEmpty == true ? '[attachment]' : 'New message');
+      final timeline = [...state.messages, userMessage];
+      await ref.read(conv.conversationsProvider.notifier).syncConversationStats(
+            _currentConversationId!,
+            messageCount: timeline.length,
+            characterCount: timeline.fold<int>(
+              0,
+              (sum, message) => sum + message.content.length,
+            ),
+            preview: preview,
+          );
+    }
 
     ref.read(chatBackgroundServiceProvider).start();
 
@@ -888,30 +1073,12 @@ class ChatNotifier extends Notifier<ChatState> {
                   }
                   ref.read(isStreamingProvider.notifier).setStreaming(false);
                   _latestStreamingMessage = null;
-                    if (_currentConversationId != null) {
-                    final preview = finalMessage.content.length > 100
-                        ? '${finalMessage.content.substring(0, 100)}...'
-                        : finalMessage.content;
-                    final totalChars = state.messages.fold<int>(
-                      0,
-                      (sum, message) => sum + message.content.length,
-                    );
-                    await ref
-                        .read(conv.conversationsProvider.notifier)
-                        .updatePreview(
-                          _currentConversationId!,
-                          preview,
-                          DateTime.now(),
-                          characterCount: totalChars,
-                        );
 
-                    final userMessage = state.messages
-                        .where((m) => m.role == MessageRole.user)
-                        .firstOrNull;
-                    if (userMessage != null) {
-                      _maybeAutoGenerateTitleAfterFirstReply();
-                    }
-                  }
+                  await _syncConversationStatsAfterGeneration(
+                    streamConvId,
+                    finalMessage,
+                    isCurrentContext: isCurrentContext,
+                  );
 
                   _maybeRequestReviewAfterSuccessfulCompletion(
                     finalMessage: finalMessage,
@@ -979,30 +1146,129 @@ class ChatNotifier extends Notifier<ChatState> {
     }
   }
 
+  /// Inserts [content] as a message with the given [role] without calling
+  /// the chat service or starting generation. Used by the send button's
+  /// long-press ("insert without generating") and the role-swap button
+  /// (which lets the user manually author an assistant-role turn).
+  Future<void> insertMessageWithoutGenerating(
+    String content, {
+    required MessageRole role,
+    List<File>? attachments,
+  }) async {
+    final server = ref.read(activeServerProvider);
+    if (server == null) {
+      state = state.copyWith(errorMessage: 'No server connected');
+      return;
+    }
+
+    final trimmedContent = content.trim();
+    if (trimmedContent.isEmpty && (attachments == null || attachments.isEmpty)) {
+      return;
+    }
+
+    final titleSource = trimmedContent.isNotEmpty
+        ? trimmedContent
+        : (attachments?.isNotEmpty == true
+            ? attachments!.first.path.split(Platform.pathSeparator).last
+            : 'New Chat');
+    await _ensureConversationExists(titleSource);
+
+    final convId = _activeConversationId;
+    if (convId == null) return;
+
+    final List<String> savedPaths = [];
+    if (attachments != null && attachments.isNotEmpty) {
+      final appDir = await ref.read(storageDirectoryProvider.future);
+      final attachmentsDir = Directory('${appDir.path}/attachments');
+      if (!await attachmentsDir.exists()) {
+        await attachmentsDir.create(recursive: true);
+      }
+
+      for (final file in attachments) {
+        final savedPath =
+            await AttachmentHelpers.saveAttachment(file, attachmentsDir);
+        if (savedPath != null) savedPaths.add(savedPath);
+      }
+    }
+
+    final threadOrder = MessageVariants.nextThreadOrder(state.messages);
+    final groupId = generateUuid();
+    final lastInTimeline = state.messages.isNotEmpty ? state.messages.last : null;
+
+    final message = Message(
+      id: generateUuid(),
+      conversationId: convId,
+      role: role,
+      content: trimmedContent,
+      createdAt: DateTime.now(),
+      status: MessageStatus.complete,
+      attachmentPaths: savedPaths.isNotEmpty ? savedPaths : null,
+      variantGroupId: groupId,
+      variantIndex: 0,
+      threadOrder: threadOrder,
+      isActiveVariant: true,
+      parentMessageId: lastInTimeline?.id,
+    );
+
+    final updatedAll = [...state.allMessages, message];
+    state = state.copyWith(
+      allMessages: updatedAll,
+      messages: MessageVariants.resolveActiveTimeline(updatedAll),
+      clearError: true,
+    );
+
+    await _saveMessage(message);
+
+    if (!_isInMemoryChat && _currentConversationId != null) {
+      final preview = trimmedContent.isNotEmpty
+          ? (trimmedContent.length > 100
+              ? '${trimmedContent.substring(0, 100)}...'
+              : trimmedContent)
+          : (attachments?.isNotEmpty == true ? '[attachment]' : 'New message');
+      final timeline = state.messages;
+      await ref.read(conv.conversationsProvider.notifier).syncConversationStats(
+            _currentConversationId!,
+            messageCount: timeline.length,
+            characterCount: timeline.fold<int>(
+              0,
+              (sum, message) => sum + message.content.length,
+            ),
+            preview: preview,
+          );
+    }
+  }
+
   List<Message> _buildMessagesForApi(ModelInfo? selectedModel) {
     final settings = ref.read(settingsProvider);
     final messages = <Message>[];
 
+    final reasoningConfig = ref.read(chatReasoningConfigProvider);
+    final shouldDisableThinking =
+        (selectedModel?.supportsReasoning ?? false) && !reasoningConfig.enabled;
+
     final personaPrompt = _getPersonaSystemPrompt();
-    if (personaPrompt != null) {
+    var systemContent = personaPrompt ??
+        (settings.showSystemMessages
+            ? 'You are LocalMind, a helpful AI assistant. Provide clear, accurate, and concise responses.'
+            : null);
+
+    if (shouldDisableThinking) {
+      // Hybrid reasoning models (Qwen3 and similar) key off this literal
+      // token in the prompt to skip their <think> block — send it whenever
+      // the model supports reasoning and the user has switched Think off,
+      // alongside the request-level reasoning-disable fields.
+      systemContent = (systemContent == null || systemContent.trim().isEmpty)
+          ? '/no_think'
+          : '$systemContent\n/no_think';
+    }
+
+    if (systemContent != null) {
       messages.add(
         Message(
           id: 'system-$_currentConversationId',
           conversationId: _currentConversationId ?? '',
           role: MessageRole.system,
-          content: personaPrompt,
-          createdAt: DateTime.now(),
-          status: MessageStatus.complete,
-        ),
-      );
-    } else if (settings.showSystemMessages) {
-      messages.add(
-        Message(
-          id: 'system-default-$_currentConversationId',
-          conversationId: _currentConversationId ?? '',
-          role: MessageRole.system,
-          content:
-              'You are LocalMind, a helpful AI assistant. Provide clear, accurate, and concise responses.',
+          content: systemContent,
           createdAt: DateTime.now(),
           status: MessageStatus.complete,
         ),
@@ -1035,25 +1301,28 @@ class ChatNotifier extends Notifier<ChatState> {
   }
 
   String? _getPersonaSystemPrompt() {
-    final conversation = ref.read(conv.activeConversationProvider);
-    final personaId = conversation?.personaId;
-    if (personaId == null) return null;
+    if (_useFreshConversationSystemPrompt) {
+      _useFreshConversationSystemPrompt = false;
+      final override = _freshConversationSystemPrompt;
+      _freshConversationSystemPrompt = null;
+      if (override != null && override.trim().isNotEmpty) return override;
+    }
 
+    final conversation = ref.read(conv.activeConversationProvider);
     if (conversation?.systemPrompt != null &&
-        conversation!.systemPrompt!.isNotEmpty) {
+        conversation!.systemPrompt!.trim().isNotEmpty) {
       return conversation.systemPrompt;
     }
 
+    final personaIds = conversation?.personaId;
+    if (personaIds == null || personaIds.isEmpty) return null;
+
     try {
-      final personasAsync = ref.read(personasNotifierProvider);
-      final personas = personasAsync.value ?? [];
-      final persona = personas.firstWhere(
-        (p) => p.id == personaId,
-        orElse: () => throw Exception('Persona not found'),
-      );
-      if (persona.systemPrompt.isNotEmpty) {
-        return persona.systemPrompt;
-      }
+      final personas = ref.read(personasNotifierProvider).value ?? [];
+      final selected =
+          PersonaPromptUtils.resolvePersonas(personaIds, personas);
+      if (selected.isEmpty) return null;
+      return PersonaPromptUtils.combineSystemPrompts(selected);
     } catch (_) {}
 
     return null;
@@ -1440,11 +1709,11 @@ class ChatNotifier extends Notifier<ChatState> {
   }) async {
     final selectedModel = ref.read(selectedModelProvider);
     final server = ref.read(activeServerProvider);
-    if (server == null || _currentConversationId == null) return;
+    if (server == null || _activeConversationId == null) return;
 
     final assistantMessage = Message(
       id: generateUuid(),
-      conversationId: _currentConversationId!,
+      conversationId: _activeConversationId!,
       role: MessageRole.assistant,
       content: '',
       createdAt: DateTime.now(),
@@ -1492,6 +1761,7 @@ class ChatNotifier extends Notifier<ChatState> {
     try {
       await _detachStreamSubscription();
       _uiUpdateTimer?.cancel();
+      _resetStreamMetrics();
 
       String reasoningContent = '';
       var streamingAssistantMessage = assistantMessage;
@@ -1537,9 +1807,8 @@ class ChatNotifier extends Notifier<ChatState> {
           .listen(
             (response) async {
               if (streamGeneration != _streamGeneration) return;
-              if (_activeConversationId != assistantMessage.conversationId) {
-                return;
-              }
+              final streamConvId = assistantMessage.conversationId;
+              final isCurrentContext = _activeConversationId == streamConvId;
 
               switch (response.type) {
                 case ChatResponseType.message:
@@ -1612,11 +1881,16 @@ class ChatNotifier extends Notifier<ChatState> {
                     stopReason: 'error',
                   );
                   await _saveMessage(streamingAssistantMessage);
-                  _replaceMessageInAll(
-                    streamingAssistantMessage,
-                    clearStreaming: true,
-                  );
-                  state = state.copyWith(isStreaming: false, clearStreaming: true);
+                  if (isCurrentContext) {
+                    _replaceMessageInAll(
+                      streamingAssistantMessage,
+                      clearStreaming: true,
+                    );
+                    state = state.copyWith(
+                      isStreaming: false,
+                      clearStreaming: true,
+                    );
+                  }
                   ref.read(isStreamingProvider.notifier).setStreaming(false);
                   ref.read(chatBackgroundServiceProvider).stop();
                   break;
@@ -1632,6 +1906,9 @@ class ChatNotifier extends Notifier<ChatState> {
             onDone: () async {
               _uiUpdateTimer?.cancel();
               _uiUpdateTimer = null;
+              final streamConvId = assistantMessage.conversationId;
+              final isCurrentContext = _activeConversationId == streamConvId;
+
               final finalMessage = _finalizeStreamMessage(
                 streamingAssistantMessage.copyWith(
                   status: MessageStatus.complete,
@@ -1640,10 +1917,17 @@ class ChatNotifier extends Notifier<ChatState> {
                 stopReason: 'complete',
               );
               await _saveMessage(finalMessage);
-              _replaceMessageInAll(finalMessage, clearStreaming: true);
-              state = state.copyWith(isStreaming: false, clearStreaming: true);
+              if (isCurrentContext) {
+                _replaceMessageInAll(finalMessage, clearStreaming: true);
+                state = state.copyWith(isStreaming: false, clearStreaming: true);
+              }
               ref.read(isStreamingProvider.notifier).setStreaming(false);
               ref.read(chatBackgroundServiceProvider).stop();
+              await _syncConversationStatsAfterGeneration(
+                streamConvId,
+                finalMessage,
+                isCurrentContext: isCurrentContext,
+              );
               _maybeRequestReviewAfterSuccessfulCompletion(
                 finalMessage: finalMessage,
                 server: server,
@@ -1654,18 +1938,22 @@ class ChatNotifier extends Notifier<ChatState> {
               Log.error('Stream error: $error');
               _uiUpdateTimer?.cancel();
               _uiUpdateTimer = null;
+              final isCurrentContext =
+                  _activeConversationId == assistantMessage.conversationId;
               final errorMessage = streamingAssistantMessage.copyWith(
                 status: MessageStatus.error,
                 errorMessage: error.toString(),
                 isProcessing: false,
               );
               await _saveMessage(errorMessage);
-              _replaceMessageInAll(errorMessage, clearStreaming: true);
-              state = state.copyWith(
-                isStreaming: false,
-                clearStreaming: true,
-                errorMessage: error.toString(),
-              );
+              if (isCurrentContext) {
+                _replaceMessageInAll(errorMessage, clearStreaming: true);
+                state = state.copyWith(
+                  isStreaming: false,
+                  clearStreaming: true,
+                  errorMessage: error.toString(),
+                );
+              }
               ref.read(isStreamingProvider.notifier).setStreaming(false);
               ref.read(chatBackgroundServiceProvider).stop();
             },
@@ -1794,6 +2082,10 @@ class ChatNotifier extends Notifier<ChatState> {
       allMessages: updatedAll,
       messages: MessageVariants.resolveActiveTimeline(updatedAll),
     );
+
+    if (_currentConversationId != null) {
+      _recomputeConversationTotal(_currentConversationId!);
+    }
   }
 
   Future<void> editMessageSaveOnly(String messageId, String newContent) async {
@@ -1865,14 +2157,21 @@ class ChatNotifier extends Notifier<ChatState> {
               firstUser.isNotEmpty ? firstUser : 'New Chat',
             );
 
+    final preselected = ref.read(selectedPersonasProvider);
     final conversation = await ref
         .read(conv.conversationsProvider.notifier)
         .createConversation(
           title: title,
           serverId: server.id,
           modelId: ref.read(selectedModelProvider)?.id,
-          personaId: ref.read(selectedPersonaProvider)?.id,
-          systemPrompt: ref.read(selectedPersonaProvider)?.systemPrompt,
+          personaId: preselected.isEmpty
+              ? null
+              : PersonaPromptUtils.joinPersonaIds(
+                  preselected.map((p) => p.id).toList(),
+                ),
+          systemPrompt: preselected.isEmpty
+              ? null
+              : PersonaPromptUtils.combineSystemPrompts(preselected),
           mcpEnabled: settings.newChatMcpEnabled,
           isTemporary: false,
         );

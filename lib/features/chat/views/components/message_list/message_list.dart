@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:localmind/core/models/enums.dart';
+import 'package:localmind/core/providers/app_providers.dart';
 import 'package:localmind/features/chat/data/models/message.dart';
 import 'package:localmind/features/chat/providers/chat_providers.dart';
 import 'package:localmind/features/conversations/providers/conversation_providers.dart';
@@ -189,7 +190,7 @@ class _MessageListConsumerState extends ConsumerState<_MessageListConsumer> {
   }
 }
 
-class _MessageList extends StatelessWidget {
+class _MessageList extends ConsumerWidget {
   const _MessageList({
     required this.scrollController,
     required this.messages,
@@ -235,17 +236,35 @@ class _MessageList extends StatelessWidget {
   final double bottomInset;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final selectionMode = ref.watch(messageSelectionModeProvider);
+    final selectedIds = ref.watch(selectedMessageIdsProvider);
+    final showSystemMessages =
+        ref.watch(settingsProvider.select((s) => s.showSystemMessagesInChat));
     final visibleMessages = <Message>[];
 
+    // The streaming message only belongs at the end of the currently
+    // displayed branch if that branch's active timeline actually resolves
+    // to it — otherwise the user has cycled to a different variant while
+    // a sibling variant is still generating in the background, and the
+    // live bubble must not be appended to whatever branch is now on screen.
+    final streamingBelongsToActiveTimeline = streamingMessage != null &&
+        messages.any((m) => m.id == streamingMessage!.id);
+
     for (final message in messages) {
-      if (streamingMessage != null &&
+      if (!showSystemMessages && message.role == MessageRole.system) {
+        continue;
+      }
+      if (streamingBelongsToActiveTimeline &&
           message.id == streamingMessage!.id &&
           isStreaming) {
         continue;
       }
       visibleMessages.add(message);
     }
+
+    final showTrailingStreamingBubble =
+        streamingBelongsToActiveTimeline && isStreaming;
 
     return ListView.builder(
       controller: scrollController,
@@ -255,11 +274,9 @@ class _MessageList extends StatelessWidget {
       ),
       itemCount:
           visibleMessages.length +
-          (streamingMessage != null && isStreaming ? 1 : 0),
+          (showTrailingStreamingBubble ? 1 : 0),
       itemBuilder: (context, index) {
-        if (streamingMessage != null &&
-            isStreaming &&
-            index == visibleMessages.length) {
+        if (showTrailingStreamingBubble && index == visibleMessages.length) {
           return ChatBubble(
             key: ValueKey(streamingMessage!.id),
             message: streamingMessage!,
@@ -274,39 +291,56 @@ class _MessageList extends StatelessWidget {
         final itemKey =
             messageKeys.putIfAbsent(message.id, GlobalKey.new);
 
+        final bubble = ChatBubble(
+          key: itemKey,
+          message: message,
+          allMessages: this.allMessages,
+          isStreaming: isLast &&
+              showTrailingStreamingBubble &&
+              message.id == streamingMessage?.id,
+          onRetry: () => onRetry(message.id),
+          onDelete: () => onDelete(message.id),
+          onEdit: message.role == MessageRole.user
+              ? () => onEdit(message.id, message.content)
+              : message.role == MessageRole.assistant
+                  ? () => onEditAssistant(message.id, message.content)
+                  : null,
+          onBranch: () => onBranch(message.id),
+          onContinue: message.role == MessageRole.assistant && isLast
+              ? () => onContinue(message.id)
+              : null,
+          onCycleVariant: (direction) =>
+              onCycleVariant(message.id, direction),
+          onModelTap: onModelPicker,
+          onModelLongPress: message.modelId != null &&
+                  message.role == MessageRole.assistant &&
+                  onModelLongPress != null
+              ? () => onModelLongPress!(message.modelId!)
+              : null,
+          onSave: onSave,
+          onShare: onShare == null
+              ? null
+              : () => onShare!(message),
+        );
+
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            ChatBubble(
-              key: itemKey,
-              message: message,
-              allMessages: this.allMessages,
-              isStreaming:
-                  isLast && isStreaming && message.id == streamingMessage?.id,
-              onRetry: () => onRetry(message.id),
-              onDelete: () => onDelete(message.id),
-              onEdit: message.role == MessageRole.user
-                  ? () => onEdit(message.id, message.content)
-                  : message.role == MessageRole.assistant
-                      ? () => onEditAssistant(message.id, message.content)
-                      : null,
-              onBranch: () => onBranch(message.id),
-              onContinue: message.role == MessageRole.assistant && isLast
-                  ? () => onContinue(message.id)
-                  : null,
-              onCycleVariant: (direction) =>
-                  onCycleVariant(message.id, direction),
-              onModelTap: onModelPicker,
-              onModelLongPress: message.modelId != null &&
-                      message.role == MessageRole.assistant &&
-                      onModelLongPress != null
-                  ? () => onModelLongPress!(message.modelId!)
-                  : null,
-              onSave: onSave,
-              onShare: onShare == null
-                  ? null
-                  : () => onShare!(message),
-            ),
+            if (selectionMode)
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Checkbox(
+                    value: selectedIds.contains(message.id),
+                    onChanged: (_) => ref
+                        .read(selectedMessageIdsProvider.notifier)
+                        .toggle(message.id),
+                  ),
+                  Expanded(child: bubble),
+                ],
+              )
+            else
+              bubble,
             if (!isStreaming &&
                 isLast &&
                 message.role == MessageRole.user &&

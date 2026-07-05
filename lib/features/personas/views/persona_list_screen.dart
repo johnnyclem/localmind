@@ -77,6 +77,18 @@ class PersonaListScreen extends ConsumerWidget {
                   ],
                 ),
               ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                child: Text(
+                  l10n.personas_combine_hint,
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: isDark
+                        ? AppColors.darkMutedText
+                        : AppColors.lightMutedText,
+                  ),
+                ),
+              ),
               SizedBox(
                 height: 44,
                 child: ListView(
@@ -154,24 +166,6 @@ class PersonaListScreen extends ConsumerWidget {
                           vertical: 8,
                         ),
                         children: [
-                          if (builtIn.isNotEmpty) ...[
-                            _SectionLabel(label: l10n.persona_builtin_section, isDark: isDark),
-                            ...builtIn.map(
-                              (p) => _PersonaCard(
-                                persona: p,
-                                isDark: isDark,
-                                l10n: l10n,
-                                showSystemPrompt: previewSystemPrompts,
-                                onLongPress: () => _showActions(
-                                  context,
-                                  ref,
-                                  p,
-                                  isBuiltIn: true,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                          ],
                           if (userCreated.isNotEmpty) ...[
                             _SectionLabel(label: l10n.persona_my_section, isDark: isDark),
                             ...userCreated.map(
@@ -188,6 +182,24 @@ class PersonaListScreen extends ConsumerWidget {
                                   ref,
                                   p,
                                   isBuiltIn: false,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                          ],
+                          if (builtIn.isNotEmpty) ...[
+                            _SectionLabel(label: l10n.persona_builtin_section, isDark: isDark),
+                            ...builtIn.map(
+                              (p) => _PersonaCard(
+                                persona: p,
+                                isDark: isDark,
+                                l10n: l10n,
+                                showSystemPrompt: previewSystemPrompts,
+                                onLongPress: () => _showActions(
+                                  context,
+                                  ref,
+                                  p,
+                                  isBuiltIn: true,
                                 ),
                               ),
                             ),
@@ -224,7 +236,7 @@ class PersonaListScreen extends ConsumerWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (!isBuiltIn) ...[
+              if (!isBuiltIn)
                 ListTile(
                   leading: const Icon(Icons.edit),
                   title: Text(sheetL10n.edit),
@@ -233,45 +245,48 @@ class PersonaListScreen extends ConsumerWidget {
                     context.push(AppRoutes.createPersona, extra: persona);
                   },
                 ),
-                ListTile(
-                  leading: const Icon(Icons.delete_outline, color: Colors.red),
-                  title: Text(
-                    sheetL10n.delete,
-                    style: const TextStyle(color: Colors.red),
-                  ),
-                  onTap: () {
-                    Navigator.pop(ctx);
-                    showDialog(
-                      context: context,
-                      builder: (dCtx) {
-                        final dlgL10n = AppLocalizations.of(dCtx)!;
-                        return AlertDialog(
-                          title: Text(dlgL10n.delete_persona_title(persona.name)),
-                          content: Text(dlgL10n.delete_persona_body),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.pop(dCtx),
-                              child: Text(dlgL10n.cancel),
-                            ),
-                            TextButton(
-                              onPressed: () {
-                                ref
-                                    .read(personasNotifierProvider.notifier)
-                                    .deletePersona(persona.id);
-                                Navigator.pop(dCtx);
-                              },
-                              style: TextButton.styleFrom(
-                                foregroundColor: Colors.red,
-                              ),
-                              child: Text(dlgL10n.delete),
-                            ),
-                          ],
-                        );
-                      },
-                    );
-                  },
+              ListTile(
+                leading: const Icon(Icons.delete_outline, color: Colors.red),
+                title: Text(
+                  sheetL10n.delete,
+                  style: const TextStyle(color: Colors.red),
                 ),
-              ],
+                onTap: () {
+                  Navigator.pop(ctx);
+                  showDialog(
+                    context: context,
+                    builder: (dCtx) {
+                      final dlgL10n = AppLocalizations.of(dCtx)!;
+                      return AlertDialog(
+                        title: Text(dlgL10n.delete_persona_title(persona.name)),
+                        content: Text(
+                          isBuiltIn
+                              ? dlgL10n.delete_builtin_persona_body
+                              : dlgL10n.delete_persona_body,
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(dCtx),
+                            child: Text(dlgL10n.cancel),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              ref
+                                  .read(personasNotifierProvider.notifier)
+                                  .deletePersona(persona.id);
+                              Navigator.pop(dCtx);
+                            },
+                            style: TextButton.styleFrom(
+                              foregroundColor: Colors.red,
+                            ),
+                            child: Text(dlgL10n.delete),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                },
+              ),
               ListTile(
                 leading: const Icon(Icons.copy),
                 title: Text(sheetL10n.clone_edit),

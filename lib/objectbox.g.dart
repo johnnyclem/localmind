@@ -22,7 +22,7 @@ final _entities = <obx_int.ModelEntity>[
   obx_int.ModelEntity(
     id: const obx_int.IdUid(1, 6060443518060866028),
     name: 'ConversationEntity',
-    lastPropertyId: const obx_int.IdUid(23, 3122805731877931734),
+    lastPropertyId: const obx_int.IdUid(24, 2324488738774851555),
     flags: 0,
     properties: <obx_int.ModelProperty>[
       obx_int.ModelProperty(
@@ -164,6 +164,12 @@ final _entities = <obx_int.ModelEntity>[
         type: 6,
         flags: 0,
       ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(24, 2324488738774851555),
+        name: 'totalTokenCount',
+        type: 6,
+        flags: 0,
+      ),
     ],
     relations: <obx_int.ModelRelation>[],
     backlinks: <obx_int.ModelBacklink>[
@@ -177,7 +183,7 @@ final _entities = <obx_int.ModelEntity>[
   obx_int.ModelEntity(
     id: const obx_int.IdUid(2, 196881068437544233),
     name: 'MessageEntity',
-    lastPropertyId: const obx_int.IdUid(28, 8162956617579414275),
+    lastPropertyId: const obx_int.IdUid(29, 6028398201373029019),
     flags: 0,
     properties: <obx_int.ModelProperty>[
       obx_int.ModelProperty(
@@ -353,6 +359,12 @@ final _entities = <obx_int.ModelEntity>[
         type: 9,
         flags: 0,
       ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(29, 6028398201373029019),
+        name: 'contentTokenCount',
+        type: 6,
+        flags: 0,
+      ),
     ],
     relations: <obx_int.ModelRelation>[],
     backlinks: <obx_int.ModelBacklink>[],
@@ -437,7 +449,7 @@ final _entities = <obx_int.ModelEntity>[
   obx_int.ModelEntity(
     id: const obx_int.IdUid(4, 6971506781199819057),
     name: 'ServerEntity',
-    lastPropertyId: const obx_int.IdUid(13, 6207430374144016939),
+    lastPropertyId: const obx_int.IdUid(15, 6058370228992885505),
     flags: 0,
     properties: <obx_int.ModelProperty>[
       obx_int.ModelProperty(
@@ -519,6 +531,18 @@ final _entities = <obx_int.ModelEntity>[
         type: 9,
         flags: 0,
       ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(14, 5253774322138008698),
+        name: 'availableRamGb',
+        type: 6,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(15, 6058370228992885505),
+        name: 'availableVramGb',
+        type: 6,
+        flags: 0,
+      ),
     ],
     relations: <obx_int.ModelRelation>[],
     backlinks: <obx_int.ModelBacklink>[],
@@ -567,7 +591,7 @@ final _entities = <obx_int.ModelEntity>[
   obx_int.ModelEntity(
     id: const obx_int.IdUid(6, 152573122645768072),
     name: 'SavedMessageEntity',
-    lastPropertyId: const obx_int.IdUid(10, 431621328894537301),
+    lastPropertyId: const obx_int.IdUid(11, 8907657125307211651),
     flags: 0,
     properties: <obx_int.ModelProperty>[
       obx_int.ModelProperty(
@@ -631,6 +655,12 @@ final _entities = <obx_int.ModelEntity>[
         id: const obx_int.IdUid(10, 431621328894537301),
         name: 'savedAt',
         type: 10,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(11, 8907657125307211651),
+        name: 'isArchived',
+        type: 1,
         flags: 0,
       ),
     ],
@@ -779,7 +809,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
         final folderIdOffset = object.folderId == null
             ? null
             : fbb.writeString(object.folderId!);
-        fbb.startTable(24);
+        fbb.startTable(25);
         fbb.addInt64(0, object.internalId);
         fbb.addOffset(1, idOffset);
         fbb.addOffset(2, titleOffset);
@@ -803,6 +833,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
         fbb.addBool(20, object.isTemporary);
         fbb.addBool(21, object.isArchived);
         fbb.addInt64(22, object.characterCount);
+        fbb.addInt64(23, object.totalTokenCount);
         fbb.finish(fbb.endTable());
         return object.internalId;
       },
@@ -906,6 +937,11 @@ obx_int.ModelDefinition getObjectBoxModel() {
           48,
           0,
         );
+        final totalTokenCountParam = const fb.Int64Reader().vTableGetNullable(
+          buffer,
+          rootOffset,
+          50,
+        );
         final object = ConversationEntity(
           internalId: internalIdParam,
           id: idParam,
@@ -930,6 +966,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
           isTemporary: isTemporaryParam,
           isArchived: isArchivedParam,
           characterCount: characterCountParam,
+          totalTokenCount: totalTokenCountParam,
         );
         obx_int.InternalToManyAccess.setRelInfo<ConversationEntity>(
           object.messages,
@@ -988,7 +1025,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
         final stopReasonOffset = object.stopReason == null
             ? null
             : fbb.writeString(object.stopReason!);
-        fbb.startTable(29);
+        fbb.startTable(30);
         fbb.addInt64(0, object.internalId);
         fbb.addOffset(1, idOffset);
         fbb.addInt64(2, object.conversation.targetId);
@@ -1017,6 +1054,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
         fbb.addFloat64(25, object.tokensPerSecond);
         fbb.addInt64(26, object.ttftMs);
         fbb.addOffset(27, stopReasonOffset);
+        fbb.addInt64(28, object.contentTokenCount);
         fbb.finish(fbb.endTable());
         return object.internalId;
       },
@@ -1135,6 +1173,11 @@ obx_int.ModelDefinition getObjectBoxModel() {
         final parentMessageIdParam = const fb.StringReader(
           asciiOptimization: true,
         ).vTableGetNullable(buffer, rootOffset, 50);
+        final contentTokenCountParam = const fb.Int64Reader().vTableGetNullable(
+          buffer,
+          rootOffset,
+          60,
+        );
         final object = MessageEntity(
           internalId: internalIdParam,
           id: idParam,
@@ -1163,6 +1206,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
           threadOrder: threadOrderParam,
           isActiveVariant: isActiveVariantParam,
           parentMessageId: parentMessageIdParam,
+          contentTokenCount: contentTokenCountParam,
         );
         object.conversation.targetId = const fb.Int64Reader().vTableGet(
           buffer,
@@ -1291,7 +1335,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
         final pathPrefixOffset = object.pathPrefix == null
             ? null
             : fbb.writeString(object.pathPrefix!);
-        fbb.startTable(14);
+        fbb.startTable(16);
         fbb.addInt64(0, object.internalId);
         fbb.addOffset(1, idOffset);
         fbb.addOffset(2, nameOffset);
@@ -1305,6 +1349,8 @@ obx_int.ModelDefinition getObjectBoxModel() {
         fbb.addInt32(10, object.statusIndex);
         fbb.addOffset(11, iconNameOffset);
         fbb.addOffset(12, pathPrefixOffset);
+        fbb.addInt64(13, object.availableRamGb);
+        fbb.addInt64(14, object.availableVramGb);
         fbb.finish(fbb.endTable());
         return object.internalId;
       },
@@ -1365,6 +1411,16 @@ obx_int.ModelDefinition getObjectBoxModel() {
         final pathPrefixParam = const fb.StringReader(
           asciiOptimization: true,
         ).vTableGetNullable(buffer, rootOffset, 28);
+        final availableRamGbParam = const fb.Int64Reader().vTableGetNullable(
+          buffer,
+          rootOffset,
+          30,
+        );
+        final availableVramGbParam = const fb.Int64Reader().vTableGetNullable(
+          buffer,
+          rootOffset,
+          32,
+        );
         final object = ServerEntity(
           internalId: internalIdParam,
           id: idParam,
@@ -1379,6 +1435,8 @@ obx_int.ModelDefinition getObjectBoxModel() {
           statusIndex: statusIndexParam,
           iconName: iconNameParam,
           pathPrefix: pathPrefixParam,
+          availableRamGb: availableRamGbParam,
+          availableVramGb: availableVramGbParam,
         );
 
         return object;
@@ -1462,7 +1520,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
         final folderIdOffset = object.folderId == null
             ? null
             : fbb.writeString(object.folderId!);
-        fbb.startTable(11);
+        fbb.startTable(12);
         fbb.addInt64(0, object.internalId);
         fbb.addOffset(1, idOffset);
         fbb.addOffset(2, sourceMessageIdOffset);
@@ -1473,6 +1531,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
         fbb.addOffset(7, modelIdOffset);
         fbb.addOffset(8, folderIdOffset);
         fbb.addInt64(9, object.savedAt.millisecondsSinceEpoch);
+        fbb.addBool(10, object.isArchived);
         fbb.finish(fbb.endTable());
         return object.internalId;
       },
@@ -1515,6 +1574,12 @@ obx_int.ModelDefinition getObjectBoxModel() {
         final savedAtParam = DateTime.fromMillisecondsSinceEpoch(
           const fb.Int64Reader().vTableGet(buffer, rootOffset, 22, 0),
         );
+        final isArchivedParam = const fb.BoolReader().vTableGet(
+          buffer,
+          rootOffset,
+          24,
+          false,
+        );
         final object = SavedMessageEntity(
           internalId: internalIdParam,
           id: idParam,
@@ -1526,6 +1591,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
           modelId: modelIdParam,
           folderId: folderIdParam,
           savedAt: savedAtParam,
+          isArchived: isArchivedParam,
         );
 
         return object;
@@ -1708,6 +1774,11 @@ class ConversationEntity_ {
     _entities[0].properties[22],
   );
 
+  /// See [ConversationEntity.totalTokenCount].
+  static final totalTokenCount = obx.QueryIntegerProperty<ConversationEntity>(
+    _entities[0].properties[23],
+  );
+
   /// see [ConversationEntity.messages]
   static final messages =
       obx.QueryBacklinkToMany<MessageEntity, ConversationEntity>(
@@ -1857,6 +1928,11 @@ class MessageEntity_ {
   static final stopReason = obx.QueryStringProperty<MessageEntity>(
     _entities[1].properties[27],
   );
+
+  /// See [MessageEntity.contentTokenCount].
+  static final contentTokenCount = obx.QueryIntegerProperty<MessageEntity>(
+    _entities[1].properties[28],
+  );
 }
 
 /// [PersonaEntity] entity fields to define ObjectBox queries.
@@ -1983,6 +2059,16 @@ class ServerEntity_ {
   static final pathPrefix = obx.QueryStringProperty<ServerEntity>(
     _entities[3].properties[12],
   );
+
+  /// See [ServerEntity.availableRamGb].
+  static final availableRamGb = obx.QueryIntegerProperty<ServerEntity>(
+    _entities[3].properties[13],
+  );
+
+  /// See [ServerEntity.availableVramGb].
+  static final availableVramGb = obx.QueryIntegerProperty<ServerEntity>(
+    _entities[3].properties[14],
+  );
 }
 
 /// [ConversationFolderEntity] entity fields to define ObjectBox queries.
@@ -2063,6 +2149,11 @@ class SavedMessageEntity_ {
   /// See [SavedMessageEntity.savedAt].
   static final savedAt = obx.QueryDateProperty<SavedMessageEntity>(
     _entities[5].properties[9],
+  );
+
+  /// See [SavedMessageEntity.isArchived].
+  static final isArchived = obx.QueryBooleanProperty<SavedMessageEntity>(
+    _entities[5].properties[10],
   );
 }
 

@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:localmind/core/routes/app_routes.dart';
 import 'package:localmind/core/theme/colors.dart';
 import 'package:localmind/features/conversations/providers/conversation_providers.dart'
     as conv;
 import 'package:localmind/features/personas/data/models/persona.dart';
 import 'package:localmind/features/personas/providers/personas_providers.dart';
+import 'package:localmind/features/personas/utils/persona_prompt_utils.dart';
 import 'package:localmind/l10n/app_localizations.dart';
 
 enum PersonaPickerMode { conversation, preselection }
@@ -16,53 +19,165 @@ void showPersonaPickerSheet(
   showModalBottomSheet(
     context: context,
     isScrollControlled: true,
+    showDragHandle: true,
     builder: (ctx) => PersonaPickerSheet(mode: mode),
   );
 }
 
-class PersonaPickerSheet extends ConsumerWidget {
+class PersonaPickerSheet extends ConsumerStatefulWidget {
   const PersonaPickerSheet({super.key, required this.mode});
 
   final PersonaPickerMode mode;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context)!;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final personasAsync = ref.watch(personasNotifierProvider);
-    final activeConv = ref.watch(conv.activeConversationProvider);
-    final selectedPersona = ref.watch(selectedPersonaProvider);
+  ConsumerState<PersonaPickerSheet> createState() => _PersonaPickerSheetState();
+}
 
-    final currentPersonaId = mode == PersonaPickerMode.preselection
-        ? selectedPersona?.id
-        : activeConv?.personaId;
+class _PersonaPickerSheetState extends ConsumerState<PersonaPickerSheet> {
+  late Set<String> _selectedIds;
+  var _initialized = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_initialized) {
+      _selectedIds = _initialSelectedIds().toSet();
+      _initialized = true;
+    }
+  }
+
+  List<String> _initialSelectedIds() {
+    if (widget.mode == PersonaPickerMode.preselection) {
+      return ref
+          .read(selectedPersonasProvider)
+          .map((p) => p.id)
+          .toList();
+    }
+    final activeConv = ref.read(conv.activeConversationProvider);
+    return PersonaPromptUtils.parsePersonaIds(activeConv?.personaId);
+  }
+
+  void _toggle(Persona persona, List<Persona> allPersonas) {
+    setState(() {
+      if (_selectedIds.contains(persona.id)) {
+        _selectedIds.remove(persona.id);
+      } else {
+        _selectedIds.add(persona.id);
+      }
+    });
+    _apply(allPersonas);
+  }
+
+  void _clear(List<Persona> allPersonas) {
+    setState(() => _selectedIds.clear());
+    _apply(allPersonas);
+  }
+
+  void _apply(List<Persona> allPersonas) {
+    final selected = allPersonas
+        .where((p) => _selectedIds.contains(p.id))
+        .toList(growable: false);
+
+    if (widget.mode == PersonaPickerMode.preselection) {
+      ref.read(selectedPersonasProvider.notifier).setPersonas(selected);
+    } else {
+      final conversationId = ref.read(conv.activeConversationProvider)?.id;
+      if (conversationId != null) {
+        ref
+            .read(conv.conversationsProvider.notifier)
+            .updatePersonas(conversationId, selected);
+      } else {
+        ref.read(selectedPersonasProvider.notifier).setPersonas(selected);
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final personasAsync = ref.watch(personasNotifierProvider);
+    final selectedCategory = ref.watch(personaCategoryFilterProvider);
+    final categories = [
+      l10n.all,
+      l10n.persona_category_general,
+      l10n.persona_category_coding,
+      l10n.persona_category_education,
+      l10n.persona_category_creative,
+    ];
 
     return SafeArea(
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 16),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
         child: Column(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: isDark ? Colors.grey[600] : Colors.grey[300],
-                  borderRadius: BorderRadius.circular(2),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    l10n.select_persona,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+                if (_selectedIds.isNotEmpty)
+                  TextButton(
+                    onPressed: () =>
+                        _clear(personasAsync.value ?? const []),
+                    child: Text(l10n.clear_personas),
+                  ),
+                TextButton(
+                  onPressed: () => context.push(AppRoutes.personas),
+                  child: Text(l10n.manage_personas),
+                ),
+              ],
+            ),
+            if (_selectedIds.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Wrap(
+                  spacing: 6,
+                  runSpacing: 6,
+                  children: _selectedIds.map((id) {
+                    final persona = personasAsync.value
+                        ?.where((p) => p.id == id)
+                        .firstOrNull;
+                    if (persona == null) return const SizedBox.shrink();
+                    return InputChip(
+                      avatar: Text(persona.emoji, style: const TextStyle(fontSize: 14)),
+                      label: Text(persona.name),
+                      onDeleted: () =>
+                          _toggle(persona, personasAsync.value ?? const []),
+                    );
+                  }).toList(),
                 ),
               ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              l10n.select_persona,
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: isDark ? Colors.white : Colors.black,
+            SizedBox(
+              height: 40,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                children: categories.map((cat) {
+                  final isActive =
+                      selectedCategory == (cat == l10n.all ? null : cat);
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 6),
+                    child: FilterChip(
+                      label: Text(cat, style: const TextStyle(fontSize: 12)),
+                      selected: isActive,
+                      showCheckmark: false,
+                      onSelected: (_) => ref
+                          .read(personaCategoryFilterProvider.notifier)
+                          .setCategory(cat == l10n.all ? null : cat),
+                    ),
+                  );
+                }).toList(),
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 4),
             Flexible(
               child: personasAsync.when(
                 loading: () => const Padding(
@@ -71,22 +186,20 @@ class PersonaPickerSheet extends ConsumerWidget {
                 ),
                 error: (error, _) => Padding(
                   padding: const EdgeInsets.all(24),
-                  child: Text(
-                    error.toString(),
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: isDark
-                          ? AppColors.darkMutedText
-                          : AppColors.lightMutedText,
-                    ),
-                  ),
+                  child: Text(error.toString(), textAlign: TextAlign.center),
                 ),
-                data: (personas) {
+                data: (allPersonas) {
+                  final personas = selectedCategory == null
+                      ? allPersonas
+                      : allPersonas
+                          .where((p) => p.category == selectedCategory)
+                          .toList();
                   if (personas.isEmpty) {
                     return Padding(
                       padding: const EdgeInsets.all(24),
                       child: Text(
                         l10n.no_personas_found,
+                        textAlign: TextAlign.center,
                         style: TextStyle(
                           color: isDark
                               ? AppColors.darkMutedText
@@ -96,93 +209,59 @@ class PersonaPickerSheet extends ConsumerWidget {
                     );
                   }
 
-                  return ListView.builder(
+                  return ListView.separated(
                     shrinkWrap: true,
                     itemCount: personas.length,
+                    separatorBuilder: (_, __) => const Divider(height: 1),
                     itemBuilder: (context, index) {
                       final persona = personas[index];
-                      return _PersonaTile(
-                        persona: persona,
-                        isSelected: persona.id == currentPersonaId,
-                        isDark: isDark,
-                        onTap: () => _selectPersona(
-                          context,
-                          ref,
-                          persona,
-                          activeConv?.id,
+                      final selected = _selectedIds.contains(persona.id);
+                      return ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        leading: CircleAvatar(
+                          backgroundColor: selected
+                              ? theme.colorScheme.primary.withValues(alpha: 0.15)
+                              : (isDark
+                                  ? AppColors.darkSurface
+                                  : AppColors.lightSurface),
+                          child: Text(persona.emoji, style: const TextStyle(fontSize: 20)),
                         ),
+                        title: Text(
+                          persona.name,
+                          style: TextStyle(
+                            fontWeight:
+                                selected ? FontWeight.w700 : FontWeight.w500,
+                          ),
+                        ),
+                        subtitle: persona.description != null
+                            ? Text(
+                                persona.description!,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              )
+                            : null,
+                        trailing: Checkbox(
+                          value: selected,
+                          onChanged: (_) => _toggle(persona, allPersonas),
+                        ),
+                        onTap: () => _toggle(persona, allPersonas),
                       );
                     },
                   );
                 },
               ),
             ),
+            const SizedBox(height: 12),
+            Align(
+              alignment: Alignment.centerRight,
+              child: FilledButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text(l10n.done),
+              ),
+            ),
           ],
         ),
       ),
-    );
-  }
-
-  void _selectPersona(
-    BuildContext context,
-    WidgetRef ref,
-    Persona persona,
-    String? conversationId,
-  ) {
-    if (mode == PersonaPickerMode.preselection || conversationId == null) {
-      ref.read(selectedPersonaProvider.notifier).select(persona);
-    } else {
-      ref.read(conv.conversationsProvider.notifier).updatePersona(
-            conversationId,
-            persona.id,
-            persona.systemPrompt,
-          );
-    }
-    Navigator.pop(context);
-  }
-}
-
-class _PersonaTile extends StatelessWidget {
-  const _PersonaTile({
-    required this.persona,
-    required this.isSelected,
-    required this.isDark,
-    required this.onTap,
-  });
-
-  final Persona persona;
-  final bool isSelected;
-  final bool isDark;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final accent = isDark ? AppColors.darkAccent : AppColors.lightAccent;
-
-    return ListTile(
-      leading: Text(persona.emoji, style: const TextStyle(fontSize: 22)),
-      title: Text(
-        persona.name,
-        style: TextStyle(
-          fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-          color: isDark ? Colors.white : Colors.black,
-        ),
-      ),
-      subtitle: persona.description != null
-          ? Text(
-              persona.description!,
-              style: TextStyle(
-                fontSize: 12,
-                color: isDark
-                    ? AppColors.darkMutedText
-                    : AppColors.lightMutedText,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            )
-          : null,
-      trailing: isSelected ? Icon(Icons.check_circle, color: accent) : null,
-      onTap: onTap,
     );
   }
 }

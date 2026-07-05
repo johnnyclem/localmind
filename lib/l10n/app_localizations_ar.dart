@@ -261,6 +261,155 @@ class AppLocalizationsAr extends AppLocalizations {
   String get delete_persona_body => 'لا يمكن التراجع عن هذا.';
 
   @override
+  String get delete_builtin_persona_body =>
+      'This is a built-in persona. You can restore it later from Settings.';
+
+  @override
+  String get restore_builtin_personas => 'Restore default personas';
+
+  @override
+  String get restore_builtin_personas_desc =>
+      'Re-add any built-in personas you\'ve deleted';
+
+  @override
+  String get restore_builtin_personas_success => 'Default personas restored';
+
+  @override
+  String get clear_personas => 'Clear personas';
+
+  @override
+  String get enable_image_compression => 'Compress images before sending';
+
+  @override
+  String get enable_image_compression_desc =>
+      'Resize and compress attached images so uploads stay within server limits';
+
+  @override
+  String get image_compression_level => 'Compression aggressiveness';
+
+  @override
+  String get image_compression_level_desc =>
+      'Higher aggressiveness produces smaller uploads at lower quality';
+
+  @override
+  String get image_compression_level_low => 'Low';
+
+  @override
+  String get image_compression_level_medium => 'Medium';
+
+  @override
+  String get image_compression_level_high => 'High';
+
+  @override
+  String get sort_models_tooltip => 'Sort models';
+
+  @override
+  String get sort_by_favorites => 'Favorites first';
+
+  @override
+  String get sort_by_name => 'Name (A-Z)';
+
+  @override
+  String get sort_by_size_smallest => 'Size (smallest first)';
+
+  @override
+  String get sort_by_size_largest => 'Size (largest first)';
+
+  @override
+  String get sort_by_context_length => 'Context length';
+
+  @override
+  String bulk_ai_rename_progress(int done, int total) {
+    return 'Renaming $done/$total...';
+  }
+
+  @override
+  String selected_count(int count) {
+    return '$count selected';
+  }
+
+  @override
+  String get ai_rename_tooltip => 'Rename selected with AI';
+
+  @override
+  String get new_chat_in_folder_tooltip => 'New chat in this folder';
+
+  @override
+  String total_tokens_count(int count) {
+    return '$count tokens';
+  }
+
+  @override
+  String get smart_replies_use_persona => 'Use persona in smart replies';
+
+  @override
+  String get smart_replies_use_persona_desc =>
+      'Suggested replies match the tone of the active persona instead of a generic assistant';
+
+  @override
+  String get keep_persona_on_new_chat => 'Keep persona on new chat';
+
+  @override
+  String get keep_persona_on_new_chat_desc =>
+      'Don\'t clear the selected persona(s) after starting a new chat';
+
+  @override
+  String get role_swap_button_enabled => 'Show role-swap button';
+
+  @override
+  String get role_swap_button_enabled_desc =>
+      'Show a button in the chat input to send your message as the assistant instead of the user, without generating a response';
+
+  @override
+  String get send_as_user_tooltip => 'Send as user';
+
+  @override
+  String get send_as_assistant_tooltip => 'Send as assistant (no response)';
+
+  @override
+  String get insert_without_generating_tooltip => 'Insert without generating';
+
+  @override
+  String get token_usage_title => 'Token Usage';
+
+  @override
+  String get total_tokens_label => 'Tokens used';
+
+  @override
+  String get usage_percent_label => 'Context used';
+
+  @override
+  String get export_choice_title => 'Export';
+
+  @override
+  String get export_choice_body => 'How would you like to export this?';
+
+  @override
+  String get copy_to_clipboard => 'Copy to Clipboard';
+
+  @override
+  String bulk_export_conversations_success(int count) {
+    return 'Exported $count conversations';
+  }
+
+  @override
+  String get bulk_ai_rename_confirm_title => 'Rename with AI?';
+
+  @override
+  String bulk_ai_rename_confirm_body(int count) {
+    return 'This will ask the AI to generate a new title for each of the $count selected conversations, replacing their current titles. This can take a while and cannot be undone.';
+  }
+
+  @override
+  String get sort_by_modified_date => 'Last modified';
+
+  @override
+  String get sort_by_created_date => 'Date created';
+
+  @override
+  String get sort_title => 'Sort';
+
+  @override
   String get clear_conversation_title => 'مسح المحادثة؟';
 
   @override
@@ -468,7 +617,11 @@ class AppLocalizationsAr extends AppLocalizations {
   String get enable_smart_reply => 'الردود الذكية المحلية';
 
   @override
-  String get ai_user_response_enabled => 'AI user message button';
+  String get ai_user_response_enabled => 'AI user message (hold send)';
+
+  @override
+  String get ai_user_response_enabled_desc =>
+      'Hold the send button for 3 seconds to have the AI write and send your next message';
 
   @override
   String get ai_user_response_tooltip => 'Generate user message with AI';
@@ -484,6 +637,17 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get show_system_messages => 'إظهار رسائل النظام';
+
+  @override
+  String get show_system_messages_desc =>
+      'When no persona is selected, send a default assistant system prompt with each request';
+
+  @override
+  String get show_system_messages_in_chat => 'Show System Messages in Chat';
+
+  @override
+  String get show_system_messages_in_chat_desc =>
+      'Display system messages (e.g. from an imported backup) as visible bubbles in the conversation';
 
   @override
   String get haptic_feedback => 'الاستجابة اللمسية';
@@ -538,6 +702,13 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get select_persona => 'اختيار شخصية';
+
+  @override
+  String get manage_personas => 'Manage personas';
+
+  @override
+  String get personas_combine_hint =>
+      'Select multiple personas in chat to stack their system prompts.';
 
   @override
   String get start_conversation => 'ابدأ محادثة';
@@ -1994,6 +2165,21 @@ class AppLocalizationsAr extends AppLocalizations {
       'Unload all models before loading a new one';
 
   @override
+  String get temp_chat_keyboard_incognito =>
+      'Incognito keyboard in temporary chat';
+
+  @override
+  String get temp_chat_keyboard_incognito_desc =>
+      'Disables keyboard learning and suggestions in temporary chats (e.g. SwiftKey incognito).';
+
+  @override
+  String get resume_last_chat => 'Resume last chat on launch';
+
+  @override
+  String get resume_last_chat_desc =>
+      'Restore your last open conversation when reopening the app.';
+
+  @override
   String get export_all_data => 'Export all data';
 
   @override
@@ -2343,4 +2529,130 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get generate_title_failed => 'Could not generate a title';
+
+  @override
+  String get lm_studio_model_browser_title => 'Browse models';
+
+  @override
+  String get lm_studio_model_search_hint => 'Search models by name or author…';
+
+  @override
+  String get lm_studio_staff_picks => 'Staff picks';
+
+  @override
+  String get lm_studio_community_models => 'Community models';
+
+  @override
+  String get lm_studio_no_models => 'No models found';
+
+  @override
+  String lm_studio_models_count(int count) {
+    return '$count models';
+  }
+
+  @override
+  String get lm_studio_browse_models => 'Browse & download';
+
+  @override
+  String get lm_studio_model_search => 'LMS Model Search';
+
+  @override
+  String get lm_studio_downloads_title => 'Downloads';
+
+  @override
+  String get lm_studio_choose_quant => 'Choose a download option';
+
+  @override
+  String get lm_studio_use_default_quant => 'Use default';
+
+  @override
+  String get lm_studio_recommended => 'Recommended';
+
+  @override
+  String get lm_studio_clear_downloads => 'Clear finished';
+
+  @override
+  String get lm_studio_no_downloads => 'No downloads yet';
+
+  @override
+  String get lm_studio_downloads_disclaimer =>
+      'Downloads run on the LM Studio host. Pausing, stopping, and deleting models must be done on that computer — not from this app.';
+
+  @override
+  String get lm_studio_staff_pick => 'Staff pick';
+
+  @override
+  String get lm_studio_params => 'PARAMS';
+
+  @override
+  String get lm_studio_arch => 'ARCH';
+
+  @override
+  String get lm_studio_domain => 'DOMAIN';
+
+  @override
+  String get lm_studio_format => 'FORMAT';
+
+  @override
+  String get lm_studio_vision => 'Vision';
+
+  @override
+  String get lm_studio_tool_use => 'Tool use';
+
+  @override
+  String get lm_studio_reasoning => 'Reasoning';
+
+  @override
+  String get lm_studio_download_options => 'Download options';
+
+  @override
+  String get lm_studio_download => 'Download';
+
+  @override
+  String lm_studio_download_size(String size) {
+    return 'Download $size';
+  }
+
+  @override
+  String lm_studio_downloading_percent(int percent) {
+    return 'Downloading $percent%';
+  }
+
+  @override
+  String get lm_studio_readme_unavailable =>
+      'README not available for this model.';
+
+  @override
+  String get lm_studio_full_gpu_offload => 'Full GPU offload possible';
+
+  @override
+  String get lm_studio_partial_gpu_offload => 'Partial GPU offload possible';
+
+  @override
+  String get lm_studio_likely_too_large => 'Likely too large';
+
+  @override
+  String get lm_studio_available_ram_gb => 'Available RAM (GB, optional)';
+
+  @override
+  String get lm_studio_available_vram_gb => 'Available VRAM (GB, optional)';
+
+  @override
+  String get lm_studio_memory_settings_title => 'Memory for recommendations';
+
+  @override
+  String get lm_studio_memory_settings_desc =>
+      'Used to estimate whether models fit on your machine in the model browser.';
+
+  @override
+  String get think_button_label => 'Think';
+
+  @override
+  String get reasoning_effort_low => 'Low';
+
+  @override
+  String get reasoning_effort_medium => 'Medium';
+
+  @override
+  String get reasoning_effort_high => 'High';
 }

@@ -1,13 +1,10 @@
-import 'dart:convert';
-import 'dart:typed_data';
-
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:localmind/l10n/app_localizations.dart';
 import 'package:localmind/core/providers/storage_providers.dart';
 import 'package:localmind/core/services/data_backup_service.dart';
+import 'package:localmind/core/services/export_choice_dialog.dart';
 import '../../../../core/routes/app_routes.dart';
 import '../../../chat/providers/chat_providers.dart';
 import '../../data/models/conversation.dart';
@@ -29,6 +26,8 @@ class ConversationList extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
+    final selectionMode = ref.watch(historySelectionModeProvider);
+    final selectedIds = ref.watch(historySelectedIdsProvider);
     final sectionOrder = [
       l10n.pinned_section,
       l10n.today_section,
@@ -63,10 +62,27 @@ class ConversationList extends ConsumerWidget {
               return ConversationTile(
                 conversation: conversation,
                 isActive: activeConversation?.id == conversation.id,
+                selectionMode: selectionMode,
+                isSelected: selectedIds.contains(conversation.id),
+                onEnterSelectionMode: () {
+                  ref.read(historySelectionModeProvider.notifier).enable();
+                  ref
+                      .read(historySelectedIdsProvider.notifier)
+                      .toggle(conversation.id);
+                },
                 onTap: () {
+                  if (selectionMode) {
+                    ref
+                        .read(historySelectedIdsProvider.notifier)
+                        .toggle(conversation.id);
+                    return;
+                  }
                   ref
                       .read(chatProvider.notifier)
                       .loadConversation(conversation);
+                  ref
+                      .read(chatOriginProvider.notifier)
+                      .set(ChatOrigin.history);
                   if (Scaffold.maybeOf(context)?.isDrawerOpen ?? false) {
                     Navigator.pop(context);
                   }
@@ -92,7 +108,7 @@ class ConversationList extends ConsumerWidget {
                   );
                 },
                 onMoveToFolder: () {
-                  _showMoveToFolderSheet(context, ref, l10n, conversation);
+                  showMoveToFolderSheet(context, ref, l10n, conversation);
                 },
                 onExport: () {
                   _exportConversation(context, ref, l10n, conversation);
@@ -153,50 +169,6 @@ class ConversationList extends ConsumerWidget {
     );
   }
 
-  void _showMoveToFolderSheet(
-    BuildContext context,
-    WidgetRef ref,
-    AppLocalizations l10n,
-    Conversation conversation,
-  ) {
-    final folders = ref.read(conversationFoldersProvider).value ?? [];
-
-    showModalBottomSheet<void>(
-      context: context,
-      builder: (ctx) {
-        return SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                leading: const Icon(Icons.folder_off_outlined),
-                title: Text(l10n.remove_from_folder),
-                onTap: () async {
-                  Navigator.pop(ctx);
-                  await ref
-                      .read(conversationsProvider.notifier)
-                      .moveConversationToFolder(conversation.id, null);
-                },
-              ),
-              ...folders.map(
-                (folder) => ListTile(
-                  leading: const Icon(Icons.folder_outlined),
-                  title: Text(folder.name),
-                  onTap: () async {
-                    Navigator.pop(ctx);
-                    await ref
-                        .read(conversationsProvider.notifier)
-                        .moveConversationToFolder(conversation.id, folder.id);
-                  },
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
   Future<void> _exportConversation(
     BuildContext context,
     WidgetRef ref,
@@ -206,18 +178,189 @@ class ConversationList extends ConsumerWidget {
     final db = ref.read(databaseProvider);
     final json = DataBackupService()
         .exportConversationAsJson(db.store, conversation.id);
-    final saved = await FilePicker.saveFile(
-      dialogTitle: l10n.export_conversation,
-      fileName:
-          'localmind_${conversation.title.replaceAll(RegExp(r'[^\w\-]+'), '_')}_${DateTime.now().millisecondsSinceEpoch}.json',
-      type: FileType.custom,
-      allowedExtensions: const ['json'],
-      bytes: Uint8List.fromList(utf8.encode(json)),
+    if (!context.mounted) return;
+    await showExportChoiceDialog(
+      context,
+      content: json,
+      subject: conversation.title,
     );
-    if (saved != null && context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.export_data_success)),
-      );
-    }
   }
+}
+
+/// Shown from a single conversation's overflow menu (in history, or from
+/// the chat screen itself) to move it into a folder or remove it from one.
+void showMoveToFolderSheet(
+  BuildContext context,
+  WidgetRef ref,
+  AppLocalizations l10n,
+  Conversation conversation,
+) {
+  final folders = ref.read(conversationFoldersProvider).value ?? [];
+
+  showModalBottomSheet<void>(
+    context: context,
+    builder: (ctx) {
+      return SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.folder_off_outlined),
+              title: Text(l10n.remove_from_folder),
+              onTap: () async {
+                Navigator.pop(ctx);
+                await ref
+                    .read(conversationsProvider.notifier)
+                    .moveConversationToFolder(conversation.id, null);
+              },
+            ),
+            ...folders.map(
+              (folder) => ListTile(
+                leading: const Icon(Icons.folder_outlined),
+                title: Text(folder.name),
+                onTap: () async {
+                  Navigator.pop(ctx);
+                  await ref
+                      .read(conversationsProvider.notifier)
+                      .moveConversationToFolder(conversation.id, folder.id);
+                },
+              ),
+            ),
+          ],
+        ),
+      );
+    },
+  );
+}
+
+Future<void> showBulkMoveToFolderSheet(
+  BuildContext context,
+  WidgetRef ref,
+  Set<String> conversationIds,
+) async {
+  final l10n = AppLocalizations.of(context)!;
+  final folders = ref.read(conversationFoldersProvider).value ?? [];
+
+  await showModalBottomSheet<void>(
+    context: context,
+    builder: (ctx) {
+      return SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.folder_off_outlined),
+              title: Text(l10n.remove_from_folder),
+              onTap: () async {
+                Navigator.pop(ctx);
+                for (final id in conversationIds) {
+                  await ref
+                      .read(conversationsProvider.notifier)
+                      .moveConversationToFolder(id, null);
+                }
+              },
+            ),
+            ...folders.map(
+              (folder) => ListTile(
+                leading: const Icon(Icons.folder_outlined),
+                title: Text(folder.name),
+                onTap: () async {
+                  Navigator.pop(ctx);
+                  for (final id in conversationIds) {
+                    await ref
+                        .read(conversationsProvider.notifier)
+                        .moveConversationToFolder(id, folder.id);
+                  }
+                },
+              ),
+            ),
+          ],
+        ),
+      );
+    },
+  );
+}
+
+Future<void> runBulkExportConversations(
+  BuildContext context,
+  WidgetRef ref,
+  Set<String> conversationIds,
+) async {
+  final l10n = AppLocalizations.of(context)!;
+  final db = ref.read(databaseProvider);
+  final json = DataBackupService()
+      .exportConversationsForIdsAsJson(db.store, conversationIds);
+  if (!context.mounted) return;
+  await showExportChoiceDialog(
+    context,
+    content: json,
+    subject: l10n.bulk_export_conversations_success(conversationIds.length),
+  );
+}
+
+Future<void> runBulkAiRename(
+  BuildContext context,
+  WidgetRef ref,
+  List<String> conversationIds,
+) async {
+  final l10n = AppLocalizations.of(context)!;
+
+  final confirmed = await showDialog<bool>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      title: Text(l10n.bulk_ai_rename_confirm_title),
+      content: Text(
+        l10n.bulk_ai_rename_confirm_body(conversationIds.length),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(ctx, false),
+          child: Text(l10n.cancel),
+        ),
+        FilledButton(
+          onPressed: () => Navigator.pop(ctx, true),
+          child: Text(l10n.confirm),
+        ),
+      ],
+    ),
+  );
+  if (confirmed != true) return;
+  if (!context.mounted) return;
+
+  final progress = ValueNotifier<int>(0);
+
+  showDialog<void>(
+    context: context,
+    barrierDismissible: false,
+    builder: (ctx) => AlertDialog(
+      content: ValueListenableBuilder<int>(
+        valueListenable: progress,
+        builder: (context, done, _) => Row(
+          children: [
+            const SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Text(
+                l10n.bulk_ai_rename_progress(done, conversationIds.length),
+              ),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+
+  for (final id in conversationIds) {
+    final title = await ref.read(chatProvider.notifier).generateTitleWithAi(id);
+    if (title != null && title.isNotEmpty) {
+      await ref.read(conversationsProvider.notifier).renameConversation(id, title);
+    }
+    progress.value += 1;
+  }
+
+  if (context.mounted) Navigator.of(context, rootNavigator: true).pop();
 }

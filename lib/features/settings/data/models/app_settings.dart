@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gemma/flutter_gemma.dart';
 
 import '../../../../core/models/enums.dart';
+import '../../../../features/chat/utils/image_upload_utils.dart';
 import '../../../../features/tts/data/kitten_tts_model.dart';
 
 enum SyntaxThemeName { light, dark }
@@ -44,6 +45,14 @@ class AppSettings {
   final String? localeCode;
   final String? huggingFaceToken;
   final bool unloadModelsBeforeLoad;
+  final bool tempChatKeyboardIncognito;
+  final bool resumeLastChat;
+  final bool imageCompressionEnabled;
+  final ImageCompressionLevel imageCompressionLevel;
+  final bool smartRepliesUsePersona;
+  final bool keepPersonaOnNewChat;
+  final bool roleSwapButtonEnabled;
+  final bool showSystemMessagesInChat;
 
   AppSettings({
     this.temperature = 0.7,
@@ -79,6 +88,14 @@ class AppSettings {
     this.localeCode,
     this.huggingFaceToken,
     this.unloadModelsBeforeLoad = false,
+    this.tempChatKeyboardIncognito = true,
+    this.resumeLastChat = true,
+    this.imageCompressionEnabled = false,
+    this.imageCompressionLevel = ImageCompressionLevel.medium,
+    this.smartRepliesUsePersona = false,
+    this.keepPersonaOnNewChat = false,
+    this.roleSwapButtonEnabled = false,
+    this.showSystemMessagesInChat = true,
   });
 
   AppSettings copyWith({
@@ -115,6 +132,14 @@ class AppSettings {
     Object? localeCode = _unset,
     Object? huggingFaceToken = _unset,
     bool? unloadModelsBeforeLoad,
+    bool? tempChatKeyboardIncognito,
+    bool? resumeLastChat,
+    bool? imageCompressionEnabled,
+    ImageCompressionLevel? imageCompressionLevel,
+    bool? smartRepliesUsePersona,
+    bool? keepPersonaOnNewChat,
+    bool? roleSwapButtonEnabled,
+    bool? showSystemMessagesInChat,
   }) {
     return AppSettings(
       temperature: temperature ?? this.temperature,
@@ -162,6 +187,20 @@ class AppSettings {
           : huggingFaceToken as String?,
       unloadModelsBeforeLoad:
           unloadModelsBeforeLoad ?? this.unloadModelsBeforeLoad,
+      tempChatKeyboardIncognito:
+          tempChatKeyboardIncognito ?? this.tempChatKeyboardIncognito,
+      resumeLastChat: resumeLastChat ?? this.resumeLastChat,
+      imageCompressionEnabled:
+          imageCompressionEnabled ?? this.imageCompressionEnabled,
+      imageCompressionLevel:
+          imageCompressionLevel ?? this.imageCompressionLevel,
+      smartRepliesUsePersona:
+          smartRepliesUsePersona ?? this.smartRepliesUsePersona,
+      keepPersonaOnNewChat: keepPersonaOnNewChat ?? this.keepPersonaOnNewChat,
+      roleSwapButtonEnabled:
+          roleSwapButtonEnabled ?? this.roleSwapButtonEnabled,
+      showSystemMessagesInChat:
+          showSystemMessagesInChat ?? this.showSystemMessagesInChat,
     );
   }
 
@@ -200,6 +239,14 @@ class AppSettings {
       'localeCode': localeCode,
       'huggingFaceToken': huggingFaceToken,
       'unloadModelsBeforeLoad': unloadModelsBeforeLoad,
+      'tempChatKeyboardIncognito': tempChatKeyboardIncognito,
+      'resumeLastChat': resumeLastChat,
+      'imageCompressionEnabled': imageCompressionEnabled,
+      'imageCompressionLevel': imageCompressionLevel.name,
+      'smartRepliesUsePersona': smartRepliesUsePersona,
+      'keepPersonaOnNewChat': keepPersonaOnNewChat,
+      'roleSwapButtonEnabled': roleSwapButtonEnabled,
+      'showSystemMessagesInChat': showSystemMessagesInChat,
     };
   }
 
@@ -238,7 +285,25 @@ class AppSettings {
       localeCode: map['localeCode'] as String?,
       huggingFaceToken: map['huggingFaceToken'] as String?,
       unloadModelsBeforeLoad: map['unloadModelsBeforeLoad'] ?? false,
+      tempChatKeyboardIncognito: map['tempChatKeyboardIncognito'] ?? true,
+      resumeLastChat: map['resumeLastChat'] ?? true,
+      imageCompressionEnabled: map['imageCompressionEnabled'] ?? false,
+      imageCompressionLevel:
+          _parseImageCompressionLevel(map['imageCompressionLevel']),
+      smartRepliesUsePersona: map['smartRepliesUsePersona'] ?? false,
+      keepPersonaOnNewChat: map['keepPersonaOnNewChat'] ?? false,
+      roleSwapButtonEnabled: map['roleSwapButtonEnabled'] ?? false,
+      showSystemMessagesInChat: map['showSystemMessagesInChat'] ?? true,
     );
+  }
+
+  static ImageCompressionLevel _parseImageCompressionLevel(dynamic value) {
+    if (value is String) {
+      try {
+        return ImageCompressionLevel.values.byName(value);
+      } catch (_) {}
+    }
+    return ImageCompressionLevel.medium;
   }
 
   static PreferredBackend _parsePreferredBackend(dynamic value) {

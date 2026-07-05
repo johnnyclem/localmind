@@ -10,6 +10,7 @@ import '../../../core/providers/app_providers.dart';
 import '../../../core/routes/app_routes.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/system_insets.dart';
+import '../../chat/utils/image_upload_utils.dart';
 import '../../conversations/providers/conversation_providers.dart';
 import '../../on_device/providers/on_device_providers.dart';
 import '../../personas/providers/personas_providers.dart';
@@ -207,10 +208,19 @@ class SettingsViews extends ConsumerWidget {
                   ),
                   _ToggleSetting(
                     label: l10n.show_system_messages,
+                    description: l10n.show_system_messages_desc,
                     value: settings.showSystemMessages,
                     onChanged: (value) => ref
                         .read(settingsProvider.notifier)
                         .setShowSystemMessages(value),
+                  ),
+                  _ToggleSetting(
+                    label: l10n.show_system_messages_in_chat,
+                    description: l10n.show_system_messages_in_chat_desc,
+                    value: settings.showSystemMessagesInChat,
+                    onChanged: (value) => ref
+                        .read(settingsProvider.notifier)
+                        .setShowSystemMessagesInChat(value),
                   ),
                   _ToggleSetting(
                     label: l10n.haptic_feedback,
@@ -235,6 +245,53 @@ class SettingsViews extends ConsumerWidget {
                           .read(settingsProvider.notifier)
                           .setNewChatMcpEnabled(value),
                     ),
+                  _ToggleSetting(
+                    label: l10n.temp_chat_keyboard_incognito,
+                    description: l10n.temp_chat_keyboard_incognito_desc,
+                    value: settings.tempChatKeyboardIncognito,
+                    onChanged: (value) => ref
+                        .read(settingsProvider.notifier)
+                        .setTempChatKeyboardIncognito(value),
+                  ),
+                  _ToggleSetting(
+                    label: l10n.resume_last_chat,
+                    description: l10n.resume_last_chat_desc,
+                    value: settings.resumeLastChat,
+                    onChanged: (value) => ref
+                        .read(settingsProvider.notifier)
+                        .setResumeLastChat(value),
+                  ),
+                  _ToggleSetting(
+                    label: l10n.keep_persona_on_new_chat,
+                    description: l10n.keep_persona_on_new_chat_desc,
+                    value: settings.keepPersonaOnNewChat,
+                    onChanged: (value) => ref
+                        .read(settingsProvider.notifier)
+                        .setKeepPersonaOnNewChat(value),
+                  ),
+                  _ToggleSetting(
+                    label: l10n.role_swap_button_enabled,
+                    description: l10n.role_swap_button_enabled_desc,
+                    value: settings.roleSwapButtonEnabled,
+                    onChanged: (value) => ref
+                        .read(settingsProvider.notifier)
+                        .setRoleSwapButtonEnabled(value),
+                  ),
+                  _ToggleSetting(
+                    label: l10n.enable_image_compression,
+                    description: l10n.enable_image_compression_desc,
+                    value: settings.imageCompressionEnabled,
+                    onChanged: (value) => ref
+                        .read(settingsProvider.notifier)
+                        .setImageCompressionEnabled(value),
+                  ),
+                  if (settings.imageCompressionEnabled)
+                    _ImageCompressionLevelSetting(
+                      value: settings.imageCompressionLevel,
+                      onChanged: (value) => ref
+                          .read(settingsProvider.notifier)
+                          .setImageCompressionLevel(value),
+                    ),
                 ],
               );
 
@@ -250,8 +307,18 @@ class SettingsViews extends ConsumerWidget {
                         .read(settingsProvider.notifier)
                         .setSmartReplyEnabled(value),
                   ),
+                  if (settings.smartReplyEnabled)
+                    _ToggleSetting(
+                      label: l10n.smart_replies_use_persona,
+                      description: l10n.smart_replies_use_persona_desc,
+                      value: settings.smartRepliesUsePersona,
+                      onChanged: (value) => ref
+                          .read(settingsProvider.notifier)
+                          .setSmartRepliesUsePersona(value),
+                    ),
                   _ToggleSetting(
                     label: l10n.ai_user_response_enabled,
+                    description: l10n.ai_user_response_enabled_desc,
                     value: settings.aiUserResponseEnabled,
                     badges: [_FeatureBadge(label: l10n.experimental_label)],
                     onChanged: (value) => ref
@@ -314,6 +381,24 @@ class SettingsViews extends ConsumerWidget {
                         .setDefaultPersona(value),
                     icon: Icons.smart_toy_outlined,
                   ),
+                  const SizedBox(height: 8),
+                  _SectionActionButton(
+                    icon: Icons.restore_rounded,
+                    label: l10n.restore_builtin_personas,
+                    onPressed: () async {
+                      await ref
+                          .read(personasNotifierProvider.notifier)
+                          .restoreBuiltInPersonas();
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content:
+                                Text(l10n.restore_builtin_personas_success),
+                          ),
+                        );
+                      }
+                    },
+                  ),
                 ],
               );
 
@@ -338,6 +423,8 @@ class SettingsViews extends ConsumerWidget {
                 icon: Icons.restore_page_outlined,
                 accent: const Color(0xFFEF4444),
                 children: [
+                  const DataBackupActions(),
+                  const SizedBox(height: 8),
                   _DangerousAction(
                     label: l10n.delete_all_conversations,
                     icon: Icons.delete_outline_rounded,
@@ -890,6 +977,7 @@ class _LanguageSetting extends StatelessWidget {
     ('ar', 'العربية', 'assets/images/flag_sa.png', '🇸🇦'),
     ('bn', 'বাংলা', 'assets/images/flag_bd.png', '🇧🇩'),
     ('hi', 'हिन्दी', 'assets/images/flag_in.png', '🇮🇳'),
+    ('ru', 'Русский', 'assets/images/flag_ru.png', '🇷🇺'),
   ];
 
   final String? current;
@@ -1154,6 +1242,68 @@ class _ToggleSetting extends StatelessWidget {
           ),
           const SizedBox(width: 8),
           Switch.adaptive(value: value, onChanged: onChanged),
+        ],
+      ),
+    );
+  }
+}
+
+class _ImageCompressionLevelSetting extends StatelessWidget {
+  const _ImageCompressionLevelSetting({
+    required this.value,
+    required this.onChanged,
+  });
+
+  final ImageCompressionLevel value;
+  final ValueChanged<ImageCompressionLevel> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+
+    String labelFor(ImageCompressionLevel level) {
+      switch (level) {
+        case ImageCompressionLevel.low:
+          return l10n.image_compression_level_low;
+        case ImageCompressionLevel.medium:
+          return l10n.image_compression_level_medium;
+        case ImageCompressionLevel.high:
+          return l10n.image_compression_level_high;
+      }
+    }
+
+    return _SettingPanel(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.image_compression_level,
+            style: theme.textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            l10n.image_compression_level_desc,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: ImageCompressionLevel.values.map((level) {
+              final selected = value == level;
+              return FilterChip(
+                label: Text(labelFor(level)),
+                selected: selected,
+                onSelected: (_) => onChanged(level),
+                showCheckmark: false,
+              );
+            }).toList(),
+          ),
         ],
       ),
     );

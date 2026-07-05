@@ -5,10 +5,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/providers/storage_providers.dart';
 import '../../../core/storage/entities.dart';
 import '../../../objectbox.g.dart';
+import '../../chat/utils/message_variants.dart';
 import '../data/message_search_service.dart';
 import '../data/models/message_search_hit.dart';
 import '../data/models/conversation.dart';
 import '../data/models/conversation_folder.dart';
+import '../../personas/data/models/persona.dart';
+import '../../personas/utils/persona_prompt_utils.dart';
 
 final conversationsProvider =
     AsyncNotifierProvider<ConversationsNotifier, List<Conversation>>(() {
@@ -32,8 +35,35 @@ class ConversationsNotifier extends AsyncNotifier<List<Conversation>> {
 
   static List<Conversation> _loadConversationsInBackground(Store store, _) {
     final convBox = store.box<ConversationEntity>();
+    final msgBox = store.box<MessageEntity>();
     final entities = convBox.getAll();
-    final conversations = entities.map((e) => e.toDomain()).toList();
+    final conversations = <Conversation>[];
+
+    for (final entity in entities) {
+      final domain = entity.toDomain();
+      final query = msgBox
+          .query(MessageEntity_.conversationUid.equals(domain.id))
+          .build();
+      final messages = query.find();
+      query.close();
+
+      // A flat `isActiveVariant` filter counts every message ever marked
+      // active within its own variant group, including messages hanging
+      // off a branch whose ancestor is no longer the active variant.
+      // Resolve the real connected timeline from the root instead.
+      final activeMessages = MessageVariants.resolveActiveTimeline(
+        messages.map((e) => e.toDomain()).toList(),
+      );
+      final count = activeMessages.length;
+      final chars = activeMessages.fold<int>(
+        0,
+        (sum, message) => sum + message.content.length,
+      );
+
+      conversations.add(
+        domain.copyWith(messageCount: count, characterCount: chars),
+      );
+    }
 
     conversations.sort((a, b) {
       if (a.isPinned != b.isPinned) {
@@ -53,6 +83,7 @@ class ConversationsNotifier extends AsyncNotifier<List<Conversation>> {
     String? modelId,
     bool? mcpEnabled,
     bool isTemporary = false,
+    String? folderId,
   }) async {
     final db = ref.read(databaseProvider);
     final now = DateTime.now();
@@ -72,6 +103,7 @@ class ConversationsNotifier extends AsyncNotifier<List<Conversation>> {
       systemPrompt: systemPrompt,
       mcpEnabled: mcpEnabled,
       isTemporary: isTemporary,
+      folderId: folderId,
     );
 
     db.conversationBox.put(ConversationEntity.fromDomain(conversation));
@@ -114,10 +146,9 @@ class ConversationsNotifier extends AsyncNotifier<List<Conversation>> {
       orElse: () => throw Exception('Conversation not found in state'),
     );
 
-    final updated = existing.copyWith(
-      title: newTitle,
-      updatedAt: DateTime.now(),
-    );
+    // Renaming is a metadata edit, not conversation activity — don't bump
+    // updatedAt, since that's used as the "last modified" sort/section date.
+    final updated = existing.copyWith(title: newTitle);
 
     final query = db.conversationBox
         .query(ConversationEntity_.id.equals(id))
@@ -276,7 +307,7 @@ class ConversationsNotifier extends AsyncNotifier<List<Conversation>> {
       final updated = existing.copyWith(
         lastMessagePreview: preview,
         updatedAt: updatedAt,
-        messageCount: messageCount ?? existing.messageCount + 1,
+        messageCount: messageCount ?? existing.messageCount,
         characterCount: characterCount ??
             (characterCountDelta != null
                 ? existing.characterCount + characterCountDelta
@@ -297,6 +328,76 @@ class ConversationsNotifier extends AsyncNotifier<List<Conversation>> {
 
       state = AsyncData(await _loadAll());
     }
+  }
+
+  Future<void> syncConversationStats(
+    String id, {
+    required int messageCount,
+    required int characterCount,
+    String? preview,
+  }) async {
+    final db = ref.read(databaseProvider);
+    final conversations = state.value ?? [];
+    final existingIndex = conversations.indexWhere((c) => c.id == id);
+    if (existingIndex == -1) return;
+
+    final existing = conversations[existingIndex];
+    final updated = existing.copyWith(
+      messageCount: messageCount,
+      characterCount: characterCount,
+      lastMessagePreview: preview ?? existing.lastMessagePreview,
+      updatedAt: DateTime.now(),
+    );
+
+    final query = db.conversationBox
+        .query(ConversationEntity_.id.equals(id))
+        .build();
+    final existingEntity = query.findFirst();
+    query.close();
+
+    final entity = ConversationEntity.fromDomain(updated);
+    if (existingEntity != null) {
+      entity.internalId = existingEntity.internalId;
+    }
+    db.conversationBox.put(entity);
+    state = AsyncData(await _loadAll());
+  }
+
+  /// Updates just the embeddings-derived total token count without
+  /// touching `updatedAt` — this runs as a background recount after every
+  /// send/edit/regenerate and shouldn't bump the conversation's sort order
+  /// or last-modified time on its own.
+  Future<void> updateTokenCount(String id, int totalTokenCount) async {
+    final db = ref.read(databaseProvider);
+    final conversations = state.value ?? [];
+    final existingIndex = conversations.indexWhere((c) => c.id == id);
+    if (existingIndex == -1) return;
+
+    final existing = conversations[existingIndex];
+    final updated = existing.copyWith(totalTokenCount: totalTokenCount);
+
+    final query = db.conversationBox
+        .query(ConversationEntity_.id.equals(id))
+        .build();
+    final existingEntity = query.findFirst();
+    query.close();
+
+    final entity = ConversationEntity.fromDomain(updated);
+    if (existingEntity != null) {
+      entity.internalId = existingEntity.internalId;
+    }
+    db.conversationBox.put(entity);
+    state = AsyncData(await _loadAll());
+  }
+
+  Future<void> updatePersonas(String id, List<Persona> personas) async {
+    final personaId = personas.isEmpty
+        ? null
+        : PersonaPromptUtils.joinPersonaIds(personas.map((p) => p.id).toList());
+    final systemPrompt = personas.isEmpty
+        ? null
+        : PersonaPromptUtils.combineSystemPrompts(personas);
+    await updatePersona(id, personaId, systemPrompt);
   }
 
   Future<void> updatePersona(
@@ -464,10 +565,12 @@ class ConversationsNotifier extends AsyncNotifier<List<Conversation>> {
     final db = ref.read(databaseProvider);
     final conversations = state.value ?? [];
     final existing = conversations.firstWhere((c) => c.id == id);
+    // Moving folders is a metadata edit, not conversation activity — don't
+    // bump updatedAt, since that's used as the "last modified" sort/section
+    // date.
     final updated = existing.copyWith(
       folderId: folderId,
       clearFolderId: folderId == null,
-      updatedAt: DateTime.now(),
     );
 
     final query = db.conversationBox.query(ConversationEntity_.id.equals(id)).build();
@@ -534,6 +637,23 @@ class ConversationSearchNotifier extends Notifier<String> {
   }
 }
 
+enum HistorySortOption { modified, created }
+
+final historySortOptionProvider =
+    NotifierProvider<HistorySortOptionNotifier, HistorySortOption>(() {
+      return HistorySortOptionNotifier();
+    });
+
+class HistorySortOptionNotifier extends Notifier<HistorySortOption> {
+  @override
+  HistorySortOption build() => HistorySortOption.modified;
+
+  void setOption(HistorySortOption option) => state = option;
+}
+
+DateTime historySortDate(Conversation c, HistorySortOption option) =>
+    option == HistorySortOption.created ? c.createdAt : c.updatedAt;
+
 final filteredConversationsProvider = Provider<AsyncValue<List<Conversation>>>((
   ref,
 ) {
@@ -541,6 +661,7 @@ final filteredConversationsProvider = Provider<AsyncValue<List<Conversation>>>((
   final query = ref.watch(conversationSearchProvider).toLowerCase();
   final folderFilter = ref.watch(historyFolderFilterProvider);
   final listFilter = ref.watch(historyListFilterProvider);
+  final sortOption = ref.watch(historySortOptionProvider);
 
   return conversationsAsync.whenData((conversations) {
     var filtered = conversations.where((c) => !c.isTemporary).toList();
@@ -563,11 +684,20 @@ final filteredConversationsProvider = Provider<AsyncValue<List<Conversation>>>((
         filtered = filtered.where((c) => c.folderId == folderFilter).toList();
       }
     }
-    if (query.isEmpty) return filtered;
-    return filtered.where((c) {
-      return c.title.toLowerCase().contains(query) ||
-          (c.lastMessagePreview?.toLowerCase().contains(query) ?? false);
-    }).toList();
+    if (query.isNotEmpty) {
+      filtered = filtered.where((c) {
+        return c.title.toLowerCase().contains(query) ||
+            (c.lastMessagePreview?.toLowerCase().contains(query) ?? false);
+      }).toList();
+    }
+
+    filtered.sort((a, b) {
+      if (a.isPinned != b.isPinned) return a.isPinned ? -1 : 1;
+      return historySortDate(b, sortOption).compareTo(
+        historySortDate(a, sortOption),
+      );
+    });
+    return filtered;
   });
 });
 
@@ -580,6 +710,7 @@ final recentConversationsProvider = Provider<List<Conversation>>((ref) {
 final groupedConversationsProvider =
     Provider<AsyncValue<Map<String, List<Conversation>>>>((ref) {
       final filteredAsync = ref.watch(filteredConversationsProvider);
+      final sortOption = ref.watch(historySortOptionProvider);
 
       return filteredAsync.whenData((conversations) {
         final now = DateTime.now();
@@ -591,10 +722,11 @@ final groupedConversationsProvider =
         final grouped = <String, List<Conversation>>{};
 
         for (final conversation in conversations) {
+          final sectionDate = historySortDate(conversation, sortOption);
           final convDate = DateTime(
-            conversation.updatedAt.year,
-            conversation.updatedAt.month,
-            conversation.updatedAt.day,
+            sectionDate.year,
+            sectionDate.month,
+            sectionDate.day,
           );
 
           String section;
@@ -643,6 +775,41 @@ class HistoryFolderFilterNotifier extends Notifier<String?> {
   String? build() => null;
 
   void setFilter(String? folderId) => state = folderId;
+}
+
+final historySelectionModeProvider =
+    NotifierProvider<HistorySelectionModeNotifier, bool>(
+      HistorySelectionModeNotifier.new,
+    );
+
+class HistorySelectionModeNotifier extends Notifier<bool> {
+  @override
+  bool build() => false;
+
+  void enable() => state = true;
+
+  void disable() {
+    state = false;
+    ref.read(historySelectedIdsProvider.notifier).clear();
+  }
+}
+
+final historySelectedIdsProvider =
+    NotifierProvider<HistorySelectedIdsNotifier, Set<String>>(
+      HistorySelectedIdsNotifier.new,
+    );
+
+class HistorySelectedIdsNotifier extends Notifier<Set<String>> {
+  @override
+  Set<String> build() => const {};
+
+  void toggle(String id) {
+    final updated = {...state};
+    if (!updated.remove(id)) updated.add(id);
+    state = updated;
+  }
+
+  void clear() => state = const {};
 }
 
 final conversationFoldersProvider =
