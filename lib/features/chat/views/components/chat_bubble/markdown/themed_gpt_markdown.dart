@@ -16,10 +16,11 @@ final _currencyLike = RegExp(r'^\s*\d[\d,]*(\.\d+)?\s*$');
 String normalizeDollarLatex(String input) {
   if (!input.contains(r'$')) return input;
 
-  var result = input.replaceAllMapped(
-    _blockDollarLatex,
-    (m) => '\\[${m[1]!.trim()}\\]',
-  );
+  var result = input.replaceAllMapped(_blockDollarLatex, (m) {
+    final inner = m[1]!.trim();
+    if (inner.isEmpty || _currencyLike.hasMatch(inner)) return m[0]!;
+    return '\\[$inner\\]';
+  });
 
   result = result.replaceAllMapped(_inlineDollarLatex, (m) {
     final inner = m[1]!;

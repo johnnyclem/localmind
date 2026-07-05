@@ -71,10 +71,23 @@ class ImageUploadUtils {
     Uint8List bytes,
     int maxDimension,
   ) async {
+    final decodeCodec = await ui.instantiateImageCodec(bytes);
+    final decodeFrame = await decodeCodec.getNextFrame();
+    final origWidth = decodeFrame.image.width;
+    final origHeight = decodeFrame.image.height;
+    decodeFrame.image.dispose();
+    int targetWidth, targetHeight;
+    if (origWidth >= origHeight) {
+      targetWidth = maxDimension;
+      targetHeight = (origHeight * maxDimension / origWidth).round().clamp(1, maxDimension);
+    } else {
+      targetHeight = maxDimension;
+      targetWidth = (origWidth * maxDimension / origHeight).round().clamp(1, maxDimension);
+    }
     final codec = await ui.instantiateImageCodec(
       bytes,
-      targetWidth: maxDimension,
-      targetHeight: maxDimension,
+      targetWidth: targetWidth,
+      targetHeight: targetHeight,
     );
     final frame = await codec.getNextFrame();
     final data = await frame.image.toByteData(format: ui.ImageByteFormat.png);

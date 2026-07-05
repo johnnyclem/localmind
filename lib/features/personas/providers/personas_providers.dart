@@ -149,6 +149,15 @@ class PersonasNotifier extends AsyncNotifier<List<Persona>> {
     db.personaBox.removeMany(query.findIds());
     query.close();
 
+    final convQuery = db.conversationBox
+        .query(ConversationEntity_.personaId.equals(id))
+        .build();
+    for (final entity in convQuery.find()) {
+      entity.personaId = null;
+      db.conversationBox.put(entity);
+    }
+    convQuery.close();
+
     state = AsyncData(await _loadWithoutSeeding());
   }
 

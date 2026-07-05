@@ -71,6 +71,7 @@ class LmCatalogSearchState {
 
 class LmCatalogSearchNotifier extends Notifier<LmCatalogSearchState> {
   String _query = '';
+  int _searchGeneration = 0;
 
   @override
   LmCatalogSearchState build() => const LmCatalogSearchState();
@@ -87,14 +88,17 @@ class LmCatalogSearchNotifier extends Notifier<LmCatalogSearchState> {
       return;
     }
 
+    final generation = ++_searchGeneration;
     state = state.copyWith(isLoading: true, clearError: true);
     final service = ref.read(lmStudioCatalogServiceProvider);
 
     try {
       final staffPicks = await ref.read(lmStudioStaffPicksProvider.future);
+      if (generation != _searchGeneration) return;
       final staffMatches =
           staffPicks.where((m) => m.matchesQuery(trimmed)).toList();
       final page = await service.searchHuggingFace(query: trimmed);
+      if (generation != _searchGeneration) return;
       final staffIds = staffMatches.map((m) => m.id).toSet();
       final community =
           page.models.where((m) => !staffIds.contains(m.id)).toList();
@@ -107,6 +111,7 @@ class LmCatalogSearchNotifier extends Notifier<LmCatalogSearchState> {
         isLoading: false,
       );
     } catch (e) {
+      if (generation != _searchGeneration) return;
       state = state.copyWith(isLoading: false, error: e.toString());
     }
   }
@@ -434,6 +439,7 @@ class LmDownloadManagerNotifier extends Notifier<LmDownloadManagerState> {
       timer.cancel();
     }
     _pollers.clear();
+    _jobServerIds.clear();
   }
 }
 

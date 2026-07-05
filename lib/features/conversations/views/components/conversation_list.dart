@@ -40,7 +40,8 @@ class ConversationList extends ConsumerWidget {
       ..sort((a, b) {
         final aIndex = sectionOrder.indexOf(a);
         final bIndex = sectionOrder.indexOf(b);
-        return aIndex.compareTo(bIndex);
+        return (aIndex == -1 ? 999 : aIndex)
+            .compareTo(bIndex == -1 ? 999 : bIndex);
       });
 
     return ListView.builder(
@@ -355,9 +356,13 @@ Future<void> runBulkAiRename(
   );
 
   for (final id in conversationIds) {
-    final title = await ref.read(chatProvider.notifier).generateTitleWithAi(id);
-    if (title != null && title.isNotEmpty) {
-      await ref.read(conversationsProvider.notifier).renameConversation(id, title);
+    try {
+      final title = await ref.read(chatProvider.notifier).generateTitleWithAi(id);
+      if (title != null && title.isNotEmpty) {
+        await ref.read(conversationsProvider.notifier).renameConversation(id, title);
+      }
+    } catch (_) {
+      // continue renaming remaining conversations
     }
     progress.value += 1;
   }

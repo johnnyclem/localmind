@@ -156,11 +156,6 @@ class _MessageListConsumerState extends ConsumerState<_MessageListConsumer> {
       }
     });
 
-    final pendingScroll = ref.watch(scrollToMessageIdProvider);
-    if (pendingScroll != null) {
-      _scrollToMessage(pendingScroll);
-    }
-
     final streamingMessage = ref.watch(
       chatProvider.select((s) => s.streamingMessage),
     );
@@ -293,7 +288,7 @@ class _MessageList extends ConsumerWidget {
         final bubble = ChatBubble(
           key: itemKey,
           message: message,
-          allMessages: this.allMessages,
+          allMessages: allMessages,
           isStreaming:
               isLast &&
               showTrailingStreamingBubble &&

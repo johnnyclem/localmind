@@ -320,7 +320,7 @@ class AppSettings {
     if (value is String) {
       return engineIdFromString(value);
     }
-    if (value is int) {
+    if (value is int && value >= 0 && value < EngineId.values.length) {
       return EngineId.values[value];
     }
     return EngineId.system;

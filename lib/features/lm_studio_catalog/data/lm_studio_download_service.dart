@@ -70,15 +70,16 @@ class LmStudioDownloadService {
       ),
     );
 
-    final data = response.data ?? {};
-    if (response.statusCode != 200 || data['error'] != null) {
-      final error = data['error'];
+    if (response.statusCode != 200) {
+      final data = response.data;
+      final error = data is Map<String, dynamic> ? data['error'] : null;
       final message = error is Map
           ? error['message']?.toString()
           : error?.toString();
-      throw Exception(message ?? 'Download failed');
+      throw Exception(message ?? 'Download failed (status ${response.statusCode})');
     }
 
+    final data = response.data ?? <String, dynamic>{};
     return LmDownloadJob.fromJson(
       data,
       modelId: request.model,

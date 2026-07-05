@@ -458,7 +458,7 @@ class ChatInputBarState extends ConsumerState<ChatInputBar>
 
         onResult: (words) {
 
-          if (words.isNotEmpty) {
+          if (words.isNotEmpty && mounted) {
 
             setState(() {
 

@@ -807,7 +807,7 @@ class ChatNotifier extends Notifier<ChatState> {
     final messagesForApi = _buildMessagesForApi(selectedModel);
 
     try {
-      await _detachStreamSubscription();
+      await _abortStreamImmediately();
       _uiUpdateTimer?.cancel();
 
       String reasoningContent = '';
@@ -1580,7 +1580,11 @@ class ChatNotifier extends Notifier<ChatState> {
       query.close();
     }
 
+    final removedIds = messagesToRemove.map((m) => m.id).toSet();
+    final updatedAll =
+        state.allMessages.where((m) => !removedIds.contains(m.id)).toList();
     state = state.copyWith(
+      allMessages: updatedAll,
       messages: messages.sublist(0, userMessageIndex),
       clearStreaming: true,
     );
@@ -1604,8 +1608,12 @@ class ChatNotifier extends Notifier<ChatState> {
       status: MessageStatus.streaming,
       isProcessing: true,
     );
-    _replaceMessageInAll(streamingAssistant);
+    final updatedAll = state.allMessages.map((m) {
+      return m.id == streamingAssistant.id ? streamingAssistant : m;
+    }).toList();
     state = state.copyWith(
+      allMessages: updatedAll,
+      messages: MessageVariants.resolveActiveTimeline(updatedAll),
       isStreaming: true,
       streamingMessage: streamingAssistant,
       clearError: true,
@@ -2274,6 +2282,7 @@ class ChatNotifier extends Notifier<ChatState> {
   }
 
   Future<void> clearConversation() async {
+    await _saveService?.flush();
     final db = ref.read(databaseProvider);
     if (_currentConversationId != null && !_isInMemoryChat) {
       final query = db.messageBox

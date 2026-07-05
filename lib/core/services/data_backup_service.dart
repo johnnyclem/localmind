@@ -58,6 +58,10 @@ class DataBackupService {
         'smartReplies': domain.smartReplies,
         'smartRepliesLastMessageId': domain.smartRepliesLastMessageId,
         'folderId': domain.folderId,
+        'isTemporary': domain.isTemporary,
+        'isArchived': domain.isArchived,
+        'characterCount': domain.characterCount,
+        'totalTokenCount': domain.totalTokenCount,
       };
 
   List<Map<String, dynamic>> _exportSavedMessages(Store store) {
@@ -72,7 +76,20 @@ class DataBackupService {
         'content': e.content,
         'modelId': e.modelId,
         'folderId': e.folderId,
+        'isArchived': e.isArchived,
         'savedAt': e.savedAt.toIso8601String(),
+      };
+    }).toList();
+  }
+
+  List<Map<String, dynamic>> _exportConversationFolders(Store store) {
+    final box = store.box<ConversationFolderEntity>();
+    return box.getAll().map((e) {
+      return {
+        'id': e.id,
+        'name': e.name,
+        'sortOrder': e.sortOrder,
+        'createdAt': e.createdAt.toIso8601String(),
       };
     }).toList();
   }
@@ -160,7 +177,8 @@ class DataBackupService {
       'savedMessages': _exportSavedMessages(store),
       'savedMessageFolders': _exportSavedMessageFolders(store),
       'servers': _exportServers(store),
-      'modelMetadata': ?modelMetadata,
+      'conversationFolders': _exportConversationFolders(store),
+      'modelMetadata': modelMetadata,
     };
   }
 
@@ -355,6 +373,7 @@ class DataBackupService {
       final serverBox = store.box<ServerEntity>();
       final savedBox = store.box<SavedMessageEntity>();
       final savedFolderBox = store.box<SavedMessageFolderEntity>();
+      final conversationFolderBox = store.box<ConversationFolderEntity>();
 
       final personas = decoded['personas'];
       if (personas is List) {
@@ -477,6 +496,7 @@ class DataBackupService {
             content: item['content'] as String? ?? '',
             modelId: item['modelId'] as String?,
             folderId: item['folderId'] as String?,
+            isArchived: item['isArchived'] as bool? ?? false,
             savedAt: savedAt,
           );
           final query =
@@ -485,6 +505,30 @@ class DataBackupService {
           query.close();
           if (existing != null) entity.internalId = existing.internalId;
           savedBox.put(entity);
+        }
+      }
+
+      final conversationFolders = decoded['conversationFolders'];
+      if (conversationFolders is List) {
+        for (final item in conversationFolders) {
+          if (item is! Map) continue;
+          final id = backupImportString(item['id']);
+          final folderName = backupImportString(item['name']);
+          final createdAt = backupImportDateTime(item['createdAt']);
+          if (id == null || folderName == null || createdAt == null) continue;
+          final entity = ConversationFolderEntity(
+            id: id,
+            name: folderName,
+            sortOrder: item['sortOrder'] as int? ?? 0,
+            createdAt: createdAt,
+          );
+          final query = conversationFolderBox
+              .query(ConversationFolderEntity_.id.equals(entity.id))
+              .build();
+          final existing = query.findFirst();
+          query.close();
+          if (existing != null) entity.internalId = existing.internalId;
+          conversationFolderBox.put(entity);
         }
       }
 
@@ -519,6 +563,10 @@ class DataBackupService {
             smartRepliesLastMessageId:
                 item['smartRepliesLastMessageId'] as String?,
             folderId: item['folderId'] as String?,
+            isTemporary: item['isTemporary'] as bool? ?? false,
+            isArchived: item['isArchived'] as bool? ?? false,
+            characterCount: item['characterCount'] as int? ?? 0,
+            totalTokenCount: item['totalTokenCount'] as int?,
           );
           final query =
               convBox.query(ConversationEntity_.id.equals(conversation.id)).build();
@@ -603,8 +651,11 @@ class DataBackupService {
   Future<void> importZip(Store store, List<int> bytes) async {
     final archive = ZipDecoder().decodeBytes(bytes);
     for (final file in archive.files) {
-      if (file.isFile) {
+      if (!file.isFile) continue;
+      try {
         await importFromJson(store, utf8.decode(file.content as List<int>));
+      } catch (_) {
+        // skip corrupted entry
       }
     }
   }
