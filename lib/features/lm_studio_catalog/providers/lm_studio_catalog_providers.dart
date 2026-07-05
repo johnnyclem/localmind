@@ -16,15 +16,17 @@ final lmStudioCatalogServiceProvider = Provider<LmStudioCatalogService>((ref) {
   return LmStudioCatalogService(ref.read(dioProvider));
 });
 
-final lmStudioDownloadServiceProvider = Provider<LmStudioDownloadService>((ref) {
+final lmStudioDownloadServiceProvider = Provider<LmStudioDownloadService>((
+  ref,
+) {
   return LmStudioDownloadService(ref.read(dioProvider));
 });
 
 final lmStudioStaffPicksProvider =
     FutureProvider.autoDispose<List<LmCatalogModel>>((ref) async {
-  final service = ref.read(lmStudioCatalogServiceProvider);
-  return service.fetchStaffPicks();
-});
+      final service = ref.read(lmStudioCatalogServiceProvider);
+      return service.fetchStaffPicks();
+    });
 
 class LmCatalogSearchState {
   const LmCatalogSearchState({
@@ -82,26 +84,28 @@ class LmCatalogSearchNotifier extends Notifier<LmCatalogSearchState> {
       return;
     }
     _query = trimmed;
+    final generation = ++_searchGeneration;
 
     if (trimmed.isEmpty) {
       state = const LmCatalogSearchState();
       return;
     }
 
-    final generation = ++_searchGeneration;
     state = state.copyWith(isLoading: true, clearError: true);
     final service = ref.read(lmStudioCatalogServiceProvider);
 
     try {
       final staffPicks = await ref.read(lmStudioStaffPicksProvider.future);
       if (generation != _searchGeneration) return;
-      final staffMatches =
-          staffPicks.where((m) => m.matchesQuery(trimmed)).toList();
+      final staffMatches = staffPicks
+          .where((m) => m.matchesQuery(trimmed))
+          .toList();
       final page = await service.searchHuggingFace(query: trimmed);
       if (generation != _searchGeneration) return;
       final staffIds = staffMatches.map((m) => m.id).toSet();
-      final community =
-          page.models.where((m) => !staffIds.contains(m.id)).toList();
+      final community = page.models
+          .where((m) => !staffIds.contains(m.id))
+          .toList();
 
       state = LmCatalogSearchState(
         staffMatches: staffMatches,
@@ -125,8 +129,9 @@ class LmCatalogSearchNotifier extends Notifier<LmCatalogSearchState> {
     try {
       final page = await service.searchHuggingFace(nextUrl: state.nextUrl);
       final existingIds = state.allModels.map((m) => m.id).toSet();
-      final more =
-          page.models.where((m) => !existingIds.contains(m.id)).toList();
+      final more = page.models
+          .where((m) => !existingIds.contains(m.id))
+          .toList();
 
       state = state.copyWith(
         communityModels: [...state.communityModels, ...more],
@@ -142,20 +147,17 @@ class LmCatalogSearchNotifier extends Notifier<LmCatalogSearchState> {
 
 final lmCatalogSearchProvider =
     NotifierProvider<LmCatalogSearchNotifier, LmCatalogSearchState>(
-  LmCatalogSearchNotifier.new,
-);
+      LmCatalogSearchNotifier.new,
+    );
 
-final lmModelDetailProvider =
-    FutureProvider.autoDispose.family<LmModelDetail, LmCatalogModel>(
-        (ref, model) async {
-  final service = ref.read(lmStudioCatalogServiceProvider);
-  return service.fetchModelDetail(model);
-});
+final lmModelDetailProvider = FutureProvider.autoDispose
+    .family<LmModelDetail, LmCatalogModel>((ref, model) async {
+      final service = ref.read(lmStudioCatalogServiceProvider);
+      return service.fetchModelDetail(model);
+    });
 
 class LmDownloadManagerState {
-  const LmDownloadManagerState({
-    this.jobs = const [],
-  });
+  const LmDownloadManagerState({this.jobs = const []});
 
   final List<LmDownloadJob> jobs;
 
@@ -445,8 +447,8 @@ class LmDownloadManagerNotifier extends Notifier<LmDownloadManagerState> {
 
 final lmDownloadManagerProvider =
     NotifierProvider<LmDownloadManagerNotifier, LmDownloadManagerState>(
-  LmDownloadManagerNotifier.new,
-);
+      LmDownloadManagerNotifier.new,
+    );
 
 final lmActiveDownloadCountProvider = Provider<int>((ref) {
   return ref.watch(lmDownloadManagerProvider).activeJobs.length;

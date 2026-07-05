@@ -123,6 +123,7 @@ class _MessageListConsumer extends ConsumerStatefulWidget {
 
 class _MessageListConsumerState extends ConsumerState<_MessageListConsumer> {
   final _messageKeys = <String, GlobalKey>{};
+  bool _checkedInitialScrollTarget = false;
 
   @override
   void didUpdateWidget(covariant _MessageListConsumer oldWidget) {
@@ -155,6 +156,14 @@ class _MessageListConsumerState extends ConsumerState<_MessageListConsumer> {
         _scrollToMessage(next);
       }
     });
+
+    if (!_checkedInitialScrollTarget) {
+      _checkedInitialScrollTarget = true;
+      final pendingScroll = ref.read(scrollToMessageIdProvider);
+      if (pendingScroll != null) {
+        _scrollToMessage(pendingScroll);
+      }
+    }
 
     final streamingMessage = ref.watch(
       chatProvider.select((s) => s.streamingMessage),

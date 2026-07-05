@@ -16,53 +16,53 @@ import '../../objectbox.g.dart';
 
 class DataBackupService {
   Map<String, dynamic> _messageToMap(Message message) => {
-        'id': message.id,
-        'conversationId': message.conversationId,
-        'role': message.role.name,
-        'content': message.content,
-        'createdAt': message.createdAt.toIso8601String(),
-        'status': message.status.name,
-        'modelId': message.modelId,
-        'tokenCount': message.tokenCount,
-        'errorMessage': message.errorMessage,
-        'attachmentPaths': message.attachmentPaths,
-        'generationTimeMs': message.generationTimeMs,
-        'reasoningContent': message.reasoningContent,
-        'toolCallId': message.toolCallId,
-        'isProcessing': message.isProcessing,
-        'toolSessionId': message.toolSessionId,
-        'variantGroupId': message.variantGroupId,
-        'variantIndex': message.variantIndex,
-        'threadOrder': message.threadOrder,
-        'isActiveVariant': message.isActiveVariant,
-        'parentMessageId': message.parentMessageId,
-      };
+    'id': message.id,
+    'conversationId': message.conversationId,
+    'role': message.role.name,
+    'content': message.content,
+    'createdAt': message.createdAt.toIso8601String(),
+    'status': message.status.name,
+    'modelId': message.modelId,
+    'tokenCount': message.tokenCount,
+    'errorMessage': message.errorMessage,
+    'attachmentPaths': message.attachmentPaths,
+    'generationTimeMs': message.generationTimeMs,
+    'reasoningContent': message.reasoningContent,
+    'toolCallId': message.toolCallId,
+    'isProcessing': message.isProcessing,
+    'toolSessionId': message.toolSessionId,
+    'variantGroupId': message.variantGroupId,
+    'variantIndex': message.variantIndex,
+    'threadOrder': message.threadOrder,
+    'isActiveVariant': message.isActiveVariant,
+    'parentMessageId': message.parentMessageId,
+  };
 
   Map<String, dynamic> _conversationToMap(Conversation domain) => {
-        'id': domain.id,
-        'title': domain.title,
-        'createdAt': domain.createdAt.toIso8601String(),
-        'updatedAt': domain.updatedAt.toIso8601String(),
-        'isPinned': domain.isPinned,
-        'personaId': domain.personaId,
-        'serverId': domain.serverId,
-        'modelId': domain.modelId,
-        'messageCount': domain.messageCount,
-        'lastMessagePreview': domain.lastMessagePreview,
-        'systemPrompt': domain.systemPrompt,
-        'temperature': domain.temperature,
-        'topP': domain.topP,
-        'maxTokens': domain.maxTokens,
-        'contextLength': domain.contextLength,
-        'mcpEnabled': domain.mcpEnabled,
-        'smartReplies': domain.smartReplies,
-        'smartRepliesLastMessageId': domain.smartRepliesLastMessageId,
-        'folderId': domain.folderId,
-        'isTemporary': domain.isTemporary,
-        'isArchived': domain.isArchived,
-        'characterCount': domain.characterCount,
-        'totalTokenCount': domain.totalTokenCount,
-      };
+    'id': domain.id,
+    'title': domain.title,
+    'createdAt': domain.createdAt.toIso8601String(),
+    'updatedAt': domain.updatedAt.toIso8601String(),
+    'isPinned': domain.isPinned,
+    'personaId': domain.personaId,
+    'serverId': domain.serverId,
+    'modelId': domain.modelId,
+    'messageCount': domain.messageCount,
+    'lastMessagePreview': domain.lastMessagePreview,
+    'systemPrompt': domain.systemPrompt,
+    'temperature': domain.temperature,
+    'topP': domain.topP,
+    'maxTokens': domain.maxTokens,
+    'contextLength': domain.contextLength,
+    'mcpEnabled': domain.mcpEnabled,
+    'smartReplies': domain.smartReplies,
+    'smartRepliesLastMessageId': domain.smartRepliesLastMessageId,
+    'folderId': domain.folderId,
+    'isTemporary': domain.isTemporary,
+    'isArchived': domain.isArchived,
+    'characterCount': domain.characterCount,
+    'totalTokenCount': domain.totalTokenCount,
+  };
 
   List<Map<String, dynamic>> _exportSavedMessages(Store store) {
     final box = store.box<SavedMessageEntity>();
@@ -92,6 +92,21 @@ class DataBackupService {
         'createdAt': e.createdAt.toIso8601String(),
       };
     }).toList();
+  }
+
+  List<Map<String, dynamic>> _conversationFoldersForConversationIds(
+    Map<String, dynamic> all,
+    Set<String> conversationIds,
+  ) {
+    final folderIds = (all['conversations'] as List)
+        .where((c) => conversationIds.contains((c as Map)['id']))
+        .map((c) => (c as Map)['folderId'] as String?)
+        .whereType<String>()
+        .toSet();
+    return (all['conversationFolders'] as List)
+        .where((f) => folderIds.contains((f as Map)['id']))
+        .toList()
+        .cast<Map<String, dynamic>>();
   }
 
   List<Map<String, dynamic>> _exportSavedMessageFolders(Store store) {
@@ -142,10 +157,14 @@ class DataBackupService {
     final messageBox = store.box<MessageEntity>();
     final personaBox = store.box<PersonaEntity>();
 
-    final conversations =
-        convBox.getAll().map((e) => _conversationToMap(e.toDomain())).toList();
-    final messages =
-        messageBox.getAll().map((e) => _messageToMap(e.toDomain())).toList();
+    final conversations = convBox
+        .getAll()
+        .map((e) => _conversationToMap(e.toDomain()))
+        .toList();
+    final messages = messageBox
+        .getAll()
+        .map((e) => _messageToMap(e.toDomain()))
+        .toList();
 
     final personas = personaBox
         .getAll()
@@ -192,6 +211,7 @@ class DataBackupService {
       'messages': all['messages'],
       'savedMessages': all['savedMessages'],
       'savedMessageFolders': all['savedMessageFolders'],
+      'conversationFolders': all['conversationFolders'],
     };
   }
 
@@ -213,6 +233,9 @@ class DataBackupService {
     final savedMessageFolders = (all['savedMessageFolders'] as List)
         .where((f) => folderIds.contains((f as Map)['id']))
         .toList();
+    final conversationFolders = _conversationFoldersForConversationIds(all, {
+      conversationId,
+    });
 
     return {
       'version': 3,
@@ -222,6 +245,7 @@ class DataBackupService {
       'messages': messages,
       'savedMessages': savedMessages,
       'savedMessageFolders': savedMessageFolders,
+      'conversationFolders': conversationFolders,
     };
   }
 
@@ -237,9 +261,7 @@ class DataBackupService {
         .where((m) => conversationIds.contains((m as Map)['conversationId']))
         .toList();
     final savedMessages = (all['savedMessages'] as List)
-        .where(
-          (m) => conversationIds.contains((m as Map)['conversationId']),
-        )
+        .where((m) => conversationIds.contains((m as Map)['conversationId']))
         .toList();
     final folderIds = savedMessages
         .map((m) => (m as Map)['folderId'] as String?)
@@ -248,6 +270,10 @@ class DataBackupService {
     final savedMessageFolders = (all['savedMessageFolders'] as List)
         .where((f) => folderIds.contains((f as Map)['id']))
         .toList();
+    final conversationFolders = _conversationFoldersForConversationIds(
+      all,
+      conversationIds,
+    );
 
     return {
       'version': 3,
@@ -257,15 +283,16 @@ class DataBackupService {
       'messages': messages,
       'savedMessages': savedMessages,
       'savedMessageFolders': savedMessageFolders,
+      'conversationFolders': conversationFolders,
     };
   }
 
   String exportConversationsForIdsAsJson(
     Store store,
     Set<String> conversationIds,
-  ) =>
-      const JsonEncoder.withIndent('  ')
-          .convert(exportConversationsForIds(store, conversationIds));
+  ) => const JsonEncoder.withIndent(
+    '  ',
+  ).convert(exportConversationsForIds(store, conversationIds));
 
   Map<String, dynamic> exportPersonas(Store store) {
     final all = exportAll(store);
@@ -302,8 +329,9 @@ class DataBackupService {
       const JsonEncoder.withIndent('  ').convert(exportConversations(store));
 
   String exportConversationAsJson(Store store, String conversationId) =>
-      const JsonEncoder.withIndent('  ')
-          .convert(exportConversation(store, conversationId));
+      const JsonEncoder.withIndent(
+        '  ',
+      ).convert(exportConversation(store, conversationId));
 
   String exportPersonasAsJson(Store store) =>
       const JsonEncoder.withIndent('  ').convert(exportPersonas(store));
@@ -312,10 +340,9 @@ class DataBackupService {
     String settingsJson, {
     Store? store,
     SharedPreferences? prefs,
-  }) =>
-      const JsonEncoder.withIndent('  ').convert(
-        exportSettings(settingsJson, store: store, prefs: prefs),
-      );
+  }) => const JsonEncoder.withIndent(
+    '  ',
+  ).convert(exportSettings(settingsJson, store: store, prefs: prefs));
 
   ArchiveFile _jsonArchiveFile(String name, String json) {
     final bytes = utf8.encode(json);
@@ -334,9 +361,7 @@ class DataBackupService {
           exportConversationsAsJson(store),
         ),
       )
-      ..addFile(
-        _jsonArchiveFile('personas.json', exportPersonasAsJson(store)),
-      )
+      ..addFile(_jsonArchiveFile('personas.json', exportPersonasAsJson(store)))
       ..addFile(
         _jsonArchiveFile(
           'settings.json',
@@ -347,8 +372,9 @@ class DataBackupService {
   }
 
   String exportAllAsJson(Store store, {SharedPreferences? prefs}) {
-    return const JsonEncoder.withIndent('  ')
-        .convert(exportAll(store, prefs: prefs));
+    return const JsonEncoder.withIndent(
+      '  ',
+    ).convert(exportAll(store, prefs: prefs));
   }
 
   Future<void> importFromJson(Store store, String jsonString) async {
@@ -383,7 +409,10 @@ class DataBackupService {
           final name = backupImportString(item['name']);
           final createdAt = backupImportDateTime(item['createdAt']);
           final updatedAt = backupImportDateTime(item['updatedAt']);
-          if (id == null || name == null || createdAt == null || updatedAt == null) {
+          if (id == null ||
+              name == null ||
+              createdAt == null ||
+              updatedAt == null) {
             continue;
           }
           final persona = Persona(
@@ -400,8 +429,9 @@ class DataBackupService {
                 ? Map<String, dynamic>.from(item['preferredParams'] as Map)
                 : null,
           );
-          final query =
-              personaBox.query(PersonaEntity_.id.equals(persona.id)).build();
+          final query = personaBox
+              .query(PersonaEntity_.id.equals(persona.id))
+              .build();
           final existing = query.findFirst();
           query.close();
           final entity = PersonaEntity.fromDomain(persona);
@@ -427,7 +457,9 @@ class DataBackupService {
           final server = Server(
             id: id,
             name: name,
-            type: ServerType.values.byName(item['type'] as String? ?? 'lmStudio'),
+            type: ServerType.values.byName(
+              item['type'] as String? ?? 'lmStudio',
+            ),
             host: item['host'] as String? ?? 'localhost',
             port: item['port'] as int? ?? 1234,
             apiKey: item['apiKey'] as String?,
@@ -440,7 +472,9 @@ class DataBackupService {
             iconName: item['iconName'] as String?,
             pathPrefix: item['pathPrefix'] as String?,
           );
-          final query = serverBox.query(ServerEntity_.id.equals(server.id)).build();
+          final query = serverBox
+              .query(ServerEntity_.id.equals(server.id))
+              .build();
           final existing = query.findFirst();
           query.close();
           final entity = ServerEntity.fromDomain(server);
@@ -499,8 +533,9 @@ class DataBackupService {
             isArchived: item['isArchived'] as bool? ?? false,
             savedAt: savedAt,
           );
-          final query =
-              savedBox.query(SavedMessageEntity_.id.equals(entity.id)).build();
+          final query = savedBox
+              .query(SavedMessageEntity_.id.equals(entity.id))
+              .build();
           final existing = query.findFirst();
           query.close();
           if (existing != null) entity.internalId = existing.internalId;
@@ -568,8 +603,9 @@ class DataBackupService {
             characterCount: item['characterCount'] as int? ?? 0,
             totalTokenCount: item['totalTokenCount'] as int?,
           );
-          final query =
-              convBox.query(ConversationEntity_.id.equals(conversation.id)).build();
+          final query = convBox
+              .query(ConversationEntity_.id.equals(conversation.id))
+              .build();
           final existing = query.findFirst();
           query.close();
           final entity = ConversationEntity.fromDomain(conversation);
@@ -625,7 +661,9 @@ class DataBackupService {
 
           final entity = MessageEntity.fromDomain(message)
             ..conversation.target = convEntity;
-          final query = messageBox.query(MessageEntity_.id.equals(message.id)).build();
+          final query = messageBox
+              .query(MessageEntity_.id.equals(message.id))
+              .build();
           final existing = query.findFirst();
           query.close();
           if (existing != null) entity.internalId = existing.internalId;
@@ -641,7 +679,8 @@ class DataBackupService {
     for (final entry in raw) {
       if (entry is! String || entry.isEmpty) continue;
       final normalized = p.normalize(entry);
-      if (normalized == attachmentsDir || p.isWithin(attachmentsDir, normalized)) {
+      if (normalized == attachmentsDir ||
+          p.isWithin(attachmentsDir, normalized)) {
         sanitized.add(entry);
       }
     }
