@@ -920,9 +920,34 @@ class _ChatBottomBar extends ConsumerWidget {
     final keyboardIncognito =
         isTemporary &&
         ref.watch(settingsProvider.select((s) => s.tempChatKeyboardIncognito));
-    final totalTokenCount = ref.watch(
+    final messages = ref.watch(chatProvider.select((s) => s.messages));
+    final hasActiveConv = ref.watch(conv.activeConversationProvider) != null;
+    final dbTokenCount = ref.watch(
       conv.activeConversationProvider.select((c) => c?.totalTokenCount),
     );
+    final streamingId = ref.watch(chatProvider.select((s) => s.streamingMessage?.id));
+
+    int totalTokenCount = 0;
+    if (hasActiveConv && dbTokenCount != null && dbTokenCount > 0) {
+      totalTokenCount = dbTokenCount;
+    } else {
+      final lastWithStats = messages.reversed
+          .where((m) =>
+              m.id != streamingId &&
+              m.role == MessageRole.assistant &&
+              (m.inputTokenCount != null || m.tokenCount != null))
+          .firstOrNull;
+      if (lastWithStats != null) {
+        totalTokenCount = (lastWithStats.inputTokenCount ?? 0) + (lastWithStats.tokenCount ?? 0);
+      } else {
+        totalTokenCount = messages
+            .where((m) => m.id != streamingId)
+            .fold<int>(
+              0,
+              (sum, m) => sum + (m.content.length / 4).round(),
+            );
+      }
+    }
 
     return Positioned(
       bottom: 0,

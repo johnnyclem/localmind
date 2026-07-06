@@ -163,17 +163,6 @@ class ConversationsNotifier extends AsyncNotifier<List<Conversation>> {
     db.conversationBox.put(entity);
 
     state = AsyncData(await _loadAll());
-
-    final activeId = ref.read(activeConversationProvider)?.id;
-    if (activeId == id) {
-      final refreshed = state.value?.firstWhere(
-        (c) => c.id == id,
-        orElse: () => updated,
-      );
-      ref
-          .read(activeConversationProvider.notifier)
-          .setActiveConversation(refreshed);
-    }
   }
 
   Future<void> setTemporary(String id, bool isTemporary) async {
@@ -202,17 +191,6 @@ class ConversationsNotifier extends AsyncNotifier<List<Conversation>> {
     db.conversationBox.put(entity);
 
     state = AsyncData(await _loadAll());
-
-    final activeId = ref.read(activeConversationProvider)?.id;
-    if (activeId == id) {
-      final refreshed = state.value?.firstWhere(
-        (c) => c.id == id,
-        orElse: () => updated,
-      );
-      ref
-          .read(activeConversationProvider.notifier)
-          .setActiveConversation(refreshed);
-    }
   }
 
   Future<void> deleteConversation(String id) async {
