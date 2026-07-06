@@ -178,8 +178,56 @@ class _ModelListState extends ConsumerState<ModelList> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final searchQuery = ref.watch(modelSearchQueryProvider);
-    final modelsAsync = ref.watch(availableModelsProvider(widget.serverId));
     final metadata = ref.watch(modelMetadataProvider);
+
+    final connectionStatus = ref.watch(connectionStatusProvider);
+
+    if (connectionStatus == ConnectionStatus.error) {
+      return Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.cloud_off_rounded, size: 64, color: Colors.red[300]),
+              const SizedBox(height: 16),
+              Text(
+                'Server Offline',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: widget.isDark ? Colors.white : Colors.black,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Could not establish a connection to the server. Please check if your server is running and the host/port settings are correct.',
+                style: TextStyle(
+                  fontSize: 13,
+                  color: widget.isDark ? AppColors.darkMutedText : AppColors.lightMutedText,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 24),
+              OutlinedButton.icon(
+                onPressed: () async {
+                  await ref.read(connectionStatusProvider.notifier).refresh();
+                  ref.invalidate(availableModelsProvider(widget.serverId));
+                },
+                icon: const Icon(Icons.refresh),
+                label: const Text('Retry Connection'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    if (connectionStatus == ConnectionStatus.checking) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    final modelsAsync = ref.watch(availableModelsProvider(widget.serverId));
 
     return modelsAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),

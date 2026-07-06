@@ -10,8 +10,9 @@ import 'package:localmind/features/on_device/components/on_device_picker_section
 import 'package:localmind/features/on_device/providers/on_device_providers.dart';
 import 'package:localmind/features/servers/providers/server_providers.dart';
 import 'package:localmind/features/lm_studio_catalog/views/lm_studio_download_widgets.dart';
+import 'package:localmind/core/providers/app_providers.dart';
+import 'package:localmind/features/conversations/providers/conversation_providers.dart' as conv;
 import 'package:localmind/l10n/app_localizations.dart';
-import '../components/model_context_length_section.dart';
 import '../components/model_list.dart';
 import '../components/model_search_field.dart';
 import '../components/model_sort_control.dart';
@@ -28,11 +29,12 @@ class ModelPickerSheet extends ConsumerStatefulWidget {
 
 class _ModelPickerSheetState extends ConsumerState<ModelPickerSheet> {
   @override
-  void dispose() {
+  void deactivate() {
     // Reset search when the sheet closes so the next open starts from a
     // clean, matching state instead of an empty box that's still filtering.
-    ref.read(modelSearchQueryProvider.notifier).clear();
-    super.dispose();
+    final searchNotifier = ref.read(modelSearchQueryProvider.notifier);
+    Future.microtask(() => searchNotifier.clear());
+    super.deactivate();
   }
 
   @override
@@ -150,8 +152,6 @@ class _ModelPickerSheetState extends ConsumerState<ModelPickerSheet> {
                   ),
                 ),
               const SizedBox(height: 12),
-              ModelContextLengthSection(isDark: isDark),
-              const SizedBox(height: 12),
               Row(
                 children: [
                   const Expanded(child: ModelSearchField()),
@@ -221,7 +221,7 @@ class _ModelPickerSheetState extends ConsumerState<ModelPickerSheet> {
   }
 }
 
-class _ModelPickerHeader extends StatelessWidget {
+class _ModelPickerHeader extends ConsumerWidget {
   const _ModelPickerHeader({
     required this.isDark,
     required this.isThinking,
@@ -241,11 +241,14 @@ class _ModelPickerHeader extends StatelessWidget {
   final VoidCallback? onUnloadAll;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
+    final settings = ref.watch(settingsProvider);
+    final activeConv = ref.watch(conv.activeConversationProvider);
+    final contextLength = activeConv?.contextLength ?? settings.contextLength;
 
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Expanded(
           child: Column(
@@ -299,6 +302,48 @@ class _ModelPickerHeader extends StatelessWidget {
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
+            Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () => _showContextLengthDialog(
+                  context,
+                  ref,
+                  contextLength,
+                  activeConv?.id,
+                ),
+                borderRadius: BorderRadius.circular(16),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: isDark ? Colors.grey[800]! : Colors.grey[300]!,
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                    color: isDark ? Colors.grey[900] : Colors.grey[50],
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.layers_outlined,
+                        size: 14,
+                        color: isDark ? Colors.grey[400] : Colors.grey[600],
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        '$contextLength',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: isDark ? Colors.white : Colors.black87,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 4),
             if (onUnloadAll != null)
               IconButton(
                 onPressed: onUnloadAll,
@@ -325,6 +370,173 @@ class _ModelPickerHeader extends StatelessWidget {
           ],
         ),
       ],
+    );
+  }
+}
+
+void _showContextLengthDialog(
+  BuildContext context,
+  WidgetRef ref,
+  int currentLength,
+  String? activeConversationId,
+) {
+  showDialog(
+    context: context,
+    builder: (context) => _ContextLengthEditDialog(
+      initialValue: currentLength,
+      activeConversationId: activeConversationId,
+    ),
+  );
+}
+
+class _ContextLengthEditDialog extends ConsumerStatefulWidget {
+  const _ContextLengthEditDialog({
+    required this.initialValue,
+    required this.activeConversationId,
+  });
+
+  final int initialValue;
+  final String? activeConversationId;
+
+  @override
+  ConsumerState<_ContextLengthEditDialog> createState() =>
+      __ContextLengthEditDialogState();
+}
+
+class __ContextLengthEditDialogState
+    extends ConsumerState<_ContextLengthEditDialog> {
+  late final TextEditingController _controller;
+  late final FocusNode _focusNode;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.initialValue.toString());
+    _focusNode = FocusNode();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  void _save(String value) {
+    final parsed = int.tryParse(value.trim());
+    if (parsed != null && parsed > 0) {
+      if (widget.activeConversationId == null) {
+        ref.read(settingsProvider.notifier).setContextLength(parsed);
+      } else {
+        ref.read(conv.conversationsProvider.notifier).updateChatParams(
+              widget.activeConversationId!,
+              contextLength: parsed,
+            );
+      }
+    }
+    Navigator.of(context).pop();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final l10n = AppLocalizations.of(context)!;
+
+    final suggestions = [2048, 4096, 8192, 16384, 32768, 65536, 131072];
+
+    return Dialog(
+      backgroundColor: isDark ? AppColors.darkBackground : AppColors.lightSurface,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                l10n.context_length,
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: isDark ? Colors.white : Colors.black,
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _controller,
+                focusNode: _focusNode,
+                autofocus: true,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  labelText: 'Tokens',
+                  hintText: 'Enter context length...',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  suffixIcon: IconButton(
+                    icon: const Icon(Icons.clear, size: 18),
+                    onPressed: () => _controller.clear(),
+                  ),
+                ),
+                onSubmitted: _save,
+              ),
+              const SizedBox(height: 12),
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: suggestions.map((val) {
+                    final label = val >= 1024 ? '${val ~/ 1024}K' : '$val';
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: ActionChip(
+                        label: Text(label),
+                        labelStyle: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                          color: isDark ? Colors.white70 : Colors.black87,
+                        ),
+                        backgroundColor: isDark ? Colors.grey[850] : Colors.grey[200],
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          side: BorderSide.none,
+                        ),
+                        onPressed: () {
+                          _controller.text = val.toString();
+                          _controller.selection = TextSelection.fromPosition(
+                            TextPosition(offset: _controller.text.length),
+                          );
+                        },
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: Text(l10n.cancel),
+                  ),
+                  const SizedBox(width: 8),
+                  FilledButton(
+                    onPressed: () => _save(_controller.text),
+                    style: FilledButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: Text(l10n.save),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

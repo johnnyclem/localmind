@@ -1808,6 +1808,12 @@ class _EngineDropdown extends StatelessWidget {
                     l10n.tts_engine_kitten,
                     Icons.auto_awesome_rounded,
                   ),
+                  _engineItem(
+                    context,
+                    EngineId.piper,
+                    EngineMeta.piper.name,
+                    Icons.memory_rounded,
+                  ),
                 ],
                 onChanged: (value) {
                   if (value != null) {

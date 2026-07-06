@@ -20,7 +20,7 @@ import 'package:localmind/features/conversations/providers/conversation_provider
     as conv;
 import 'package:localmind/features/conversations/views/components/conversation_list.dart';
 import 'package:localmind/features/conversations/views/components/rename_conversation_dialog.dart';
-import 'package:localmind/features/models/screens/model_picker_sheet.dart';
+import 'package:localmind/features/models/views/model_picker_sheet.dart';
 import 'package:localmind/features/personas/providers/personas_providers.dart';
 import 'package:localmind/features/servers/providers/server_providers.dart';
 import 'package:localmind/features/saved_messages/views/components/save_message_sheet.dart';
@@ -368,25 +368,25 @@ class _ChatBody extends ConsumerWidget {
             child: Stack(
               children: [
                 _MessageArea(
-                isLoading: isLoading,
-                messages: messages,
-                activeConversation: activeConversation,
-                errorMessage: errorMessage,
-                selectedModel: selectedModel,
-                isStreaming: isStreaming,
-                scrollController: scrollController,
-                effectiveBottomInset: effectiveBottomInset,
-                keyboardBottomInset: keyboardBottomInset,
-                onModelPicker: onModelPicker,
-              ),
-              _ChatBottomBar(
-                isStreaming: isStreaming,
-                keyboardBottomInset: keyboardBottomInset,
-                inputFocusNode: inputFocusNode,
-              ),
-            ],
+                  isLoading: isLoading,
+                  messages: messages,
+                  activeConversation: activeConversation,
+                  errorMessage: errorMessage,
+                  selectedModel: selectedModel,
+                  isStreaming: isStreaming,
+                  scrollController: scrollController,
+                  effectiveBottomInset: effectiveBottomInset,
+                  keyboardBottomInset: keyboardBottomInset,
+                  onModelPicker: onModelPicker,
+                ),
+                _ChatBottomBar(
+                  isStreaming: isStreaming,
+                  keyboardBottomInset: keyboardBottomInset,
+                  inputFocusNode: inputFocusNode,
+                ),
+              ],
+            ),
           ),
-        ),
         ),
       ],
     );
@@ -526,10 +526,9 @@ class _MessageArea extends ConsumerWidget {
 void _clearPersonas(WidgetRef ref) {
   final activeConv = ref.read(conv.activeConversationProvider);
   if (activeConv != null) {
-    ref.read(conv.conversationsProvider.notifier).updatePersonas(
-          activeConv.id,
-          const [],
-        );
+    ref
+        .read(conv.conversationsProvider.notifier)
+        .updatePersonas(activeConv.id, const []);
   } else {
     ref.read(selectedPersonasProvider.notifier).clear();
   }
@@ -621,7 +620,10 @@ class _ScreenAppBar extends ConsumerWidget {
             Expanded(
               child: Text(
                 l10n.selected_count(selectedMessageIds.length),
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
             IconButton(
@@ -629,14 +631,22 @@ class _ScreenAppBar extends ConsumerWidget {
               tooltip: l10n.export_conversation,
               onPressed: selectedMessageIds.isEmpty
                   ? null
-                  : () => _shareSelectedMessages(context, ref, selectedMessageIds),
+                  : () => _shareSelectedMessages(
+                      context,
+                      ref,
+                      selectedMessageIds,
+                    ),
             ),
             IconButton(
               icon: const Icon(Icons.delete_outline, color: Colors.red),
               tooltip: l10n.delete,
               onPressed: selectedMessageIds.isEmpty
                   ? null
-                  : () => _deleteSelectedMessages(context, ref, selectedMessageIds),
+                  : () => _deleteSelectedMessages(
+                      context,
+                      ref,
+                      selectedMessageIds,
+                    ),
             ),
           ],
         ),
@@ -663,10 +673,7 @@ class _ScreenAppBar extends ConsumerWidget {
           Expanded(
             child: Text(
               _appBarTitle(l10n),
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               overflow: TextOverflow.ellipsis,
             ),
           ),
@@ -861,10 +868,10 @@ class _ChatModeIconButton extends StatelessWidget {
     final ghostActive = isTemporary;
 
     if (showGhost) {
-      final activeColor =
-          isDark ? const Color(0xFFE6C35C) : const Color(0xFF9A7B1A);
-      final inactiveColor =
-          isDark ? Colors.white54 : Colors.black45;
+      final activeColor = isDark
+          ? const Color(0xFFE6C35C)
+          : const Color(0xFF9A7B1A);
+      final inactiveColor = isDark ? Colors.white54 : Colors.black45;
 
       return IconButton(
         onPressed: onPressed,
@@ -878,17 +885,9 @@ class _ChatModeIconButton extends StatelessWidget {
                   color: activeColor.withValues(alpha: 0.25),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(
-                  LucideIcons.ghost,
-                  size: 20,
-                  color: activeColor,
-                ),
+                child: Icon(LucideIcons.ghost, size: 20, color: activeColor),
               )
-            : Icon(
-                LucideIcons.ghost,
-                size: 22,
-                color: inactiveColor,
-              ),
+            : Icon(LucideIcons.ghost, size: 22, color: inactiveColor),
       );
     }
 
@@ -918,7 +917,8 @@ class _ChatBottomBar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isTemporary = ref.watch(chatProvider.select((s) => s.isTemporary));
-    final keyboardIncognito = isTemporary &&
+    final keyboardIncognito =
+        isTemporary &&
         ref.watch(settingsProvider.select((s) => s.tempChatKeyboardIncognito));
     final totalTokenCount = ref.watch(
       conv.activeConversationProvider.select((c) => c?.totalTokenCount),
@@ -985,10 +985,10 @@ class _TokenUsageIndicator extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final liveContextLength =
-        ref.watch(activeModelContextLengthProvider).value;
-    final fallbackContextLength =
-        ref.watch(settingsProvider.select((s) => s.contextLength));
+    final liveContextLength = ref.watch(activeModelContextLengthProvider).value;
+    final fallbackContextLength = ref.watch(
+      settingsProvider.select((s) => s.contextLength),
+    );
     final int contextLength = liveContextLength ?? fallbackContextLength;
 
     // totalTokenCount only updates once a response finishes (it's the real
@@ -1051,8 +1051,9 @@ class _TokenUsageIndicator extends ConsumerWidget {
       builder: (ctx) {
         final sheetTheme = Theme.of(ctx);
         final isDark = sheetTheme.brightness == Brightness.dark;
-        final muted =
-            isDark ? AppColors.darkMutedText : AppColors.lightMutedText;
+        final muted = isDark
+            ? AppColors.darkMutedText
+            : AppColors.lightMutedText;
         return SafeArea(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
