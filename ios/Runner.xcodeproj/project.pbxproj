@@ -207,6 +207,7 @@
 				9705A1C41CF9048500538489 /* Embed Frameworks */,
 				3B06AD1E1E4923F5004D2608 /* Thin Binary */,
 				B1A5ACBED1F1575EF58BAE79 /* [CP] Embed Pods Frameworks */,
+				C164955A918378A7C7CD2785 /* Fix Framework MinimumOSVersion */,
 			);
 			buildRules = (
 			);
@@ -353,6 +354,25 @@
 			shellPath = /bin/sh;
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
+		};
+		C164955A918378A7C7CD2785 /* Fix Framework MinimumOSVersion */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Fix Framework MinimumOSVersion";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "find \"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}\" -name \"Info.plist\" | while read -r plist; do\n  if ! plutil -extract MinimumOSVersion xml1 -o /dev/null \"$plist\"; then\n    echo \"Adding MinimumOSVersion to $plist\"\n    plutil -insert MinimumOSVersion -string \"16.4\" \"$plist\"\n  else\n    min_os=$(plutil -extract MinimumOSVersion raw \"$plist\")\n    if [ -z \"$min_os\" ]; then\n      echo \"Setting empty MinimumOSVersion to 16.4 in $plist\"\n      plutil -replace MinimumOSVersion -string \"16.4\" \"$plist\"\n    fi\n  fi\ndone\n";
+			showEnvVarsInLog = 1;
 		};
 		FE687F3DD5306177A50B9426 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;

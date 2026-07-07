@@ -41,4 +41,36 @@ post_install do |installer|
   installer.pods_project.targets.each do |target|
     flutter_additional_ios_build_settings(target)
   end
+
+  # Add a build phase to Runner target to patch missing MinimumOSVersion in embedded frameworks
+  runner_target = installer.aggregate_targets.find { |t| t.name == 'Pods-Runner' }
+  if runner_target
+    project = runner_target.user_project
+    runner_target.user_targets.each do |target|
+      if target.name == 'Runner'
+        phase_name = 'Fix Framework MinimumOSVersion'
+        phase = target.shell_script_build_phases.find { |p| p.name == phase_name }
+        if phase.nil?
+          puts "Adding build phase: #{phase_name}"
+          phase = target.new_shell_script_build_phase(phase_name)
+        end
+        phase.shell_script = <<~SCRIPT
+          find "${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}" -name "Info.plist" | while read -r plist; do
+            if ! plutil -extract MinimumOSVersion xml1 -o /dev/null "$plist"; then
+              echo "Adding MinimumOSVersion to $plist"
+              plutil -insert MinimumOSVersion -string "16.4" "$plist"
+            else
+              min_os=$(plutil -extract MinimumOSVersion raw "$plist")
+              if [ -z "$min_os" ]; then
+                echo "Setting empty MinimumOSVersion to 16.4 in $plist"
+                plutil -replace MinimumOSVersion -string "16.4" "$plist"
+              fi
+            fi
+          done
+        SCRIPT
+        phase.show_env_vars_in_log = '1'
+      end
+    end
+    project.save
+  end
 end
