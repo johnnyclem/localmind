@@ -78,7 +78,7 @@ class _McpToolsScreenState extends ConsumerState<McpToolsScreen> {
             children: [
               Builder(
                 builder: (context) => IconButton(
-                  icon: const Icon(Icons.menu),
+                  icon: const HugeIcon(icon: HugeIcons.strokeRoundedMenu01),
                   onPressed: () => Scaffold.of(context).openDrawer(),
                 ),
               ),
@@ -126,7 +126,7 @@ class _McpToolsScreenState extends ConsumerState<McpToolsScreen> {
 
                     if (snapshot.hasError) {
                       return _StatusPanel(
-                        icon: Icons.error_outline,
+                        icon: HugeIcons.strokeRoundedInformationCircle,
                         title: l10n.unable_load_tools,
                         body: snapshot.error.toString(),
                       );
@@ -135,7 +135,7 @@ class _McpToolsScreenState extends ConsumerState<McpToolsScreen> {
                     final tools = snapshot.data ?? const <ToolDefinition>[];
                     if (tools.isEmpty) {
                       return _StatusPanel(
-                        icon: Icons.extension_outlined,
+                        icon: HugeIcons.strokeRoundedPuzzle,
                         title: l10n.no_tools_registered,
                         body: l10n.no_tools_registered_desc,
                       );
@@ -224,7 +224,7 @@ class _ExampleServerPanel extends StatelessWidget {
           const SizedBox(height: 16),
           ShadButton(
             onPressed: onToggle,
-            leading: Icon(enabled ? Icons.power_settings_new : Icons.add),
+            leading: HugeIcon(icon: enabled ? HugeIcons.strokeRoundedPower : HugeIcons.strokeRoundedAdd01),
             child: Text(
               enabled
                   ? l10n.disable_example_server
@@ -262,8 +262,8 @@ class _ToolRow extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(
-            isMcp ? Icons.hub_outlined : Icons.functions,
+          HugeIcon(icon: 
+            isMcp ? HugeIcons.strokeRoundedShare01 : HugeIcons.strokeRoundedCalculate,
             size: 20,
             color: isMcp
                 ? theme.colorScheme.primary
@@ -349,7 +349,7 @@ class _StatusPanel extends StatelessWidget {
     required this.body,
   });
 
-  final IconData icon;
+  final List<List<dynamic>> icon;
   final String title;
   final String body;
 
@@ -364,7 +364,7 @@ class _StatusPanel extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Icon(icon, size: 32, color: theme.colorScheme.outline),
+          HugeIcon(icon: icon, size: 32, color: theme.colorScheme.outline),
           const SizedBox(height: 12),
           Text(
             title,

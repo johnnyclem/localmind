@@ -1,3 +1,4 @@
+import 'package:hugeicons/hugeicons.dart';
 import 'package:flutter/material.dart';
 
 class ListFilterOption<T> {
@@ -9,7 +10,7 @@ class ListFilterOption<T> {
 
   final T value;
   final String label;
-  final IconData? icon;
+  final List<List<dynamic>>? icon;
 }
 
 class ListFilterButton<T> extends StatelessWidget {
@@ -19,7 +20,7 @@ class ListFilterButton<T> extends StatelessWidget {
     required this.selected,
     required this.onChanged,
     this.tooltip,
-    this.icon = Icons.filter_list_rounded,
+    this.icon = HugeIcons.strokeRoundedFilterHorizontal,
     this.showBadgeWhenNotDefault = true,
   });
 
@@ -27,7 +28,7 @@ class ListFilterButton<T> extends StatelessWidget {
   final T selected;
   final ValueChanged<T> onChanged;
   final String? tooltip;
-  final IconData icon;
+  final List<List<dynamic>> icon;
   final bool showBadgeWhenNotDefault;
 
   bool get _hasActiveFilter {
@@ -45,7 +46,7 @@ class ListFilterButton<T> extends StatelessWidget {
       icon: Badge(
         isLabelVisible: _hasActiveFilter,
         smallSize: 8,
-        child: Icon(
+        child: HugeIcon(icon: 
           icon,
           color: _hasActiveFilter
               ? theme.colorScheme.primary
@@ -67,8 +68,8 @@ class ListFilterButton<T> extends StatelessWidget {
               ...options.map(
                 (option) => ListTile(
                   leading: option.icon != null
-                      ? Icon(
-                          option.icon,
+                      ? HugeIcon(icon: 
+                          option.icon!,
                           color: selected == option.value
                               ? Theme.of(ctx).colorScheme.primary
                               : null,
@@ -76,8 +77,8 @@ class ListFilterButton<T> extends StatelessWidget {
                       : null,
                   title: Text(option.label),
                   trailing: selected == option.value
-                      ? Icon(
-                          Icons.check,
+                      ? HugeIcon(icon: 
+                          HugeIcons.strokeRoundedTick01,
                           color: Theme.of(ctx).colorScheme.primary,
                         )
                       : null,

@@ -1,3 +1,4 @@
+import 'package:hugeicons/hugeicons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -106,7 +107,7 @@ class _MessageActionBarState extends ConsumerState<MessageActionBar> {
       mainAxisSize: MainAxisSize.min,
       children: [
         _ActionButton(
-          icon: Icons.copy,
+          icon: HugeIcons.strokeRoundedCopy,
           label: l10n.copy,
           onTap: () async {
             await Clipboard.setData(ClipboardData(text: widget.content));
@@ -124,7 +125,7 @@ class _MessageActionBarState extends ConsumerState<MessageActionBar> {
         if (widget.onSave != null) ...[
           const SizedBox(width: 4),
           _ActionButton(
-            icon: isSaved ? Icons.bookmark : Icons.bookmark_border,
+            icon: isSaved ? HugeIcons.strokeRoundedBookmark01 : HugeIcons.strokeRoundedBookmark01,
             label: isSaved ? l10n.message_already_saved : l10n.save_message,
             onTap: widget.onSave,
             isActive: isSaved,
@@ -133,7 +134,7 @@ class _MessageActionBarState extends ConsumerState<MessageActionBar> {
         if (widget.onRetry != null) ...[
           const SizedBox(width: 4),
           _ActionButton(
-            icon: Icons.refresh,
+            icon: HugeIcons.strokeRoundedRefresh,
             label: l10n.retry,
             onTap: widget.onRetry,
           ),
@@ -141,19 +142,19 @@ class _MessageActionBarState extends ConsumerState<MessageActionBar> {
         if (widget.onContinue != null) ...[
           const SizedBox(width: 4),
           _ActionButton(
-            icon: Icons.arrow_forward,
+            icon: HugeIcons.strokeRoundedArrowRight01,
             label: l10n.continue_action,
             onTap: widget.onContinue,
           ),
         ],
         if (widget.onEdit != null) ...[
           const SizedBox(width: 4),
-          _ActionButton(icon: Icons.edit, label: l10n.edit, onTap: widget.onEdit),
+          _ActionButton(icon: HugeIcons.strokeRoundedPencilEdit02, label: l10n.edit, onTap: widget.onEdit),
         ],
         if (widget.onDelete != null) ...[
           const SizedBox(width: 4),
           _ActionButton(
-            icon: Icons.delete_outline,
+            icon: HugeIcons.strokeRoundedDelete01,
             label: l10n.delete,
             onTap: () => _showDeleteConfirmation(context),
             isDestructive: true,
@@ -162,7 +163,7 @@ class _MessageActionBarState extends ConsumerState<MessageActionBar> {
         if (widget.onShare != null) ...[
           const SizedBox(width: 4),
           _ActionButton(
-            icon: Icons.ios_share,
+            icon: HugeIcons.strokeRoundedShare01,
             label: l10n.share,
             onTap: widget.onShare,
           ),
@@ -171,9 +172,9 @@ class _MessageActionBarState extends ConsumerState<MessageActionBar> {
         _ActionButton(
           icon: isThisActive
               ? (isThisPlaying
-                  ? Icons.pause_circle_filled
-                  : Icons.play_circle_filled)
-              : (isThisInitializing ? Icons.hourglass_top : Icons.volume_up),
+                  ? HugeIcons.strokeRoundedPauseCircle
+                  : HugeIcons.strokeRoundedPlayCircle)
+              : (isThisInitializing ? HugeIcons.strokeRoundedClock01 : HugeIcons.strokeRoundedVolumeUp),
           label: isThisActive
               ? (isThisPlaying ? l10n.pause : l10n.resume)
               : (isThisInitializing ? l10n.initializing : l10n.read_aloud),
@@ -181,7 +182,7 @@ class _MessageActionBarState extends ConsumerState<MessageActionBar> {
         ),
         const SizedBox(width: 4),
         _ActionButton(
-          icon: Icons.more_horiz,
+          icon: HugeIcons.strokeRoundedMoreHorizontal,
           label: l10n.more,
           onTap: () => _showMoreOptions(context, isSaved),
         ),
@@ -280,7 +281,7 @@ class _MessageActionBarState extends ConsumerState<MessageActionBar> {
                 ),
               ),
               _CompactOptionTile(
-                icon: Icons.code,
+                icon: HugeIcons.strokeRoundedCode,
                 label: sheetL10n.copy_markdown,
                 onTap: () {
                   Navigator.pop(ctx);
@@ -292,7 +293,7 @@ class _MessageActionBarState extends ConsumerState<MessageActionBar> {
               ),
               if (widget.messageId != null)
                 _CompactOptionTile(
-                  icon: Icons.checklist_outlined,
+                  icon: HugeIcons.strokeRoundedCheckList,
                   label: sheetL10n.select,
                   onTap: () {
                     Navigator.pop(ctx);
@@ -305,9 +306,9 @@ class _MessageActionBarState extends ConsumerState<MessageActionBar> {
               _CompactOptionTile(
                 icon: isThisActive
                     ? (isThisPlaying
-                        ? Icons.pause_circle_filled
-                        : Icons.play_circle_filled)
-                    : Icons.volume_up,
+                        ? HugeIcons.strokeRoundedPauseCircle
+                        : HugeIcons.strokeRoundedPlayCircle)
+                    : HugeIcons.strokeRoundedVolumeUp,
                 label: isThisActive
                     ? (isThisPlaying ? sheetL10n.pause : sheetL10n.resume)
                     : sheetL10n.read_aloud,
@@ -318,7 +319,7 @@ class _MessageActionBarState extends ConsumerState<MessageActionBar> {
               ),
               if (widget.onShare != null)
                 _CompactOptionTile(
-                  icon: Icons.ios_share,
+                  icon: HugeIcons.strokeRoundedShare01,
                   label: sheetL10n.share,
                   onTap: () {
                     Navigator.pop(ctx);
@@ -327,7 +328,7 @@ class _MessageActionBarState extends ConsumerState<MessageActionBar> {
                 ),
               if (widget.onBranch != null)
                 _CompactOptionTile(
-                  icon: Icons.call_split,
+                  icon: HugeIcons.strokeRoundedGitBranch,
                   label: sheetL10n.branch_chat,
                   onTap: () {
                     Navigator.pop(ctx);
@@ -336,7 +337,7 @@ class _MessageActionBarState extends ConsumerState<MessageActionBar> {
                 ),
               if (widget.onSave != null)
                 _CompactOptionTile(
-                  icon: isSaved ? Icons.bookmark : Icons.bookmark_outline,
+                  icon: isSaved ? HugeIcons.strokeRoundedBookmark01 : HugeIcons.strokeRoundedBookmark01,
                   label: isSaved
                       ? sheetL10n.message_already_saved
                       : sheetL10n.save_message,
@@ -415,7 +416,7 @@ class _CompactOptionTile extends StatelessWidget {
     required this.onTap,
   });
 
-  final IconData icon;
+  final List<List<dynamic>> icon;
   final String label;
   final VoidCallback onTap;
 
@@ -425,7 +426,7 @@ class _CompactOptionTile extends StatelessWidget {
       dense: true,
       visualDensity: VisualDensity.compact,
       contentPadding: const EdgeInsets.symmetric(horizontal: 8),
-      leading: Icon(icon, size: 20),
+      leading: HugeIcon(icon: icon, size: 20),
       title: Text(label, style: const TextStyle(fontSize: 14)),
       onTap: onTap,
     );
@@ -441,7 +442,7 @@ class _ActionButton extends StatefulWidget {
     this.isActive = false,
   });
 
-  final IconData icon;
+  final List<List<dynamic>> icon;
   final String label;
   final VoidCallback? onTap;
   final bool isDestructive;
@@ -519,7 +520,7 @@ class _ActionButtonState extends State<_ActionButton>
                     : Colors.transparent,
                 borderRadius: BorderRadius.circular(4),
               ),
-              child: Icon(
+              child: HugeIcon(icon: 
                 widget.icon,
                 size: 16,
                 color: _isHovered ? hoverColor : baseColor,

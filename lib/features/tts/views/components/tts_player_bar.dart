@@ -1,3 +1,4 @@
+import 'package:hugeicons/hugeicons.dart';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -159,10 +160,10 @@ class TtsPlayerBar extends ConsumerWidget {
                         color: theme.colorScheme.secondary.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: Icon(
+                      child: HugeIcon(icon: 
                         ttsState.isPaused
-                            ? Icons.play_arrow_rounded
-                            : Icons.pause_rounded,
+                            ? HugeIcons.strokeRoundedPlay
+                            : HugeIcons.strokeRoundedPause,
                         size: 20,
                         color: theme.colorScheme.primary,
                       ),
@@ -240,7 +241,7 @@ class TtsPlayerBar extends ConsumerWidget {
                 if (!ttsState.isInitializing &&
                     ttsState.activeEngine != EngineId.system)
                   IconButton(
-                    icon: const Icon(Icons.download_outlined, size: 20),
+                    icon: const HugeIcon(icon: HugeIcons.strokeRoundedDownload01, size: 20),
                     tooltip: l10n.download_tts_audio,
                     visualDensity: VisualDensity.compact,
                     onPressed: () async {
@@ -268,8 +269,8 @@ class TtsPlayerBar extends ConsumerWidget {
                         color: theme.colorScheme.error.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: Icon(
-                        Icons.stop_rounded,
+                      child: HugeIcon(icon: 
+                        HugeIcons.strokeRoundedStop,
                         size: 20,
                         color: theme.colorScheme.error,
                       ),
@@ -283,7 +284,7 @@ class TtsPlayerBar extends ConsumerWidget {
               Row(
                 children: [
                   _TtsSkipButton(
-                    icon: Icons.fast_rewind_rounded,
+                    icon: HugeIcons.strokeRoundedGoBackward10Sec,
                     tooltip: '-${skipSeconds}s',
                     isLoading: ttsState.isSeekPending && !ttsState.canSeek,
                     onPressed: notifier.skipBackward,
@@ -299,7 +300,7 @@ class TtsPlayerBar extends ConsumerWidget {
                     ),
                   ),
                   _TtsSkipButton(
-                    icon: Icons.fast_forward_rounded,
+                    icon: HugeIcons.strokeRoundedGoForward10Sec,
                     tooltip: '+${skipSeconds}s',
                     isLoading: ttsState.isSeekPending && !ttsState.canSeek,
                     onPressed: notifier.skipForward,
@@ -322,7 +323,7 @@ class _TtsSkipButton extends StatelessWidget {
     this.isLoading = false,
   });
 
-  final IconData icon;
+  final List<List<dynamic>> icon;
   final String tooltip;
   final Future<void> Function() onPressed;
   final bool isLoading;
@@ -339,7 +340,7 @@ class _TtsSkipButton extends StatelessWidget {
               height: 18,
               child: CircularProgressIndicator(strokeWidth: 2),
             )
-          : Icon(icon, size: 22),
+          : HugeIcon(icon: icon, size: 22),
     );
   }
 }

@@ -29,7 +29,7 @@ class _OnboardingThemeScreenState extends ConsumerState<OnboardingThemeScreen> {
       appBar: AppBar(
         title: Text(l10n.choose_theme),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const HugeIcon(icon: HugeIcons.strokeRoundedArrowLeft01),
           onPressed: () {
             context.pop();
           },
@@ -213,7 +213,7 @@ class _OnboardingThemeScreenState extends ConsumerState<OnboardingThemeScreen> {
               ),
             ),
             if (isSelected)
-              Icon(Icons.check_circle, color: theme.colorScheme.primary),
+              HugeIcon(icon: HugeIcons.strokeRoundedCheckmarkCircle01, color: theme.colorScheme.primary),
           ],
         ),
       ),

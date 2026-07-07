@@ -1,3 +1,4 @@
+import 'package:hugeicons/hugeicons.dart';
 import 'package:flutter/material.dart';
 import 'package:localmind/core/models/enums.dart';
 import 'package:localmind/core/theme/colors.dart';
@@ -112,7 +113,7 @@ class UserBubble extends StatelessWidget {
                 ),
                 if (message.status == MessageStatus.error) ...[
                   const SizedBox(width: 4),
-                  Icon(Icons.error_outline, size: 14, color: Colors.red[200]),
+                  HugeIcon(icon: HugeIcons.strokeRoundedInformationCircle, size: 14, color: Colors.red[200]),
                 ],
                 const SizedBox(width: 8),
                 MessageActionBar(

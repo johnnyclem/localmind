@@ -1,3 +1,4 @@
+import 'package:hugeicons/hugeicons.dart';
 import 'package:flutter/material.dart';
 import 'package:localmind/l10n/app_localizations.dart';
 
@@ -21,8 +22,8 @@ class ConversationEmptyState extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              isSearching ? Icons.search_off : Icons.chat_bubble_outline,
+            HugeIcon(icon: 
+              isSearching ? HugeIcons.strokeRoundedSearch01 : HugeIcons.strokeRoundedChatting01,
               size: 48,
               color: isDark ? const Color(0xFF3A3A3A) : const Color(0xFFE5E5E5),
             ),

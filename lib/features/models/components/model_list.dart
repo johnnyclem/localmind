@@ -1,3 +1,4 @@
+import 'package:hugeicons/hugeicons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:localmind/core/providers/app_providers.dart';
@@ -121,10 +122,10 @@ class _ModelListState extends ConsumerState<ModelList> {
                 const SizedBox(height: 16),
                 ListTile(
                   contentPadding: EdgeInsets.zero,
-                  leading: Icon(
+                  leading: HugeIcon(icon: 
                     metadata?.isFavorite == true
-                        ? Icons.star
-                        : Icons.star_border,
+                        ? HugeIcons.strokeRoundedStar
+                        : HugeIcons.strokeRoundedStar,
                     color: Colors.amber[700],
                   ),
                   title: Text(l10n.model_favorite_toggle),
@@ -189,7 +190,7 @@ class _ModelListState extends ConsumerState<ModelList> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.cloud_off_rounded, size: 64, color: Colors.red[300]),
+              HugeIcon(icon: HugeIcons.strokeRoundedCloud, size: 64, color: Colors.red[300]),
               const SizedBox(height: 16),
               Text(
                 l10n.server_offline,
@@ -214,7 +215,7 @@ class _ModelListState extends ConsumerState<ModelList> {
                   await ref.read(connectionStatusProvider.notifier).refresh();
                   ref.invalidate(availableModelsProvider(widget.serverId));
                 },
-                icon: const Icon(Icons.refresh),
+                icon: const HugeIcon(icon: HugeIcons.strokeRoundedRefresh),
                 label: Text(l10n.retry_connection),
               ),
             ],
@@ -235,7 +236,7 @@ class _ModelListState extends ConsumerState<ModelList> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.error_outline, size: 48, color: Colors.red[400]),
+            HugeIcon(icon: HugeIcons.strokeRoundedInformationCircle, size: 48, color: Colors.red[400]),
             const SizedBox(height: 16),
             Text(
               l10n.failed_load_models,
@@ -258,7 +259,7 @@ class _ModelListState extends ConsumerState<ModelList> {
             OutlinedButton.icon(
               onPressed: () =>
                   ref.invalidate(availableModelsProvider(widget.serverId)),
-              icon: const Icon(Icons.refresh),
+              icon: const HugeIcon(icon: HugeIcons.strokeRoundedRefresh),
               label: Text(l10n.retry),
             ),
           ],

@@ -1,3 +1,4 @@
+import 'package:hugeicons/hugeicons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:localmind/l10n/app_localizations.dart';
@@ -14,7 +15,11 @@ class ModelSearchField extends ConsumerWidget {
     return TextField(
       decoration: InputDecoration(
         hintText: l10n.search_models_hint,
-        prefixIcon: const Icon(Icons.search, size: 20),
+        prefixIcon: const Center(
+          widthFactor: 1.0,
+          heightFactor: 1.0,
+          child: HugeIcon(icon: HugeIcons.strokeRoundedSearch01, size: 20),
+        ),
         isDense: true,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 12,
@@ -25,7 +30,7 @@ class ModelSearchField extends ConsumerWidget {
         ),
         suffixIcon: searchQuery.isNotEmpty
             ? IconButton(
-                icon: const Icon(Icons.clear, size: 18),
+                icon: const HugeIcon(icon: HugeIcons.strokeRoundedCancel01, size: 18),
                 onPressed: () =>
                     ref.read(modelSearchQueryProvider.notifier).clear(),
               )

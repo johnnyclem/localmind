@@ -1,3 +1,4 @@
+import 'package:hugeicons/hugeicons.dart';
 import 'package:flutter/material.dart';
 
 import '../theme/colors.dart';
@@ -17,7 +18,7 @@ class AppButton extends StatelessWidget {
 
   final String label;
   final VoidCallback? onPressed;
-  final IconData? icon;
+  final List<List<dynamic>>? icon;
   final AppButtonVariant variant;
   final bool isLoading;
   final bool isFullWidth;
@@ -48,7 +49,7 @@ class AppButton extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               if (icon != null) ...[
-                Icon(icon, size: 18),
+                HugeIcon(icon: icon!, size: 18),
                 const SizedBox(width: AppSizes.sm),
               ],
               Text(label),

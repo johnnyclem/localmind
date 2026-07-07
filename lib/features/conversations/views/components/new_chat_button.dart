@@ -1,3 +1,4 @@
+import 'package:hugeicons/hugeicons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -24,7 +25,7 @@ class NewChatButton extends ConsumerWidget {
               Navigator.pop(context);
             }
           },
-          icon: const Icon(Icons.add, size: 18),
+          icon: const HugeIcon(icon: HugeIcons.strokeRoundedAdd01, size: 18),
           label: Text(l10n.nav_new_chat),
         ),
       ),

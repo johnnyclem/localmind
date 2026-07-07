@@ -125,8 +125,8 @@ class ServerCard extends StatelessWidget {
                                 ? activeGreen
                                 : theme.colorScheme.onSurfaceVariant,
                           )
-                        : Icon(
-                            Icons.dns,
+                        : HugeIcon(icon: 
+                            HugeIcons.strokeRoundedDatabase,
                             color: isActive
                                 ? activeGreen
                                 : theme.colorScheme.onSurfaceVariant,
@@ -237,7 +237,7 @@ class ServerCard extends StatelessWidget {
                         value: 'edit',
                         child: Row(
                           children: [
-                            const Icon(Icons.edit, size: 18),
+                            const HugeIcon(icon: HugeIcons.strokeRoundedPencilEdit02, size: 18),
                             const SizedBox(width: 8),
                             Text(l10n.edit),
                           ],
@@ -248,7 +248,7 @@ class ServerCard extends StatelessWidget {
                           value: 'setDefault',
                           child: Row(
                             children: [
-                              const Icon(Icons.star, size: 18),
+                              const HugeIcon(icon: HugeIcons.strokeRoundedStar, size: 18),
                               const SizedBox(width: 8),
                               Text(l10n.set_as_default),
                             ],
@@ -258,7 +258,7 @@ class ServerCard extends StatelessWidget {
                         value: 'delete',
                         child: Row(
                           children: [
-                            const Icon(Icons.delete, size: 18, color: Colors.red),
+                            const HugeIcon(icon: HugeIcons.strokeRoundedDelete01, size: 18, color: Colors.red),
                             const SizedBox(width: 8),
                             Text(l10n.delete, style: const TextStyle(color: Colors.red)),
                           ],

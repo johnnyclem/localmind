@@ -60,7 +60,7 @@ class SidebarWidget extends ConsumerWidget {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: ShadButton(
                 width: double.infinity,
-                leading: const Icon(LucideIcons.plus, size: 20),
+                leading: const HugeIcon(icon: HugeIcons.strokeRoundedAdd01, size: 20),
                 onPressed: () {
                   ref.read(chatProvider.notifier).startNewConversation();
                   context.go(AppRoutes.home);
@@ -78,7 +78,7 @@ class SidebarWidget extends ConsumerWidget {
                 child: isTemporary
                     ? ShadButton.outline(
                         width: double.infinity,
-                        leading: const Icon(Icons.arrow_back, size: 18),
+                        leading: const HugeIcon(icon: HugeIcons.strokeRoundedArrowLeft01, size: 18),
                         onPressed: () {
                           if (!isHome) context.go(AppRoutes.home);
                           if (Scaffold.maybeOf(context)?.isDrawerOpen ??
@@ -90,7 +90,7 @@ class SidebarWidget extends ConsumerWidget {
                       )
                     : ShadButton.secondary(
                         width: double.infinity,
-                        leading: const Icon(Icons.arrow_back, size: 18),
+                        leading: const HugeIcon(icon: HugeIcons.strokeRoundedArrowLeft01, size: 18),
                         onPressed: () {
                           if (!isHome) context.go(AppRoutes.home);
                           if (Scaffold.maybeOf(context)?.isDrawerOpen ??

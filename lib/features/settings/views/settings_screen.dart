@@ -1,3 +1,4 @@
+import 'package:hugeicons/hugeicons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -62,7 +63,7 @@ class SettingsViews extends ConsumerWidget {
             children: [
               Builder(
                 builder: (context) => IconButton(
-                  icon: const Icon(Icons.menu),
+                  icon: const HugeIcon(icon: HugeIcons.strokeRoundedMenu01),
                   onPressed: () => Scaffold.of(context).openDrawer(),
                 ),
               ),
@@ -89,7 +90,7 @@ class SettingsViews extends ConsumerWidget {
 
               final appearanceCard = _SettingsSectionCard(
                 title: l10n.settings_appearance,
-                icon: Icons.palette_outlined,
+                icon: HugeIcons.strokeRoundedPaintBrush02,
                 accent: const Color(0xFF8B5CF6),
                 children: [
                   _ThemeToggle(ref: ref),
@@ -130,7 +131,7 @@ class SettingsViews extends ConsumerWidget {
 
               final ttsCard = _SettingsSectionCard(
                 title: l10n.settings_tts,
-                icon: Icons.graphic_eq_rounded,
+                icon: HugeIcons.strokeRoundedVoice,
                 accent: const Color(0xFF0EA5E9),
                 children: [
                   _EngineDropdown(
@@ -139,7 +140,7 @@ class SettingsViews extends ConsumerWidget {
                         ref.read(settingsProvider.notifier).setTtsEngine(value),
                   ),
                   _SectionActionButton(
-                    icon: Icons.record_voice_over_outlined,
+                    icon: HugeIcons.strokeRoundedVoice,
                     label: l10n.manage_tts_models,
                     onPressed: () => context.push(AppRoutes.ttsModels),
                   ),
@@ -183,7 +184,7 @@ class SettingsViews extends ConsumerWidget {
 
               final behaviorCard = _SettingsSectionCard(
                 title: l10n.settings_behavior,
-                icon: Icons.tune_rounded,
+                icon: HugeIcons.strokeRoundedSlidersHorizontal,
                 accent: const Color(0xFF22C55E),
                 children: [
                   _ToggleSetting(
@@ -298,7 +299,7 @@ class SettingsViews extends ConsumerWidget {
 
               final onDeviceCard = _SettingsSectionCard(
                 title: l10n.settings_on_device,
-                icon: Icons.memory_rounded,
+                icon: HugeIcons.strokeRoundedCpu,
                 accent: const Color(0xFFF97316),
                 children: [
                   _ToggleSetting(
@@ -344,7 +345,7 @@ class SettingsViews extends ConsumerWidget {
                     },
                   ),
                   _SectionActionButton(
-                    icon: Icons.phone_android_rounded,
+                    icon: HugeIcons.strokeRoundedSmartPhone01,
                     label: l10n.manage_on_device_models,
                     onPressed: () => context.push(AppRoutes.onDeviceModels),
                   ),
@@ -361,7 +362,7 @@ class SettingsViews extends ConsumerWidget {
 
               final defaultsCard = _SettingsSectionCard(
                 title: l10n.settings_default_server,
-                icon: Icons.hub_outlined,
+                icon: HugeIcons.strokeRoundedShare01,
                 accent: const Color(0xFF06B6D4),
                 children: [
                   _DropdownSetting(
@@ -371,7 +372,7 @@ class SettingsViews extends ConsumerWidget {
                     onChanged: (value) => ref
                         .read(settingsProvider.notifier)
                         .setDefaultServer(value),
-                    icon: Icons.computer_rounded,
+                    icon: HugeIcons.strokeRoundedComputer,
                   ),
                   _DropdownSetting(
                     label: l10n.settings_default_persona,
@@ -380,11 +381,11 @@ class SettingsViews extends ConsumerWidget {
                     onChanged: (value) => ref
                         .read(settingsProvider.notifier)
                         .setDefaultPersona(value),
-                    icon: Icons.smart_toy_outlined,
+                    icon: HugeIcons.strokeRoundedRobot01,
                   ),
                   const SizedBox(height: 8),
                   _SectionActionButton(
-                    icon: Icons.restore_rounded,
+                    icon: HugeIcons.strokeRoundedRefresh,
                     label: l10n.restore_builtin_personas,
                     onPressed: () async {
                       await ref
@@ -405,7 +406,7 @@ class SettingsViews extends ConsumerWidget {
 
               final privacyCard = _SettingsSectionCard(
                 title: l10n.settings_privacy,
-                icon: Icons.lock_outline_rounded,
+                icon: HugeIcons.strokeRoundedLock,
                 accent: const Color(0xFF14B8A6),
                 children: [
                   _ToggleSetting(
@@ -421,20 +422,20 @@ class SettingsViews extends ConsumerWidget {
 
               final dataCard = _SettingsSectionCard(
                 title: l10n.settings_data_management,
-                icon: Icons.restore_page_outlined,
+                icon: HugeIcons.strokeRoundedRefresh,
                 accent: const Color(0xFFEF4444),
                 children: [
                   const DataBackupActions(),
                   const SizedBox(height: 8),
                   _DangerousAction(
                     label: l10n.delete_all_conversations,
-                    icon: Icons.delete_outline_rounded,
+                    icon: HugeIcons.strokeRoundedDelete01,
                     onConfirm: () =>
                         ref.read(conversationsProvider.notifier).deleteAll(),
                   ),
                   _DangerousAction(
                     label: l10n.reset_settings_defaults,
-                    icon: Icons.restore_rounded,
+                    icon: HugeIcons.strokeRoundedRefresh,
                     onConfirm: () =>
                         ref.read(settingsProvider.notifier).resetToDefaults(),
                   ),
@@ -443,7 +444,7 @@ class SettingsViews extends ConsumerWidget {
 
               final aboutCard = _SettingsSectionCard(
                 title: l10n.settings_about,
-                icon: Icons.info_outline_rounded,
+                icon: HugeIcons.strokeRoundedInformationCircle,
                 accent: const Color(0xFFF59E0B),
                 children: [
                   _AboutPanel(
@@ -588,10 +589,12 @@ class _SettingsHero extends StatelessWidget {
                     color: primary.withValues(alpha: 0.10),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Icon(
-                    Icons.settings_outlined,
-                    size: 18,
-                    color: primary,
+                  child: Center(
+                    child: HugeIcon(icon: 
+                      HugeIcons.strokeRoundedSettings01,
+                      size: 18,
+                      color: primary,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -621,17 +624,17 @@ class _SettingsHero extends StatelessWidget {
                 _HeroStat(
                   label: l10n.theme,
                   value: _themeLabel(themeType, l10n),
-                  icon: Icons.auto_awesome_rounded,
+                  icon: HugeIcons.strokeRoundedSparkles,
                 ),
                 _HeroStat(
                   label: l10n.settings_language,
                   value: _languageLabel(settings.localeCode, l10n),
-                  icon: Icons.language_rounded,
+                  icon: HugeIcons.strokeRoundedGlobe,
                 ),
                 _HeroStat(
                   label: l10n.tts_engine,
                   value: _engineLabel(settings.ttsEngine, l10n),
-                  icon: Icons.record_voice_over_rounded,
+                  icon: HugeIcons.strokeRoundedVoice,
                 ),
               ],
             ),
@@ -651,7 +654,7 @@ class _HeroStat extends StatelessWidget {
 
   final String label;
   final String value;
-  final IconData icon;
+  final List<List<dynamic>> icon;
 
   @override
   Widget build(BuildContext context) {
@@ -659,7 +662,7 @@ class _HeroStat extends StatelessWidget {
     final primary = _primaryColor(context);
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
         color: _panelColor(context),
         borderRadius: BorderRadius.circular(12),
@@ -668,7 +671,7 @@ class _HeroStat extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 14, color: primary),
+          HugeIcon(icon: icon, size: 14, color: primary),
           const SizedBox(width: 8),
           Text(
             '$label: ',
@@ -701,7 +704,7 @@ class _SettingsSectionCard extends StatelessWidget {
   });
 
   final String title;
-  final IconData icon;
+  final List<List<dynamic>> icon;
   final Color accent;
   final List<Widget> children;
 
@@ -727,7 +730,9 @@ class _SettingsSectionCard extends StatelessWidget {
                     color: accent.withValues(alpha: 0.10),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: Icon(icon, color: accent, size: 16),
+                  child: Center(
+                    child: HugeIcon(icon: icon, color: accent, size: 16),
+                  ),
                 ),
                 const SizedBox(width: 10),
                 Expanded(
@@ -779,8 +784,8 @@ class _MutedCallout extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(
-            Icons.shield_moon_outlined,
+          HugeIcon(icon: 
+            HugeIcons.strokeRoundedMoon02,
             size: 18,
             color: _mutedColor(context),
           ),
@@ -849,7 +854,7 @@ class _AboutPanel extends StatelessWidget {
             children: providers
                 .map(
                   (provider) =>
-                      _AboutChip(label: provider, icon: Icons.hub_outlined),
+                      _AboutChip(label: provider, icon: HugeIcons.strokeRoundedShare01),
                 )
                 .toList(),
           ),
@@ -863,7 +868,7 @@ class _AboutPanel extends StatelessWidget {
                 .map(
                   (highlight) => _AboutChip(
                     label: highlight,
-                    icon: Icons.check_circle_outline_rounded,
+                    icon: HugeIcons.strokeRoundedCheckmarkCircle01,
                   ),
                 )
                 .toList(),
@@ -876,7 +881,7 @@ class _AboutPanel extends StatelessWidget {
             runSpacing: 6,
             children: stack
                 .map(
-                  (item) => _AboutChip(label: item, icon: Icons.code_rounded),
+                  (item) => _AboutChip(label: item, icon: HugeIcons.strokeRoundedCode),
                 )
                 .toList(),
           ),
@@ -892,8 +897,8 @@ class _AboutPanel extends StatelessWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(
-                  Icons.open_in_new_rounded,
+                HugeIcon(icon: 
+                  HugeIcons.strokeRoundedShare01,
                   size: 15,
                   color: _mutedColor(context),
                 ),
@@ -937,7 +942,7 @@ class _AboutChip extends StatelessWidget {
   const _AboutChip({required this.label, required this.icon});
 
   final String label;
-  final IconData icon;
+  final List<List<dynamic>> icon;
 
   @override
   Widget build(BuildContext context) {
@@ -951,7 +956,7 @@ class _AboutChip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 13, color: _mutedColor(context)),
+          HugeIcon(icon: icon, size: 13, color: _mutedColor(context)),
           const SizedBox(width: 6),
           Text(
             label,
@@ -1008,8 +1013,8 @@ class _LanguageSetting extends StatelessWidget {
                     value: null,
                     child: Row(
                       children: [
-                        Icon(
-                          Icons.settings_suggest_outlined,
+                        HugeIcon(icon: 
+                          HugeIcons.strokeRoundedSettings01,
                           size: 18,
                           color: _mutedColor(context),
                         ),
@@ -1167,7 +1172,7 @@ class _SliderSetting extends StatelessWidget {
             const SizedBox(height: 8),
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(10),
+              padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
                 color: theme.scaffoldBackgroundColor.withValues(alpha: 0.65),
                 borderRadius: BorderRadius.circular(12),
@@ -1425,7 +1430,7 @@ class _ThemeToggle extends StatelessWidget {
                     width: itemWidth,
                     child: _ThemeOption(
                       label: l10n.theme_system,
-                      icon: Icons.brightness_auto_rounded,
+                      icon: HugeIcons.strokeRoundedSun01,
                       isSelected: currentTheme == AppThemeType.system,
                       onTap: () => ref
                           .read(themeModeProvider.notifier)
@@ -1436,7 +1441,7 @@ class _ThemeToggle extends StatelessWidget {
                     width: itemWidth,
                     child: _ThemeOption(
                       label: l10n.theme_light,
-                      icon: Icons.light_mode_rounded,
+                      icon: HugeIcons.strokeRoundedSun01,
                       isSelected: currentTheme == AppThemeType.light,
                       onTap: () => ref
                           .read(themeModeProvider.notifier)
@@ -1447,7 +1452,7 @@ class _ThemeToggle extends StatelessWidget {
                     width: itemWidth,
                     child: _ThemeOption(
                       label: l10n.theme_dark,
-                      icon: Icons.dark_mode_rounded,
+                      icon: HugeIcons.strokeRoundedMoon02,
                       isSelected: currentTheme == AppThemeType.dark,
                       onTap: () => ref
                           .read(themeModeProvider.notifier)
@@ -1458,7 +1463,7 @@ class _ThemeToggle extends StatelessWidget {
                     width: itemWidth,
                     child: _ThemeOption(
                       label: l10n.theme_claude,
-                      icon: Icons.auto_awesome_rounded,
+                      icon: HugeIcons.strokeRoundedSparkles,
                       isSelected: currentTheme == AppThemeType.claude,
                       onTap: () => ref
                           .read(themeModeProvider.notifier)
@@ -1484,7 +1489,7 @@ class _ThemeOption extends StatelessWidget {
   });
 
   final String label;
-  final IconData icon;
+  final List<List<dynamic>> icon;
   final bool isSelected;
   final VoidCallback onTap;
 
@@ -1499,7 +1504,7 @@ class _ThemeOption extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(14),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           decoration: BoxDecoration(
             color: isSelected
                 ? primary.withValues(alpha: 0.10)
@@ -1520,10 +1525,12 @@ class _ThemeOption extends StatelessWidget {
                       : _panelColor(context),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: Icon(
-                  icon,
-                  size: 16,
-                  color: isSelected ? primary : _mutedColor(context),
+                child: Center(
+                  child: HugeIcon(icon: 
+                    icon,
+                    size: 16,
+                    color: isSelected ? primary : _mutedColor(context),
+                  ),
                 ),
               ),
               const SizedBox(width: 10),
@@ -1536,10 +1543,10 @@ class _ThemeOption extends StatelessWidget {
                   ),
                 ),
               ),
-              Icon(
+              HugeIcon(icon: 
                 isSelected
-                    ? Icons.check_circle_rounded
-                    : Icons.radio_button_unchecked_rounded,
+                    ? HugeIcons.strokeRoundedCheckmarkCircle01
+                    : HugeIcons.strokeRoundedCircle,
                 size: 16,
                 color: isSelected ? primary : _mutedColor(context),
               ),
@@ -1564,7 +1571,7 @@ class _DropdownSetting extends StatelessWidget {
   final String? currentValue;
   final List<(String id, String name)> items;
   final ValueChanged<String?> onChanged;
-  final IconData icon;
+  final List<List<dynamic>> icon;
 
   @override
   Widget build(BuildContext context) {
@@ -1601,7 +1608,7 @@ class _DropdownSetting extends StatelessWidget {
                       value: item.$1,
                       child: Row(
                         children: [
-                          Icon(icon, size: 16, color: _mutedColor(context)),
+                          HugeIcon(icon: icon, size: 16, color: _mutedColor(context)),
                           const SizedBox(width: 8),
                           Flexible(
                             child: Text(
@@ -1694,7 +1701,7 @@ class _DangerousAction extends StatelessWidget {
   });
 
   final String label;
-  final IconData icon;
+  final List<List<dynamic>> icon;
   final VoidCallback onConfirm;
 
   @override
@@ -1731,7 +1738,7 @@ class _DangerousAction extends StatelessWidget {
           },
         );
       },
-      icon: Icon(icon, color: Colors.red, size: 16),
+      icon: HugeIcon(icon: icon, color: Colors.red, size: 16),
       label: Align(
         alignment: Alignment.centerLeft,
         child: Text(label, style: const TextStyle(color: Colors.red)),
@@ -1755,7 +1762,7 @@ class _SectionActionButton extends StatelessWidget {
     required this.onPressed,
   });
 
-  final IconData icon;
+  final List<List<dynamic>> icon;
   final String label;
   final VoidCallback onPressed;
 
@@ -1764,7 +1771,7 @@ class _SectionActionButton extends StatelessWidget {
     return ShadButton.outline(
       onPressed: onPressed,
       width: double.infinity,
-      leading: Icon(icon, size: 16),
+      leading: HugeIcon(icon: icon, size: 16),
       child: Align(alignment: Alignment.centerLeft, child: Text(label)),
     );
   }
@@ -1800,19 +1807,19 @@ class _EngineDropdown extends StatelessWidget {
                     context,
                     EngineId.system,
                     l10n.tts_engine_system,
-                    Icons.record_voice_over_rounded,
+                    HugeIcons.strokeRoundedVoice,
                   ),
                   _engineItem(
                     context,
                     EngineId.kitten,
                     l10n.tts_engine_kitten,
-                    Icons.auto_awesome_rounded,
+                    HugeIcons.strokeRoundedSparkles,
                   ),
                   _engineItem(
                     context,
                     EngineId.piper,
                     EngineMeta.piper.name,
-                    Icons.memory_rounded,
+                    HugeIcons.strokeRoundedCpu,
                   ),
                 ],
                 onChanged: (value) {
@@ -1832,14 +1839,14 @@ class _EngineDropdown extends StatelessWidget {
     BuildContext context,
     EngineId id,
     String label,
-    IconData icon,
+    List<List<dynamic>> icon,
   ) {
     final meta = EngineMeta.forEngine(id);
     return DropdownMenuItem<EngineId>(
       value: id,
       child: Row(
         children: [
-          Icon(icon, size: 18, color: Color(meta.accentColor)),
+          HugeIcon(icon: icon, size: 18, color: Color(meta.accentColor)),
           const SizedBox(width: 10),
           Flexible(child: Text(label, overflow: TextOverflow.ellipsis)),
         ],
@@ -1996,10 +2003,10 @@ class _VoiceChip extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
+              HugeIcon(icon: 
                 selected
-                    ? Icons.radio_button_checked_rounded
-                    : Icons.radio_button_off_rounded,
+                    ? HugeIcons.strokeRoundedCheckmarkCircle01
+                    : HugeIcons.strokeRoundedCircle,
                 size: 16,
                 color: selected ? primary : _mutedColor(context),
               ),
@@ -2049,12 +2056,12 @@ class _OnDeviceEngineStatusCard extends ConsumerWidget {
 
     final (
       Color accent,
-      IconData icon,
+      List<List<dynamic>> icon,
       String message,
     ) = switch (engineState.status) {
       OnDeviceEngineStatus.loaded => (
         Colors.green,
-        Icons.check_circle_rounded,
+        HugeIcons.strokeRoundedCheckmarkCircle01,
         l10n.model_loaded(
           engineState.loadedModelId ?? 'unknown',
           engineState.backend?.name ?? 'CPU',
@@ -2062,17 +2069,17 @@ class _OnDeviceEngineStatusCard extends ConsumerWidget {
       ),
       OnDeviceEngineStatus.loading => (
         Colors.blue,
-        Icons.hourglass_top_rounded,
+        HugeIcons.strokeRoundedClock01,
         l10n.loading,
       ),
       OnDeviceEngineStatus.error => (
         Colors.red,
-        Icons.error_rounded,
+        HugeIcons.strokeRoundedAlertCircle,
         l10n.error_with_message(engineState.error ?? l10n.unknown_error),
       ),
       OnDeviceEngineStatus.notLoaded => (
         Colors.grey,
-        Icons.info_outline_rounded,
+        HugeIcons.strokeRoundedInformationCircle,
         l10n.no_model_loaded,
       ),
     };
@@ -2087,7 +2094,7 @@ class _OnDeviceEngineStatusCard extends ConsumerWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 18, color: accent),
+          HugeIcon(icon: icon, size: 18, color: accent),
           const SizedBox(width: 8),
           Expanded(
             child: Text(

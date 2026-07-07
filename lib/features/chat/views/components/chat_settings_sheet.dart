@@ -100,7 +100,7 @@ class _ChatSettingsSheetState extends ConsumerState<ChatSettingsSheet> {
                 if (hasOverrides)
                   ShadButton.ghost(
                     onPressed: () => _resetToDefaults(ref, activeConv?.id),
-                    leading: const Icon(Icons.restore, size: 16),
+                    leading: const HugeIcon(icon: HugeIcons.strokeRoundedRefresh, size: 16),
                     child: Text(l10n.reset_defaults),
                   ),
               ],
@@ -231,8 +231,8 @@ class _ChatSettingsSheetState extends ConsumerState<ChatSettingsSheet> {
               ),
               child: Row(
                 children: [
-                  const Icon(
-                    Icons.warning_amber_rounded,
+                  const HugeIcon(icon: 
+                    HugeIcons.strokeRoundedAlertCircle,
                     color: Colors.orange,
                     size: 20,
                   ),
@@ -298,7 +298,7 @@ class _ChatSettingsSheetState extends ConsumerState<ChatSettingsSheet> {
                 ),
                 const SizedBox(width: 8),
                 ShadIconButton(
-                  icon: const Icon(Icons.add),
+                  icon: const HugeIcon(icon: HugeIcons.strokeRoundedAdd01),
                   onPressed: _addServer,
                 ),
               ],
@@ -342,8 +342,8 @@ class _ChatSettingsSheetState extends ConsumerState<ChatSettingsSheet> {
                           style: const TextStyle(fontSize: 11),
                         ),
                         trailing: ShadIconButton.ghost(
-                          icon: const Icon(
-                            Icons.delete_outline,
+                          icon: const HugeIcon(icon: 
+                            HugeIcons.strokeRoundedDelete01,
                             size: 18,
                             color: Colors.red,
                           ),

@@ -69,7 +69,7 @@ void showServerPickerSheet(BuildContext context, WidgetRef ref) {
                 ),
                 IconButton(
                   onPressed: () => Navigator.pop(context),
-                  icon: const Icon(Icons.close, size: 20),
+                  icon: const HugeIcon(icon: HugeIcons.strokeRoundedCancel01, size: 20),
                   visualDensity: VisualDensity.compact,
                   color: colorScheme.onSurfaceVariant,
                 ),
@@ -176,14 +176,14 @@ void showServerPickerSheet(BuildContext context, WidgetRef ref) {
                                 ),
                               ),
                               if (isCurrentlyActive)
-                                Icon(
-                                  Icons.check_circle,
+                                HugeIcon(icon: 
+                                  HugeIcons.strokeRoundedCheckmarkCircle01,
                                   size: 20,
                                   color: colorScheme.primary,
                                 )
                               else
-                                const Icon(
-                                  Icons.chevron_right,
+                                const HugeIcon(icon: 
+                                  HugeIcons.strokeRoundedArrowRight01,
                                   size: 20,
                                   color: Colors.grey,
                                 ),
@@ -198,7 +198,7 @@ void showServerPickerSheet(BuildContext context, WidgetRef ref) {
                   const SizedBox(height: 12),
                   ShadButton.ghost(
                     width: double.infinity,
-                    leading: const Icon(Icons.settings, size: 18),
+                    leading: const HugeIcon(icon: HugeIcons.strokeRoundedSettings01, size: 18),
                     onPressed: () {
                       Navigator.pop(context);
                       context.go(AppRoutes.servers);

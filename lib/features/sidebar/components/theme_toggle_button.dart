@@ -1,3 +1,4 @@
+import 'package:hugeicons/hugeicons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
@@ -28,7 +29,7 @@ class ThemeToggleButton extends ConsumerWidget {
             ),
           );
         },
-        child: Icon(
+        child: HugeIcon(icon: 
           _getIconForMode(themeMode),
           key: ValueKey(themeMode),
           size: 20,
@@ -37,16 +38,16 @@ class ThemeToggleButton extends ConsumerWidget {
     );
   }
 
-  IconData _getIconForMode(AppThemeType mode) {
+  List<List<dynamic>> _getIconForMode(AppThemeType mode) {
     switch (mode) {
       case AppThemeType.system:
-        return LucideIcons.monitor;
+        return HugeIcons.strokeRoundedComputer;
       case AppThemeType.light:
-        return LucideIcons.sun;
+        return HugeIcons.strokeRoundedSun01;
       case AppThemeType.dark:
-        return LucideIcons.moon;
+        return HugeIcons.strokeRoundedMoon02;
       case AppThemeType.claude:
-        return LucideIcons.palmtree;
+        return HugeIcons.strokeRoundedTree01;
     }
   }
 }

@@ -1,3 +1,4 @@
+import 'package:hugeicons/hugeicons.dart';
 import 'package:flutter/material.dart';
 import 'package:localmind/core/theme/colors.dart';
 import 'package:localmind/features/personas/data/models/persona.dart';
@@ -72,7 +73,7 @@ class PersonaIndicator extends StatelessWidget {
           ),
           const SizedBox(width: 8),
           IconButton(
-            icon: const Icon(Icons.close, size: 16),
+            icon: const HugeIcon(icon: HugeIcons.strokeRoundedCancel01, size: 16),
             onPressed: onClear,
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(),

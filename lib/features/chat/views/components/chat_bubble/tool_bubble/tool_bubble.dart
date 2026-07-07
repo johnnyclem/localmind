@@ -1,3 +1,4 @@
+import 'package:hugeicons/hugeicons.dart';
 import 'package:flutter/material.dart';
 import 'package:localmind/core/theme/colors.dart';
 import 'package:localmind/features/chat/data/models/message.dart';
@@ -39,8 +40,8 @@ class ToolBubble extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(
-                  Icons.build_outlined,
+                HugeIcon(icon: 
+                  HugeIcons.strokeRoundedTools,
                   size: 14,
                   color: isDark ? AppColors.darkMutedText : AppColors.lightMutedText,
                 ),

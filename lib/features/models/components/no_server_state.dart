@@ -1,3 +1,4 @@
+import 'package:hugeicons/hugeicons.dart';
 import 'package:flutter/material.dart';
 import 'package:localmind/core/theme/colors.dart';
 import 'package:localmind/l10n/app_localizations.dart';
@@ -13,8 +14,8 @@ class NoServerState extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.computer_outlined,
+          HugeIcon(icon: 
+            HugeIcons.strokeRoundedComputer,
             size: 48,
             color: isDark ? AppColors.darkMutedText : AppColors.lightMutedText,
           ),

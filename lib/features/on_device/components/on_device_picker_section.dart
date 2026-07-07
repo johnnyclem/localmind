@@ -1,3 +1,4 @@
+import 'package:hugeicons/hugeicons.dart';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -46,7 +47,7 @@ class OnDevicePickerSection extends ConsumerWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.error_outline, size: 48, color: Colors.red[400]),
+            HugeIcon(icon: HugeIcons.strokeRoundedInformationCircle, size: 48, color: Colors.red[400]),
             const SizedBox(height: 16),
             Text(
               l10n.failed_load_models,
@@ -59,7 +60,7 @@ class OnDevicePickerSection extends ConsumerWidget {
             const SizedBox(height: 16),
             OutlinedButton.icon(
               onPressed: () => ref.invalidate(downloadedModelsProvider),
-              icon: const Icon(Icons.refresh),
+              icon: const HugeIcon(icon: HugeIcons.strokeRoundedRefresh),
               label: Text(l10n.retry),
             ),
           ],
@@ -303,8 +304,8 @@ class _OnDeviceModelTile extends ConsumerWidget {
                       padding: const EdgeInsets.only(top: 2),
                       child: Row(
                         children: [
-                          const Icon(
-                            Icons.warning_amber_rounded,
+                          const HugeIcon(icon: 
+                            HugeIcons.strokeRoundedAlertCircle,
                             color: Colors.orange,
                             size: 12,
                           ),
@@ -396,8 +397,8 @@ class _OnDeviceModelTile extends ConsumerWidget {
               ),
               const SizedBox(width: 8),
               _IconButton(
-                icon: Icon(
-                  Icons.power_settings_new_outlined,
+                icon: HugeIcon(icon: 
+                  HugeIcons.strokeRoundedPower,
                   size: 18,
                   color: Colors.red[400],
                 ),
@@ -406,14 +407,14 @@ class _OnDeviceModelTile extends ConsumerWidget {
               ),
             ] else if (isDownloaded) ...[
               _IconButton(
-                icon: Icon(Icons.play_arrow, size: 20, color: accent),
+                icon: HugeIcon(icon: HugeIcons.strokeRoundedPlay, size: 20, color: accent),
                 tooltip: l10n.load,
                 onPressed: () => _loadModel(context, ref),
               ),
               const SizedBox(width: 4),
               _IconButton(
-                icon: Icon(
-                  Icons.delete_outline,
+                icon: HugeIcon(icon: 
+                  HugeIcons.strokeRoundedDelete01,
                   size: 18,
                   color: isDark
                       ? AppColors.darkMutedText
@@ -424,8 +425,8 @@ class _OnDeviceModelTile extends ConsumerWidget {
               ),
             ] else if (isDownloading) ...[
               _IconButton(
-                icon: Icon(
-                  Icons.close,
+                icon: HugeIcon(icon: 
+                  HugeIcons.strokeRoundedCancel01,
                   size: 16,
                   color: isDark
                       ? AppColors.darkMutedText
@@ -438,8 +439,8 @@ class _OnDeviceModelTile extends ConsumerWidget {
               ),
             ] else ...[
               _IconButton(
-                icon: Icon(
-                  Icons.cloud_download_outlined,
+                icon: HugeIcon(icon: 
+                  HugeIcons.strokeRoundedCloudDownload,
                   size: 18,
                   color: isDark
                       ? AppColors.darkMutedText
@@ -478,7 +479,7 @@ class _OnDeviceModelTile extends ConsumerWidget {
             ],
             if (isDownloaded && isSelected && isLoaded) ...[
               const SizedBox(width: 4),
-              Icon(Icons.check_circle, color: accent, size: 22),
+              HugeIcon(icon: HugeIcons.strokeRoundedCheckmarkCircle01, color: accent, size: 22),
             ],
           ],
         ),
@@ -538,7 +539,7 @@ class _OnDeviceModelTile extends ConsumerWidget {
       builder: (ctx) => AlertDialog(
         title: Row(
           children: [
-            const Icon(Icons.warning_amber_rounded, color: Colors.orange),
+            const HugeIcon(icon: HugeIcons.strokeRoundedAlertCircle, color: Colors.orange),
             const SizedBox(width: 8),
             Text(l10n.ram_warning),
           ],

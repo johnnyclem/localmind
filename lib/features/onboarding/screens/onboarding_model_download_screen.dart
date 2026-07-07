@@ -1,3 +1,4 @@
+import 'package:hugeicons/hugeicons.dart';
 import 'dart:async';
 import 'dart:io';
 
@@ -80,8 +81,8 @@ class _OnboardingModelDownloadScreenState
                               ),
                               child: Row(
                                 children: [
-                                  const Icon(
-                                    Icons.info_outline,
+                                  const HugeIcon(icon: 
+                                    HugeIcons.strokeRoundedInformationCircle,
                                     color: Colors.orange,
                                     size: 20,
                                   ),
@@ -241,13 +242,13 @@ class _OnboardingModelDownloadScreenState
               _MemoryStat(
                 label: l10n.total_ram,
                 value: info.totalMemoryFormatted,
-                icon: Icons.memory,
+                icon: HugeIcons.strokeRoundedCpu,
               ),
               const SizedBox(width: 24),
               _MemoryStat(
                 label: l10n.available,
                 value: info.availableMemoryFormatted,
-                icon: Icons.event_available,
+                icon: HugeIcons.strokeRoundedCalendarCheckIn01,
                 color: info.availableMemoryMb < 1024 ? Colors.orange : null,
               ),
             ],
@@ -263,7 +264,7 @@ class _OnboardingModelDownloadScreenState
 class _MemoryStat extends StatelessWidget {
   final String label;
   final String value;
-  final IconData icon;
+  final List<List<dynamic>> icon;
   final Color? color;
 
   const _MemoryStat({
@@ -278,7 +279,7 @@ class _MemoryStat extends StatelessWidget {
     final theme = Theme.of(context);
     return Row(
       children: [
-        Icon(icon, size: 16, color: color ?? theme.colorScheme.primary),
+        HugeIcon(icon: icon, size: 16, color: color ?? theme.colorScheme.primary),
         const SizedBox(width: 8),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -380,8 +381,8 @@ class _ModelCard extends ConsumerWidget {
               padding: const EdgeInsets.only(top: 4),
               child: Row(
                 children: [
-                  const Icon(
-                    Icons.warning_amber_rounded,
+                  const HugeIcon(icon: 
+                    HugeIcons.strokeRoundedAlertCircle,
                     color: Colors.orange,
                     size: 14,
                   ),
@@ -424,7 +425,7 @@ class _ModelCard extends ConsumerWidget {
           if (isDownloaded)
             Row(
               children: [
-                const Icon(Icons.check_circle, color: Colors.green, size: 18),
+                const HugeIcon(icon: HugeIcons.strokeRoundedCheckmarkCircle01, color: Colors.green, size: 18),
                 const SizedBox(width: 4),
                 Text(
                   l10n.downloaded,
@@ -590,7 +591,7 @@ class _ModelCard extends ConsumerWidget {
         return AlertDialog(
           title: Row(
             children: [
-              const Icon(Icons.warning_amber_rounded, color: Colors.orange),
+              const HugeIcon(icon: HugeIcons.strokeRoundedAlertCircle, color: Colors.orange),
               const SizedBox(width: 8),
               Text(dialogL10n.ram_warning),
             ],

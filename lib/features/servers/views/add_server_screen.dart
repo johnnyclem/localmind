@@ -287,7 +287,7 @@ class _AddServerScreenState extends ConsumerState<AddServerScreen> {
       appBar: AppBar(
         title: Text(_isEditing ? l10n.edit_server : l10n.add_server_title),
         leading: IconButton(
-          icon: const Icon(Icons.close),
+          icon: const HugeIcon(icon: HugeIcons.strokeRoundedCancel01),
           onPressed: () => context.pop(),
         ),
       ),
@@ -379,8 +379,8 @@ class _AddServerScreenState extends ConsumerState<AddServerScreen> {
                               ],
                             ),
                           ),
-                          Icon(
-                            Icons.arrow_forward_ios_rounded,
+                          HugeIcon(icon: 
+                            HugeIcons.strokeRoundedArrowRight01,
                             size: 16,
                             color: colorScheme.onSurfaceVariant,
                           ),
@@ -554,12 +554,12 @@ class _AddServerScreenState extends ConsumerState<AddServerScreen> {
             children: [
               _buildInfoPill(
                 context,
-                icon: Icons.hub_outlined,
+                icon: HugeIcons.strokeRoundedShare01,
                 label: _serverTypeLabel(context),
               ),
               _buildInfoPill(
                 context,
-                icon: _requiresMandatoryApiKey ? Icons.key_outlined : Icons.dns,
+                icon: _requiresMandatoryApiKey ? HugeIcons.strokeRoundedKey01 : HugeIcons.strokeRoundedDatabase,
                 label: _requiresMandatoryApiKey
                     ? l10n.api_key_required
                     : l10n.host_label,
@@ -629,8 +629,8 @@ class _AddServerScreenState extends ConsumerState<AddServerScreen> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(
-            success ? Icons.check_circle_rounded : Icons.error_rounded,
+          HugeIcon(icon: 
+            success ? HugeIcons.strokeRoundedCheckmarkCircle01 : HugeIcons.strokeRoundedAlertCircle,
             color: accent,
           ),
           const SizedBox(width: 10),
@@ -692,7 +692,7 @@ class _AddServerScreenState extends ConsumerState<AddServerScreen> {
                           height: 16,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : const Icon(Icons.network_check_rounded),
+                      : const HugeIcon(icon: HugeIcons.strokeRoundedWifi01),
                   label: Text(_isTesting ? l10n.testing : l10n.test_connection),
                 ),
               ),
@@ -712,7 +712,7 @@ class _AddServerScreenState extends ConsumerState<AddServerScreen> {
                           height: 18,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : const Icon(Icons.save_rounded),
+                      : const HugeIcon(icon: HugeIcons.strokeRoundedFloppyDisk),
                   label: Text(
                     _isSaving
                         ? l10n.save
@@ -729,7 +729,7 @@ class _AddServerScreenState extends ConsumerState<AddServerScreen> {
 
   Widget _buildInfoPill(
     BuildContext context, {
-    required IconData icon,
+    required List<List<dynamic>> icon,
     required String label,
   }) {
     final theme = Theme.of(context);
@@ -745,7 +745,7 @@ class _AddServerScreenState extends ConsumerState<AddServerScreen> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 16, color: colorScheme.primary),
+          HugeIcon(icon: icon, size: 16, color: colorScheme.primary),
           const SizedBox(width: 8),
           Text(
             label,

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
-import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:localmind/core/models/enums.dart';
 import 'package:localmind/core/theme/colors.dart';
 import 'package:localmind/features/models/data/models/model_info.dart';
@@ -63,7 +62,7 @@ class ModelTile extends StatelessWidget {
                   Row(
                     children: [
                       if (isFavorite) ...[
-                        Icon(Icons.star, size: 16, color: Colors.amber[600]),
+                        HugeIcon(icon: HugeIcons.strokeRoundedStar, size: 16, color: Colors.amber[600]),
                         const SizedBox(width: 6),
                       ],
                       Expanded(
@@ -135,8 +134,8 @@ class ModelTile extends StatelessWidget {
                     model.serverType == ServerType.ollama) &&
                 isLoaded) ...[
               IconButton(
-                icon: Icon(
-                  Icons.power_settings_new_outlined,
+                icon: HugeIcon(icon: 
+                  HugeIcons.strokeRoundedPower,
                   size: 18,
                   color: Colors.red[400],
                 ),
@@ -196,19 +195,19 @@ class _ModelCapabilityIcons extends StatelessWidget {
       children: [
         if (model.supportsVision)
           _CapabilityIcon(
-            icon: LucideIcons.eye,
+            icon: HugeIcons.strokeRoundedEye,
             tooltip: l10n.lm_studio_vision,
             color: color,
           ),
         if (model.supportsReasoning)
           _CapabilityIcon(
-            icon: LucideIcons.brain,
+            icon: HugeIcons.strokeRoundedBrain,
             tooltip: l10n.lm_studio_reasoning,
             color: color,
           ),
         if (model.supportsToolUse)
           _CapabilityIcon(
-            icon: LucideIcons.hammer,
+            icon: HugeIcons.strokeRoundedTools,
             tooltip: l10n.lm_studio_tool_use,
             color: color,
           ),
@@ -224,7 +223,7 @@ class _CapabilityIcon extends StatelessWidget {
     required this.color,
   });
 
-  final IconData icon;
+  final List<List<dynamic>> icon;
   final String tooltip;
   final Color color;
 
@@ -234,7 +233,7 @@ class _CapabilityIcon extends StatelessWidget {
       padding: const EdgeInsets.only(left: 4),
       child: Tooltip(
         message: tooltip,
-        child: Icon(icon, size: 14, color: color),
+        child: HugeIcon(icon: icon, size: 14, color: color),
       ),
     );
   }

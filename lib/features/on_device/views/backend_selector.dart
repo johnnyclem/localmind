@@ -1,3 +1,4 @@
+import 'package:hugeicons/hugeicons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gemma/flutter_gemma.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -36,10 +37,10 @@ class BackendSelector extends ConsumerWidget {
                   .setPreferredBackend(backend),
               child: Row(
                 children: [
-                  Icon(
+                  HugeIcon(icon: 
                     isSelected
-                        ? Icons.radio_button_checked
-                        : Icons.radio_button_off,
+                        ? HugeIcons.strokeRoundedCheckmarkCircle01
+                        : HugeIcons.strokeRoundedCircle,
                     size: 20,
                     color: isSelected
                         ? Theme.of(context).colorScheme.primary

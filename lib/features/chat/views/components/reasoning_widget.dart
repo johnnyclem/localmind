@@ -1,3 +1,4 @@
+import 'package:hugeicons/hugeicons.dart';
 import 'package:flutter/material.dart';
 import 'package:gpt_markdown/gpt_markdown.dart';
 import 'package:localmind/l10n/app_localizations.dart';
@@ -123,8 +124,8 @@ class _ReasoningWidgetState extends State<ReasoningWidget>
                 ),
                 child: Row(
                   children: [
-                    Icon(
-                      Icons.psychology_outlined,
+                    HugeIcon(icon: 
+                      HugeIcons.strokeRoundedBrain,
                       size: 18,
                       color: isDark
                           ? AppColors.darkMutedText
@@ -159,8 +160,8 @@ class _ReasoningWidgetState extends State<ReasoningWidget>
                         begin: 0.0,
                         end: 0.5,
                       ).animate(_expandAnimation),
-                      child: Icon(
-                        Icons.keyboard_arrow_down_rounded,
+                      child: HugeIcon(icon: 
+                        HugeIcons.strokeRoundedArrowDown01,
                         size: 18,
                         color: isDark
                             ? AppColors.darkMutedText

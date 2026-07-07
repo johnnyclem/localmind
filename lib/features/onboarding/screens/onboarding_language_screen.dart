@@ -368,8 +368,8 @@ class _OnboardingLanguageScreenState
                                       ),
                                     ),
                                     child: isSelected
-                                        ? const Icon(
-                                            Icons.check,
+                                        ? const HugeIcon(icon: 
+                                            HugeIcons.strokeRoundedTick01,
                                             color: Colors.white,
                                             size: 14,
                                           )

@@ -1,3 +1,4 @@
+import 'package:hugeicons/hugeicons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
@@ -43,20 +44,20 @@ Future<void> showSaveMessageSheet(
                   ),
                 ),
               ListTile(
-                leading: Icon(
+                leading: HugeIcon(icon: 
                   selectedFolderId == null
-                      ? Icons.radio_button_checked
-                      : Icons.radio_button_off,
+                      ? HugeIcons.strokeRoundedCheckmarkCircle01
+                      : HugeIcons.strokeRoundedCircle,
                 ),
                 title: Text(l10n.unfiled_chats),
                 onTap: () => setState(() => selectedFolderId = null),
               ),
               ...folders.map(
                 (folder) => ListTile(
-                  leading: Icon(
+                  leading: HugeIcon(icon: 
                     selectedFolderId == folder.id
-                        ? Icons.radio_button_checked
-                        : Icons.radio_button_off,
+                        ? HugeIcons.strokeRoundedCheckmarkCircle01
+                        : HugeIcons.strokeRoundedCircle,
                   ),
                   title: Text(folder.name),
                   onTap: () => setState(() => selectedFolderId = folder.id),
@@ -72,7 +73,7 @@ Future<void> showSaveMessageSheet(
                     ref.invalidate(isMessageSavedProvider(message.id));
                     if (context.mounted) Navigator.pop(context);
                   },
-                  icon: const Icon(Icons.bookmark_remove_outlined),
+                  icon: const HugeIcon(icon: HugeIcons.strokeRoundedBookmarkRemove01),
                   label: Text(l10n.remove_from_saved),
                 ),
               const SizedBox(height: 8),

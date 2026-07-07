@@ -1,3 +1,4 @@
+import 'package:hugeicons/hugeicons.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../l10n/app_localizations.dart';
@@ -41,8 +42,8 @@ class HttpsSchemeHint extends StatelessWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(
-                  Icons.lock_outline_rounded,
+                HugeIcon(icon: 
+                  HugeIcons.strokeRoundedLock,
                   size: 18,
                   color: colorScheme.tertiary,
                 ),

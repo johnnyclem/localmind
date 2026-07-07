@@ -1,3 +1,4 @@
+import 'package:hugeicons/hugeicons.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:localmind/core/models/enums.dart';
@@ -22,8 +23,8 @@ class ConnectionBanner extends StatelessWidget {
           : Colors.orange.withValues(alpha: 0.1),
       child: Row(
         children: [
-          Icon(
-            isError ? Icons.error_outline : Icons.wifi_off,
+          HugeIcon(icon: 
+            isError ? HugeIcons.strokeRoundedInformationCircle : HugeIcons.strokeRoundedWifiOff01,
             size: 16,
             color: isError ? Colors.red : Colors.orange,
           ),

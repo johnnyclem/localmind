@@ -1,3 +1,4 @@
+import 'package:hugeicons/hugeicons.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:localmind/l10n/app_localizations.dart';
@@ -141,7 +142,7 @@ class AssistantBubble extends StatelessWidget {
               ),
               if (message.status == MessageStatus.error) ...[
                 const SizedBox(width: 4),
-                Icon(Icons.error_outline, size: 14, color: Colors.red[400]),
+                HugeIcon(icon: HugeIcons.strokeRoundedInformationCircle, size: 14, color: Colors.red[400]),
               ],
               const Spacer(),
               if (!isStreaming)

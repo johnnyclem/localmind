@@ -1,3 +1,4 @@
+import 'package:hugeicons/hugeicons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
@@ -104,7 +105,7 @@ class BootstrapScreen extends StatelessWidget {
                           ),
                         ),
                       ] else ...[
-                        Icon(Icons.error_outline, size: 40, color: AppColors.error),
+                        HugeIcon(icon: HugeIcons.strokeRoundedInformationCircle, size: 40, color: AppColors.error),
                         const SizedBox(height: 16),
                         Text(
                           l10n.something_went_wrong,
@@ -131,7 +132,7 @@ class BootstrapScreen extends StatelessWidget {
                         if (onRetry != null)
                           ElevatedButton.icon(
                             onPressed: onRetry,
-                            icon: const Icon(Icons.refresh, size: 18),
+                            icon: const HugeIcon(icon: HugeIcons.strokeRoundedRefresh, size: 18),
                             label: Text(l10n.retry),
                           ),
                       ],

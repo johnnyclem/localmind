@@ -1,3 +1,4 @@
+import 'package:hugeicons/hugeicons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:localmind/core/theme/colors.dart';
@@ -29,8 +30,8 @@ class RecentConversationItem extends ConsumerWidget {
         ),
         child: Row(
           children: [
-            Icon(
-              Icons.chat_bubble_outline,
+            HugeIcon(icon: 
+              HugeIcons.strokeRoundedChatting01,
               size: 18,
               color: isDark ? AppColors.darkMutedText : AppColors.lightMutedText,
             ),
@@ -62,10 +63,10 @@ class RecentConversationItem extends ConsumerWidget {
                 ],
               ),
             ),
-            Icon(
+            HugeIcon(icon: 
               Directionality.of(context) == TextDirection.rtl
-                  ? Icons.chevron_left
-                  : Icons.chevron_right,
+                  ? HugeIcons.strokeRoundedArrowLeft01
+                  : HugeIcons.strokeRoundedArrowRight01,
               size: 18,
               color: isDark ? AppColors.darkMutedText : AppColors.lightMutedText,
             ),

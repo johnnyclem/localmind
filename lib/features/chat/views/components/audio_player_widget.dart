@@ -1,3 +1,4 @@
+import 'package:hugeicons/hugeicons.dart';
 import 'dart:async';
 
 import 'package:audioplayers/audioplayers.dart';
@@ -95,8 +96,8 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
         mainAxisSize: MainAxisSize.min,
         children: [
           IconButton(
-            icon: Icon(
-              _state == PlayerState.playing ? Icons.pause_circle_filled : Icons.play_circle_filled,
+            icon: HugeIcon(icon: 
+              _state == PlayerState.playing ? HugeIcons.strokeRoundedPauseCircle : HugeIcons.strokeRoundedPlayCircle,
               size: 28,
               color: isDark ? Colors.white : Colors.black87,
             ),

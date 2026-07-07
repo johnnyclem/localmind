@@ -151,8 +151,8 @@ class _OnboardingServerTypeScreenState
                                 type: ServerType.onDevice,
                                 title: l10n.server_type_on_device,
                                 subtitle: l10n.server_type_on_device_desc,
-                                iconWidget: Icon(
-                                  Icons.phone_android_rounded,
+                                iconWidget: HugeIcon(icon: 
+                                  HugeIcons.strokeRoundedSmartPhone01,
                                   color: _selectedType == ServerType.onDevice
                                       ? theme.colorScheme.primary
                                       : theme.colorScheme.onSurface,
@@ -163,8 +163,8 @@ class _OnboardingServerTypeScreenState
                                 type: ServerType.lmStudio,
                                 title: l10n.server_type_lm_studio,
                                 subtitle: l10n.server_type_lm_studio_desc,
-                                iconWidget: Icon(
-                                  Icons.terminal_rounded,
+                                iconWidget: HugeIcon(icon: 
+                                  HugeIcons.strokeRoundedComputerTerminal01,
                                   color: _selectedType == ServerType.lmStudio
                                       ? theme.colorScheme.primary
                                       : theme.colorScheme.onSurface,
@@ -189,8 +189,8 @@ class _OnboardingServerTypeScreenState
                                 type: ServerType.ollama,
                                 title: l10n.server_type_ollama,
                                 subtitle: l10n.server_type_ollama_desc,
-                                iconWidget: Icon(
-                                  Icons.smart_toy_rounded,
+                                iconWidget: HugeIcon(icon: 
+                                  HugeIcons.strokeRoundedRobot01,
                                   color: _selectedType == ServerType.ollama
                                       ? theme.colorScheme.primary
                                       : theme.colorScheme.onSurface,
@@ -367,8 +367,8 @@ class _OnboardingServerTypeScreenState
                 ),
                 const Spacer(),
                 if (disabled)
-                  const Icon(
-                    Icons.lock_outline_rounded,
+                  const HugeIcon(icon: 
+                    HugeIcons.strokeRoundedLock,
                     size: 18,
                     color: Colors.orange,
                   ),
@@ -451,8 +451,8 @@ class _OnboardingServerTypeScreenState
                             ),
                             borderRadius: BorderRadius.circular(11),
                           ),
-                          child: Icon(
-                            Icons.add_rounded,
+                          child: HugeIcon(icon: 
+                            HugeIcons.strokeRoundedAdd01,
                             size: 18,
                             color: theme.colorScheme.primary,
                           ),

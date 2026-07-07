@@ -1,3 +1,4 @@
+import 'package:hugeicons/hugeicons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:localmind/l10n/app_localizations.dart';
@@ -76,17 +77,21 @@ class _ConversationSearchBarState extends ConsumerState<ConversationSearchBar> {
             fontSize: 14,
             color: isDark ? const Color(0xFF666666) : const Color(0xFF999999),
           ),
-          prefixIcon: Icon(
-            Icons.search,
-            size: 20,
-            color: isDark ? const Color(0xFF666666) : const Color(0xFF999999),
+          prefixIcon: Center(
+            widthFactor: 1.0,
+            heightFactor: 1.0,
+            child: HugeIcon(icon: 
+              HugeIcons.strokeRoundedSearch01,
+              size: 20,
+              color: isDark ? const Color(0xFF666666) : const Color(0xFF999999),
+            ),
           ),
           suffixIcon: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               IconButton(
-                icon: Icon(
-                  searchContents ? Icons.article : Icons.article_outlined,
+                icon: HugeIcon(icon: 
+                  searchContents ? HugeIcons.strokeRoundedDocumentCode : HugeIcons.strokeRoundedDocumentCode,
                   size: 20,
                   color: searchContents
                       ? theme.colorScheme.primary
@@ -101,8 +106,8 @@ class _ConversationSearchBarState extends ConsumerState<ConversationSearchBar> {
               ),
               if (_controller.text.isNotEmpty)
                 IconButton(
-                  icon: Icon(
-                    Icons.clear,
+                  icon: HugeIcon(icon: 
+                    HugeIcons.strokeRoundedCancel01,
                     size: 18,
                     color: isDark
                         ? const Color(0xFF666666)

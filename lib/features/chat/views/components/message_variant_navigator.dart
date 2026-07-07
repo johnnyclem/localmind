@@ -1,3 +1,4 @@
+import 'package:hugeicons/hugeicons.dart';
 import 'package:flutter/material.dart';
 import 'package:localmind/core/theme/colors.dart';
 import 'package:localmind/features/chat/data/models/message.dart';
@@ -35,7 +36,7 @@ class MessageVariantNavigator extends StatelessWidget {
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
             onPressed: currentIndex > 0 ? () => onCycle(-1) : null,
-            icon: Icon(Icons.chevron_left, size: 18, color: muted),
+            icon: HugeIcon(icon: HugeIcons.strokeRoundedArrowLeft01, size: 18, color: muted),
           ),
           Text(
             '${currentIndex + 1} / ${variants.length}',
@@ -51,7 +52,7 @@ class MessageVariantNavigator extends StatelessWidget {
             constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
             onPressed:
                 currentIndex < variants.length - 1 ? () => onCycle(1) : null,
-            icon: Icon(Icons.chevron_right, size: 18, color: muted),
+            icon: HugeIcon(icon: HugeIcons.strokeRoundedArrowRight01, size: 18, color: muted),
           ),
         ],
       ),

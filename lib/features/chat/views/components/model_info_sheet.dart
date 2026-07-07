@@ -1,3 +1,4 @@
+import 'package:hugeicons/hugeicons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -69,7 +70,7 @@ class _ModelInfoRow extends StatelessWidget {
       title: Text(label, style: const TextStyle(fontSize: 12)),
       subtitle: SelectableText(value),
       trailing: IconButton(
-        icon: const Icon(Icons.copy, size: 18),
+        icon: const HugeIcon(icon: HugeIcons.strokeRoundedCopy, size: 18),
         tooltip: l10n.copy,
         onPressed: () async {
           await Clipboard.setData(ClipboardData(text: value));

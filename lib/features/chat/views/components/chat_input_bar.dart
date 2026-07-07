@@ -294,7 +294,7 @@ class ChatInputBarState extends ConsumerState<ChatInputBar>
 
           children: [
             ListTile(
-              leading: const Icon(Icons.description_outlined),
+              leading: const HugeIcon(icon: HugeIcons.strokeRoundedFile01),
               title: Text(l10n.attach_text_document),
               onTap: () {
                 Navigator.pop(ctx);
@@ -302,7 +302,7 @@ class ChatInputBarState extends ConsumerState<ChatInputBar>
               },
             ),
             ListTile(
-              leading: const Icon(Icons.image_outlined),
+              leading: const HugeIcon(icon: HugeIcons.strokeRoundedImage01),
               title: Text(l10n.attach_image),
               onTap: () {
                 Navigator.pop(ctx);
@@ -311,7 +311,7 @@ class ChatInputBarState extends ConsumerState<ChatInputBar>
             ),
 
             ListTile(
-              leading: const Icon(Icons.bookmark_outline),
+              leading: const HugeIcon(icon: HugeIcons.strokeRoundedBookmark01),
 
               title: Text(l10n.insert_saved_message),
 
@@ -504,8 +504,8 @@ class ChatInputBarState extends ConsumerState<ChatInputBar>
                 setState(() => _sendAsAssistant = !_sendAsAssistant);
               }
             : null,
-        icon: Icon(
-          Icons.swap_horiz_rounded,
+        icon: HugeIcon(icon: 
+          HugeIcons.strokeRoundedExchange01,
           size: 20,
           color: _sendAsAssistant
               ? theme.colorScheme.primary
@@ -566,8 +566,8 @@ class ChatInputBarState extends ConsumerState<ChatInputBar>
                   top: 6,
                   bottom: 6,
                 ),
-                child: Icon(
-                  enabled ? Icons.check_box : Icons.check_box_outline_blank,
+                child: HugeIcon(icon: 
+                  enabled ? HugeIcons.strokeRoundedTick01 : HugeIcons.strokeRoundedSquare01,
                   size: 18,
                   color: fgColor,
                 ),
@@ -936,8 +936,8 @@ class ChatInputBarState extends ConsumerState<ChatInputBar>
                                           .colorScheme
                                           .surfaceContainerHighest,
 
-                                      child: Icon(
-                                        Icons.description_outlined,
+                                      child: HugeIcon(icon: 
+                                        HugeIcons.strokeRoundedFile01,
 
                                         size: 22,
 
@@ -968,8 +968,8 @@ class ChatInputBarState extends ConsumerState<ChatInputBar>
                                   shape: BoxShape.circle,
                                 ),
 
-                                child: const Icon(
-                                  Icons.close,
+                                child: const HugeIcon(icon: 
+                                  HugeIcons.strokeRoundedCancel01,
 
                                   size: 10,
 
@@ -1016,8 +1016,8 @@ class ChatInputBarState extends ConsumerState<ChatInputBar>
                     minHeight: 36,
                   ),
 
-                  icon: Icon(
-                    Icons.add,
+                  icon: HugeIcon(icon: 
+                    HugeIcons.strokeRoundedAdd01,
 
                     size: 24,
 

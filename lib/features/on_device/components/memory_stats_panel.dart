@@ -1,3 +1,4 @@
+import 'package:hugeicons/hugeicons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
@@ -93,8 +94,8 @@ class _MemoryPanelContent extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    Icon(
-                      Icons.memory_rounded,
+                    HugeIcon(icon: 
+                      HugeIcons.strokeRoundedCpu,
                       size: 20,
                       color: theme.colorScheme.primary,
                     ),
@@ -111,7 +112,7 @@ class _MemoryPanelContent extends StatelessWidget {
                 ShadButton.ghost(
                   size: ShadButtonSize.sm,
                   onPressed: () => ref.invalidate(deviceMemoryProvider),
-                  child: const Icon(Icons.refresh_rounded, size: 18),
+                  child: const HugeIcon(icon: HugeIcons.strokeRoundedRefresh, size: 18),
                 ),
               ],
             ),
@@ -216,7 +217,7 @@ class _MemoryPanelContent extends StatelessWidget {
                   child: _MemoryStat(
                     label: l10n.available_ram,
                     value: info.availableMemoryFormatted,
-                    icon: Icons.speed_rounded,
+                    icon: HugeIcons.strokeRoundedDashboardSpeed01,
                     color: statusColor,
                     isPrimary: true,
                   ),
@@ -230,7 +231,7 @@ class _MemoryPanelContent extends StatelessWidget {
                   child: _MemoryStat(
                     label: l10n.total_capacity,
                     value: info.totalMemoryFormatted,
-                    icon: Icons.storage_rounded,
+                    icon: HugeIcons.strokeRoundedDatabase,
                     alignment: CrossAxisAlignment.end,
                   ),
                 ),
@@ -246,7 +247,7 @@ class _MemoryPanelContent extends StatelessWidget {
 class _MemoryStat extends StatelessWidget {
   final String label;
   final String value;
-  final IconData icon;
+  final List<List<dynamic>> icon;
   final Color? color;
   final CrossAxisAlignment alignment;
   final bool isPrimary;
@@ -272,7 +273,7 @@ class _MemoryStat extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             if (alignment == CrossAxisAlignment.start) ...[
-              Icon(icon, size: 14, color: iconColor),
+              HugeIcon(icon: icon, size: 14, color: iconColor),
               const SizedBox(width: 6),
             ],
             Text(
@@ -284,7 +285,7 @@ class _MemoryStat extends StatelessWidget {
             ),
             if (alignment == CrossAxisAlignment.end) ...[
               const SizedBox(width: 6),
-              Icon(icon, size: 14, color: iconColor),
+              HugeIcon(icon: icon, size: 14, color: iconColor),
             ],
           ],
         ),

@@ -1,3 +1,4 @@
+import 'package:hugeicons/hugeicons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -50,7 +51,7 @@ class SavedMessagesScreen extends ConsumerWidget {
               ? Row(
                   children: [
                     IconButton(
-                      icon: const Icon(Icons.close),
+                      icon: const HugeIcon(icon: HugeIcons.strokeRoundedCancel01),
                       onPressed: () => ref
                           .read(savedMessageSelectionModeProvider.notifier)
                           .disable(),
@@ -66,7 +67,7 @@ class SavedMessagesScreen extends ConsumerWidget {
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.folder_outlined),
+                      icon: const HugeIcon(icon: HugeIcons.strokeRoundedFolder01),
                       tooltip: l10n.move_to_folder,
                       onPressed: selectedIds.isEmpty
                           ? null
@@ -79,7 +80,7 @@ class SavedMessagesScreen extends ConsumerWidget {
                   children: [
                     Builder(
                       builder: (context) => IconButton(
-                        icon: const Icon(Icons.menu),
+                        icon: const HugeIcon(icon: HugeIcons.strokeRoundedMenu01),
                         onPressed: () => Scaffold.of(context).openDrawer(),
                       ),
                     ),
@@ -94,7 +95,7 @@ class SavedMessagesScreen extends ConsumerWidget {
                     ),
                     const Spacer(),
                     IconButton(
-                      icon: const Icon(Icons.checklist_outlined),
+                      icon: const HugeIcon(icon: HugeIcons.strokeRoundedCheckList),
                       tooltip: l10n.select,
                       onPressed: () => ref
                           .read(savedMessageSelectionModeProvider.notifier)
@@ -110,27 +111,27 @@ class SavedMessagesScreen extends ConsumerWidget {
                         ListFilterOption(
                           value: SavedMessageListFilter.all,
                           label: l10n.all_chats,
-                          icon: Icons.view_list_rounded,
+                          icon: HugeIcons.strokeRoundedView,
                         ),
                         ListFilterOption(
                           value: SavedMessageListFilter.tempChats,
                           label: l10n.filter_temp_chats,
-                          icon: Icons.bolt_outlined,
+                          icon: HugeIcons.strokeRoundedZap,
                         ),
                         ListFilterOption(
                           value: SavedMessageListFilter.user,
                           label: l10n.filter_user_messages,
-                          icon: Icons.person_outline,
+                          icon: HugeIcons.strokeRoundedUser,
                         ),
                         ListFilterOption(
                           value: SavedMessageListFilter.assistant,
                           label: l10n.filter_assistant_messages,
-                          icon: Icons.auto_awesome_outlined,
+                          icon: HugeIcons.strokeRoundedSparkles,
                         ),
                         ListFilterOption(
                           value: SavedMessageListFilter.archived,
                           label: l10n.filter_archived,
-                          icon: Icons.archive_outlined,
+                          icon: HugeIcons.strokeRoundedArchive,
                         ),
                       ],
                     ),

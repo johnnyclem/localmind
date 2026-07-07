@@ -50,7 +50,7 @@ class ScreenAppBar extends ConsumerWidget {
         child: Row(
           children: [
             IconButton(
-              icon: const Icon(Icons.close),
+              icon: const HugeIcon(icon: HugeIcons.strokeRoundedCancel01),
               onPressed: () =>
                   ref.read(messageSelectionModeProvider.notifier).disable(),
             ),
@@ -64,7 +64,7 @@ class ScreenAppBar extends ConsumerWidget {
               ),
             ),
             IconButton(
-              icon: const Icon(Icons.ios_share),
+              icon: const HugeIcon(icon: HugeIcons.strokeRoundedShare01),
               tooltip: l10n.export_conversation,
               onPressed: selectedMessageIds.isEmpty
                   ? null
@@ -75,7 +75,7 @@ class ScreenAppBar extends ConsumerWidget {
                     ),
             ),
             IconButton(
-              icon: const Icon(Icons.delete_outline, color: Colors.red),
+              icon: const HugeIcon(icon: HugeIcons.strokeRoundedDelete01, color: Colors.red),
               tooltip: l10n.delete,
               onPressed: selectedMessageIds.isEmpty
                   ? null
@@ -101,7 +101,7 @@ class ScreenAppBar extends ConsumerWidget {
                   breakpoint >= ShadTheme.of(context).breakpoints.md;
               if (isDesktop) return const SizedBox.shrink();
               return IconButton(
-                icon: const Icon(Icons.menu),
+                icon: const HugeIcon(icon: HugeIcons.strokeRoundedMenu01),
                 onPressed: () => Scaffold.of(context).openDrawer(),
               );
             },
@@ -152,13 +152,13 @@ class ScreenAppBar extends ConsumerWidget {
             onPressed: onChatModeAction,
           ),
           PopupMenuButton<String>(
-            icon: const Icon(Icons.more_vert),
+            icon: const HugeIcon(icon: HugeIcons.strokeRoundedMoreVertical),
             onSelected: onMenuAction,
             itemBuilder: (context) => [
               PopupMenuItem(
                 value: 'new_chat',
                 child: ListTile(
-                  leading: const Icon(Icons.add),
+                  leading: const HugeIcon(icon: HugeIcons.strokeRoundedAdd01),
                   title: Text(l10n.nav_new_chat),
                   contentPadding: EdgeInsets.zero,
                 ),
@@ -167,7 +167,7 @@ class ScreenAppBar extends ConsumerWidget {
                 PopupMenuItem(
                   value: 'rename',
                   child: ListTile(
-                    leading: const Icon(Icons.drive_file_rename_outline),
+                    leading: const HugeIcon(icon: HugeIcons.strokeRoundedPencilEdit02),
                     title: Text(l10n.rename_conversation),
                     contentPadding: EdgeInsets.zero,
                   ),
@@ -175,7 +175,7 @@ class ScreenAppBar extends ConsumerWidget {
                 PopupMenuItem(
                   value: 'move_to_folder',
                   child: ListTile(
-                    leading: const Icon(Icons.folder_outlined),
+                    leading: const HugeIcon(icon: HugeIcons.strokeRoundedFolder01),
                     title: Text(l10n.move_to_folder),
                     contentPadding: EdgeInsets.zero,
                   ),
@@ -185,7 +185,7 @@ class ScreenAppBar extends ConsumerWidget {
                 PopupMenuItem(
                   value: 'export_chat',
                   child: ListTile(
-                    leading: const Icon(Icons.upload_outlined),
+                    leading: const HugeIcon(icon: HugeIcons.strokeRoundedUpload01),
                     title: Text(l10n.export_conversation),
                     contentPadding: EdgeInsets.zero,
                   ),
@@ -193,7 +193,7 @@ class ScreenAppBar extends ConsumerWidget {
                 PopupMenuItem(
                   value: 'share_chat',
                   child: ListTile(
-                    leading: const Icon(Icons.share_outlined),
+                    leading: const HugeIcon(icon: HugeIcons.strokeRoundedShare01),
                     title: Text(l10n.share_conversation),
                     contentPadding: EdgeInsets.zero,
                   ),
@@ -202,8 +202,8 @@ class ScreenAppBar extends ConsumerWidget {
               PopupMenuItem(
                 value: 'persona',
                 child: ListTile(
-                  leading: Icon(
-                    hasPersonas ? Icons.swap_horiz : Icons.smart_toy_outlined,
+                  leading: HugeIcon(icon: 
+                    hasPersonas ? HugeIcons.strokeRoundedExchange01 : HugeIcons.strokeRoundedRobot01,
                   ),
                   title: Text(
                     hasPersonas ? l10n.change_persona : l10n.set_persona,
@@ -214,7 +214,7 @@ class ScreenAppBar extends ConsumerWidget {
               PopupMenuItem(
                 value: 'clear',
                 child: ListTile(
-                  leading: const Icon(Icons.delete_outline),
+                  leading: const HugeIcon(icon: HugeIcons.strokeRoundedDelete01),
                   title: Text(l10n.clear_conversation),
                   contentPadding: EdgeInsets.zero,
                 ),
@@ -328,17 +328,17 @@ class ChatModeIconButton extends StatelessWidget {
                   color: activeColor.withValues(alpha: 0.25),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(LucideIcons.ghost, size: 20, color: activeColor),
+                child: HugeIcon(icon: HugeIcons.strokeRoundedIncognito, size: 20, color: activeColor),
               )
-            : Icon(LucideIcons.ghost, size: 22, color: inactiveColor),
+            : HugeIcon(icon: HugeIcons.strokeRoundedIncognito, size: 22, color: inactiveColor),
       );
     }
 
     return IconButton(
       onPressed: onPressed,
       tooltip: l10n.nav_new_chat,
-      icon: Icon(
-        Icons.add_comment_outlined,
+      icon: HugeIcon(icon: 
+        HugeIcons.strokeRoundedMessageAdd01,
         size: 22,
         color: isDark ? Colors.white70 : Colors.black87,
       ),

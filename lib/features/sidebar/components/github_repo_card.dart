@@ -70,8 +70,8 @@ class GitHubRepoCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                Icon(
-                  Icons.open_in_new,
+                HugeIcon(icon: 
+                  HugeIcons.strokeRoundedShare01,
                   size: 14,
                   color: isDark ? AppColors.darkMutedText : AppColors.lightMutedText,
                 ),

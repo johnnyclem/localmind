@@ -1,3 +1,4 @@
+import 'package:hugeicons/hugeicons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -206,7 +207,7 @@ void showMoveToFolderSheet(
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: const Icon(Icons.folder_off_outlined),
+              leading: const HugeIcon(icon: HugeIcons.strokeRoundedFolder01),
               title: Text(l10n.remove_from_folder),
               onTap: () async {
                 Navigator.pop(ctx);
@@ -217,7 +218,7 @@ void showMoveToFolderSheet(
             ),
             ...folders.map(
               (folder) => ListTile(
-                leading: const Icon(Icons.folder_outlined),
+                leading: const HugeIcon(icon: HugeIcons.strokeRoundedFolder01),
                 title: Text(folder.name),
                 onTap: () async {
                   Navigator.pop(ctx);
@@ -250,7 +251,7 @@ Future<void> showBulkMoveToFolderSheet(
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: const Icon(Icons.folder_off_outlined),
+              leading: const HugeIcon(icon: HugeIcons.strokeRoundedFolder01),
               title: Text(l10n.remove_from_folder),
               onTap: () async {
                 Navigator.pop(ctx);
@@ -263,7 +264,7 @@ Future<void> showBulkMoveToFolderSheet(
             ),
             ...folders.map(
               (folder) => ListTile(
-                leading: const Icon(Icons.folder_outlined),
+                leading: const HugeIcon(icon: HugeIcons.strokeRoundedFolder01),
                 title: Text(folder.name),
                 onTap: () async {
                   Navigator.pop(ctx);

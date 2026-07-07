@@ -1,3 +1,4 @@
+import 'package:hugeicons/hugeicons.dart';
 import 'dart:io' show Platform;
 
 import 'package:flutter/material.dart';
@@ -324,8 +325,8 @@ class _OnboardingServerSetupScreenState
                           ),
                           child: Row(
                             children: [
-                              Icon(
-                                _testSuccess ? Icons.check_circle : Icons.error,
+                              HugeIcon(icon: 
+                                _testSuccess ? HugeIcons.strokeRoundedCheckmarkCircle01 : HugeIcons.strokeRoundedAlertCircle,
                                 color: _testSuccess ? Colors.green : Colors.red,
                               ),
                               const SizedBox(width: 8),

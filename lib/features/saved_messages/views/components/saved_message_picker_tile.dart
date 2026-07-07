@@ -1,3 +1,4 @@
+import 'package:hugeicons/hugeicons.dart';
 import 'package:flutter/material.dart';
 import 'package:localmind/core/models/enums.dart';
 import 'package:localmind/core/theme/colors.dart';
@@ -34,10 +35,10 @@ class SavedMessagePickerTile extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(
+              HugeIcon(icon: 
                 isUser
-                    ? Icons.person_outline
-                    : Icons.auto_awesome_outlined,
+                    ? HugeIcons.strokeRoundedUser
+                    : HugeIcons.strokeRoundedSparkles,
                 size: 20,
                 color: mutedColor,
               ),

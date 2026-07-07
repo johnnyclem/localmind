@@ -1,3 +1,4 @@
+import 'package:hugeicons/hugeicons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -324,8 +325,8 @@ class _ModelPickerHeader extends ConsumerWidget {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(
-                        Icons.layers_outlined,
+                      HugeIcon(icon: 
+                        HugeIcons.strokeRoundedLayers01,
                         size: 14,
                         color: isDark ? Colors.grey[400] : Colors.grey[600],
                       ),
@@ -348,8 +349,8 @@ class _ModelPickerHeader extends ConsumerWidget {
               IconButton(
                 onPressed: onUnloadAll,
                 tooltip: l10n.unload_all_models,
-                icon: Icon(
-                  Icons.power_settings_new_outlined,
+                icon: HugeIcon(icon: 
+                  HugeIcons.strokeRoundedPower,
                   size: 20,
                   color: Colors.red[400],
                 ),
@@ -358,12 +359,12 @@ class _ModelPickerHeader extends ConsumerWidget {
               IconButton(
                 onPressed: onBrowseModels,
                 tooltip: l10n.lm_studio_browse_models,
-                icon: const Icon(Icons.explore_outlined, size: 20),
+                icon: const HugeIcon(icon: HugeIcons.strokeRoundedCompass01, size: 20),
               ),
             const LmDownloadIndicatorButton(compact: true),
             if (onRefresh != null)
               IconButton(
-                icon: const Icon(Icons.refresh, size: 20),
+                icon: const HugeIcon(icon: HugeIcons.strokeRoundedRefresh, size: 20),
                 onPressed: onRefresh,
                 tooltip: l10n.refresh_models,
               ),
@@ -476,7 +477,7 @@ class __ContextLengthEditDialogState
                     borderRadius: BorderRadius.circular(10),
                   ),
                   suffixIcon: IconButton(
-                    icon: const Icon(Icons.clear, size: 18),
+                    icon: const HugeIcon(icon: HugeIcons.strokeRoundedCancel01, size: 18),
                     onPressed: () => _controller.clear(),
                   ),
                 ),

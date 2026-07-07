@@ -1,3 +1,4 @@
+import 'package:hugeicons/hugeicons.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
@@ -312,7 +313,7 @@ class DataBackupActions extends ConsumerWidget {
             'localmind_backup_${DateTime.now().millisecondsSinceEpoch}.zip',
           ),
           width: double.infinity,
-          leading: const Icon(Icons.folder_zip_outlined, size: 16),
+          leading: const HugeIcon(icon: HugeIcons.strokeRoundedFolder01, size: 16),
           child: Align(
             alignment: Alignment.centerLeft,
             child: Text(l10n.export_all_zip),
@@ -322,7 +323,7 @@ class DataBackupActions extends ConsumerWidget {
         ShadButton.outline(
           onPressed: () => _importZipFile(context, ref),
           width: double.infinity,
-          leading: const Icon(Icons.unarchive_outlined, size: 16),
+          leading: const HugeIcon(icon: HugeIcons.strokeRoundedArchive, size: 16),
           child: Align(
             alignment: Alignment.centerLeft,
             child: Text(l10n.import_all_zip),

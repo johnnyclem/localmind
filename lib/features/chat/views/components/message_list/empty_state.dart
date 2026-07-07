@@ -1,3 +1,4 @@
+import 'package:hugeicons/hugeicons.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -172,7 +173,7 @@ class _EmptyStateState extends State<EmptyState>
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.settings_suggest,
+                  HugeIcon(icon: HugeIcons.strokeRoundedSettings01,
                       size: 18, color: theme.colorScheme.primary),
                   const SizedBox(width: 8),
                   Flexible(
@@ -188,7 +189,7 @@ class _EmptyStateState extends State<EmptyState>
                     ),
                   ),
                   const SizedBox(width: 4),
-                  const Icon(Icons.expand_more, size: 16, color: Colors.grey),
+                  const HugeIcon(icon: HugeIcons.strokeRoundedArrowDown01, size: 16, color: Colors.grey),
                 ],
               ),
             ),
@@ -224,7 +225,7 @@ class _EmptyStateState extends State<EmptyState>
                       ),
                     ),
                   ] else ...[
-                    Icon(Icons.smart_toy_outlined,
+                    HugeIcon(icon: HugeIcons.strokeRoundedRobot01,
                         size: 18, color: theme.colorScheme.primary),
                     const SizedBox(width: 8),
                     Flexible(
@@ -241,7 +242,7 @@ class _EmptyStateState extends State<EmptyState>
                     ),
                   ],
                   const SizedBox(width: 4),
-                  const Icon(Icons.expand_more, size: 16, color: Colors.grey),
+                  const HugeIcon(icon: HugeIcons.strokeRoundedArrowDown01, size: 16, color: Colors.grey),
                 ],
               ),
             ),

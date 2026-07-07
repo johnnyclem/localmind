@@ -1,3 +1,4 @@
+import 'package:hugeicons/hugeicons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:localmind/core/models/enums.dart';
@@ -353,7 +354,7 @@ class _MessageList extends ConsumerWidget {
                   alignment: Alignment.centerLeft,
                   child: OutlinedButton.icon(
                     onPressed: onGenerateResponse,
-                    icon: const Icon(Icons.auto_awesome, size: 16),
+                    icon: const HugeIcon(icon: HugeIcons.strokeRoundedSparkles, size: 16),
                     label: Text(
                       AppLocalizations.of(context)!.generate_ai_response,
                     ),

@@ -1,3 +1,4 @@
+import 'package:hugeicons/hugeicons.dart';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -186,8 +187,8 @@ class _MemoryWarningBadge extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(
-            Icons.warning_amber_rounded,
+          const HugeIcon(icon: 
+            HugeIcons.strokeRoundedAlertCircle,
             color: Colors.orange,
             size: 14,
           ),
@@ -430,8 +431,8 @@ class _DownloadedActions extends ConsumerWidget {
 
     return Row(
       children: [
-        Icon(
-          isLoaded ? Icons.check_circle : Icons.check_circle_outline,
+        HugeIcon(icon: 
+          isLoaded ? HugeIcons.strokeRoundedCheckmarkCircle01 : HugeIcons.strokeRoundedCheckmarkCircle01,
           color: isLoaded ? Colors.green : Colors.grey,
           size: 18,
         ),
@@ -758,7 +759,7 @@ class _NotDownloadedActions extends ConsumerWidget {
       builder: (ctx) => AlertDialog(
         title: Row(
           children: [
-            const Icon(Icons.warning_amber_rounded, color: Colors.orange),
+            const HugeIcon(icon: HugeIcons.strokeRoundedAlertCircle, color: Colors.orange),
             const SizedBox(width: 8),
             Text(l10n.ram_warning),
           ],

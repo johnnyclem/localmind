@@ -1,3 +1,4 @@
+import 'package:hugeicons/hugeicons.dart';
 import 'package:flutter/material.dart';
 import 'package:localmind/core/theme/colors.dart';
 import 'package:localmind/features/chat/data/tools/tool_event.dart';
@@ -98,16 +99,16 @@ class _ToolRowWidgetState extends State<ToolRowWidget> {
                   if (call.status == ToolEventStatus.running)
                     _AnimatedRunningIcon(color: iconColor)
                   else
-                    Icon(
+                    HugeIcon(icon: 
                       switch (call.status) {
                         ToolEventStatus.requested =>
-                          Icons.hourglass_empty_rounded,
+                          HugeIcons.strokeRoundedClock01,
                         ToolEventStatus.approved =>
-                          Icons.check_circle_outline_rounded,
-                        ToolEventStatus.rejected => Icons.block_flipped,
-                        ToolEventStatus.running => Icons.cached_rounded,
-                        ToolEventStatus.completed => Icons.check_circle_rounded,
-                        ToolEventStatus.failed => Icons.error_rounded,
+                          HugeIcons.strokeRoundedCheckmarkCircle01,
+                        ToolEventStatus.rejected => HugeIcons.strokeRoundedUnavailable,
+                        ToolEventStatus.running => HugeIcons.strokeRoundedRefresh,
+                        ToolEventStatus.completed => HugeIcons.strokeRoundedCheckmarkCircle01,
+                        ToolEventStatus.failed => HugeIcons.strokeRoundedAlertCircle,
                       },
                       size: 14,
                       color: iconColor,
@@ -186,10 +187,10 @@ class _ToolRowWidgetState extends State<ToolRowWidget> {
                   ],
                   if (showCodeBlock) ...[
                     const SizedBox(width: 6),
-                    Icon(
+                    HugeIcon(icon: 
                       _isExpanded
-                          ? Icons.keyboard_arrow_up_rounded
-                          : Icons.keyboard_arrow_down_rounded,
+                          ? HugeIcons.strokeRoundedArrowUp01
+                          : HugeIcons.strokeRoundedArrowDown01,
                       size: 16,
                       color: isDark
                           ? AppColors.darkMutedText
@@ -341,7 +342,7 @@ class _AnimatedRunningIconState extends State<_AnimatedRunningIcon>
   Widget build(BuildContext context) {
     return RotationTransition(
       turns: _controller,
-      child: Icon(Icons.cached_rounded, size: 14, color: widget.color),
+      child: HugeIcon(icon: HugeIcons.strokeRoundedRefresh, size: 14, color: widget.color),
     );
   }
 }

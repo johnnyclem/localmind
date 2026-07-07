@@ -1,3 +1,4 @@
+import 'package:hugeicons/hugeicons.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:localmind/core/theme/colors.dart';
@@ -106,8 +107,8 @@ class ToolTimeline extends StatelessWidget {
             ),
             child: Row(
               children: [
-                Icon(
-                  Icons.terminal_rounded,
+                HugeIcon(icon: 
+                  HugeIcons.strokeRoundedComputerTerminal01,
                   size: 16,
                   color: isDark ? AppColors.darkMutedText : AppColors.lightMutedText,
                 ),

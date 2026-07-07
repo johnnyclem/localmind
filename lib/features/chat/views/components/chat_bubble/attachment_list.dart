@@ -1,3 +1,4 @@
+import 'package:hugeicons/hugeicons.dart';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:localmind/core/theme/colors.dart';
@@ -91,8 +92,8 @@ class _AttachmentItem extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                Icons.description_outlined,
+              HugeIcon(icon: 
+                HugeIcons.strokeRoundedFile01,
                 size: 20,
                 color: theme.colorScheme.primary,
               ),
@@ -138,8 +139,8 @@ class _AttachmentItem extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            Icons.insert_drive_file_outlined,
+          HugeIcon(icon: 
+            HugeIcons.strokeRoundedFile01,
             size: 20,
             color: isDark ? AppColors.darkMutedText : AppColors.lightMutedText,
           ),
@@ -196,7 +197,7 @@ class _TextPreviewSheet extends StatelessWidget {
                 padding: const EdgeInsets.all(16),
                 child: Row(
                   children: [
-                    Icon(Icons.description_outlined, color: theme.colorScheme.primary),
+                    HugeIcon(icon: HugeIcons.strokeRoundedFile01, color: theme.colorScheme.primary),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
@@ -209,7 +210,7 @@ class _TextPreviewSheet extends StatelessWidget {
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.close),
+                      icon: const HugeIcon(icon: HugeIcons.strokeRoundedCancel01),
                       onPressed: () => Navigator.pop(context),
                     ),
                   ],

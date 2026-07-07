@@ -1,3 +1,4 @@
+import 'package:hugeicons/hugeicons.dart';
 import 'package:flutter/material.dart';
 import 'package:gpt_markdown/gpt_markdown.dart';
 import 'package:localmind/core/theme/colors.dart';
@@ -119,7 +120,7 @@ class ThemedGptMarkdown extends StatelessWidget {
         },
         errorBuilder: (context, error, stackTrace) => Container(
           color: Colors.grey[800],
-          child: const Center(child: Icon(Icons.broken_image, color: Colors.white54)),
+          child: const Center(child: HugeIcon(icon: HugeIcons.strokeRoundedImageNotFound01, color: Colors.white54)),
         ),
       ),
     );

@@ -1,3 +1,4 @@
+import 'package:hugeicons/hugeicons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -55,7 +56,7 @@ class ChatHistoryScreen extends ConsumerWidget {
                   ? Row(
                       children: [
                         IconButton(
-                          icon: const Icon(Icons.close),
+                          icon: const HugeIcon(icon: HugeIcons.strokeRoundedCancel01),
                           onPressed: () => ref
                               .read(historySelectionModeProvider.notifier)
                               .disable(),
@@ -71,7 +72,7 @@ class ChatHistoryScreen extends ConsumerWidget {
                           ),
                         ),
                         IconButton(
-                          icon: const Icon(Icons.folder_outlined),
+                          icon: const HugeIcon(icon: HugeIcons.strokeRoundedFolder01),
                           tooltip: l10n.move_to_folder,
                           onPressed: selectedIds.isEmpty
                               ? null
@@ -79,7 +80,7 @@ class ChatHistoryScreen extends ConsumerWidget {
                                   context, ref, selectedIds),
                         ),
                         IconButton(
-                          icon: const Icon(Icons.ios_share),
+                          icon: const HugeIcon(icon: HugeIcons.strokeRoundedShare01),
                           tooltip: l10n.export_conversation,
                           onPressed: selectedIds.isEmpty
                               ? null
@@ -87,7 +88,7 @@ class ChatHistoryScreen extends ConsumerWidget {
                                   context, ref, selectedIds),
                         ),
                         IconButton(
-                          icon: const Icon(Icons.auto_awesome_outlined),
+                          icon: const HugeIcon(icon: HugeIcons.strokeRoundedSparkles),
                           tooltip: l10n.ai_rename_tooltip,
                           onPressed: selectedIds.isEmpty
                               ? null
@@ -105,7 +106,7 @@ class ChatHistoryScreen extends ConsumerWidget {
                       children: [
                         Builder(
                           builder: (context) => IconButton(
-                            icon: const Icon(Icons.menu),
+                            icon: const HugeIcon(icon: HugeIcons.strokeRoundedMenu01),
                             onPressed: () => Scaffold.of(context).openDrawer(),
                           ),
                         ),
@@ -120,7 +121,7 @@ class ChatHistoryScreen extends ConsumerWidget {
                         ),
                         const Spacer(),
                         IconButton(
-                          icon: const Icon(Icons.checklist_outlined),
+                          icon: const HugeIcon(icon: HugeIcons.strokeRoundedCheckList),
                           tooltip: l10n.select,
                           onPressed: () => ref
                               .read(historySelectionModeProvider.notifier)
@@ -128,7 +129,7 @@ class ChatHistoryScreen extends ConsumerWidget {
                         ),
                         ListFilterButton<HistorySortOption>(
                           tooltip: l10n.sort_title,
-                          icon: Icons.sort,
+                          icon: HugeIcons.strokeRoundedSlidersHorizontal,
                           showBadgeWhenNotDefault: false,
                           selected: ref.watch(historySortOptionProvider),
                           onChanged: (option) => ref
@@ -138,12 +139,12 @@ class ChatHistoryScreen extends ConsumerWidget {
                             ListFilterOption(
                               value: HistorySortOption.modified,
                               label: l10n.sort_by_modified_date,
-                              icon: Icons.edit_calendar_outlined,
+                              icon: HugeIcons.strokeRoundedCalendar01,
                             ),
                             ListFilterOption(
                               value: HistorySortOption.created,
                               label: l10n.sort_by_created_date,
-                              icon: Icons.calendar_today_outlined,
+                              icon: HugeIcons.strokeRoundedCalendar01,
                             ),
                           ],
                         ),
@@ -157,17 +158,17 @@ class ChatHistoryScreen extends ConsumerWidget {
                             ListFilterOption(
                               value: HistoryListFilter.all,
                               label: l10n.all_chats,
-                              icon: Icons.view_list_rounded,
+                              icon: HugeIcons.strokeRoundedView,
                             ),
                             ListFilterOption(
                               value: HistoryListFilter.pinned,
                               label: l10n.filter_pinned,
-                              icon: Icons.push_pin_outlined,
+                              icon: HugeIcons.strokeRoundedPin,
                             ),
                             ListFilterOption(
                               value: HistoryListFilter.archived,
                               label: l10n.filter_archived,
-                              icon: Icons.archive_outlined,
+                              icon: HugeIcons.strokeRoundedArchive,
                             ),
                           ],
                         ),
@@ -225,7 +226,7 @@ class ChatHistoryScreen extends ConsumerWidget {
                 ref.read(chatProvider.notifier).startNewConversation();
                 context.go(AppRoutes.home);
               },
-              child: const Icon(Icons.add),
+              child: const HugeIcon(icon: HugeIcons.strokeRoundedAdd01),
             ),
           ),
       ],

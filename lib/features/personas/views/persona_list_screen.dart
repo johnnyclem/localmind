@@ -1,4 +1,5 @@
 import "package:localmind/core/theme/colors.dart";
+import 'package:hugeicons/hugeicons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -49,7 +50,7 @@ class PersonaListScreen extends ConsumerWidget {
                   children: [
                     Builder(
                       builder: (context) => IconButton(
-                        icon: const Icon(Icons.menu),
+                        icon: const HugeIcon(icon: HugeIcons.strokeRoundedMenu01),
                         onPressed: () => Scaffold.of(context).openDrawer(),
                       ),
                     ),
@@ -64,10 +65,10 @@ class PersonaListScreen extends ConsumerWidget {
                     ),
                     const Spacer(),
                     IconButton(
-                      icon: Icon(
+                      icon: HugeIcon(icon: 
                         previewSystemPrompts
-                            ? Icons.visibility
-                            : Icons.visibility_outlined,
+                            ? HugeIcons.strokeRoundedEye
+                            : HugeIcons.strokeRoundedEye,
                       ),
                       tooltip: l10n.preview_system_prompts,
                       onPressed: () => ref
@@ -215,7 +216,7 @@ class PersonaListScreen extends ConsumerWidget {
             end: 24,
             child: FloatingActionButton(
               onPressed: () => context.push(AppRoutes.createPersona),
-              child: const Icon(Icons.add),
+              child: const HugeIcon(icon: HugeIcons.strokeRoundedAdd01),
             ),
           ),
       ],
@@ -238,7 +239,7 @@ class PersonaListScreen extends ConsumerWidget {
             children: [
               if (!isBuiltIn)
                 ListTile(
-                  leading: const Icon(Icons.edit),
+                  leading: const HugeIcon(icon: HugeIcons.strokeRoundedPencilEdit02),
                   title: Text(sheetL10n.edit),
                   onTap: () {
                     Navigator.pop(ctx);
@@ -246,7 +247,7 @@ class PersonaListScreen extends ConsumerWidget {
                   },
                 ),
               ListTile(
-                leading: const Icon(Icons.delete_outline, color: Colors.red),
+                leading: const HugeIcon(icon: HugeIcons.strokeRoundedDelete01, color: Colors.red),
                 title: Text(
                   sheetL10n.delete,
                   style: const TextStyle(color: Colors.red),
@@ -288,7 +289,7 @@ class PersonaListScreen extends ConsumerWidget {
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.copy),
+                leading: const HugeIcon(icon: HugeIcons.strokeRoundedCopy),
                 title: Text(sheetL10n.clone_edit),
                 onTap: () {
                   Navigator.pop(ctx);
@@ -481,8 +482,8 @@ class _PersonaCard extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 8),
-            Icon(
-              Icons.chevron_right,
+            HugeIcon(icon: 
+              HugeIcons.strokeRoundedArrowRight01,
               size: 20,
               color: isDark ? const Color(0xFF555555) : const Color(0xFFCCCCCC),
             ),
@@ -506,8 +507,8 @@ class _EmptyState extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.smart_toy_outlined,
+            HugeIcon(icon: 
+              HugeIcons.strokeRoundedRobot01,
               size: 64,
               color: isDark ? const Color(0xFF444444) : const Color(0xFFCCCCCC),
             ),

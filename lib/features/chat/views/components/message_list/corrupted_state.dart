@@ -1,3 +1,4 @@
+import 'package:hugeicons/hugeicons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -122,8 +123,8 @@ Error: $errorMessage
                 color: Colors.red.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
-                Icons.history_toggle_off_rounded,
+              child: const HugeIcon(icon: 
+                HugeIcons.strokeRoundedClock01,
                 size: 48,
                 color: Colors.red,
               ),
@@ -152,7 +153,7 @@ Error: $errorMessage
               children: [
                 ShadButton(
                   onPressed: onStartNewChat,
-                  leading: const Icon(Icons.add_rounded, size: 20),
+                  leading: const HugeIcon(icon: HugeIcons.strokeRoundedAdd01, size: 20),
                   child: Text(l10n.start_new_chat),
                 ),
                 const SizedBox(width: 12),

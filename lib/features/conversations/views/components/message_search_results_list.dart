@@ -1,3 +1,4 @@
+import 'package:hugeicons/hugeicons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -37,10 +38,10 @@ class MessageSearchResultsList extends ConsumerWidget {
           itemBuilder: (context, index) {
             final hit = hits[index];
             return ListTile(
-              leading: Icon(
+              leading: HugeIcon(icon: 
                 hit.role == MessageRole.user
-                    ? Icons.person_outline
-                    : Icons.smart_toy_outlined,
+                    ? HugeIcons.strokeRoundedUser
+                    : HugeIcons.strokeRoundedRobot01,
               ),
               title: Text(
                 hit.conversationTitle,

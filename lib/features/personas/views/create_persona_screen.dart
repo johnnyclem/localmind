@@ -1,3 +1,4 @@
+import 'package:hugeicons/hugeicons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -172,7 +173,7 @@ class _CreatePersonaScreenState extends ConsumerState<CreatePersonaScreen> {
       appBar: AppBar(
         title: Text(_isEditing ? l10n.edit_persona : l10n.create_persona),
         leading: IconButton(
-          icon: const Icon(Icons.close),
+          icon: const HugeIcon(icon: HugeIcons.strokeRoundedCancel01),
           onPressed: () => context.pop(),
         ),
         actions: [
@@ -315,8 +316,8 @@ class _CreatePersonaScreenState extends ConsumerState<CreatePersonaScreen> {
                     ),
                     const SizedBox(width: 8),
                     IconButton(
-                      icon: Icon(
-                        _showPreview ? Icons.edit : Icons.visibility,
+                      icon: HugeIcon(icon: 
+                        _showPreview ? HugeIcons.strokeRoundedPencilEdit02 : HugeIcons.strokeRoundedEye,
                         size: 18,
                       ),
                       tooltip: _showPreview ? l10n.edit : l10n.preview,
@@ -382,8 +383,8 @@ class _CreatePersonaScreenState extends ConsumerState<CreatePersonaScreen> {
               onTap: () => setState(() => _showAdvanced = !_showAdvanced),
               child: Row(
                 children: [
-                  Icon(
-                    _showAdvanced ? Icons.expand_less : Icons.expand_more,
+                  HugeIcon(icon: 
+                    _showAdvanced ? HugeIcons.strokeRoundedArrowUp01 : HugeIcons.strokeRoundedArrowDown01,
                     color: isDark
                         ? const Color(0xFF888888)
                         : const Color(0xFF999999),

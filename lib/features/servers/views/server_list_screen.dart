@@ -1,3 +1,4 @@
+import 'package:hugeicons/hugeicons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -49,7 +50,7 @@ class ServerListScreen extends ConsumerWidget {
                 children: [
                   Builder(
                     builder: (context) => IconButton(
-                      icon: const Icon(Icons.menu),
+                      icon: const HugeIcon(icon: HugeIcons.strokeRoundedMenu01),
                       onPressed: () => Scaffold.of(context).openDrawer(),
                     ),
                   ),
@@ -138,8 +139,8 @@ class ServerListScreen extends ConsumerWidget {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(
-                        Icons.error_outline,
+                      const HugeIcon(icon: 
+                        HugeIcons.strokeRoundedInformationCircle,
                         color: Colors.red,
                         size: 48,
                       ),
@@ -161,7 +162,7 @@ class ServerListScreen extends ConsumerWidget {
           end: 24,
           child: FloatingActionButton(
             onPressed: () => context.push(AppRoutes.addServer),
-            child: const Icon(Icons.add),
+            child: const HugeIcon(icon: HugeIcons.strokeRoundedAdd01),
           ),
         ),
       ],
@@ -179,7 +180,7 @@ class ServerListScreen extends ConsumerWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.computer, size: 80, color: theme.colorScheme.outline),
+            HugeIcon(icon: HugeIcons.strokeRoundedComputer, size: 80, color: theme.colorScheme.outline),
             const SizedBox(height: 24),
             Text(l10n.no_servers_yet, style: theme.textTheme.headlineSmall),
             const SizedBox(height: 8),
@@ -193,7 +194,7 @@ class ServerListScreen extends ConsumerWidget {
             const SizedBox(height: 24),
             ElevatedButton.icon(
               onPressed: () => context.push(AppRoutes.addServer),
-              icon: const Icon(Icons.add),
+              icon: const HugeIcon(icon: HugeIcons.strokeRoundedAdd01),
               label: Text(l10n.add_server),
             ),
           ],

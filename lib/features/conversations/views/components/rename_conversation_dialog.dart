@@ -1,3 +1,4 @@
+import 'package:hugeicons/hugeicons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:localmind/l10n/app_localizations.dart';
@@ -65,7 +66,7 @@ Future<void> showRenameConversationDialog(
                           height: 16,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : const Icon(Icons.auto_awesome_outlined, size: 18),
+                      : const HugeIcon(icon: HugeIcons.strokeRoundedSparkles, size: 18),
                   label: Text(
                     isGenerating
                         ? l10n.generating_title

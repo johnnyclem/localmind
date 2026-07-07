@@ -1,3 +1,4 @@
+import 'package:hugeicons/hugeicons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -229,7 +230,7 @@ class _DownloadJobTile extends ConsumerWidget {
       trailing: job.status.isActive
           ? null
           : IconButton(
-              icon: const Icon(Icons.close, size: 18),
+              icon: const HugeIcon(icon: HugeIcons.strokeRoundedCancel01, size: 18),
               onPressed: () => ref
                   .read(lmDownloadManagerProvider.notifier)
                   .removeJob(job.jobId),

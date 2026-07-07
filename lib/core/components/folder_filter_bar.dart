@@ -1,3 +1,4 @@
+import 'package:hugeicons/hugeicons.dart';
 import 'package:flutter/material.dart';
 import 'package:localmind/l10n/app_localizations.dart';
 
@@ -44,7 +45,7 @@ class FolderFilterBar extends StatelessWidget {
         children: [
           SystemFolderFilterChip(
             label: l10n.all_chats,
-            icon: Icons.view_list_rounded,
+            icon: HugeIcons.strokeRoundedView,
             selected: selectedFolderId == null,
             isDark: isDark,
             onSelected: (_) => onFilterChanged(null),
@@ -52,7 +53,7 @@ class FolderFilterBar extends StatelessWidget {
           const SizedBox(width: 6),
           SystemFolderFilterChip(
             label: l10n.unfiled_chats,
-            icon: Icons.inbox_outlined,
+            icon: HugeIcons.strokeRoundedInbox,
             selected: selectedFolderId != null && selectedFolderId!.isEmpty,
             isDark: isDark,
             outlined: true,
@@ -62,8 +63,8 @@ class FolderFilterBar extends StatelessWidget {
             (folder) => Padding(
               padding: const EdgeInsets.only(left: 6),
               child: FilterChip(
-                avatar: Icon(
-                  Icons.folder_outlined,
+                avatar: HugeIcon(icon: 
+                  HugeIcons.strokeRoundedFolder01,
                   size: 16,
                   color: selectedFolderId == folder.id
                       ? theme.colorScheme.onSecondaryContainer
@@ -79,8 +80,8 @@ class FolderFilterBar extends StatelessWidget {
           if (showCreateFolder) ...[
             const SizedBox(width: 6),
             ActionChip(
-              avatar: Icon(
-                Icons.create_new_folder_outlined,
+              avatar: HugeIcon(icon: 
+                HugeIcons.strokeRoundedFolderAdd,
                 size: 16,
                 color: theme.colorScheme.primary,
               ),
@@ -110,7 +111,7 @@ class SystemFolderFilterChip extends StatelessWidget {
   });
 
   final String label;
-  final IconData icon;
+  final List<List<dynamic>> icon;
   final bool selected;
   final bool isDark;
   final bool outlined;
@@ -131,7 +132,7 @@ class SystemFolderFilterChip extends StatelessWidget {
             : (isDark ? const Color(0xFF333333) : const Color(0xFFE0E0E0)));
 
     return FilterChip(
-      avatar: Icon(
+      avatar: HugeIcon(icon: 
         icon,
         size: 16,
         color: selected

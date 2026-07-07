@@ -103,7 +103,7 @@ class ModelTopBar extends ConsumerWidget {
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                        Icon(Icons.expand_more, size: 14, color: mutedColor),
+                        HugeIcon(icon: HugeIcons.strokeRoundedArrowDown01, size: 14, color: mutedColor),
                       ],
                     ),
                   ),

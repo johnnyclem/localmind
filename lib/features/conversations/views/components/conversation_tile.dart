@@ -68,10 +68,10 @@ class ConversationTile extends StatelessWidget {
         alignment: AlignmentDirectional.centerStart,
         padding: const EdgeInsetsDirectional.only(start: 16),
         color: Colors.blue,
-        child: Icon(
+        child: HugeIcon(icon: 
           conversation.isArchived
-              ? Icons.unarchive_outlined
-              : Icons.archive_outlined,
+              ? HugeIcons.strokeRoundedArchive
+              : HugeIcons.strokeRoundedArchive,
           color: Colors.white,
         ),
       ),
@@ -79,7 +79,7 @@ class ConversationTile extends StatelessWidget {
         alignment: AlignmentDirectional.centerEnd,
         padding: const EdgeInsetsDirectional.only(end: 16),
         color: Colors.red,
-        child: const Icon(Icons.delete, color: Colors.white),
+        child: const HugeIcon(icon: HugeIcons.strokeRoundedDelete01, color: Colors.white),
       ),
       confirmDismiss: (direction) async {
         if (direction == DismissDirection.startToEnd) {
@@ -105,10 +105,10 @@ class ConversationTile extends StatelessWidget {
                 if (selectionMode)
                   Checkbox(value: isSelected, onChanged: (_) => onTap())
                 else
-                  Icon(
+                  HugeIcon(icon: 
                     conversation.isPinned
-                        ? Icons.push_pin
-                        : Icons.chat_bubble_outline,
+                        ? HugeIcons.strokeRoundedPin
+                        : HugeIcons.strokeRoundedChatting01,
                     size: 20,
                     color: isActive
                         ? (isDark
@@ -210,7 +210,7 @@ class ConversationTile extends StatelessWidget {
             children: [
               if (onEnterSelectionMode != null)
                 ListTile(
-                  leading: const Icon(Icons.checklist_outlined),
+                  leading: const HugeIcon(icon: HugeIcons.strokeRoundedCheckList),
                   title: Text(l10n.select),
                   onTap: () {
                     Navigator.pop(ctx);
@@ -218,10 +218,10 @@ class ConversationTile extends StatelessWidget {
                   },
                 ),
               ListTile(
-                leading: Icon(
+                leading: HugeIcon(icon: 
                   conversation.isPinned
-                      ? Icons.push_pin_outlined
-                      : Icons.push_pin,
+                      ? HugeIcons.strokeRoundedPin
+                      : HugeIcons.strokeRoundedPin,
                 ),
                 title: Text(conversation.isPinned ? l10n.unpin : l10n.pin),
                 onTap: () {
@@ -230,7 +230,7 @@ class ConversationTile extends StatelessWidget {
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.edit_outlined),
+                leading: const HugeIcon(icon: HugeIcons.strokeRoundedPencilEdit02),
                 title: Text(l10n.rename),
                 onTap: () {
                   Navigator.pop(ctx);
@@ -238,7 +238,7 @@ class ConversationTile extends StatelessWidget {
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.copy_outlined),
+                leading: const HugeIcon(icon: HugeIcons.strokeRoundedCopy),
                 title: Text(l10n.duplicate_chat),
                 onTap: () {
                   Navigator.pop(ctx);
@@ -246,7 +246,7 @@ class ConversationTile extends StatelessWidget {
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.folder_outlined),
+                leading: const HugeIcon(icon: HugeIcons.strokeRoundedFolder01),
                 title: Text(l10n.move_to_folder),
                 onTap: () {
                   Navigator.pop(ctx);
@@ -254,7 +254,7 @@ class ConversationTile extends StatelessWidget {
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.upload_outlined),
+                leading: const HugeIcon(icon: HugeIcons.strokeRoundedUpload01),
                 title: Text(l10n.export_conversation),
                 onTap: () {
                   Navigator.pop(ctx);
@@ -262,10 +262,10 @@ class ConversationTile extends StatelessWidget {
                 },
               ),
               ListTile(
-                leading: Icon(
+                leading: HugeIcon(icon: 
                   conversation.isArchived
-                      ? Icons.unarchive_outlined
-                      : Icons.archive_outlined,
+                      ? HugeIcons.strokeRoundedArchive
+                      : HugeIcons.strokeRoundedArchive,
                 ),
                 title: Text(
                   conversation.isArchived
@@ -278,7 +278,7 @@ class ConversationTile extends StatelessWidget {
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.delete_outline, color: Colors.red),
+                leading: const HugeIcon(icon: HugeIcons.strokeRoundedDelete01, color: Colors.red),
                 title: Text(
                   l10n.delete,
                   style: const TextStyle(color: Colors.red),

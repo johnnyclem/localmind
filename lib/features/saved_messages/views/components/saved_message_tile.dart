@@ -46,8 +46,8 @@ class SavedMessageTile extends StatelessWidget {
         alignment: AlignmentDirectional.centerStart,
         padding: const EdgeInsetsDirectional.only(start: 16),
         color: Colors.blue,
-        child: Icon(
-          saved.isArchived ? Icons.unarchive_outlined : Icons.archive_outlined,
+        child: HugeIcon(icon: 
+          saved.isArchived ? HugeIcons.strokeRoundedArchive : HugeIcons.strokeRoundedArchive,
           color: Colors.white,
         ),
       ),
@@ -55,7 +55,7 @@ class SavedMessageTile extends StatelessWidget {
         alignment: AlignmentDirectional.centerEnd,
         padding: const EdgeInsetsDirectional.only(end: 16),
         color: Colors.red,
-        child: const Icon(Icons.delete, color: Colors.white),
+        child: const HugeIcon(icon: HugeIcons.strokeRoundedDelete01, color: Colors.white),
       ),
       confirmDismiss: (direction) async {
         if (direction == DismissDirection.startToEnd) {
@@ -78,10 +78,10 @@ class SavedMessageTile extends StatelessWidget {
               if (selectionMode)
                 Checkbox(value: isSelected, onChanged: (_) => onTap())
               else
-                Icon(
+                HugeIcon(icon: 
                   isUser
-                      ? Icons.person_outline
-                      : Icons.auto_awesome_outlined,
+                      ? HugeIcons.strokeRoundedUser
+                      : HugeIcons.strokeRoundedSparkles,
                   size: 20,
                   color: mutedColor,
                 ),
@@ -164,7 +164,7 @@ class SavedMessageTile extends StatelessWidget {
             children: [
               if (onEnterSelectionMode != null)
                 ListTile(
-                  leading: const Icon(Icons.checklist_outlined),
+                  leading: const HugeIcon(icon: HugeIcons.strokeRoundedCheckList),
                   title: Text(l10n.select),
                   onTap: () {
                     Navigator.pop(ctx);
@@ -172,7 +172,7 @@ class SavedMessageTile extends StatelessWidget {
                   },
                 ),
               ListTile(
-                leading: const Icon(Icons.copy_outlined),
+                leading: const HugeIcon(icon: HugeIcons.strokeRoundedCopy),
                 title: Text(l10n.copy),
                 onTap: () {
                   Navigator.pop(ctx);
@@ -180,7 +180,7 @@ class SavedMessageTile extends StatelessWidget {
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.folder_outlined),
+                leading: const HugeIcon(icon: HugeIcons.strokeRoundedFolder01),
                 title: Text(l10n.move_to_folder),
                 onTap: () {
                   Navigator.pop(ctx);
@@ -188,10 +188,10 @@ class SavedMessageTile extends StatelessWidget {
                 },
               ),
               ListTile(
-                leading: Icon(
+                leading: HugeIcon(icon: 
                   saved.isArchived
-                      ? Icons.unarchive_outlined
-                      : Icons.archive_outlined,
+                      ? HugeIcons.strokeRoundedArchive
+                      : HugeIcons.strokeRoundedArchive,
                 ),
                 title: Text(
                   saved.isArchived ? l10n.unarchive_chat : l10n.archive_chat,
@@ -202,7 +202,7 @@ class SavedMessageTile extends StatelessWidget {
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.delete_outline, color: Colors.red),
+                leading: const HugeIcon(icon: HugeIcons.strokeRoundedDelete01, color: Colors.red),
                 title: Text(
                   l10n.delete,
                   style: const TextStyle(color: Colors.red),

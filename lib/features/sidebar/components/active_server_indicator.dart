@@ -153,7 +153,7 @@ class ActiveServerIndicator extends ConsumerWidget {
                         ),
                         IconButton(
                           onPressed: () => Navigator.pop(context),
-                          icon: const Icon(Icons.close, size: 20),
+                          icon: const HugeIcon(icon: HugeIcons.strokeRoundedCancel01, size: 20),
                           visualDensity: VisualDensity.compact,
                           color: colorScheme.onSurfaceVariant,
                         ),
@@ -285,14 +285,14 @@ class ActiveServerIndicator extends ConsumerWidget {
                                           ),
                                         ),
                                         if (isCurrentlyActive)
-                                          Icon(
-                                            Icons.check_circle,
+                                          HugeIcon(icon: 
+                                            HugeIcons.strokeRoundedCheckmarkCircle01,
                                             size: 20,
                                             color: colorScheme.primary,
                                           )
                                         else
-                                          const Icon(
-                                            Icons.chevron_right,
+                                          const HugeIcon(icon: 
+                                            HugeIcons.strokeRoundedArrowRight01,
                                             size: 20,
                                             color: Colors.grey,
                                           ),
@@ -308,7 +308,7 @@ class ActiveServerIndicator extends ConsumerWidget {
                           const SizedBox(height: 12),
                           ShadButton.ghost(
                             width: double.infinity,
-                            leading: const Icon(Icons.settings, size: 18),
+                            leading: const HugeIcon(icon: HugeIcons.strokeRoundedSettings01, size: 18),
                             onPressed: () {
                               Navigator.pop(context);
                               context.go(AppRoutes.servers);
@@ -389,7 +389,7 @@ class ActiveServerIndicator extends ConsumerWidget {
                   ],
                 ),
               ),
-              const Icon(Icons.unfold_more, size: 16, color: Colors.grey),
+              const HugeIcon(icon: HugeIcons.strokeRoundedArrowUpDown, size: 16, color: Colors.grey),
             ],
           ),
         ),

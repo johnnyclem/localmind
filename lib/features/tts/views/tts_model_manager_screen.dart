@@ -1,3 +1,4 @@
+import 'package:hugeicons/hugeicons.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -48,7 +49,7 @@ class TtsModelManagerScreen extends ConsumerWidget {
               children: [
                 Builder(
                   builder: (context) => IconButton(
-                    icon: const Icon(Icons.menu),
+                    icon: const HugeIcon(icon: HugeIcons.strokeRoundedMenu01),
                     onPressed: () => Scaffold.of(context).openDrawer(),
                   ),
                 ),
@@ -138,8 +139,8 @@ class _SystemVoicesList extends ConsumerWidget {
           ),
           const SizedBox(height: 12),
           ShadAlert(
-            icon: Icon(
-              Icons.info_outline,
+            icon: HugeIcon(icon: 
+              HugeIcons.strokeRoundedInformationCircle,
               color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
             ),
             description: Text(
@@ -204,7 +205,7 @@ class _KittenEngineCard extends ConsumerWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.music_note, size: 12),
+                  const HugeIcon(icon: HugeIcons.strokeRoundedMusicNote01, size: 12),
                   const SizedBox(width: 4),
                   Text(
                     l10n.tts_supports_background,
@@ -268,7 +269,7 @@ class _KittenEngineCard extends ConsumerWidget {
           const SizedBox(width: 8),
           ShadIconButton.ghost(
             padding: EdgeInsets.zero,
-            icon: const Icon(Icons.delete_outline, color: Colors.red, size: 20),
+            icon: const HugeIcon(icon: HugeIcons.strokeRoundedDelete01, color: Colors.red, size: 20),
             onPressed: () => _confirmDelete(context, ref, model),
           ),
         ],
@@ -436,7 +437,7 @@ class _PiperEngineCard extends ConsumerWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.music_note, size: 12),
+                  const HugeIcon(icon: HugeIcons.strokeRoundedMusicNote01, size: 12),
                   const SizedBox(width: 4),
                   Text(
                     l10n.tts_supports_background,
@@ -530,7 +531,7 @@ class _PiperEngineCard extends ConsumerWidget {
           const SizedBox(width: 8),
           ShadIconButton.ghost(
             padding: EdgeInsets.zero,
-            icon: const Icon(Icons.delete_outline, color: Colors.red, size: 20),
+            icon: const HugeIcon(icon: HugeIcons.strokeRoundedDelete01, color: Colors.red, size: 20),
             onPressed: () => _confirmDelete(context, ref, variant),
           ),
         ],
@@ -688,7 +689,7 @@ class _PiperVariantChip extends StatelessWidget {
             ),
             if (installed) ...[
               const SizedBox(width: 6),
-              const Icon(Icons.check_circle, size: 14, color: Colors.green),
+              const HugeIcon(icon: HugeIcons.strokeRoundedCheckmarkCircle01, size: 14, color: Colors.green),
             ],
           ],
         ),
@@ -750,8 +751,8 @@ class _EngineCard extends StatelessWidget {
                   color: accentColor.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(
-                  Icons.record_voice_over,
+                child: HugeIcon(icon: 
+                  HugeIcons.strokeRoundedVoice,
                   size: 18,
                   color: accentColor,
                 ),
@@ -971,8 +972,8 @@ class _VoiceChipsState extends ConsumerState<_VoiceChips> {
                 child: Row(
                   children: [
                     if (isSelected) ...[
-                      const Icon(
-                        Icons.check_circle,
+                      const HugeIcon(icon: 
+                        HugeIcons.strokeRoundedCheckmarkCircle01,
                         size: 16,
                         color: Colors.green,
                       ),
@@ -1014,8 +1015,8 @@ class _VoiceChipsState extends ConsumerState<_VoiceChips> {
                   horizontal: 10,
                   vertical: 8,
                 ),
-                child: Icon(
-                  isPlaying ? Icons.stop : Icons.play_arrow,
+                child: HugeIcon(icon: 
+                  isPlaying ? HugeIcons.strokeRoundedStop : HugeIcons.strokeRoundedPlay,
                   size: 16,
                   color: isPlaying
                       ? accent
@@ -1115,14 +1116,14 @@ class _TtsTestSectionState extends ConsumerState<_TtsTestSection> {
             Expanded(
               child: ShadButton(
                 onPressed: _speak,
-                leading: const Icon(Icons.volume_up),
+                leading: const HugeIcon(icon: HugeIcons.strokeRoundedVolumeUp),
                 child: Text(l10n.test_speak_button),
               ),
             ),
             const SizedBox(width: 8),
             ShadButton.outline(
               onPressed: () => ref.read(tts.ttsProvider.notifier).stop(),
-              leading: const Icon(Icons.stop),
+              leading: const HugeIcon(icon: HugeIcons.strokeRoundedStop),
               child: Text(l10n.stop),
             ),
           ],

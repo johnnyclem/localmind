@@ -1,3 +1,4 @@
+import 'package:hugeicons/hugeicons.dart';
 import 'package:flutter/material.dart';
 import 'package:localmind/core/theme/colors.dart';
 import 'package:localmind/features/models/data/models/model_info.dart';
@@ -57,21 +58,21 @@ class _LmStudioQuantSelectorState extends State<LmStudioQuantSelector> {
 
     late final String label;
     late final Color color;
-    late final IconData icon;
+    late final List<List<dynamic>> icon;
 
     switch (compatibility) {
       case MemoryCompatibility.fullGpuOffload:
         label = l10n.lm_studio_full_gpu_offload;
         color = Colors.green;
-        icon = Icons.rocket_launch_outlined;
+        icon = HugeIcons.strokeRoundedRocket;
       case MemoryCompatibility.partialGpuOffload:
         label = l10n.lm_studio_partial_gpu_offload;
         color = Colors.blue;
-        icon = Icons.memory_outlined;
+        icon = HugeIcons.strokeRoundedCpu;
       case MemoryCompatibility.likelyTooLarge:
         label = l10n.lm_studio_likely_too_large;
         color = Colors.red;
-        icon = Icons.cancel_outlined;
+        icon = HugeIcons.strokeRoundedCancel01;
       case MemoryCompatibility.unknown:
         return const SizedBox.shrink();
     }
@@ -85,7 +86,7 @@ class _LmStudioQuantSelectorState extends State<LmStudioQuantSelector> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 12, color: color),
+          HugeIcon(icon: icon, size: 12, color: color),
           const SizedBox(width: 4),
           Flexible(
             child: Text(
@@ -143,8 +144,8 @@ class _LmStudioQuantSelectorState extends State<LmStudioQuantSelector> {
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  Icon(
-                    _expanded ? Icons.expand_less : Icons.expand_more,
+                  HugeIcon(icon: 
+                    _expanded ? HugeIcons.strokeRoundedArrowUp01 : HugeIcons.strokeRoundedArrowDown01,
                     color: theme.hintColor,
                   ),
                 ],
@@ -209,10 +210,10 @@ class _LmStudioQuantSelectorState extends State<LmStudioQuantSelector> {
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Icon(
+                            HugeIcon(icon: 
                               isSelected
-                                  ? Icons.check_circle
-                                  : Icons.circle_outlined,
+                                  ? HugeIcons.strokeRoundedCheckmarkCircle01
+                                  : HugeIcons.strokeRoundedCircle,
                               size: 18,
                               color: isSelected
                                   ? (isDark
@@ -237,11 +238,11 @@ class _LmStudioQuantSelectorState extends State<LmStudioQuantSelector> {
                                             ?.copyWith(fontWeight: FontWeight.w600),
                                       ),
                                       if (widget.modelCapabilities.metadata.vision)
-                                        _CapIcon(Icons.visibility_outlined, Colors.amber),
+                                        _CapIcon(HugeIcons.strokeRoundedEye, Colors.amber),
                                       if (widget.modelCapabilities.metadata.reasoning)
-                                        _CapIcon(Icons.psychology_outlined, Colors.green),
+                                        _CapIcon(HugeIcons.strokeRoundedBrain, Colors.green),
                                       if (widget.modelCapabilities.metadata.trainedForToolUse)
-                                        _CapIcon(Icons.build_outlined, Colors.blue),
+                                        _CapIcon(HugeIcons.strokeRoundedTools, Colors.blue),
                                       if (isRecommended) _RecommendedTag(l10n: l10n),
                                     ],
                                   ),
@@ -272,7 +273,7 @@ class _LmStudioQuantSelectorState extends State<LmStudioQuantSelector> {
                                   Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      Icon(Icons.check, size: 14, color: Colors.green.shade400),
+                                      HugeIcon(icon: HugeIcons.strokeRoundedTick01, size: 14, color: Colors.green.shade400),
                                       const SizedBox(width: 2),
                                       Text(
                                         l10n.downloaded,
@@ -334,12 +335,12 @@ class _GgufTag extends StatelessWidget {
 class _CapIcon extends StatelessWidget {
   const _CapIcon(this.icon, this.color);
 
-  final IconData icon;
+  final List<List<dynamic>> icon;
   final Color color;
 
   @override
   Widget build(BuildContext context) {
-    return Icon(icon, size: 14, color: color);
+    return HugeIcon(icon: icon, size: 14, color: color);
   }
 }
 

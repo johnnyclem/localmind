@@ -1,3 +1,4 @@
+import 'package:hugeicons/hugeicons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:localmind/l10n/app_localizations.dart';
@@ -21,17 +22,17 @@ class ModelSortControl extends ConsumerWidget {
     }
   }
 
-  IconData _iconFor(ModelSortOption option) {
+  List<List<dynamic>> _iconFor(ModelSortOption option) {
     switch (option) {
       case ModelSortOption.favorites:
-        return Icons.star_outline;
+        return HugeIcons.strokeRoundedStar;
       case ModelSortOption.nameAsc:
-        return Icons.sort_by_alpha;
+        return HugeIcons.strokeRoundedAlpha;
       case ModelSortOption.sizeAsc:
       case ModelSortOption.sizeDesc:
-        return Icons.sd_storage_outlined;
+        return HugeIcons.strokeRoundedDatabase;
       case ModelSortOption.contextDesc:
-        return Icons.view_column_outlined;
+        return HugeIcons.strokeRoundedView;
     }
   }
 
@@ -45,13 +46,13 @@ class ModelSortControl extends ConsumerWidget {
       initialValue: current,
       onSelected: (option) =>
           ref.read(modelSortOptionProvider.notifier).setOption(option),
-      icon: const Icon(Icons.sort, size: 20),
+      icon: const HugeIcon(icon: HugeIcons.strokeRoundedSlidersHorizontal, size: 20),
       itemBuilder: (context) => ModelSortOption.values.map((option) {
         return PopupMenuItem(
           value: option,
           child: Row(
             children: [
-              Icon(
+              HugeIcon(icon: 
                 _iconFor(option),
                 size: 18,
                 color: option == current

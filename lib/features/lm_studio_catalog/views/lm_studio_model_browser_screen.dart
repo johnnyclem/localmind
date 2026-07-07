@@ -1,3 +1,4 @@
+import 'package:hugeicons/hugeicons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gpt_markdown/gpt_markdown.dart';
@@ -129,10 +130,14 @@ class _LmStudioModelBrowserScreenState
                   onChanged: _onSearchChanged,
                   decoration: InputDecoration(
                     hintText: l10n.lm_studio_model_search_hint,
-                    prefixIcon: const Icon(Icons.search),
+                    prefixIcon: const Center(
+                      widthFactor: 1.0,
+                      heightFactor: 1.0,
+                      child: HugeIcon(icon: HugeIcons.strokeRoundedSearch01, size: 20),
+                    ),
                     suffixIcon: _searchQuery.isNotEmpty
                         ? IconButton(
-                            icon: const Icon(Icons.close),
+                            icon: const HugeIcon(icon: HugeIcons.strokeRoundedCancel01, size: 18),
                             onPressed: () {
                               _searchController.clear();
                               _onSearchChanged('');
@@ -364,8 +369,8 @@ class _ModelListTile extends StatelessWidget {
                           ),
                         ),
                         if (model.isVerified)
-                          Icon(
-                            Icons.verified,
+                          HugeIcon(icon: 
+                            HugeIcons.strokeRoundedCheckmarkBadge01,
                             size: 16,
                             color: isDark
                                 ? AppColors.darkAccent
@@ -373,8 +378,8 @@ class _ModelListTile extends StatelessWidget {
                           ),
                         if (model.isStaffPick) ...[
                           const SizedBox(width: 4),
-                          Icon(
-                            Icons.auto_awesome,
+                          HugeIcon(icon: 
+                            HugeIcons.strokeRoundedSparkles,
                             size: 14,
                             color: Colors.purple.shade300,
                           ),
@@ -405,7 +410,7 @@ class _ModelListTile extends StatelessWidget {
                         _CapabilityIcons(model: model),
                         const Spacer(),
                         if (model.likes > 0) ...[
-                          Icon(Icons.favorite_border,
+                          HugeIcon(icon: HugeIcons.strokeRoundedFavourite,
                               size: 14, color: theme.hintColor),
                           const SizedBox(width: 2),
                           Text(
@@ -415,7 +420,7 @@ class _ModelListTile extends StatelessWidget {
                           const SizedBox(width: 8),
                         ],
                         if (model.downloads > 0) ...[
-                          Icon(Icons.download_outlined,
+                          HugeIcon(icon: HugeIcons.strokeRoundedDownload01,
                               size: 14, color: theme.hintColor),
                           const SizedBox(width: 2),
                           Text(
@@ -480,21 +485,21 @@ class _CapabilityIcons extends StatelessWidget {
   Widget build(BuildContext context) {
     final icons = <Widget>[];
     if (model.metadata.vision) {
-      icons.add(_capIcon(Icons.visibility_outlined, Colors.amber));
+      icons.add(_capIcon(HugeIcons.strokeRoundedEye, Colors.amber));
     }
     if (model.metadata.trainedForToolUse) {
-      icons.add(_capIcon(Icons.build_outlined, Colors.blue));
+      icons.add(_capIcon(HugeIcons.strokeRoundedTools, Colors.blue));
     }
     if (model.metadata.reasoning) {
-      icons.add(_capIcon(Icons.psychology_outlined, Colors.green));
+      icons.add(_capIcon(HugeIcons.strokeRoundedBrain, Colors.green));
     }
     return Row(children: icons);
   }
 
-  Widget _capIcon(IconData icon, Color color) {
+  Widget _capIcon(List<List<dynamic>> icon, Color color) {
     return Padding(
       padding: const EdgeInsets.only(right: 4),
-      child: Icon(icon, size: 16, color: color),
+      child: HugeIcon(icon: icon, size: 16, color: color),
     );
   }
 }
@@ -635,7 +640,7 @@ class _ModelDetailPanelState extends ConsumerState<_ModelDetailPanel> {
                     child: Row(
                       children: [
                         IconButton(
-                          icon: const Icon(Icons.arrow_back),
+                          icon: const HugeIcon(icon: HugeIcons.strokeRoundedArrowLeft01),
                           onPressed: widget.onClose,
                         ),
                         Expanded(
@@ -649,7 +654,7 @@ class _ModelDetailPanelState extends ConsumerState<_ModelDetailPanel> {
                           ),
                         ),
                         IconButton(
-                          icon: const Icon(Icons.close),
+                          icon: const HugeIcon(icon: HugeIcons.strokeRoundedCancel01),
                           onPressed: widget.onClose,
                         ),
                       ],
@@ -686,14 +691,14 @@ class _ModelDetailPanelState extends ConsumerState<_ModelDetailPanel> {
                           Row(
                             children: [
                               if (widget.model.likes > 0) ...[
-                                Icon(Icons.favorite_border,
+                                HugeIcon(icon: HugeIcons.strokeRoundedFavourite,
                                     size: 16, color: theme.hintColor),
                                 const SizedBox(width: 4),
                                 Text(_formatCount(widget.model.likes)),
                                 const SizedBox(width: 16),
                               ],
                               if (widget.model.downloads > 0) ...[
-                                Icon(Icons.download_outlined,
+                                HugeIcon(icon: HugeIcons.strokeRoundedDownload01,
                                     size: 16, color: theme.hintColor),
                                 const SizedBox(width: 4),
                                 Text(_formatCount(widget.model.downloads)),
@@ -806,10 +811,10 @@ class _ModelDetailPanelState extends ConsumerState<_ModelDetailPanel> {
                                       value: activeJob.progressFraction,
                                     ),
                                   )
-                                : Icon(
+                                : HugeIcon(icon: 
                                     selectedDownloaded
-                                        ? Icons.check
-                                        : Icons.download,
+                                        ? HugeIcons.strokeRoundedTick01
+                                        : HugeIcons.strokeRoundedDownload01,
                                   ),
                             label: Text(
                               activeJob != null
@@ -948,19 +953,19 @@ class _CapabilityRow extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final caps = <Widget>[];
     if (model.metadata.vision) {
-      caps.add(_capLabel(Icons.visibility_outlined, l10n.lm_studio_vision, Colors.amber));
+      caps.add(_capLabel(HugeIcons.strokeRoundedEye, l10n.lm_studio_vision, Colors.amber));
     }
     if (model.metadata.trainedForToolUse) {
-      caps.add(_capLabel(Icons.build_outlined, l10n.lm_studio_tool_use, Colors.blue));
+      caps.add(_capLabel(HugeIcons.strokeRoundedTools, l10n.lm_studio_tool_use, Colors.blue));
     }
     if (model.metadata.reasoning) {
-      caps.add(_capLabel(Icons.psychology_outlined, l10n.lm_studio_reasoning, Colors.green));
+      caps.add(_capLabel(HugeIcons.strokeRoundedBrain, l10n.lm_studio_reasoning, Colors.green));
     }
     if (caps.isEmpty) return const SizedBox.shrink();
     return Wrap(spacing: 8, runSpacing: 8, children: caps);
   }
 
-  Widget _capLabel(IconData icon, String label, Color color) {
+  Widget _capLabel(List<List<dynamic>> icon, String label, Color color) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
@@ -970,7 +975,7 @@ class _CapabilityRow extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 14, color: color),
+          HugeIcon(icon: icon, size: 14, color: color),
           const SizedBox(width: 4),
           Text(label, style: TextStyle(color: color, fontSize: 12)),
         ],
@@ -989,21 +994,21 @@ class _CompatibilityBadge extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     late final String label;
     late final Color color;
-    late final IconData icon;
+    late final List<List<dynamic>> icon;
 
     switch (compatibility) {
       case MemoryCompatibility.fullGpuOffload:
         label = l10n.lm_studio_full_gpu_offload;
         color = Colors.green;
-        icon = Icons.rocket_launch_outlined;
+        icon = HugeIcons.strokeRoundedRocket;
       case MemoryCompatibility.partialGpuOffload:
         label = l10n.lm_studio_partial_gpu_offload;
         color = Colors.blue;
-        icon = Icons.memory_outlined;
+        icon = HugeIcons.strokeRoundedCpu;
       case MemoryCompatibility.likelyTooLarge:
         label = l10n.lm_studio_likely_too_large;
         color = Colors.red;
-        icon = Icons.cancel_outlined;
+        icon = HugeIcons.strokeRoundedCancel01;
       case MemoryCompatibility.unknown:
         return const SizedBox.shrink();
     }
@@ -1017,7 +1022,7 @@ class _CompatibilityBadge extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 14, color: color),
+          HugeIcon(icon: icon, size: 14, color: color),
           const SizedBox(width: 6),
           Text(
             label,
