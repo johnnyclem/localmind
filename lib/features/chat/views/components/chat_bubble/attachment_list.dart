@@ -4,6 +4,7 @@ import 'package:localmind/core/theme/colors.dart';
 import 'package:localmind/features/chat/views/components/image_preview_dialog.dart';
 import 'package:localmind/features/chat/utils/attachment_helpers.dart';
 import 'package:localmind/features/chat/views/components/audio_player_widget.dart';
+import 'package:localmind/l10n/app_localizations.dart';
 
 class AttachmentList extends StatelessWidget {
   const AttachmentList({super.key, required this.paths, required this.isUser});
@@ -34,8 +35,9 @@ class _AttachmentItem extends StatelessWidget {
     final text = await AttachmentHelpers.readTextFile(path);
     if (!context.mounted) return;
     if (text == null) {
+      final l10n = AppLocalizations.of(context)!;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Could not read file')),
+        SnackBar(content: Text(l10n.could_not_read_file)),
       );
       return;
     }

@@ -262,152 +262,155 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get delete_builtin_persona_body =>
-      'This is a built-in persona. You can restore it later from Settings.';
+      'هذه شخصية مدمجة. يمكنك استعادتها لاحقًا من الإعدادات.';
 
   @override
-  String get restore_builtin_personas => 'Restore default personas';
+  String get restore_builtin_personas => 'استعادة الشخصيات الافتراضية';
 
   @override
   String get restore_builtin_personas_desc =>
-      'Re-add any built-in personas you\'ve deleted';
+      'إعادة إضافة أي شخصيات مدمجة قمت بحذفها';
 
   @override
-  String get restore_builtin_personas_success => 'Default personas restored';
+  String get restore_builtin_personas_success =>
+      'تم استعادة الشخصيات الافتراضية';
 
   @override
-  String get clear_personas => 'Clear personas';
+  String get clear_personas => 'مسح الشخصيات';
 
   @override
-  String get enable_image_compression => 'Compress images before sending';
+  String get enable_image_compression => 'ضغط الصور قبل الإرسال';
 
   @override
   String get enable_image_compression_desc =>
-      'Resize and compress attached images so uploads stay within server limits';
+      'تغيير حجم الصور المرفقة وضغطها لتبقى عمليات التحميل ضمن حدود الخادم';
 
   @override
-  String get image_compression_level => 'Compression aggressiveness';
+  String get image_compression_level => 'درجة ضغط الصور';
 
   @override
   String get image_compression_level_desc =>
-      'Higher aggressiveness produces smaller uploads at lower quality';
+      'الضغط العالي ينتج أحجام تحميل أصغر بجودة أقل';
 
   @override
-  String get image_compression_level_low => 'Low';
+  String get image_compression_level_low => 'منخفض';
 
   @override
-  String get image_compression_level_medium => 'Medium';
+  String get image_compression_level_medium => 'متوسط';
 
   @override
-  String get image_compression_level_high => 'High';
+  String get image_compression_level_high => 'مرتفع';
 
   @override
-  String get sort_models_tooltip => 'Sort models';
+  String get sort_models_tooltip => 'فرز النماذج';
 
   @override
-  String get sort_by_favorites => 'Favorites first';
+  String get sort_by_favorites => 'المفضلة أولاً';
 
   @override
-  String get sort_by_name => 'Name (A-Z)';
+  String get sort_by_name => 'الاسم (أ-ي)';
 
   @override
-  String get sort_by_size_smallest => 'Size (smallest first)';
+  String get sort_by_size_smallest => 'الحجم (الأصغر أولاً)';
 
   @override
-  String get sort_by_size_largest => 'Size (largest first)';
+  String get sort_by_size_largest => 'الحجم (الأكبر أولاً)';
 
   @override
-  String get sort_by_context_length => 'Context length';
+  String get sort_by_context_length => 'طول السياق';
 
   @override
   String bulk_ai_rename_progress(int done, int total) {
-    return 'Renaming $done/$total...';
+    return 'إعادة تسمية $done/$total...';
   }
 
   @override
   String selected_count(int count) {
-    return '$count selected';
+    return 'تم تحديد $count';
   }
 
   @override
-  String get ai_rename_tooltip => 'Rename selected with AI';
+  String get ai_rename_tooltip =>
+      'إعادة تسمية العناصر المحددة بواسطة الذكاء الاصطناعي';
 
   @override
-  String get new_chat_in_folder_tooltip => 'New chat in this folder';
+  String get new_chat_in_folder_tooltip => 'دردشة جديدة في هذا المجلد';
 
   @override
   String total_tokens_count(int count) {
-    return '$count tokens';
+    return '$count من الرموز';
   }
 
   @override
-  String get smart_replies_use_persona => 'Use persona in smart replies';
+  String get smart_replies_use_persona => 'استخدام الشخصية في الردود الذكية';
 
   @override
   String get smart_replies_use_persona_desc =>
-      'Suggested replies match the tone of the active persona instead of a generic assistant';
+      'تتطابق الردود المقترحة مع نبرة الشخصية النشطة بدلاً من مساعد عام';
 
   @override
-  String get keep_persona_on_new_chat => 'Keep persona on new chat';
+  String get keep_persona_on_new_chat =>
+      'الاحتفاظ بالشخصية عند بدء دردشة جديدة';
 
   @override
   String get keep_persona_on_new_chat_desc =>
-      'Don\'t clear the selected persona(s) after starting a new chat';
+      'لا تقم بمسح الشخصية المحددة بعد بدء دردشة جديدة';
 
   @override
-  String get role_swap_button_enabled => 'Show role-swap button';
+  String get role_swap_button_enabled => 'إظهار زر تبديل الأدوار';
 
   @override
   String get role_swap_button_enabled_desc =>
-      'Show a button in the chat input to send your message as the assistant instead of the user, without generating a response';
+      'إظهار زر في مدخلات الدردشة لإرسال رسالتك كدور مساعد بدلاً من المستخدم، دون إنشاء رد';
 
   @override
-  String get send_as_user_tooltip => 'Send as user';
+  String get send_as_user_tooltip => 'إرسال كمستخدم';
 
   @override
-  String get send_as_assistant_tooltip => 'Send as assistant (no response)';
+  String get send_as_assistant_tooltip => 'إرسال كمساعد (بدون رد)';
 
   @override
-  String get insert_without_generating_tooltip => 'Insert without generating';
+  String get insert_without_generating_tooltip => 'إدراج دون إنشاء رد';
 
   @override
-  String get token_usage_title => 'Token Usage';
+  String get token_usage_title => 'استخدام الرموز (Tokens)';
 
   @override
-  String get total_tokens_label => 'Tokens used';
+  String get total_tokens_label => 'الرموز المستخدمة';
 
   @override
-  String get usage_percent_label => 'Context used';
+  String get usage_percent_label => 'السياق المستخدم';
 
   @override
-  String get export_choice_title => 'Export';
+  String get export_choice_title => 'تصدير';
 
   @override
-  String get export_choice_body => 'How would you like to export this?';
+  String get export_choice_body => 'كيف ترغب في تصدير هذا؟';
 
   @override
-  String get copy_to_clipboard => 'Copy to Clipboard';
+  String get copy_to_clipboard => 'نسخ إلى الحافظة';
 
   @override
   String bulk_export_conversations_success(int count) {
-    return 'Exported $count conversations';
+    return 'تم تصدير $count من المحادثات';
   }
 
   @override
-  String get bulk_ai_rename_confirm_title => 'Rename with AI?';
+  String get bulk_ai_rename_confirm_title => 'إعادة التسمية بالذكاء الاصطناعي؟';
 
   @override
   String bulk_ai_rename_confirm_body(int count) {
-    return 'This will ask the AI to generate a new title for each of the $count selected conversations, replacing their current titles. This can take a while and cannot be undone.';
+    return 'سيؤدي هذا إلى جعل الذكاء الاصطناعي ينشئ عنوانًا جديدًا لكل من المحادثات المحددة الـ $count، ليحل محل عناوينها الحالية. قد يستغرق هذا بعض الوقت ولا يمكن التراجع عنه.';
   }
 
   @override
-  String get sort_by_modified_date => 'Last modified';
+  String get sort_by_modified_date => 'آخر تعديل';
 
   @override
-  String get sort_by_created_date => 'Date created';
+  String get sort_by_created_date => 'تاريخ الإنشاء';
 
   @override
-  String get sort_title => 'Sort';
+  String get sort_title => 'فرز';
 
   @override
   String get clear_conversation_title => 'مسح المحادثة؟';
@@ -617,14 +620,15 @@ class AppLocalizationsAr extends AppLocalizations {
   String get enable_smart_reply => 'الردود الذكية المحلية';
 
   @override
-  String get ai_user_response_enabled => 'AI user message (hold send)';
+  String get ai_user_response_enabled =>
+      'رسالة مستخدم بالذكاء الاصطناعي (اضغط مطولاً)';
 
   @override
   String get ai_user_response_enabled_desc =>
-      'Hold the send button for 3 seconds to have the AI write and send your next message';
+      'اضغط مع الاستمرار على زر الإرسال لمدة 3 ثوانٍ ليقوم الذكاء الاصطناعي بكتابة وإرسال رسالتك التالية';
 
   @override
-  String get ai_user_response_tooltip => 'Generate user message with AI';
+  String get ai_user_response_tooltip => 'إنشاء رسالة مستخدم بالذكاء الاصطناعي';
 
   @override
   String get streaming_responses => 'الردود المتدفقة';
@@ -640,14 +644,14 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get show_system_messages_desc =>
-      'When no persona is selected, send a default assistant system prompt with each request';
+      'عند عدم تحديد أي شخصية، أرسل مطالبة نظام المساعد الافتراضية مع كل طلب';
 
   @override
-  String get show_system_messages_in_chat => 'Show System Messages in Chat';
+  String get show_system_messages_in_chat => 'إظهار رسائل النظام في الدردشة';
 
   @override
   String get show_system_messages_in_chat_desc =>
-      'Display system messages (e.g. from an imported backup) as visible bubbles in the conversation';
+      'عرض رسائل النظام (على سبيل المثال من نسخة احتياطية مستوردة) كفقاعات مرئية في المحادثة';
 
   @override
   String get haptic_feedback => 'الاستجابة اللمسية';
@@ -704,11 +708,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get select_persona => 'اختيار شخصية';
 
   @override
-  String get manage_personas => 'Manage personas';
+  String get manage_personas => 'إدارة الشخصيات';
 
   @override
-  String get personas_combine_hint =>
-      'Select multiple personas in chat to stack their system prompts.';
+  String get personas_combine_hint => 'سيتم دمج الشخصيات المحددة';
 
   @override
   String get start_conversation => 'ابدأ محادثة';
@@ -1693,28 +1696,28 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get unload_all_models => 'Unload all';
+  String get unload_all_models => 'إلغاء تحميل جميع النماذج';
 
   @override
   String loaded_models_count(int count) {
-    return '$count loaded';
+    return 'تم تحميل $count نموذج';
   }
 
   @override
-  String get all_models_unloaded => 'All models unloaded';
+  String get all_models_unloaded => 'تم إلغاء تحميل جميع النماذج';
 
   @override
-  String get branch_chat => 'Branch chat';
+  String get branch_chat => 'تفريع الدردشة';
 
   @override
-  String get branch_chat_desc => 'Start a new conversation from this message';
+  String get branch_chat_desc => 'إنشاء دردشة جديدة بدءًا من هذه الرسالة';
 
   @override
-  String get edit_assistant_message_desc => 'Edit the assistant response text.';
+  String get edit_assistant_message_desc => 'تعديل محتوى رسالة المساعد';
 
   @override
-  String switch_to_model(String modelName) {
-    return 'Switch to $modelName';
+  String switch_to_model(String modelName, Object model) {
+    return 'التبديل إلى النموذج $model';
   }
 
   @override
@@ -2152,507 +2155,521 @@ class AppLocalizationsAr extends AppLocalizations {
   String get tool_status_failed => 'Failed';
 
   @override
-  String get model_favorite_toggle => 'Toggle favorite';
+  String get model_favorite_toggle => 'تبديل المفضلة';
 
   @override
-  String get model_note_label => 'Note';
+  String get model_note_label => 'ملاحظة';
 
   @override
-  String get model_note_hint => 'Add a note about this model…';
+  String get model_note_hint => 'أضف ملاحظة خاصة لهذا النموذج...';
 
   @override
   String get unload_models_before_load =>
-      'Unload all models before loading a new one';
+      'إلغاء تحميل النماذج قبل التحميل الجديد';
 
   @override
   String get temp_chat_keyboard_incognito =>
-      'Incognito keyboard in temporary chat';
+      'لوحة مفاتيح متخفية في الدردشة المؤقتة';
 
   @override
   String get temp_chat_keyboard_incognito_desc =>
-      'Disables keyboard learning and suggestions in temporary chats (e.g. SwiftKey incognito).';
+      'طلب عدم حفظ سجل الكتابة من لوحة مفاتيح النظام أثناء الدردشات المؤقتة';
 
   @override
-  String get resume_last_chat => 'Resume last chat on launch';
+  String get resume_last_chat => 'استئناف الدردشة الأخيرة';
 
   @override
-  String get resume_last_chat_desc =>
-      'Restore your last open conversation when reopening the app.';
+  String get resume_last_chat_desc => 'افتح تلقائيًا آخر محادثة نشطة عند البدء';
 
   @override
-  String get export_all_data => 'Export all data';
+  String get export_all_data => 'تصدير جميع البيانات';
 
   @override
-  String get import_all_data => 'Import all data';
+  String get import_all_data => 'استيراد جميع البيانات';
 
   @override
-  String get export_data_success => 'Backup exported successfully';
+  String get export_data_success => 'تم تصدير البيانات بنجاح';
 
   @override
-  String get import_data_success => 'Backup imported successfully';
+  String get import_data_success => 'تم استيراد البيانات بنجاح';
 
   @override
   String import_data_failed(String error) {
-    return 'Failed to import backup: $error';
+    return 'فشل استيراد البيانات';
   }
 
   @override
   String get import_data_confirm =>
-      'Import conversations and custom personas from this backup? Existing items with the same IDs will be updated.';
+      'سيؤدي هذا إلى استبدال جميع بياناتك الحالية بالبيانات المستوردة. هل تريد الاستمرار؟';
 
   @override
   String get import_settings_confirm =>
-      'Replace current settings with the imported backup?';
+      'سيؤدي هذا إلى استبدال إعداداتك الحالية بالإعدادات المستوردة. هل تريد الاستمرار؟';
 
   @override
-  String get export_conversations => 'Export conversations';
+  String get export_conversations => 'تصدير المحادثات';
 
   @override
-  String get import_conversations => 'Import conversations';
+  String get import_conversations => 'استيراد المحادثات';
 
   @override
-  String get export_personas => 'Export personas';
+  String get export_personas => 'تصدير الشخصيات';
 
   @override
-  String get import_personas => 'Import personas';
+  String get import_personas => 'استيراد الشخصيات';
 
   @override
-  String get export_settings => 'Export settings';
+  String get export_settings => 'تصدير الإعدادات';
 
   @override
-  String get import_settings => 'Import settings';
+  String get import_settings => 'استيراد الإعدادات';
 
   @override
-  String get export_all_zip => 'Export all (ZIP)';
+  String get export_all_zip => 'تصدير الكل (ZIP)';
 
   @override
-  String get import_all_zip => 'Import all (ZIP)';
+  String get import_all_zip => 'استيراد الكل (ZIP)';
 
   @override
-  String get duplicate_chat => 'Duplicate chat';
+  String get duplicate_chat => 'تكرار الدردشة';
 
   @override
-  String get duplicate_chat_success => 'Chat duplicated';
+  String get duplicate_chat_success => 'تم تكرار الدردشة بنجاح';
 
   @override
-  String get move_to_folder => 'Move to folder';
+  String get move_to_folder => 'نقل إلى مجلد';
 
   @override
-  String get remove_from_folder => 'Remove from folder';
+  String get remove_from_folder => 'إزالة من المجلد';
 
   @override
-  String get create_folder => 'Create folder';
+  String get create_folder => 'إنشاء مجلد';
 
   @override
-  String get new_folder => 'New folder';
+  String get new_folder => 'مجلد جديد';
 
   @override
-  String get folder_name_hint => 'Folder name';
+  String get folder_name_hint => 'أدخل اسم المجلد...';
 
   @override
-  String get all_chats => 'All';
+  String get all_chats => 'جميع الدردشات';
 
   @override
-  String get unfiled_chats => 'Unfiled';
+  String get unfiled_chats => 'دردشات غير مصنفة';
 
   @override
-  String get create => 'Create';
+  String get create => 'إنشاء';
 
   @override
-  String get server_path_prefix_label => 'API path prefix';
+  String get server_path_prefix_label => 'بادئة مسار الخادم';
 
   @override
-  String get server_path_prefix_hint => '/your-secret-token';
+  String get server_path_prefix_hint =>
+      'بادئة اختيارية لمسارات واجهة برمجة تطبيقات الخادم (على سبيل المثال /v1)';
 
   @override
-  String get search_message_contents => 'Search message contents';
+  String get search_message_contents => 'البحث في محتوى الرسائل...';
 
   @override
-  String get message_search_results => 'Message matches';
+  String get message_search_results => 'نتائج البحث في الرسائل';
 
   @override
-  String get saved_messages_title => 'Saved Messages';
+  String get saved_messages_title => 'الرسائل المحفوظة';
 
   @override
-  String get nav_saved_messages => 'Saved Messages';
+  String get nav_saved_messages => 'الرسائل المحفوظة';
 
   @override
-  String get saved_messages_empty =>
-      'No saved messages yet. Bookmark a message from its options menu.';
+  String get saved_messages_empty => 'لا توجد رسائل محفوظة بعد';
 
   @override
-  String get save_message => 'Save message';
+  String get save_message => 'حفظ الرسالة';
 
   @override
-  String get message_saved => 'Message saved';
+  String get message_saved => 'تم حفظ الرسالة';
 
   @override
   String token_count(int count) {
-    return '$count tokens';
+    return 'الرموز: $count';
   }
 
   @override
   String estimated_token_count(int count) {
-    return '~$count tokens (estimated)';
+    return 'الرموز المقدرة: $count';
   }
 
   @override
-  String get test_tts_section_title => 'Test voice';
+  String get test_tts_section_title => 'اختبار تحويل النص إلى كلام';
 
   @override
-  String get test_tts_hint => 'Enter text to hear the current TTS engine…';
+  String get test_tts_hint => 'اكتب شيئًا لاختبار الصوت...';
 
   @override
-  String get test_speak_button => 'Speak';
+  String get test_speak_button => 'تحدث';
 
   @override
-  String get scroll_to_bottom => 'Scroll to bottom';
+  String get scroll_to_bottom => 'التمرير إلى الأسفل';
 
   @override
-  String get generate_ai_response => 'Generate AI response';
+  String get generate_ai_response => 'إنشاء رد بالذكاء الاصطناعي';
 
   @override
-  String get no_response => 'No response';
+  String get no_response => 'لا يوجد رد';
 
   @override
-  String get export => 'Export';
+  String get export => 'تصدير';
 
   @override
-  String get import => 'Import';
+  String get import => 'استيراد';
 
   @override
-  String get conversations_label => 'Conversations';
+  String get conversations_label => 'المحادثات';
 
   @override
-  String get personas_label => 'Personas';
+  String get personas_label => 'الشخصيات';
 
   @override
-  String get settings_label => 'Settings';
+  String get settings_label => 'الإعدادات';
 
   @override
-  String get export_conversation => 'Export conversation';
+  String get export_conversation => 'تصدير المحادثة';
 
   @override
-  String get tts_process_markdown => 'Process markdown for speech';
+  String get tts_process_markdown => 'معالجة التنسيق (Markdown)';
 
   @override
   String get tts_process_markdown_desc =>
-      'Strip formatting like **bold** before reading aloud';
+      'إزالة التنسيق مثل الخط **العريض** قبل القراءة بصوت عالٍ';
 
   @override
-  String get tts_skip_seconds => 'Skip interval';
+  String get tts_skip_seconds => 'ثواني التخطي';
 
   @override
-  String get tts_skip_seconds_desc =>
-      'Forward and rewind jump size during playback';
+  String get tts_skip_seconds_desc => 'الوقت للتخطي للأمام/الخلف في مشغل الصوت';
 
   @override
   String tts_skip_seconds_value(int seconds) {
-    return '${seconds}s';
+    return '$seconds ثانية';
   }
 
   @override
-  String get preview_system_prompts => 'Preview system prompts';
+  String get preview_system_prompts => 'معاينة مطالبات النظام';
 
   @override
-  String get welcome_message_1 => 'What can I help you with today?';
+  String get welcome_message_1 => 'مرحبًا! أنا مساعدك المحلي للذكاء الاصطناعي.';
 
   @override
-  String get welcome_message_2 => 'Ask me anything — I\'m ready when you are.';
+  String get welcome_message_2 =>
+      'اسألني عن أي شيء - أنا جاهز عندما تكون مستعدًا.';
 
   @override
-  String get welcome_message_3 => 'Start a conversation below.';
+  String get welcome_message_3 =>
+      'يتم معالجة بياناتك محليًا ولا تغادر جهازك أبدًا.';
 
   @override
-  String get welcome_message_4 => 'Need ideas? Try one of the quick prompts.';
+  String get welcome_message_4 =>
+      'للبدء، حدد نموذجًا من الشريط العلوي أو أضف نموذجًا جديدًا في قسم إدارة النماذج.';
 
   @override
-  String get temporary_chat => 'Temporary chat';
+  String get temporary_chat => 'دردشة مؤقتة';
 
   @override
-  String get temporary_chat_desc => 'Chats aren\'t saved to history.';
+  String get temporary_chat_desc =>
+      'لن يتم حفظ الرسائل في هذه الدردشة في السجل';
 
   @override
-  String get temporary_chat_banner => 'Temporary chat — not saved to history';
+  String get temporary_chat_banner => 'الدردشة المؤقتة نشطة — لن يتم حفظ السجل';
 
   @override
-  String get temporary_chat_save_warning_title =>
-      'Save message in temporary chat?';
+  String get temporary_chat_save_warning_title => 'حفظ الدردشة المؤقتة؟';
 
   @override
   String get temporary_chat_save_warning_body =>
-      'This chat is temporary and hidden from history. The saved message will still appear in Saved Messages.';
+      'هذه الدردشة غير محفوظة في السجل الخاص بك. هل تريد حفظها الآن؟';
 
   @override
-  String get save_to_history => 'Save to history';
+  String get save_to_history => 'حفظ في السجل';
 
   @override
-  String get share_conversation => 'Share conversation';
+  String get share_conversation => 'مشاركة المحادثة';
 
   @override
-  String get download_tts_audio => 'Download audio';
+  String get download_tts_audio => 'تنزيل الصوت';
 
   @override
-  String get tts_download_unavailable =>
-      'Download is only available for Piper and Kitten TTS';
+  String get tts_download_unavailable => 'تنزيل الصوت غير متاح';
 
   @override
-  String get tts_download_no_audio => 'No audio available to download yet';
+  String get tts_download_no_audio => 'لا يوجد صوت تم إنشاؤه لتنزيله';
 
   @override
-  String get tts_download_success => 'Audio saved';
+  String get tts_download_success => 'تم حفظ الصوت بنجاح';
 
   @override
-  String get return_to_chat => 'Return to chat';
+  String get return_to_chat => 'العودة إلى الدردشة';
 
   @override
-  String get return_to_temp_chat => 'Return to temporary chat';
+  String get return_to_temp_chat => 'العودة إلى الدردشة المؤقتة';
 
   @override
-  String get insert_saved_message => 'Insert saved message';
+  String get insert_saved_message => 'إدراج رسالة محفوظة';
 
   @override
   String get insert_saved_message_desc =>
-      'Choose a saved message to add to your input';
+      'إضافة مقتطف من رسائلك المحفوظة إلى الدردشة';
 
   @override
-  String get model_info => 'Model info';
+  String get model_info => 'معلومات النموذج';
 
   @override
-  String get model_name => 'Model name';
+  String get model_name => 'اسم النموذج';
 
   @override
-  String get model_identifier => 'Identifier';
+  String get model_identifier => 'معرف النموذج';
 
   @override
-  String get not_available => 'Not available';
+  String get not_available => 'غير متاح';
 
   @override
-  String get save_message_folders => 'Save message';
+  String get save_message_folders => 'حفظ في المجلدات';
 
   @override
-  String get remove_from_saved => 'Remove from saved';
+  String get remove_from_saved => 'إزالة من المحفوظات';
 
   @override
-  String get message_already_saved => 'Saved';
+  String get message_already_saved => 'الرسالة محفوظة بالفعل';
 
   @override
-  String get stream_ttft => 'Time to first token';
+  String get stream_ttft => 'الوقت حتى الرمز الأول';
 
   @override
-  String get stream_tokens_per_sec => 'Tokens per second';
+  String get stream_tokens_per_sec => 'الرموز في الثانية';
 
   @override
-  String get stream_stop_reason => 'Stop reason';
+  String get stream_stop_reason => 'سبب التوقف';
 
   @override
-  String get stream_input_tokens => 'Input tokens';
+  String get stream_input_tokens => 'رموز الإدخال';
 
   @override
-  String get stream_output_tokens => 'Output tokens';
+  String get stream_output_tokens => 'رموز الإخراج';
 
   @override
-  String get stream_generation_time => 'Generation time';
+  String get stream_generation_time => 'وقت الإنشاء';
 
   @override
-  String get attach_image => 'Image';
+  String get attach_image => 'إرفاق صورة';
 
   @override
-  String get attach_text_document => 'Text document';
+  String get attach_text_document => 'إرفاق مستند نصي';
 
   @override
-  String get add_attachment => 'Add attachment';
+  String get add_attachment => 'إضافة مرفق';
 
   @override
-  String get photo_permission_denied =>
-      'Photo access is required to attach images';
+  String get photo_permission_denied => 'تم رفض إذن الوصول إلى الصور';
 
   @override
-  String get characters_label => 'Characters';
+  String get characters_label => 'الحروف';
 
   @override
-  String get exit_temporary_chat_title => 'Exit temporary chat?';
+  String get exit_temporary_chat_title => 'الخروج من الدردشة المؤقتة؟';
 
   @override
   String get exit_temporary_chat_body =>
-      'This will discard the current temporary chat and return to a new chat.';
+      'سيؤدي هذا إلى حذف المحادثة الحالية نهائيًا. هل تريد الاستمرار؟';
 
   @override
   String get saved_message_temp_snap_unavailable =>
-      'This message was saved from a temporary chat and can\'t be opened in its original conversation.';
+      'لقطات الرسائل غير متوفرة في الدردشات المؤقتة';
 
   @override
-  String get filter_title => 'Filter';
+  String get filter_title => 'تصفية الدردشات';
 
   @override
-  String get filter_pinned => 'Pinned';
+  String get filter_pinned => 'المثبتة';
 
   @override
-  String get filter_archived => 'Archived';
+  String get filter_archived => 'المؤرشفة';
 
   @override
-  String get filter_temp_chats => 'Temporary chats';
+  String get filter_temp_chats => 'الدردشات المؤقتة';
 
   @override
-  String get filter_user_messages => 'User messages';
+  String get filter_user_messages => 'رسائل المستخدم';
 
   @override
-  String get filter_assistant_messages => 'Assistant messages';
+  String get filter_assistant_messages => 'رسائل المساعد';
 
   @override
-  String get archive_chat => 'Archive';
+  String get archive_chat => 'أرشفة الدردشة';
 
   @override
-  String get unarchive_chat => 'Unarchive';
+  String get unarchive_chat => 'إلغاء أرشفة الدردشة';
 
   @override
   String conversation_message_count(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count messages',
-      one: '1 message',
-    );
-    return '$_temp0';
+    return '$count رسالة';
   }
 
   @override
   String conversation_character_count(int count) {
-    return '$count chars';
+    return '$count حرف';
   }
 
   @override
-  String get generate_title_with_ai => 'Generate with AI';
+  String get generate_title_with_ai => 'إنشاء عنوان بالذكاء الاصطناعي';
 
   @override
-  String get generating_title => 'Generating...';
+  String get generating_title => 'جاري إنشاء العنوان...';
 
   @override
-  String get generate_title_failed => 'Could not generate a title';
+  String get generate_title_failed => 'تعذر إنشاء العنوان';
 
   @override
-  String get lm_studio_model_browser_title => 'Browse models';
+  String get lm_studio_model_browser_title => 'متصفح النماذج';
 
   @override
-  String get lm_studio_model_search_hint => 'Search models by name or author…';
+  String get lm_studio_model_search_hint => 'البحث عن نماذج...';
 
   @override
-  String get lm_studio_staff_picks => 'Staff picks';
+  String get lm_studio_staff_picks => 'ترشيحات فريق العمل';
 
   @override
-  String get lm_studio_community_models => 'Community models';
+  String get lm_studio_community_models => 'نماذج المجتمع';
 
   @override
-  String get lm_studio_no_models => 'No models found';
+  String get lm_studio_no_models => 'لم يتم العثور على نماذج';
 
   @override
   String lm_studio_models_count(int count) {
-    return '$count models';
+    return '$count نموذج';
   }
 
   @override
-  String get lm_studio_browse_models => 'Browse & download';
+  String get lm_studio_browse_models => 'تصفح النماذج على LM Studio';
 
   @override
-  String get lm_studio_model_search => 'LMS Model Search';
+  String get lm_studio_model_search => 'البحث عن النماذج';
 
   @override
-  String get lm_studio_downloads_title => 'Downloads';
+  String get lm_studio_downloads_title => 'التنزيلات';
 
   @override
-  String get lm_studio_choose_quant => 'Choose a download option';
+  String get lm_studio_choose_quant => 'اختر مستوى الكمية (Quantization)';
 
   @override
-  String get lm_studio_use_default_quant => 'Use default';
+  String get lm_studio_use_default_quant => 'استخدام الكمية الافتراضية';
 
   @override
-  String get lm_studio_recommended => 'Recommended';
+  String get lm_studio_recommended => 'موصى به';
 
   @override
-  String get lm_studio_clear_downloads => 'Clear finished';
+  String get lm_studio_clear_downloads => 'مسح التنزيلات المكتملة';
 
   @override
-  String get lm_studio_no_downloads => 'No downloads yet';
+  String get lm_studio_no_downloads => 'لا توجد تنزيلات نشطة';
 
   @override
   String get lm_studio_downloads_disclaimer =>
-      'Downloads run on the LM Studio host. Pausing, stopping, and deleting models must be done on that computer — not from this app.';
+      'يتم تنزيل النماذج مباشرة من Hugging Face.';
 
   @override
-  String get lm_studio_staff_pick => 'Staff pick';
+  String get lm_studio_staff_pick => 'ترشيح مميز';
 
   @override
-  String get lm_studio_params => 'PARAMS';
+  String get lm_studio_params => 'المعلمات';
 
   @override
-  String get lm_studio_arch => 'ARCH';
+  String get lm_studio_arch => 'البنية';
 
   @override
-  String get lm_studio_domain => 'DOMAIN';
+  String get lm_studio_domain => 'المجال';
 
   @override
-  String get lm_studio_format => 'FORMAT';
+  String get lm_studio_format => 'الصيغة';
 
   @override
-  String get lm_studio_vision => 'Vision';
+  String get lm_studio_vision => 'الرؤية البصرية';
 
   @override
-  String get lm_studio_tool_use => 'Tool use';
+  String get lm_studio_tool_use => 'استخدام الأدوات';
 
   @override
-  String get lm_studio_reasoning => 'Reasoning';
+  String get lm_studio_reasoning => 'التفكير والاستنتاج';
 
   @override
-  String get lm_studio_download_options => 'Download options';
+  String get lm_studio_download_options => 'خيارات التنزيل';
 
   @override
-  String get lm_studio_download => 'Download';
+  String get lm_studio_download => 'تنزيل';
 
   @override
   String lm_studio_download_size(String size) {
-    return 'Download $size';
+    return 'حجم التنزيل';
   }
 
   @override
   String lm_studio_downloading_percent(int percent) {
-    return 'Downloading $percent%';
+    return 'جاري التنزيل: $percent%';
   }
 
   @override
   String get lm_studio_readme_unavailable =>
-      'README not available for this model.';
+      'ملف README غير متاح لهذا النموذج.';
 
   @override
-  String get lm_studio_full_gpu_offload => 'Full GPU offload possible';
+  String get lm_studio_full_gpu_offload => 'تفريغ كامل لـ GPU ممكن';
 
   @override
-  String get lm_studio_partial_gpu_offload => 'Partial GPU offload possible';
+  String get lm_studio_partial_gpu_offload => 'تفريغ جزئي لـ GPU ممكن';
 
   @override
-  String get lm_studio_likely_too_large => 'Likely too large';
+  String get lm_studio_likely_too_large => 'قد يكون كبيرًا جدًا';
 
   @override
-  String get lm_studio_available_ram_gb => 'Available RAM (GB, optional)';
+  String get lm_studio_available_ram_gb =>
+      'الذاكرة العشوائية المتاحة (RAM بالجيجابايت، اختيارية)';
 
   @override
-  String get lm_studio_available_vram_gb => 'Available VRAM (GB, optional)';
+  String get lm_studio_available_vram_gb =>
+      'ذاكرة الفيديو المتاحة (VRAM بالجيجابايت، اختيارية)';
 
   @override
-  String get lm_studio_memory_settings_title => 'Memory for recommendations';
+  String get lm_studio_memory_settings_title => 'الذاكرة المخصصة للتوصيات';
 
   @override
   String get lm_studio_memory_settings_desc =>
-      'Used to estimate whether models fit on your machine in the model browser.';
+      'تُستخدم لتقدير ما إذا كانت النماذج تتناسب مع جهازك في متصفح النماذج.';
 
   @override
-  String get think_button_label => 'Think';
+  String get think_button_label => 'تفكير';
 
   @override
-  String get reasoning_effort_low => 'Low';
+  String get reasoning_effort_low => 'منخفض';
 
   @override
-  String get reasoning_effort_medium => 'Medium';
+  String get reasoning_effort_medium => 'متوسط';
 
   @override
-  String get reasoning_effort_high => 'High';
+  String get reasoning_effort_high => 'مرتفع';
+
+  @override
+  String get could_not_read_file => 'تعذر قراءة الملف';
+
+  @override
+  String get server_offline => 'الخادم غير متصل بالإنترنت';
+
+  @override
+  String get could_not_establish_connection =>
+      'تعذر الاتصال بالخادم. يرجى التحقق مما إذا كان الخادم قيد التشغيل وصحة إعدادات المضيف/المنفذ.';
+
+  @override
+  String get retry_connection => 'إعادة محاولة الاتصال';
+
+  @override
+  String get tokens_label => 'الرموز';
+
+  @override
+  String get enter_context_length => 'أدخل طول السياق...';
 }

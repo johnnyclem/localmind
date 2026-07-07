@@ -262,77 +262,78 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get delete_builtin_persona_body =>
-      'This is a built-in persona. You can restore it later from Settings.';
+      'Este es un personaje incorporado. Puedes restaurarlo más tarde desde Configuración.';
 
   @override
-  String get restore_builtin_personas => 'Restore default personas';
+  String get restore_builtin_personas => 'Restaurar personajes predeterminados';
 
   @override
   String get restore_builtin_personas_desc =>
-      'Re-add any built-in personas you\'ve deleted';
+      'Vuelve a añadir cualquier personaje incorporado que hayas eliminado';
 
   @override
-  String get restore_builtin_personas_success => 'Default personas restored';
+  String get restore_builtin_personas_success =>
+      'Personajes predeterminados restaurados';
 
   @override
-  String get clear_personas => 'Clear personas';
+  String get clear_personas => 'Limpiar personajes';
 
   @override
-  String get enable_image_compression => 'Compress images before sending';
+  String get enable_image_compression => 'Comprimir imágenes antes de enviar';
 
   @override
   String get enable_image_compression_desc =>
-      'Resize and compress attached images so uploads stay within server limits';
+      'Redimensionar y comprimir imágenes adjuntas para que las cargas se mantengan dentro de los límites del servidor';
 
   @override
-  String get image_compression_level => 'Compression aggressiveness';
+  String get image_compression_level => 'Agresividad de la compresión';
 
   @override
   String get image_compression_level_desc =>
-      'Higher aggressiveness produces smaller uploads at lower quality';
+      'Una mayor agresividad produce cargas más pequeñas a menor calidad';
 
   @override
-  String get image_compression_level_low => 'Low';
+  String get image_compression_level_low => 'Baja';
 
   @override
-  String get image_compression_level_medium => 'Medium';
+  String get image_compression_level_medium => 'Media';
 
   @override
-  String get image_compression_level_high => 'High';
+  String get image_compression_level_high => 'Alta';
 
   @override
-  String get sort_models_tooltip => 'Sort models';
+  String get sort_models_tooltip => 'Ordenar modelos';
 
   @override
-  String get sort_by_favorites => 'Favorites first';
+  String get sort_by_favorites => 'Favoritos primero';
 
   @override
-  String get sort_by_name => 'Name (A-Z)';
+  String get sort_by_name => 'Nombre (A-Z)';
 
   @override
-  String get sort_by_size_smallest => 'Size (smallest first)';
+  String get sort_by_size_smallest => 'Tamaño (más pequeño primero)';
 
   @override
-  String get sort_by_size_largest => 'Size (largest first)';
+  String get sort_by_size_largest => 'Tamaño (más grande primero)';
 
   @override
-  String get sort_by_context_length => 'Context length';
+  String get sort_by_context_length => 'Longitud de contexto';
 
   @override
   String bulk_ai_rename_progress(int done, int total) {
-    return 'Renaming $done/$total...';
+    return 'Renombrando $done/$total...';
   }
 
   @override
   String selected_count(int count) {
-    return '$count selected';
+    return '$count seleccionados';
   }
 
   @override
-  String get ai_rename_tooltip => 'Rename selected with AI';
+  String get ai_rename_tooltip => 'Renombrar seleccionados con IA';
 
   @override
-  String get new_chat_in_folder_tooltip => 'New chat in this folder';
+  String get new_chat_in_folder_tooltip => 'Nuevo chat en esta carpeta';
 
   @override
   String total_tokens_count(int count) {
@@ -340,74 +341,77 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get smart_replies_use_persona => 'Use persona in smart replies';
+  String get smart_replies_use_persona =>
+      'Usar personaje en respuestas inteligentes';
 
   @override
   String get smart_replies_use_persona_desc =>
-      'Suggested replies match the tone of the active persona instead of a generic assistant';
+      'Las respuestas sugeridas coinciden con el tono del personaje activo en lugar de un asistente genérico';
 
   @override
-  String get keep_persona_on_new_chat => 'Keep persona on new chat';
+  String get keep_persona_on_new_chat =>
+      'Mantener personaje al iniciar chat nuevo';
 
   @override
   String get keep_persona_on_new_chat_desc =>
-      'Don\'t clear the selected persona(s) after starting a new chat';
+      'No limpiar la selección de personaje al comenzar un nuevo chat';
 
   @override
-  String get role_swap_button_enabled => 'Show role-swap button';
+  String get role_swap_button_enabled => 'Mostrar botón de cambio de rol';
 
   @override
   String get role_swap_button_enabled_desc =>
-      'Show a button in the chat input to send your message as the assistant instead of the user, without generating a response';
+      'Mostrar un botón en la entrada de chat para enviar tu mensaje con el rol de asistente en lugar de usuario, sin generar respuesta';
 
   @override
-  String get send_as_user_tooltip => 'Send as user';
+  String get send_as_user_tooltip => 'Enviar como usuario';
 
   @override
-  String get send_as_assistant_tooltip => 'Send as assistant (no response)';
+  String get send_as_assistant_tooltip =>
+      'Enviar como asistente (sin respuesta)';
 
   @override
-  String get insert_without_generating_tooltip => 'Insert without generating';
+  String get insert_without_generating_tooltip => 'Insertar sin generar';
 
   @override
-  String get token_usage_title => 'Token Usage';
+  String get token_usage_title => 'Uso de Tokens';
 
   @override
-  String get total_tokens_label => 'Tokens used';
+  String get total_tokens_label => 'Tokens usados';
 
   @override
-  String get usage_percent_label => 'Context used';
+  String get usage_percent_label => 'Contexto usado';
 
   @override
-  String get export_choice_title => 'Export';
+  String get export_choice_title => 'Exportar';
 
   @override
-  String get export_choice_body => 'How would you like to export this?';
+  String get export_choice_body => '¿Cómo te gustaría exportar esto?';
 
   @override
-  String get copy_to_clipboard => 'Copy to Clipboard';
+  String get copy_to_clipboard => 'Copiar al portapapeles';
 
   @override
   String bulk_export_conversations_success(int count) {
-    return 'Exported $count conversations';
+    return 'Exportado $count conversaciones';
   }
 
   @override
-  String get bulk_ai_rename_confirm_title => 'Rename with AI?';
+  String get bulk_ai_rename_confirm_title => '¿Renombrar con IA?';
 
   @override
   String bulk_ai_rename_confirm_body(int count) {
-    return 'This will ask the AI to generate a new title for each of the $count selected conversations, replacing their current titles. This can take a while and cannot be undone.';
+    return 'Esto le pedirá a la IA que genere un nuevo título para cada una de las $count conversaciones seleccionadas, reemplazando sus títulos actuales. Esto puede tardar un poco y no se puede deshacer.';
   }
 
   @override
-  String get sort_by_modified_date => 'Last modified';
+  String get sort_by_modified_date => 'Última modificación';
 
   @override
-  String get sort_by_created_date => 'Date created';
+  String get sort_by_created_date => 'Fecha de creación';
 
   @override
-  String get sort_title => 'Sort';
+  String get sort_title => 'Ordenar';
 
   @override
   String get clear_conversation_title => '¿Limpiar conversación?';
@@ -619,14 +623,15 @@ class AppLocalizationsEs extends AppLocalizations {
   String get enable_smart_reply => 'Respuestas inteligentes locales';
 
   @override
-  String get ai_user_response_enabled => 'AI user message (hold send)';
+  String get ai_user_response_enabled =>
+      'Mensaje de usuario de IA (mantener presionado)';
 
   @override
   String get ai_user_response_enabled_desc =>
-      'Hold the send button for 3 seconds to have the AI write and send your next message';
+      'Mantén presionado el botón de enviar durante 3 segundos para que la IA escriba y envíe tu próximo mensaje';
 
   @override
-  String get ai_user_response_tooltip => 'Generate user message with AI';
+  String get ai_user_response_tooltip => 'Generar mensaje de usuario con IA';
 
   @override
   String get streaming_responses => 'Respuestas en tiempo real (streaming)';
@@ -642,14 +647,15 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get show_system_messages_desc =>
-      'When no persona is selected, send a default assistant system prompt with each request';
+      'Cuando no se seleccione ningún personaje, enviar un prompt de sistema de asistente predeterminado con cada solicitud';
 
   @override
-  String get show_system_messages_in_chat => 'Show System Messages in Chat';
+  String get show_system_messages_in_chat =>
+      'Mostrar mensajes del sistema en el chat';
 
   @override
   String get show_system_messages_in_chat_desc =>
-      'Display system messages (e.g. from an imported backup) as visible bubbles in the conversation';
+      'Mostrar mensajes de sistema (por ejemplo, de una copia de seguridad importada) como burbujas visibles en la conversación';
 
   @override
   String get haptic_feedback => 'Comentarios hápticos';
@@ -707,11 +713,11 @@ class AppLocalizationsEs extends AppLocalizations {
   String get select_persona => 'Seleccionar personaje';
 
   @override
-  String get manage_personas => 'Manage personas';
+  String get manage_personas => 'Gestionar personajes';
 
   @override
   String get personas_combine_hint =>
-      'Select multiple personas in chat to stack their system prompts.';
+      'Los personajes seleccionados se combinarán';
 
   @override
   String get start_conversation => 'Comenzar una conversación';
@@ -1710,28 +1716,29 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get unload_all_models => 'Unload all';
+  String get unload_all_models => 'Descargar todos los modelos';
 
   @override
   String loaded_models_count(int count) {
-    return '$count loaded';
+    return '$count modelos cargados';
   }
 
   @override
-  String get all_models_unloaded => 'All models unloaded';
+  String get all_models_unloaded => 'Todos los modelos descargados';
 
   @override
-  String get branch_chat => 'Branch chat';
+  String get branch_chat => 'Ramificar chat';
 
   @override
-  String get branch_chat_desc => 'Start a new conversation from this message';
+  String get branch_chat_desc => 'Crear un nuevo chat a partir de este mensaje';
 
   @override
-  String get edit_assistant_message_desc => 'Edit the assistant response text.';
+  String get edit_assistant_message_desc =>
+      'Editar el contenido del mensaje del asistente';
 
   @override
-  String switch_to_model(String modelName) {
-    return 'Switch to $modelName';
+  String switch_to_model(String modelName, Object model) {
+    return 'Cambiar al modelo $model';
   }
 
   @override
@@ -2172,199 +2179,198 @@ class AppLocalizationsEs extends AppLocalizations {
   String get tool_status_failed => 'Failed';
 
   @override
-  String get model_favorite_toggle => 'Toggle favorite';
+  String get model_favorite_toggle => 'Alternar favorito';
 
   @override
-  String get model_note_label => 'Note';
+  String get model_note_label => 'Nota';
 
   @override
-  String get model_note_hint => 'Add a note about this model…';
+  String get model_note_hint => 'Añade una nota privada para este modelo...';
 
   @override
-  String get unload_models_before_load =>
-      'Unload all models before loading a new one';
+  String get unload_models_before_load => 'Descargar modelos antes de cargar';
 
   @override
   String get temp_chat_keyboard_incognito =>
-      'Incognito keyboard in temporary chat';
+      'Teclado de incógnito en chat temporal';
 
   @override
   String get temp_chat_keyboard_incognito_desc =>
-      'Disables keyboard learning and suggestions in temporary chats (e.g. SwiftKey incognito).';
+      'Solicitar al teclado del sistema que no guarde el historial de escritura durante los chats temporales';
 
   @override
-  String get resume_last_chat => 'Resume last chat on launch';
+  String get resume_last_chat => 'Reanudar último chat';
 
   @override
   String get resume_last_chat_desc =>
-      'Restore your last open conversation when reopening the app.';
+      'Abrir automáticamente tu última conversación activa al iniciar';
 
   @override
-  String get export_all_data => 'Export all data';
+  String get export_all_data => 'Exportar todos los datos';
 
   @override
-  String get import_all_data => 'Import all data';
+  String get import_all_data => 'Importar todos los datos';
 
   @override
-  String get export_data_success => 'Backup exported successfully';
+  String get export_data_success => 'Datos exportados con éxito';
 
   @override
-  String get import_data_success => 'Backup imported successfully';
+  String get import_data_success => 'Datos importados con éxito';
 
   @override
   String import_data_failed(String error) {
-    return 'Failed to import backup: $error';
+    return 'Error al importar datos';
   }
 
   @override
   String get import_data_confirm =>
-      'Import conversations and custom personas from this backup? Existing items with the same IDs will be updated.';
+      'Esto reemplazará todos tus datos actuales con los datos importados. ¿Continuar?';
 
   @override
   String get import_settings_confirm =>
-      'Replace current settings with the imported backup?';
+      'Esto reemplazará tu configuración actual con la configuración importada. ¿Continuar?';
 
   @override
-  String get export_conversations => 'Export conversations';
+  String get export_conversations => 'Exportar conversaciones';
 
   @override
-  String get import_conversations => 'Import conversations';
+  String get import_conversations => 'Importar conversaciones';
 
   @override
-  String get export_personas => 'Export personas';
+  String get export_personas => 'Exportar personajes';
 
   @override
-  String get import_personas => 'Import personas';
+  String get import_personas => 'Importar personajes';
 
   @override
-  String get export_settings => 'Export settings';
+  String get export_settings => 'Exportar configuración';
 
   @override
-  String get import_settings => 'Import settings';
+  String get import_settings => 'Importar configuración';
 
   @override
-  String get export_all_zip => 'Export all (ZIP)';
+  String get export_all_zip => 'Exportar todo (ZIP)';
 
   @override
-  String get import_all_zip => 'Import all (ZIP)';
+  String get import_all_zip => 'Importar todo (ZIP)';
 
   @override
-  String get duplicate_chat => 'Duplicate chat';
+  String get duplicate_chat => 'Duplicar chat';
 
   @override
-  String get duplicate_chat_success => 'Chat duplicated';
+  String get duplicate_chat_success => 'Chat duplicado con éxito';
 
   @override
-  String get move_to_folder => 'Move to folder';
+  String get move_to_folder => 'Mover a carpeta';
 
   @override
-  String get remove_from_folder => 'Remove from folder';
+  String get remove_from_folder => 'Eliminar de la carpeta';
 
   @override
-  String get create_folder => 'Create folder';
+  String get create_folder => 'Crear carpeta';
 
   @override
-  String get new_folder => 'New folder';
+  String get new_folder => 'Nueva carpeta';
 
   @override
-  String get folder_name_hint => 'Folder name';
+  String get folder_name_hint => 'Introduce el nombre de la carpeta...';
 
   @override
-  String get all_chats => 'All';
+  String get all_chats => 'Todos los chats';
 
   @override
-  String get unfiled_chats => 'Unfiled';
+  String get unfiled_chats => 'Chats sin archivar';
 
   @override
-  String get create => 'Create';
+  String get create => 'Crear';
 
   @override
-  String get server_path_prefix_label => 'API path prefix';
+  String get server_path_prefix_label => 'Prefijo de ruta del servidor';
 
   @override
-  String get server_path_prefix_hint => '/your-secret-token';
+  String get server_path_prefix_hint =>
+      'Prefijo opcional para las rutas de la API del servidor (por ejemplo, /v1)';
 
   @override
-  String get search_message_contents => 'Search message contents';
+  String get search_message_contents => 'Buscar contenidos de mensajes...';
 
   @override
-  String get message_search_results => 'Message matches';
+  String get message_search_results => 'Resultados de búsqueda de mensajes';
 
   @override
-  String get saved_messages_title => 'Saved Messages';
+  String get saved_messages_title => 'Mensajes Guardados';
 
   @override
-  String get nav_saved_messages => 'Saved Messages';
+  String get nav_saved_messages => 'Mensajes guardados';
 
   @override
-  String get saved_messages_empty =>
-      'No saved messages yet. Bookmark a message from its options menu.';
+  String get saved_messages_empty => 'No hay mensajes guardados todavía';
 
   @override
-  String get save_message => 'Save message';
+  String get save_message => 'Guardar mensaje';
 
   @override
-  String get message_saved => 'Message saved';
+  String get message_saved => 'Mensaje guardado';
 
   @override
   String token_count(int count) {
-    return '$count tokens';
+    return 'Tokens: $count';
   }
 
   @override
   String estimated_token_count(int count) {
-    return '~$count tokens (estimated)';
+    return 'Tokens estimados: $count';
   }
 
   @override
-  String get test_tts_section_title => 'Test voice';
+  String get test_tts_section_title => 'Prueba de Texto a Voz';
 
   @override
-  String get test_tts_hint => 'Enter text to hear the current TTS engine…';
+  String get test_tts_hint => 'Escribe algo para probar la voz...';
 
   @override
-  String get test_speak_button => 'Speak';
+  String get test_speak_button => 'Hablar';
 
   @override
-  String get scroll_to_bottom => 'Scroll to bottom';
+  String get scroll_to_bottom => 'Desplazarse hacia abajo';
 
   @override
-  String get generate_ai_response => 'Generate AI response';
+  String get generate_ai_response => 'Generar respuesta de IA';
 
   @override
-  String get no_response => 'No response';
+  String get no_response => 'Sin respuesta';
 
   @override
-  String get export => 'Export';
+  String get export => 'Exportar';
 
   @override
-  String get import => 'Import';
+  String get import => 'Importar';
 
   @override
-  String get conversations_label => 'Conversations';
+  String get conversations_label => 'Conversaciones';
 
   @override
-  String get personas_label => 'Personas';
+  String get personas_label => 'Personajes';
 
   @override
-  String get settings_label => 'Settings';
+  String get settings_label => 'Configuración';
 
   @override
-  String get export_conversation => 'Export conversation';
+  String get export_conversation => 'Exportar conversación';
 
   @override
-  String get tts_process_markdown => 'Process markdown for speech';
+  String get tts_process_markdown => 'Procesar Markdown';
 
   @override
   String get tts_process_markdown_desc =>
-      'Strip formatting like **bold** before reading aloud';
+      'Eliminar formato como **negrita** antes de leer en voz alta';
 
   @override
-  String get tts_skip_seconds => 'Skip interval';
+  String get tts_skip_seconds => 'Segundos a omitir';
 
   @override
   String get tts_skip_seconds_desc =>
-      'Forward and rewind jump size during playback';
+      'Tiempo para saltar hacia adelante/atrás en el reproductor de voz';
 
   @override
   String tts_skip_seconds_value(int seconds) {
@@ -2372,307 +2378,322 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get preview_system_prompts => 'Preview system prompts';
+  String get preview_system_prompts => 'Vista previa de prompts del sistema';
 
   @override
-  String get welcome_message_1 => 'What can I help you with today?';
+  String get welcome_message_1 => '¡Hola! Soy tu asistente de IA local.';
 
   @override
-  String get welcome_message_2 => 'Ask me anything — I\'m ready when you are.';
+  String get welcome_message_2 =>
+      'Pregúntame lo que quieras, estoy listo cuando tú lo estés.';
 
   @override
-  String get welcome_message_3 => 'Start a conversation below.';
+  String get welcome_message_3 =>
+      'Tus datos se procesan localmente y nunca salen de tu dispositivo.';
 
   @override
-  String get welcome_message_4 => 'Need ideas? Try one of the quick prompts.';
+  String get welcome_message_4 =>
+      'Para empezar, selecciona un modelo en la barra superior o añade uno en la sección de administración de modelos.';
 
   @override
-  String get temporary_chat => 'Temporary chat';
+  String get temporary_chat => 'Chat temporal';
 
   @override
-  String get temporary_chat_desc => 'Chats aren\'t saved to history.';
+  String get temporary_chat_desc =>
+      'Los mensajes de este chat no se guardarán en el historial';
 
   @override
-  String get temporary_chat_banner => 'Temporary chat — not saved to history';
+  String get temporary_chat_banner =>
+      'Chat Temporal Activo — No se guardará en el historial';
 
   @override
-  String get temporary_chat_save_warning_title =>
-      'Save message in temporary chat?';
+  String get temporary_chat_save_warning_title => '¿Guardar chat temporal?';
 
   @override
   String get temporary_chat_save_warning_body =>
-      'This chat is temporary and hidden from history. The saved message will still appear in Saved Messages.';
+      'Este chat no está guardado en tu historial. ¿Quieres guardarlo ahora?';
 
   @override
-  String get save_to_history => 'Save to history';
+  String get save_to_history => 'Guardar en el historial';
 
   @override
-  String get share_conversation => 'Share conversation';
+  String get share_conversation => 'Compartir conversación';
 
   @override
-  String get download_tts_audio => 'Download audio';
+  String get download_tts_audio => 'Descargar audio de voz';
 
   @override
-  String get tts_download_unavailable =>
-      'Download is only available for Piper and Kitten TTS';
+  String get tts_download_unavailable => 'Descarga de voz no disponible';
 
   @override
-  String get tts_download_no_audio => 'No audio available to download yet';
+  String get tts_download_no_audio => 'No hay audio generado para descargar';
 
   @override
-  String get tts_download_success => 'Audio saved';
+  String get tts_download_success => 'Audio de voz guardado con éxito';
 
   @override
-  String get return_to_chat => 'Return to chat';
+  String get return_to_chat => 'Volver al chat';
 
   @override
-  String get return_to_temp_chat => 'Return to temporary chat';
+  String get return_to_temp_chat => 'Volver al chat temporal';
 
   @override
-  String get insert_saved_message => 'Insert saved message';
+  String get insert_saved_message => 'Insertar mensaje guardado';
 
   @override
   String get insert_saved_message_desc =>
-      'Choose a saved message to add to your input';
+      'Añade un fragmento de tus mensajes guardados al chat';
 
   @override
-  String get model_info => 'Model info';
+  String get model_info => 'Información del modelo';
 
   @override
-  String get model_name => 'Model name';
+  String get model_name => 'Nombre del modelo';
 
   @override
-  String get model_identifier => 'Identifier';
+  String get model_identifier => 'Identificador del modelo';
 
   @override
-  String get not_available => 'Not available';
+  String get not_available => 'No disponible';
 
   @override
-  String get save_message_folders => 'Save message';
+  String get save_message_folders => 'Guardar en carpetas';
 
   @override
-  String get remove_from_saved => 'Remove from saved';
+  String get remove_from_saved => 'Eliminar de guardados';
 
   @override
-  String get message_already_saved => 'Saved';
+  String get message_already_saved => 'El mensaje ya está guardado';
 
   @override
-  String get stream_ttft => 'Time to first token';
+  String get stream_ttft => 'Tiempo hasta el primer token';
 
   @override
-  String get stream_tokens_per_sec => 'Tokens per second';
+  String get stream_tokens_per_sec => 'Tokens por segundo';
 
   @override
-  String get stream_stop_reason => 'Stop reason';
+  String get stream_stop_reason => 'Razón de parada';
 
   @override
-  String get stream_input_tokens => 'Input tokens';
+  String get stream_input_tokens => 'Tokens de entrada';
 
   @override
-  String get stream_output_tokens => 'Output tokens';
+  String get stream_output_tokens => 'Tokens de salida';
 
   @override
-  String get stream_generation_time => 'Generation time';
+  String get stream_generation_time => 'Tiempo de generación';
 
   @override
-  String get attach_image => 'Image';
+  String get attach_image => 'Adjuntar imagen';
 
   @override
-  String get attach_text_document => 'Text document';
+  String get attach_text_document => 'Adjuntar documento de texto';
 
   @override
-  String get add_attachment => 'Add attachment';
+  String get add_attachment => 'Añadir adjunto';
 
   @override
-  String get photo_permission_denied =>
-      'Photo access is required to attach images';
+  String get photo_permission_denied => 'Permiso de fotos denegado';
 
   @override
-  String get characters_label => 'Characters';
+  String get characters_label => 'Caracteres';
 
   @override
-  String get exit_temporary_chat_title => 'Exit temporary chat?';
+  String get exit_temporary_chat_title => '¿Salir del chat temporal?';
 
   @override
   String get exit_temporary_chat_body =>
-      'This will discard the current temporary chat and return to a new chat.';
+      'Esto eliminará permanentemente la conversación actual. ¿Continuar?';
 
   @override
   String get saved_message_temp_snap_unavailable =>
-      'This message was saved from a temporary chat and can\'t be opened in its original conversation.';
+      'Las capturas de mensajes no están disponibles en chats temporales';
 
   @override
-  String get filter_title => 'Filter';
+  String get filter_title => 'Filtrar chats';
 
   @override
-  String get filter_pinned => 'Pinned';
+  String get filter_pinned => 'Fijados';
 
   @override
-  String get filter_archived => 'Archived';
+  String get filter_archived => 'Archivados';
 
   @override
-  String get filter_temp_chats => 'Temporary chats';
+  String get filter_temp_chats => 'Chats temporales';
 
   @override
-  String get filter_user_messages => 'User messages';
+  String get filter_user_messages => 'Mensajes de usuario';
 
   @override
-  String get filter_assistant_messages => 'Assistant messages';
+  String get filter_assistant_messages => 'Mensajes de asistente';
 
   @override
-  String get archive_chat => 'Archive';
+  String get archive_chat => 'Archivar chat';
 
   @override
-  String get unarchive_chat => 'Unarchive';
+  String get unarchive_chat => 'Desarchivar chat';
 
   @override
   String conversation_message_count(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count messages',
-      one: '1 message',
-    );
-    return '$_temp0';
+    return '$count mensajes';
   }
 
   @override
   String conversation_character_count(int count) {
-    return '$count chars';
+    return '$count caracteres';
   }
 
   @override
-  String get generate_title_with_ai => 'Generate with AI';
+  String get generate_title_with_ai => 'Generar título con IA';
 
   @override
-  String get generating_title => 'Generating...';
+  String get generating_title => 'Generando título...';
 
   @override
-  String get generate_title_failed => 'Could not generate a title';
+  String get generate_title_failed => 'No se pudo generar un título';
 
   @override
-  String get lm_studio_model_browser_title => 'Browse models';
+  String get lm_studio_model_browser_title => 'Navegador de Modelos';
 
   @override
-  String get lm_studio_model_search_hint => 'Search models by name or author…';
+  String get lm_studio_model_search_hint => 'Buscar modelos...';
 
   @override
-  String get lm_studio_staff_picks => 'Staff picks';
+  String get lm_studio_staff_picks => 'Selección del equipo';
 
   @override
-  String get lm_studio_community_models => 'Community models';
+  String get lm_studio_community_models => 'Modelos de la comunidad';
 
   @override
-  String get lm_studio_no_models => 'No models found';
+  String get lm_studio_no_models => 'No se encontraron modelos';
 
   @override
   String lm_studio_models_count(int count) {
-    return '$count models';
+    return '$count modelos';
   }
 
   @override
-  String get lm_studio_browse_models => 'Browse & download';
+  String get lm_studio_browse_models => 'Buscar modelos en LM Studio';
 
   @override
-  String get lm_studio_model_search => 'LMS Model Search';
+  String get lm_studio_model_search => 'Búsqueda de modelos';
 
   @override
-  String get lm_studio_downloads_title => 'Downloads';
+  String get lm_studio_downloads_title => 'Descargas';
 
   @override
-  String get lm_studio_choose_quant => 'Choose a download option';
+  String get lm_studio_choose_quant => 'Elegir cuantización';
 
   @override
-  String get lm_studio_use_default_quant => 'Use default';
+  String get lm_studio_use_default_quant => 'Usar cuantización predeterminada';
 
   @override
-  String get lm_studio_recommended => 'Recommended';
+  String get lm_studio_recommended => 'Recomendado';
 
   @override
-  String get lm_studio_clear_downloads => 'Clear finished';
+  String get lm_studio_clear_downloads => 'Limpiar descargas completadas';
 
   @override
-  String get lm_studio_no_downloads => 'No downloads yet';
+  String get lm_studio_no_downloads => 'No hay descargas activas';
 
   @override
   String get lm_studio_downloads_disclaimer =>
-      'Downloads run on the LM Studio host. Pausing, stopping, and deleting models must be done on that computer — not from this app.';
+      'Las descargas de modelos se realizan directamente desde Hugging Face.';
 
   @override
-  String get lm_studio_staff_pick => 'Staff pick';
+  String get lm_studio_staff_pick => 'Selección destacada';
 
   @override
-  String get lm_studio_params => 'PARAMS';
+  String get lm_studio_params => 'Parámetros';
 
   @override
-  String get lm_studio_arch => 'ARCH';
+  String get lm_studio_arch => 'Arquitectura';
 
   @override
-  String get lm_studio_domain => 'DOMAIN';
+  String get lm_studio_domain => 'Dominio';
 
   @override
-  String get lm_studio_format => 'FORMAT';
+  String get lm_studio_format => 'Formato';
 
   @override
-  String get lm_studio_vision => 'Vision';
+  String get lm_studio_vision => 'Visión';
 
   @override
-  String get lm_studio_tool_use => 'Tool use';
+  String get lm_studio_tool_use => 'Uso de herramientas';
 
   @override
-  String get lm_studio_reasoning => 'Reasoning';
+  String get lm_studio_reasoning => 'Razonamiento';
 
   @override
-  String get lm_studio_download_options => 'Download options';
+  String get lm_studio_download_options => 'Opciones de descarga';
 
   @override
-  String get lm_studio_download => 'Download';
+  String get lm_studio_download => 'Descargar';
 
   @override
   String lm_studio_download_size(String size) {
-    return 'Download $size';
+    return 'Tamaño de descarga';
   }
 
   @override
   String lm_studio_downloading_percent(int percent) {
-    return 'Downloading $percent%';
+    return 'Descargando: $percent%';
   }
 
   @override
   String get lm_studio_readme_unavailable =>
-      'README not available for this model.';
+      'README no disponible para este modelo.';
 
   @override
-  String get lm_studio_full_gpu_offload => 'Full GPU offload possible';
+  String get lm_studio_full_gpu_offload => 'Descarga completa de GPU posible';
 
   @override
-  String get lm_studio_partial_gpu_offload => 'Partial GPU offload possible';
+  String get lm_studio_partial_gpu_offload => 'Descarga parcial de GPU posible';
 
   @override
-  String get lm_studio_likely_too_large => 'Likely too large';
+  String get lm_studio_likely_too_large => 'Probablemente demasiado grande';
 
   @override
-  String get lm_studio_available_ram_gb => 'Available RAM (GB, optional)';
+  String get lm_studio_available_ram_gb => 'RAM disponible (GB, opcional)';
 
   @override
-  String get lm_studio_available_vram_gb => 'Available VRAM (GB, optional)';
+  String get lm_studio_available_vram_gb => 'VRAM disponible (GB, opcional)';
 
   @override
-  String get lm_studio_memory_settings_title => 'Memory for recommendations';
+  String get lm_studio_memory_settings_title => 'Memoria para recomendaciones';
 
   @override
   String get lm_studio_memory_settings_desc =>
-      'Used to estimate whether models fit on your machine in the model browser.';
+      'Se utiliza para estimar si los modelos caben en tu máquina en el explorador de modelos.';
 
   @override
-  String get think_button_label => 'Think';
+  String get think_button_label => 'Pensar';
 
   @override
-  String get reasoning_effort_low => 'Low';
+  String get reasoning_effort_low => 'Bajo';
 
   @override
-  String get reasoning_effort_medium => 'Medium';
+  String get reasoning_effort_medium => 'Medio';
 
   @override
-  String get reasoning_effort_high => 'High';
+  String get reasoning_effort_high => 'Alto';
+
+  @override
+  String get could_not_read_file => 'No se pudo leer el archivo';
+
+  @override
+  String get server_offline => 'Servidor sin conexión';
+
+  @override
+  String get could_not_establish_connection =>
+      'No se pudo establecer una conexión con el servidor. Por favor, comprueba si tu servidor está funcionando y si la configuración de host/puerto es correcta.';
+
+  @override
+  String get retry_connection => 'Reintentar conexión';
+
+  @override
+  String get tokens_label => 'Tokens';
+
+  @override
+  String get enter_context_length => 'Introduce la longitud del contexto...';
 }

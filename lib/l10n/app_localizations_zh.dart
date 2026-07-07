@@ -261,153 +261,147 @@ class AppLocalizationsZh extends AppLocalizations {
   String get delete_persona_body => '此操作无法撤销。';
 
   @override
-  String get delete_builtin_persona_body =>
-      'This is a built-in persona. You can restore it later from Settings.';
+  String get delete_builtin_persona_body => '这是一个内置角色。您稍后可以在“设置”中将其恢复。';
 
   @override
-  String get restore_builtin_personas => 'Restore default personas';
+  String get restore_builtin_personas => '恢复默认角色';
 
   @override
-  String get restore_builtin_personas_desc =>
-      'Re-add any built-in personas you\'ve deleted';
+  String get restore_builtin_personas_desc => '重新添加您已删除的任何内置角色';
 
   @override
-  String get restore_builtin_personas_success => 'Default personas restored';
+  String get restore_builtin_personas_success => '已恢复默认角色';
 
   @override
-  String get clear_personas => 'Clear personas';
+  String get clear_personas => '清除角色';
 
   @override
-  String get enable_image_compression => 'Compress images before sending';
+  String get enable_image_compression => '发送前压缩图片';
 
   @override
-  String get enable_image_compression_desc =>
-      'Resize and compress attached images so uploads stay within server limits';
+  String get enable_image_compression_desc => '调整并压缩附加图片的大小，以使上传大小保持在服务器限制内';
 
   @override
-  String get image_compression_level => 'Compression aggressiveness';
+  String get image_compression_level => '压缩强度';
 
   @override
-  String get image_compression_level_desc =>
-      'Higher aggressiveness produces smaller uploads at lower quality';
+  String get image_compression_level_desc => '较高的压缩强度会生成质量较低但上传更小的图片';
 
   @override
-  String get image_compression_level_low => 'Low';
+  String get image_compression_level_low => '低';
 
   @override
-  String get image_compression_level_medium => 'Medium';
+  String get image_compression_level_medium => '中';
 
   @override
-  String get image_compression_level_high => 'High';
+  String get image_compression_level_high => '高';
 
   @override
-  String get sort_models_tooltip => 'Sort models';
+  String get sort_models_tooltip => '排序模型';
 
   @override
-  String get sort_by_favorites => 'Favorites first';
+  String get sort_by_favorites => '收藏优先';
 
   @override
-  String get sort_by_name => 'Name (A-Z)';
+  String get sort_by_name => '名称 (A-Z)';
 
   @override
-  String get sort_by_size_smallest => 'Size (smallest first)';
+  String get sort_by_size_smallest => '大小 (从小到大)';
 
   @override
-  String get sort_by_size_largest => 'Size (largest first)';
+  String get sort_by_size_largest => '大小 (从大到小)';
 
   @override
-  String get sort_by_context_length => 'Context length';
+  String get sort_by_context_length => '上下文长度';
 
   @override
   String bulk_ai_rename_progress(int done, int total) {
-    return 'Renaming $done/$total...';
+    return '正在重命名 $done/$total...';
   }
 
   @override
   String selected_count(int count) {
-    return '$count selected';
+    return '已选择 $count 个';
   }
 
   @override
-  String get ai_rename_tooltip => 'Rename selected with AI';
+  String get ai_rename_tooltip => '使用 AI 重命名所选内容';
 
   @override
-  String get new_chat_in_folder_tooltip => 'New chat in this folder';
+  String get new_chat_in_folder_tooltip => '在此文件夹中新建聊天';
 
   @override
   String total_tokens_count(int count) {
-    return '$count tokens';
+    return '$count 个 Token';
   }
 
   @override
-  String get smart_replies_use_persona => 'Use persona in smart replies';
+  String get smart_replies_use_persona => '在智能回复中应用角色';
 
   @override
-  String get smart_replies_use_persona_desc =>
-      'Suggested replies match the tone of the active persona instead of a generic assistant';
+  String get smart_replies_use_persona_desc => '建议的回复将符合当前启用角色的语气，而不是通用的助手语气';
 
   @override
-  String get keep_persona_on_new_chat => 'Keep persona on new chat';
+  String get keep_persona_on_new_chat => '新聊天保留角色';
 
   @override
-  String get keep_persona_on_new_chat_desc =>
-      'Don\'t clear the selected persona(s) after starting a new chat';
+  String get keep_persona_on_new_chat_desc => '开始新聊天时不要清除选定的角色';
 
   @override
-  String get role_swap_button_enabled => 'Show role-swap button';
+  String get role_swap_button_enabled => '显示角色切换按钮';
 
   @override
   String get role_swap_button_enabled_desc =>
-      'Show a button in the chat input to send your message as the assistant instead of the user, without generating a response';
+      '在聊天输入框中显示一个按钮，允许您以助手而非用户的身份发送消息，而不生成任何回复';
 
   @override
-  String get send_as_user_tooltip => 'Send as user';
+  String get send_as_user_tooltip => '以用户身份发送';
 
   @override
-  String get send_as_assistant_tooltip => 'Send as assistant (no response)';
+  String get send_as_assistant_tooltip => '以助手身份发送 (无回复)';
 
   @override
-  String get insert_without_generating_tooltip => 'Insert without generating';
+  String get insert_without_generating_tooltip => '仅插入不生成回复';
 
   @override
-  String get token_usage_title => 'Token Usage';
+  String get token_usage_title => 'Token 使用情况';
 
   @override
-  String get total_tokens_label => 'Tokens used';
+  String get total_tokens_label => '已用 Token';
 
   @override
-  String get usage_percent_label => 'Context used';
+  String get usage_percent_label => '已用上下文';
 
   @override
-  String get export_choice_title => 'Export';
+  String get export_choice_title => '导出';
 
   @override
-  String get export_choice_body => 'How would you like to export this?';
+  String get export_choice_body => '您希望如何导出此内容？';
 
   @override
-  String get copy_to_clipboard => 'Copy to Clipboard';
+  String get copy_to_clipboard => '复制到剪贴板';
 
   @override
   String bulk_export_conversations_success(int count) {
-    return 'Exported $count conversations';
+    return '已成功导出 $count 个对话';
   }
 
   @override
-  String get bulk_ai_rename_confirm_title => 'Rename with AI?';
+  String get bulk_ai_rename_confirm_title => '使用 AI 重命名？';
 
   @override
   String bulk_ai_rename_confirm_body(int count) {
-    return 'This will ask the AI to generate a new title for each of the $count selected conversations, replacing their current titles. This can take a while and cannot be undone.';
+    return '这将请求 AI 为每个选定的 $count 个对话生成新标题，替换其当前的标题。此操作可能需要一些时间，且无法撤销。';
   }
 
   @override
-  String get sort_by_modified_date => 'Last modified';
+  String get sort_by_modified_date => '最近修改';
 
   @override
-  String get sort_by_created_date => 'Date created';
+  String get sort_by_created_date => '创建日期';
 
   @override
-  String get sort_title => 'Sort';
+  String get sort_title => '排序';
 
   @override
   String get clear_conversation_title => '清除对话吗？';
@@ -614,14 +608,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get enable_smart_reply => '设备端智能回复';
 
   @override
-  String get ai_user_response_enabled => 'AI user message (hold send)';
+  String get ai_user_response_enabled => 'AI 用户消息 (长按发送)';
 
   @override
-  String get ai_user_response_enabled_desc =>
-      'Hold the send button for 3 seconds to have the AI write and send your next message';
+  String get ai_user_response_enabled_desc => '长按发送按钮 3 秒钟以让 AI 撰写并发送您的下一条消息';
 
   @override
-  String get ai_user_response_tooltip => 'Generate user message with AI';
+  String get ai_user_response_tooltip => '使用 AI 生成用户消息';
 
   @override
   String get streaming_responses => '流式响应';
@@ -636,15 +629,14 @@ class AppLocalizationsZh extends AppLocalizations {
   String get show_system_messages => '显示系统消息';
 
   @override
-  String get show_system_messages_desc =>
-      'When no persona is selected, send a default assistant system prompt with each request';
+  String get show_system_messages_desc => '当没有选定角色时，每次请求都发送默认的助手系统提示词';
 
   @override
-  String get show_system_messages_in_chat => 'Show System Messages in Chat';
+  String get show_system_messages_in_chat => '在聊天中显示系统消息';
 
   @override
   String get show_system_messages_in_chat_desc =>
-      'Display system messages (e.g. from an imported backup) as visible bubbles in the conversation';
+      '将系统消息 (例如来自导入的备份) 作为对话中的可见气泡显示';
 
   @override
   String get haptic_feedback => '触觉反馈';
@@ -701,11 +693,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get select_persona => '选择角色';
 
   @override
-  String get manage_personas => 'Manage personas';
+  String get manage_personas => '管理角色';
 
   @override
-  String get personas_combine_hint =>
-      'Select multiple personas in chat to stack their system prompts.';
+  String get personas_combine_hint => '选定的角色将被合并';
 
   @override
   String get start_conversation => '开始对话';
@@ -1672,28 +1663,28 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get unload_all_models => 'Unload all';
+  String get unload_all_models => '卸载所有模型';
 
   @override
   String loaded_models_count(int count) {
-    return '$count loaded';
+    return '已加载 $count 个模型';
   }
 
   @override
-  String get all_models_unloaded => 'All models unloaded';
+  String get all_models_unloaded => '所有模型已卸载';
 
   @override
-  String get branch_chat => 'Branch chat';
+  String get branch_chat => '分支聊天';
 
   @override
-  String get branch_chat_desc => 'Start a new conversation from this message';
+  String get branch_chat_desc => '从此消息开始新建聊天';
 
   @override
-  String get edit_assistant_message_desc => 'Edit the assistant response text.';
+  String get edit_assistant_message_desc => '编辑助手消息的内容';
 
   @override
-  String switch_to_model(String modelName) {
-    return 'Switch to $modelName';
+  String switch_to_model(String modelName, Object model) {
+    return '切换到模型 $model';
   }
 
   @override
@@ -2127,509 +2118,503 @@ class AppLocalizationsZh extends AppLocalizations {
   String get tool_status_failed => 'Failed';
 
   @override
-  String get model_favorite_toggle => 'Toggle favorite';
+  String get model_favorite_toggle => '切换收藏';
 
   @override
-  String get model_note_label => 'Note';
+  String get model_note_label => '备注';
 
   @override
-  String get model_note_hint => 'Add a note about this model…';
+  String get model_note_hint => '为此模型添加个人备注...';
 
   @override
-  String get unload_models_before_load =>
-      'Unload all models before loading a new one';
+  String get unload_models_before_load => '加载前卸载模型';
 
   @override
-  String get temp_chat_keyboard_incognito =>
-      'Incognito keyboard in temporary chat';
+  String get temp_chat_keyboard_incognito => '临时聊天中的隐私键盘';
 
   @override
-  String get temp_chat_keyboard_incognito_desc =>
-      'Disables keyboard learning and suggestions in temporary chats (e.g. SwiftKey incognito).';
+  String get temp_chat_keyboard_incognito_desc => '请求系统键盘在临时聊天期间不保存输入历史记录';
 
   @override
-  String get resume_last_chat => 'Resume last chat on launch';
+  String get resume_last_chat => '恢复上次聊天';
 
   @override
-  String get resume_last_chat_desc =>
-      'Restore your last open conversation when reopening the app.';
+  String get resume_last_chat_desc => '启动时自动打开您上次活跃的对话';
 
   @override
-  String get export_all_data => 'Export all data';
+  String get export_all_data => '导出所有数据';
 
   @override
-  String get import_all_data => 'Import all data';
+  String get import_all_data => '导入所有数据';
 
   @override
-  String get export_data_success => 'Backup exported successfully';
+  String get export_data_success => '数据导出成功';
 
   @override
-  String get import_data_success => 'Backup imported successfully';
+  String get import_data_success => '数据导入成功';
 
   @override
   String import_data_failed(String error) {
-    return 'Failed to import backup: $error';
+    return '导入数据失败';
   }
 
   @override
-  String get import_data_confirm =>
-      'Import conversations and custom personas from this backup? Existing items with the same IDs will be updated.';
+  String get import_data_confirm => '这将用导入的数据替换您当前的所有数据。是否继续？';
 
   @override
-  String get import_settings_confirm =>
-      'Replace current settings with the imported backup?';
+  String get import_settings_confirm => '这将用导入的设置替换您当前的设置。是否继续？';
 
   @override
-  String get export_conversations => 'Export conversations';
+  String get export_conversations => '导出对话';
 
   @override
-  String get import_conversations => 'Import conversations';
+  String get import_conversations => '导入对话';
 
   @override
-  String get export_personas => 'Export personas';
+  String get export_personas => '导出角色';
 
   @override
-  String get import_personas => 'Import personas';
+  String get import_personas => '导入角色';
 
   @override
-  String get export_settings => 'Export settings';
+  String get export_settings => '导出设置';
 
   @override
-  String get import_settings => 'Import settings';
+  String get import_settings => '导入设置';
 
   @override
-  String get export_all_zip => 'Export all (ZIP)';
+  String get export_all_zip => '导出全部 (ZIP)';
 
   @override
-  String get import_all_zip => 'Import all (ZIP)';
+  String get import_all_zip => '导入全部 (ZIP)';
 
   @override
-  String get duplicate_chat => 'Duplicate chat';
+  String get duplicate_chat => '复制聊天';
 
   @override
-  String get duplicate_chat_success => 'Chat duplicated';
+  String get duplicate_chat_success => '聊天复制成功';
 
   @override
-  String get move_to_folder => 'Move to folder';
+  String get move_to_folder => '移动到文件夹';
 
   @override
-  String get remove_from_folder => 'Remove from folder';
+  String get remove_from_folder => '从文件夹中移除';
 
   @override
-  String get create_folder => 'Create folder';
+  String get create_folder => '创建文件夹';
 
   @override
-  String get new_folder => 'New folder';
+  String get new_folder => '新文件夹';
 
   @override
-  String get folder_name_hint => 'Folder name';
+  String get folder_name_hint => '输入文件夹名称...';
 
   @override
-  String get all_chats => 'All';
+  String get all_chats => '所有聊天';
 
   @override
-  String get unfiled_chats => 'Unfiled';
+  String get unfiled_chats => '未分类聊天';
 
   @override
-  String get create => 'Create';
+  String get create => '创建';
 
   @override
-  String get server_path_prefix_label => 'API path prefix';
+  String get server_path_prefix_label => '服务器路径前缀';
 
   @override
-  String get server_path_prefix_hint => '/your-secret-token';
+  String get server_path_prefix_hint => '服务器 API 路径的可选前缀 (例如 /v1)';
 
   @override
-  String get search_message_contents => 'Search message contents';
+  String get search_message_contents => '搜索消息内容...';
 
   @override
-  String get message_search_results => 'Message matches';
+  String get message_search_results => '消息搜索结果';
 
   @override
-  String get saved_messages_title => 'Saved Messages';
+  String get saved_messages_title => '已保存的消息';
 
   @override
-  String get nav_saved_messages => 'Saved Messages';
+  String get nav_saved_messages => '保存消息';
 
   @override
-  String get saved_messages_empty =>
-      'No saved messages yet. Bookmark a message from its options menu.';
+  String get saved_messages_empty => '尚无保存的消息';
 
   @override
-  String get save_message => 'Save message';
+  String get save_message => '保存消息';
 
   @override
-  String get message_saved => 'Message saved';
+  String get message_saved => '消息已保存';
 
   @override
   String token_count(int count) {
-    return '$count tokens';
+    return 'Token 数: $count';
   }
 
   @override
   String estimated_token_count(int count) {
-    return '~$count tokens (estimated)';
+    return '预估 Token 数: $count';
   }
 
   @override
-  String get test_tts_section_title => 'Test voice';
+  String get test_tts_section_title => '文字转语音测试';
 
   @override
-  String get test_tts_hint => 'Enter text to hear the current TTS engine…';
+  String get test_tts_hint => '输入内容以测试声音...';
 
   @override
-  String get test_speak_button => 'Speak';
+  String get test_speak_button => '朗读';
 
   @override
-  String get scroll_to_bottom => 'Scroll to bottom';
+  String get scroll_to_bottom => '滚动到底部';
 
   @override
-  String get generate_ai_response => 'Generate AI response';
+  String get generate_ai_response => '生成 AI 回复';
 
   @override
-  String get no_response => 'No response';
+  String get no_response => '无回复';
 
   @override
-  String get export => 'Export';
+  String get export => '导出';
 
   @override
-  String get import => 'Import';
+  String get import => '导入';
 
   @override
-  String get conversations_label => 'Conversations';
+  String get conversations_label => '对话';
 
   @override
-  String get personas_label => 'Personas';
+  String get personas_label => '角色';
 
   @override
-  String get settings_label => 'Settings';
+  String get settings_label => '设置';
 
   @override
-  String get export_conversation => 'Export conversation';
+  String get export_conversation => '导出对话';
 
   @override
-  String get tts_process_markdown => 'Process markdown for speech';
+  String get tts_process_markdown => '处理 Markdown';
 
   @override
-  String get tts_process_markdown_desc =>
-      'Strip formatting like **bold** before reading aloud';
+  String get tts_process_markdown_desc => '在朗读前去除 **加粗** 等格式标记';
 
   @override
-  String get tts_skip_seconds => 'Skip interval';
+  String get tts_skip_seconds => '跳过秒数';
 
   @override
-  String get tts_skip_seconds_desc =>
-      'Forward and rewind jump size during playback';
+  String get tts_skip_seconds_desc => '语音播放器中快进/快退的时间';
 
   @override
   String tts_skip_seconds_value(int seconds) {
-    return '${seconds}s';
+    return '$seconds秒';
   }
 
   @override
-  String get preview_system_prompts => 'Preview system prompts';
+  String get preview_system_prompts => '预览系统提示词';
 
   @override
-  String get welcome_message_1 => 'What can I help you with today?';
+  String get welcome_message_1 => '你好！我是您的本地 AI 助手。';
 
   @override
-  String get welcome_message_2 => 'Ask me anything — I\'m ready when you are.';
+  String get welcome_message_2 => '问我任何问题——我随时恭候。';
 
   @override
-  String get welcome_message_3 => 'Start a conversation below.';
+  String get welcome_message_3 => '您的数据完全在本地处理，绝不会离开您的设备。';
 
   @override
-  String get welcome_message_4 => 'Need ideas? Try one of the quick prompts.';
+  String get welcome_message_4 => '要开始，请从顶部栏中选择一个模型，或在模型管理部分中添加一个新模型。';
 
   @override
-  String get temporary_chat => 'Temporary chat';
+  String get temporary_chat => '临时聊天';
 
   @override
-  String get temporary_chat_desc => 'Chats aren\'t saved to history.';
+  String get temporary_chat_desc => '此聊天中的消息不会保存到历史记录中';
 
   @override
-  String get temporary_chat_banner => 'Temporary chat — not saved to history';
+  String get temporary_chat_banner => '临时聊天处于活动状态——消息将不保存到历史记录';
 
   @override
-  String get temporary_chat_save_warning_title =>
-      'Save message in temporary chat?';
+  String get temporary_chat_save_warning_title => '保存临时聊天？';
 
   @override
-  String get temporary_chat_save_warning_body =>
-      'This chat is temporary and hidden from history. The saved message will still appear in Saved Messages.';
+  String get temporary_chat_save_warning_body => '此聊天未保存到您的历史记录中。您想现在保存吗？';
 
   @override
-  String get save_to_history => 'Save to history';
+  String get save_to_history => '保存到历史记录';
 
   @override
-  String get share_conversation => 'Share conversation';
+  String get share_conversation => '分享对话';
 
   @override
-  String get download_tts_audio => 'Download audio';
+  String get download_tts_audio => '下载音频';
 
   @override
-  String get tts_download_unavailable =>
-      'Download is only available for Piper and Kitten TTS';
+  String get tts_download_unavailable => '音频下载不可用';
 
   @override
-  String get tts_download_no_audio => 'No audio available to download yet';
+  String get tts_download_no_audio => '没有生成的可供下载的音频';
 
   @override
-  String get tts_download_success => 'Audio saved';
+  String get tts_download_success => '音频保存成功';
 
   @override
-  String get return_to_chat => 'Return to chat';
+  String get return_to_chat => '返回聊天';
 
   @override
-  String get return_to_temp_chat => 'Return to temporary chat';
+  String get return_to_temp_chat => '返回临时聊天';
 
   @override
-  String get insert_saved_message => 'Insert saved message';
+  String get insert_saved_message => '插入已保存的消息';
 
   @override
-  String get insert_saved_message_desc =>
-      'Choose a saved message to add to your input';
+  String get insert_saved_message_desc => '将您已保存的文本片段添加到聊天中';
 
   @override
-  String get model_info => 'Model info';
+  String get model_info => '模型信息';
 
   @override
-  String get model_name => 'Model name';
+  String get model_name => '模型名称';
 
   @override
-  String get model_identifier => 'Identifier';
+  String get model_identifier => '模型标识符';
 
   @override
-  String get not_available => 'Not available';
+  String get not_available => '不可用';
 
   @override
-  String get save_message_folders => 'Save message';
+  String get save_message_folders => '保存到文件夹';
 
   @override
-  String get remove_from_saved => 'Remove from saved';
+  String get remove_from_saved => '从已保存中移除';
 
   @override
-  String get message_already_saved => 'Saved';
+  String get message_already_saved => '消息已保存';
 
   @override
-  String get stream_ttft => 'Time to first token';
+  String get stream_ttft => '首个 Token 延迟';
 
   @override
-  String get stream_tokens_per_sec => 'Tokens per second';
+  String get stream_tokens_per_sec => '每秒 Token 数';
 
   @override
-  String get stream_stop_reason => 'Stop reason';
+  String get stream_stop_reason => '停止原因';
 
   @override
-  String get stream_input_tokens => 'Input tokens';
+  String get stream_input_tokens => '输入 Token 数';
 
   @override
-  String get stream_output_tokens => 'Output tokens';
+  String get stream_output_tokens => '输出 Token 数';
 
   @override
-  String get stream_generation_time => 'Generation time';
+  String get stream_generation_time => '生成时间';
 
   @override
-  String get attach_image => 'Image';
+  String get attach_image => '附加图片';
 
   @override
-  String get attach_text_document => 'Text document';
+  String get attach_text_document => '附加文本文件';
 
   @override
-  String get add_attachment => 'Add attachment';
+  String get add_attachment => '添加附件';
 
   @override
-  String get photo_permission_denied =>
-      'Photo access is required to attach images';
+  String get photo_permission_denied => '相册权限被拒绝';
 
   @override
-  String get characters_label => 'Characters';
+  String get characters_label => '字符数';
 
   @override
-  String get exit_temporary_chat_title => 'Exit temporary chat?';
+  String get exit_temporary_chat_title => '退出临时聊天？';
 
   @override
-  String get exit_temporary_chat_body =>
-      'This will discard the current temporary chat and return to a new chat.';
+  String get exit_temporary_chat_body => '这将永久删除当前的对话。是否继续？';
 
   @override
-  String get saved_message_temp_snap_unavailable =>
-      'This message was saved from a temporary chat and can\'t be opened in its original conversation.';
+  String get saved_message_temp_snap_unavailable => '临时聊天中不支持消息快照';
 
   @override
-  String get filter_title => 'Filter';
+  String get filter_title => '筛选聊天';
 
   @override
-  String get filter_pinned => 'Pinned';
+  String get filter_pinned => '已置顶';
 
   @override
-  String get filter_archived => 'Archived';
+  String get filter_archived => '已归档';
 
   @override
-  String get filter_temp_chats => 'Temporary chats';
+  String get filter_temp_chats => '临时聊天';
 
   @override
-  String get filter_user_messages => 'User messages';
+  String get filter_user_messages => '用户消息';
 
   @override
-  String get filter_assistant_messages => 'Assistant messages';
+  String get filter_assistant_messages => '助手消息';
 
   @override
-  String get archive_chat => 'Archive';
+  String get archive_chat => '归档聊天';
 
   @override
-  String get unarchive_chat => 'Unarchive';
+  String get unarchive_chat => '取消归档';
 
   @override
   String conversation_message_count(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count messages',
-      one: '1 message',
-    );
-    return '$_temp0';
+    return '$count 条消息';
   }
 
   @override
   String conversation_character_count(int count) {
-    return '$count chars';
+    return '$count 个字符';
   }
 
   @override
-  String get generate_title_with_ai => 'Generate with AI';
+  String get generate_title_with_ai => '使用 AI 生成标题';
 
   @override
-  String get generating_title => 'Generating...';
+  String get generating_title => '正在生成标题...';
 
   @override
-  String get generate_title_failed => 'Could not generate a title';
+  String get generate_title_failed => '无法生成标题';
 
   @override
-  String get lm_studio_model_browser_title => 'Browse models';
+  String get lm_studio_model_browser_title => '模型浏览器';
 
   @override
-  String get lm_studio_model_search_hint => 'Search models by name or author…';
+  String get lm_studio_model_search_hint => '搜索模型...';
 
   @override
-  String get lm_studio_staff_picks => 'Staff picks';
+  String get lm_studio_staff_picks => '编辑精选';
 
   @override
-  String get lm_studio_community_models => 'Community models';
+  String get lm_studio_community_models => '社区模型';
 
   @override
-  String get lm_studio_no_models => 'No models found';
+  String get lm_studio_no_models => '未找到模型';
 
   @override
   String lm_studio_models_count(int count) {
-    return '$count models';
+    return '$count 个模型';
   }
 
   @override
-  String get lm_studio_browse_models => 'Browse & download';
+  String get lm_studio_browse_models => '在 LM Studio 中浏览模型';
 
   @override
-  String get lm_studio_model_search => 'LMS Model Search';
+  String get lm_studio_model_search => '模型搜索';
 
   @override
-  String get lm_studio_downloads_title => 'Downloads';
+  String get lm_studio_downloads_title => '下载';
 
   @override
-  String get lm_studio_choose_quant => 'Choose a download option';
+  String get lm_studio_choose_quant => '选择量化版本';
 
   @override
-  String get lm_studio_use_default_quant => 'Use default';
+  String get lm_studio_use_default_quant => '使用默认量化版本';
 
   @override
-  String get lm_studio_recommended => 'Recommended';
+  String get lm_studio_recommended => '推荐';
 
   @override
-  String get lm_studio_clear_downloads => 'Clear finished';
+  String get lm_studio_clear_downloads => '清除已完成的下载';
 
   @override
-  String get lm_studio_no_downloads => 'No downloads yet';
+  String get lm_studio_no_downloads => '无活动中的下载';
 
   @override
-  String get lm_studio_downloads_disclaimer =>
-      'Downloads run on the LM Studio host. Pausing, stopping, and deleting models must be done on that computer — not from this app.';
+  String get lm_studio_downloads_disclaimer => '模型下载直接从 Hugging Face 获取。';
 
   @override
-  String get lm_studio_staff_pick => 'Staff pick';
+  String get lm_studio_staff_pick => '推荐模型';
 
   @override
-  String get lm_studio_params => 'PARAMS';
+  String get lm_studio_params => '参数';
 
   @override
-  String get lm_studio_arch => 'ARCH';
+  String get lm_studio_arch => '架构';
 
   @override
-  String get lm_studio_domain => 'DOMAIN';
+  String get lm_studio_domain => '领域';
 
   @override
-  String get lm_studio_format => 'FORMAT';
+  String get lm_studio_format => '格式';
 
   @override
-  String get lm_studio_vision => 'Vision';
+  String get lm_studio_vision => '视觉能力';
 
   @override
-  String get lm_studio_tool_use => 'Tool use';
+  String get lm_studio_tool_use => '工具调用';
 
   @override
-  String get lm_studio_reasoning => 'Reasoning';
+  String get lm_studio_reasoning => '推理能力';
 
   @override
-  String get lm_studio_download_options => 'Download options';
+  String get lm_studio_download_options => '下载选项';
 
   @override
-  String get lm_studio_download => 'Download';
+  String get lm_studio_download => '下载';
 
   @override
   String lm_studio_download_size(String size) {
-    return 'Download $size';
+    return '下载大小';
   }
 
   @override
   String lm_studio_downloading_percent(int percent) {
-    return 'Downloading $percent%';
+    return '正在下载: $percent%';
   }
 
   @override
-  String get lm_studio_readme_unavailable =>
-      'README not available for this model.';
+  String get lm_studio_readme_unavailable => '此模型无 README 说明文件。';
 
   @override
-  String get lm_studio_full_gpu_offload => 'Full GPU offload possible';
+  String get lm_studio_full_gpu_offload => '支持完全 GPU 卸载';
 
   @override
-  String get lm_studio_partial_gpu_offload => 'Partial GPU offload possible';
+  String get lm_studio_partial_gpu_offload => '支持部分 GPU 卸载';
 
   @override
-  String get lm_studio_likely_too_large => 'Likely too large';
+  String get lm_studio_likely_too_large => '可能过大';
 
   @override
-  String get lm_studio_available_ram_gb => 'Available RAM (GB, optional)';
+  String get lm_studio_available_ram_gb => '可用 RAM (GB, 可选)';
 
   @override
-  String get lm_studio_available_vram_gb => 'Available VRAM (GB, optional)';
+  String get lm_studio_available_vram_gb => '可用 VRAM (GB, 可选)';
 
   @override
-  String get lm_studio_memory_settings_title => 'Memory for recommendations';
+  String get lm_studio_memory_settings_title => '用于推荐的内存大小';
 
   @override
-  String get lm_studio_memory_settings_desc =>
-      'Used to estimate whether models fit on your machine in the model browser.';
+  String get lm_studio_memory_settings_desc => '用于在模型浏览器中预估模型是否可以在您的设备上运行。';
 
   @override
-  String get think_button_label => 'Think';
+  String get think_button_label => '思考';
 
   @override
-  String get reasoning_effort_low => 'Low';
+  String get reasoning_effort_low => '低';
 
   @override
-  String get reasoning_effort_medium => 'Medium';
+  String get reasoning_effort_medium => '中';
 
   @override
-  String get reasoning_effort_high => 'High';
+  String get reasoning_effort_high => '高';
+
+  @override
+  String get could_not_read_file => '无法读取文件';
+
+  @override
+  String get server_offline => '服务器已离线';
+
+  @override
+  String get could_not_establish_connection =>
+      '无法与服务器建立连接。请检查您的服务器是否正在运行，以及主机/端口设置是否正确。';
+
+  @override
+  String get retry_connection => '重试连接';
+
+  @override
+  String get tokens_label => 'Token 数';
+
+  @override
+  String get enter_context_length => '输入上下文长度...';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -2889,6 +2874,149 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get delete_persona_body => '此操作無法復原。';
 
   @override
+  String get delete_builtin_persona_body => '這是一個內置角色。您稍後可以在「設定」中將其恢復。';
+
+  @override
+  String get restore_builtin_personas => '恢復預設角色';
+
+  @override
+  String get restore_builtin_personas_desc => '重新添加您已刪除的任何內置角色';
+
+  @override
+  String get restore_builtin_personas_success => '已恢復預設角色';
+
+  @override
+  String get clear_personas => '清除角色';
+
+  @override
+  String get enable_image_compression => '發送前壓縮圖片';
+
+  @override
+  String get enable_image_compression_desc => '調整並壓縮附加圖片的大小，以使上傳大小保持在伺服器限制內';
+
+  @override
+  String get image_compression_level => '壓縮強度';
+
+  @override
+  String get image_compression_level_desc => '較高的壓縮強度會生成質量較低但上傳更小的圖片';
+
+  @override
+  String get image_compression_level_low => '低';
+
+  @override
+  String get image_compression_level_medium => '中';
+
+  @override
+  String get image_compression_level_high => '高';
+
+  @override
+  String get sort_models_tooltip => '排序模型';
+
+  @override
+  String get sort_by_favorites => '收藏優先';
+
+  @override
+  String get sort_by_name => '名稱 (A-Z)';
+
+  @override
+  String get sort_by_size_smallest => '大小 (從小到大)';
+
+  @override
+  String get sort_by_size_largest => '大小 (從大到小)';
+
+  @override
+  String get sort_by_context_length => '上下文長度';
+
+  @override
+  String bulk_ai_rename_progress(int done, int total) {
+    return '正在重命名 $done/$total...';
+  }
+
+  @override
+  String selected_count(int count) {
+    return '已選擇 $count 個';
+  }
+
+  @override
+  String get ai_rename_tooltip => '使用 AI 重命名所選內容';
+
+  @override
+  String get new_chat_in_folder_tooltip => '在此資料夾中新建聊天';
+
+  @override
+  String total_tokens_count(int count) {
+    return '$count 個 Token';
+  }
+
+  @override
+  String get smart_replies_use_persona => '在智能回覆中應用角色';
+
+  @override
+  String get smart_replies_use_persona_desc => '建議的回覆將符合當前啟用角色的語氣，而不是通用的助手語氣';
+
+  @override
+  String get keep_persona_on_new_chat => '新聊天保留角色';
+
+  @override
+  String get keep_persona_on_new_chat_desc => '開始新聊天時不要清除選定的角色';
+
+  @override
+  String get role_swap_button_enabled => '顯示角色切換按鈕';
+
+  @override
+  String get role_swap_button_enabled_desc =>
+      '在聊天輸入框中顯示一個按鈕，允許您以助手而非用戶的身份發送消息，而不生成任何回覆';
+
+  @override
+  String get send_as_user_tooltip => '以用戶身份發送';
+
+  @override
+  String get send_as_assistant_tooltip => '以助手身份發送 (無回覆)';
+
+  @override
+  String get insert_without_generating_tooltip => '僅插入不生成回覆';
+
+  @override
+  String get token_usage_title => 'Token 使用情況';
+
+  @override
+  String get total_tokens_label => '已用 Token';
+
+  @override
+  String get usage_percent_label => '已用上下文';
+
+  @override
+  String get export_choice_title => '匯出';
+
+  @override
+  String get export_choice_body => '您希望如何匯出此內容？';
+
+  @override
+  String get copy_to_clipboard => '複製到剪貼簿';
+
+  @override
+  String bulk_export_conversations_success(int count) {
+    return '已成功匯出 $count 個對話';
+  }
+
+  @override
+  String get bulk_ai_rename_confirm_title => '使用 AI 重命名？';
+
+  @override
+  String bulk_ai_rename_confirm_body(int count) {
+    return '這將請求 AI 為每個選定的 $count 個對話生成新標題，替換其當前的標題。此操作可能需要一些時間，且無法撤銷。';
+  }
+
+  @override
+  String get sort_by_modified_date => '最近修改';
+
+  @override
+  String get sort_by_created_date => '創建日期';
+
+  @override
+  String get sort_title => '排序';
+
+  @override
   String get clear_conversation_title => '要清除對話嗎？';
 
   @override
@@ -3093,6 +3221,15 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get enable_smart_reply => '裝置端智慧回覆';
 
   @override
+  String get ai_user_response_enabled => 'AI 用戶消息 (長按發送)';
+
+  @override
+  String get ai_user_response_enabled_desc => '長按發送按鈕 3 秒鐘以讓 AI 撰寫並發送您的下一條消息';
+
+  @override
+  String get ai_user_response_tooltip => '使用 AI 生成用戶消息';
+
+  @override
   String get streaming_responses => '串流響應';
 
   @override
@@ -3103,6 +3240,16 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get show_system_messages => '顯示系統訊息';
+
+  @override
+  String get show_system_messages_desc => '當沒有選定角色時，每次請求都發送預設的助手系統提示詞';
+
+  @override
+  String get show_system_messages_in_chat => '在聊天中顯示系統消息';
+
+  @override
+  String get show_system_messages_in_chat_desc =>
+      '將系統消息 (例如來自導入的備份) 作為對話中的可見氣泡顯示';
 
   @override
   String get haptic_feedback => '觸覺回饋';
@@ -3157,6 +3304,12 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get select_persona => '選擇角色';
+
+  @override
+  String get manage_personas => '管理角色';
+
+  @override
+  String get personas_combine_hint => '選定的角色將被合併';
 
   @override
   String get start_conversation => '開始對話';
@@ -4123,6 +4276,31 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   }
 
   @override
+  String get unload_all_models => '卸載所有模型';
+
+  @override
+  String loaded_models_count(int count) {
+    return '已載入 $count 個模型';
+  }
+
+  @override
+  String get all_models_unloaded => '所有模型已卸載';
+
+  @override
+  String get branch_chat => '分支聊天';
+
+  @override
+  String get branch_chat_desc => '從此消息開始新建聊天';
+
+  @override
+  String get edit_assistant_message_desc => '編輯助手消息的內容';
+
+  @override
+  String switch_to_model(String modelName, Object model) {
+    return '切換到模型 $model';
+  }
+
+  @override
   String download_notification_title(String modelName) {
     return '正在下載 $modelName...';
   }
@@ -4552,4 +4730,503 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get tool_status_failed => 'Failed';
+
+  @override
+  String get model_favorite_toggle => '切換收藏';
+
+  @override
+  String get model_note_label => '備註';
+
+  @override
+  String get model_note_hint => '為此模型添加個人備註...';
+
+  @override
+  String get unload_models_before_load => '載入前卸載模型';
+
+  @override
+  String get temp_chat_keyboard_incognito => '臨時聊天中的隱私鍵盤';
+
+  @override
+  String get temp_chat_keyboard_incognito_desc => '請求系統鍵盤在臨時聊天期間不保存輸入歷史記錄';
+
+  @override
+  String get resume_last_chat => '恢復上次聊天';
+
+  @override
+  String get resume_last_chat_desc => '啟動時自動打開您上次活躍的對話';
+
+  @override
+  String get export_all_data => '匯出所有數據';
+
+  @override
+  String get import_all_data => '導入所有數據';
+
+  @override
+  String get export_data_success => '數據匯出成功';
+
+  @override
+  String get import_data_success => '數據導入成功';
+
+  @override
+  String import_data_failed(String error) {
+    return '導入數據失敗';
+  }
+
+  @override
+  String get import_data_confirm => '這將用導入的數據替換您當前的所有數據。是否繼續？';
+
+  @override
+  String get import_settings_confirm => '這將用導入的設定替換您當前的設定。是否繼續？';
+
+  @override
+  String get export_conversations => '匯出對話';
+
+  @override
+  String get import_conversations => '導入對話';
+
+  @override
+  String get export_personas => '匯出角色';
+
+  @override
+  String get import_personas => '導入角色';
+
+  @override
+  String get export_settings => '匯出設定';
+
+  @override
+  String get import_settings => '導入設定';
+
+  @override
+  String get export_all_zip => '匯出全部 (ZIP)';
+
+  @override
+  String get import_all_zip => '導入全部 (ZIP)';
+
+  @override
+  String get duplicate_chat => '複製聊天';
+
+  @override
+  String get duplicate_chat_success => '聊天複製成功';
+
+  @override
+  String get move_to_folder => '移動到資料夾';
+
+  @override
+  String get remove_from_folder => '從資料夾中移除';
+
+  @override
+  String get create_folder => '創建資料夾';
+
+  @override
+  String get new_folder => '新資料夾';
+
+  @override
+  String get folder_name_hint => '輸入資料夾名稱...';
+
+  @override
+  String get all_chats => '所有聊天';
+
+  @override
+  String get unfiled_chats => '未分類聊天';
+
+  @override
+  String get create => '創建';
+
+  @override
+  String get server_path_prefix_label => '伺服器路徑前綴';
+
+  @override
+  String get server_path_prefix_hint => '伺服器 API 路徑的可選前綴 (例如 /v1)';
+
+  @override
+  String get search_message_contents => '搜尋消息內容...';
+
+  @override
+  String get message_search_results => '消息搜尋結果';
+
+  @override
+  String get saved_messages_title => '已保存的消息';
+
+  @override
+  String get nav_saved_messages => '保存消息';
+
+  @override
+  String get saved_messages_empty => '尚無保存的消息';
+
+  @override
+  String get save_message => '保存消息';
+
+  @override
+  String get message_saved => '消息已保存';
+
+  @override
+  String token_count(int count) {
+    return 'Token 數: $count';
+  }
+
+  @override
+  String estimated_token_count(int count) {
+    return '預估 Token 數: $count';
+  }
+
+  @override
+  String get test_tts_section_title => '文字轉語音測試';
+
+  @override
+  String get test_tts_hint => '輸入內容以測試聲音...';
+
+  @override
+  String get test_speak_button => '朗讀';
+
+  @override
+  String get scroll_to_bottom => '滾動到底部';
+
+  @override
+  String get generate_ai_response => '生成 AI 回覆';
+
+  @override
+  String get no_response => '無回覆';
+
+  @override
+  String get export => '匯出';
+
+  @override
+  String get import => '導入';
+
+  @override
+  String get conversations_label => '對話';
+
+  @override
+  String get personas_label => '角色';
+
+  @override
+  String get settings_label => '設定';
+
+  @override
+  String get export_conversation => '匯出對話';
+
+  @override
+  String get tts_process_markdown => '處理 Markdown';
+
+  @override
+  String get tts_process_markdown_desc => '在朗讀前去除 **加粗** 等格式標記';
+
+  @override
+  String get tts_skip_seconds => '跳過秒數';
+
+  @override
+  String get tts_skip_seconds_desc => '語音播放器中快進/快退的時間';
+
+  @override
+  String tts_skip_seconds_value(int seconds) {
+    return '$seconds秒';
+  }
+
+  @override
+  String get preview_system_prompts => '預覽系統提示詞';
+
+  @override
+  String get welcome_message_1 => '你好！我是您的本地 AI 助手。';
+
+  @override
+  String get welcome_message_2 => '問我任何問題——我隨時恭候。';
+
+  @override
+  String get welcome_message_3 => '您的數據完全在本地處理，絕不會離開您的設備。';
+
+  @override
+  String get welcome_message_4 => '要開始，請從頂部欄中選擇一個模型，或在模型管理部分中添加一個新模型。';
+
+  @override
+  String get temporary_chat => '臨時聊天';
+
+  @override
+  String get temporary_chat_desc => '此聊天中的消息不會保存到歷史記錄中';
+
+  @override
+  String get temporary_chat_banner => '臨時聊天處於活動狀態——消息將不保存到歷史記錄';
+
+  @override
+  String get temporary_chat_save_warning_title => '保存臨時聊天？';
+
+  @override
+  String get temporary_chat_save_warning_body => '此聊天未保存到您的歷史記錄中。您想現在保存嗎？';
+
+  @override
+  String get save_to_history => '保存到歷史記錄';
+
+  @override
+  String get share_conversation => '分享對話';
+
+  @override
+  String get download_tts_audio => '下載音訊';
+
+  @override
+  String get tts_download_unavailable => '音訊下載不可用';
+
+  @override
+  String get tts_download_no_audio => '沒有生成的可供下載的音訊';
+
+  @override
+  String get tts_download_success => '音訊保存成功';
+
+  @override
+  String get return_to_chat => '返回聊天';
+
+  @override
+  String get return_to_temp_chat => '返回臨時聊天';
+
+  @override
+  String get insert_saved_message => '插入已保存的消息';
+
+  @override
+  String get insert_saved_message_desc => '將您已保存的文字片段添加到聊天中';
+
+  @override
+  String get model_info => '模型資訊';
+
+  @override
+  String get model_name => '模型名稱';
+
+  @override
+  String get model_identifier => '模型識別碼';
+
+  @override
+  String get not_available => '不可用';
+
+  @override
+  String get save_message_folders => '保存到資料夾';
+
+  @override
+  String get remove_from_saved => '從已保存中移除';
+
+  @override
+  String get message_already_saved => '消息已保存';
+
+  @override
+  String get stream_ttft => '首個 Token 延遲';
+
+  @override
+  String get stream_tokens_per_sec => '每秒 Token 數';
+
+  @override
+  String get stream_stop_reason => '停止原因';
+
+  @override
+  String get stream_input_tokens => '輸入 Token 數';
+
+  @override
+  String get stream_output_tokens => '輸出 Token 數';
+
+  @override
+  String get stream_generation_time => '生成時間';
+
+  @override
+  String get attach_image => '附加圖片';
+
+  @override
+  String get attach_text_document => '附加文字檔案';
+
+  @override
+  String get add_attachment => '添加附件';
+
+  @override
+  String get photo_permission_denied => '相簿權限被拒絕';
+
+  @override
+  String get characters_label => '字元數';
+
+  @override
+  String get exit_temporary_chat_title => '退出臨時聊天？';
+
+  @override
+  String get exit_temporary_chat_body => '這將永久刪除當前的對話。是否繼續？';
+
+  @override
+  String get saved_message_temp_snap_unavailable => '臨時聊天中不支援消息快照';
+
+  @override
+  String get filter_title => '篩選聊天';
+
+  @override
+  String get filter_pinned => '已置頂';
+
+  @override
+  String get filter_archived => '已封存';
+
+  @override
+  String get filter_temp_chats => '臨時聊天';
+
+  @override
+  String get filter_user_messages => '用戶消息';
+
+  @override
+  String get filter_assistant_messages => '助手消息';
+
+  @override
+  String get archive_chat => '封存聊天';
+
+  @override
+  String get unarchive_chat => '取消封存';
+
+  @override
+  String conversation_message_count(int count) {
+    return '$count 條消息';
+  }
+
+  @override
+  String conversation_character_count(int count) {
+    return '$count 個字元';
+  }
+
+  @override
+  String get generate_title_with_ai => '使用 AI 生成標題';
+
+  @override
+  String get generating_title => '正在生成標題...';
+
+  @override
+  String get generate_title_failed => '無法生成標題';
+
+  @override
+  String get lm_studio_model_browser_title => '模型瀏覽器';
+
+  @override
+  String get lm_studio_model_search_hint => '搜尋模型...';
+
+  @override
+  String get lm_studio_staff_picks => '編輯精選';
+
+  @override
+  String get lm_studio_community_models => '社區模型';
+
+  @override
+  String get lm_studio_no_models => '未找到模型';
+
+  @override
+  String lm_studio_models_count(int count) {
+    return '$count 個模型';
+  }
+
+  @override
+  String get lm_studio_browse_models => '在 LM Studio 中瀏覽模型';
+
+  @override
+  String get lm_studio_model_search => '模型搜尋';
+
+  @override
+  String get lm_studio_downloads_title => '下載';
+
+  @override
+  String get lm_studio_choose_quant => '選擇量化版本';
+
+  @override
+  String get lm_studio_use_default_quant => '使用預設量化版本';
+
+  @override
+  String get lm_studio_recommended => '推薦';
+
+  @override
+  String get lm_studio_clear_downloads => '清除已完成的下載';
+
+  @override
+  String get lm_studio_no_downloads => '無活動中的下載';
+
+  @override
+  String get lm_studio_downloads_disclaimer => '模型下載直接從 Hugging Face 獲取。';
+
+  @override
+  String get lm_studio_staff_pick => '推薦模型';
+
+  @override
+  String get lm_studio_params => '參數';
+
+  @override
+  String get lm_studio_arch => '架構';
+
+  @override
+  String get lm_studio_domain => '領域';
+
+  @override
+  String get lm_studio_format => '格式';
+
+  @override
+  String get lm_studio_vision => '視覺能力';
+
+  @override
+  String get lm_studio_tool_use => '工具調用';
+
+  @override
+  String get lm_studio_reasoning => '推理能力';
+
+  @override
+  String get lm_studio_download_options => '下載選項';
+
+  @override
+  String get lm_studio_download => '下載';
+
+  @override
+  String lm_studio_download_size(String size) {
+    return '下載大小';
+  }
+
+  @override
+  String lm_studio_downloading_percent(int percent) {
+    return '正在下載: $percent%';
+  }
+
+  @override
+  String get lm_studio_readme_unavailable => '此模型無 README 說明檔案。';
+
+  @override
+  String get lm_studio_full_gpu_offload => '支援完全 GPU 卸載';
+
+  @override
+  String get lm_studio_partial_gpu_offload => '支援部分 GPU 卸載';
+
+  @override
+  String get lm_studio_likely_too_large => '可能過大';
+
+  @override
+  String get lm_studio_available_ram_gb => '可用 RAM (GB, 可選)';
+
+  @override
+  String get lm_studio_available_vram_gb => '可用 VRAM (GB, 可选)';
+
+  @override
+  String get lm_studio_memory_settings_title => '用於推薦的記憶體大小';
+
+  @override
+  String get lm_studio_memory_settings_desc => '用於在模型瀏覽器中預估模型是否可以在您的設備上運行。';
+
+  @override
+  String get think_button_label => '思考';
+
+  @override
+  String get reasoning_effort_low => '低';
+
+  @override
+  String get reasoning_effort_medium => '中';
+
+  @override
+  String get reasoning_effort_high => '高';
+
+  @override
+  String get could_not_read_file => '無法讀取檔案';
+
+  @override
+  String get server_offline => '伺服器已離線';
+
+  @override
+  String get could_not_establish_connection =>
+      '無法與伺服器建立連線。請檢查您的伺服器是否正在運行，以及主機/埠設定是否正確。';
+
+  @override
+  String get retry_connection => '重試連線';
+
+  @override
+  String get tokens_label => 'Token 數';
+
+  @override
+  String get enter_context_length => '輸入上下文長度...';
 }

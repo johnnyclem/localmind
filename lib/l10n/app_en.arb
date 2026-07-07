@@ -2973,5 +2973,29 @@
   "reasoning_effort_high": "High",
   "@reasoning_effort_high": {
     "description": "High reasoning effort level"
+  },
+  "could_not_read_file": "Could not read file",
+  "@could_not_read_file": {
+    "description": "Error message when file cannot be read"
+  },
+  "server_offline": "Server Offline",
+  "@server_offline": {
+    "description": "Server offline status message"
+  },
+  "could_not_establish_connection": "Could not establish a connection to the server. Please check if your server is running and the host/port settings are correct.",
+  "@could_not_establish_connection": {
+    "description": "Error message when connection to server fails"
+  },
+  "retry_connection": "Retry Connection",
+  "@retry_connection": {
+    "description": "Retry connection button label"
+  },
+  "tokens_label": "Tokens",
+  "@tokens_label": {
+    "description": "Tokens input label"
+  },
+  "enter_context_length": "Enter context length...",
+  "@enter_context_length": {
+    "description": "Context length input placeholder text"
   }
 }

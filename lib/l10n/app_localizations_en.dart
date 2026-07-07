@@ -1715,7 +1715,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get edit_assistant_message_desc => 'Edit the assistant response text.';
 
   @override
-  String switch_to_model(String modelName) {
+  String switch_to_model(String modelName, Object model) {
     return 'Switch to $modelName';
   }
 
@@ -2660,4 +2660,23 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get reasoning_effort_high => 'High';
+
+  @override
+  String get could_not_read_file => 'Could not read file';
+
+  @override
+  String get server_offline => 'Server Offline';
+
+  @override
+  String get could_not_establish_connection =>
+      'Could not establish a connection to the server. Please check if your server is running and the host/port settings are correct.';
+
+  @override
+  String get retry_connection => 'Retry Connection';
+
+  @override
+  String get tokens_label => 'Tokens';
+
+  @override
+  String get enter_context_length => 'Enter context length...';
 }

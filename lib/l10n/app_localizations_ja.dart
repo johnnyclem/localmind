@@ -261,153 +261,149 @@ class AppLocalizationsJa extends AppLocalizations {
   String get delete_persona_body => 'この操作は取り消せません。';
 
   @override
-  String get delete_builtin_persona_body =>
-      'This is a built-in persona. You can restore it later from Settings.';
+  String get delete_builtin_persona_body => 'これは組み込みのペルソナです。後で「設定」から復元できます。';
 
   @override
-  String get restore_builtin_personas => 'Restore default personas';
+  String get restore_builtin_personas => 'デフォルトのペルソナを復元';
 
   @override
-  String get restore_builtin_personas_desc =>
-      'Re-add any built-in personas you\'ve deleted';
+  String get restore_builtin_personas_desc => '削除した組み込みペルソナを再追加する';
 
   @override
-  String get restore_builtin_personas_success => 'Default personas restored';
+  String get restore_builtin_personas_success => 'デフォルトのペルソナが復元されました';
 
   @override
-  String get clear_personas => 'Clear personas';
+  String get clear_personas => 'ペルソナをクリア';
 
   @override
-  String get enable_image_compression => 'Compress images before sending';
+  String get enable_image_compression => '送信前に画像を圧縮';
 
   @override
   String get enable_image_compression_desc =>
-      'Resize and compress attached images so uploads stay within server limits';
+      '添付画像のサイズ変更と圧縮を行い、送信がサーバー制限内に収まるようにします';
 
   @override
-  String get image_compression_level => 'Compression aggressiveness';
+  String get image_compression_level => '圧縮率の強さ';
 
   @override
-  String get image_compression_level_desc =>
-      'Higher aggressiveness produces smaller uploads at lower quality';
+  String get image_compression_level_desc => '圧縮率が高いほど、より低画質で小さいファイルサイズになります';
 
   @override
-  String get image_compression_level_low => 'Low';
+  String get image_compression_level_low => '低';
 
   @override
-  String get image_compression_level_medium => 'Medium';
+  String get image_compression_level_medium => '中';
 
   @override
-  String get image_compression_level_high => 'High';
+  String get image_compression_level_high => '高';
 
   @override
-  String get sort_models_tooltip => 'Sort models';
+  String get sort_models_tooltip => 'モデルを並べ替え';
 
   @override
-  String get sort_by_favorites => 'Favorites first';
+  String get sort_by_favorites => 'お気に入りを優先';
 
   @override
-  String get sort_by_name => 'Name (A-Z)';
+  String get sort_by_name => '名前順 (A-Z)';
 
   @override
-  String get sort_by_size_smallest => 'Size (smallest first)';
+  String get sort_by_size_smallest => 'サイズ順 (小さい順)';
 
   @override
-  String get sort_by_size_largest => 'Size (largest first)';
+  String get sort_by_size_largest => 'サイズ順 (大きい順)';
 
   @override
-  String get sort_by_context_length => 'Context length';
+  String get sort_by_context_length => 'コンテキスト長順';
 
   @override
   String bulk_ai_rename_progress(int done, int total) {
-    return 'Renaming $done/$total...';
+    return '名前変更中 $done/$total...';
   }
 
   @override
   String selected_count(int count) {
-    return '$count selected';
+    return '$count 件選択中';
   }
 
   @override
-  String get ai_rename_tooltip => 'Rename selected with AI';
+  String get ai_rename_tooltip => 'AIで選択項目の名前を変更';
 
   @override
-  String get new_chat_in_folder_tooltip => 'New chat in this folder';
+  String get new_chat_in_folder_tooltip => 'このフォルダー内に新規チャット';
 
   @override
   String total_tokens_count(int count) {
-    return '$count tokens';
+    return '$count トークン';
   }
 
   @override
-  String get smart_replies_use_persona => 'Use persona in smart replies';
+  String get smart_replies_use_persona => 'スマートリプライにペルソナを使用';
 
   @override
   String get smart_replies_use_persona_desc =>
-      'Suggested replies match the tone of the active persona instead of a generic assistant';
+      '提案される返信が一般的なアシスタントではなく、有効なペルソナのトーンに沿ったものになります';
 
   @override
-  String get keep_persona_on_new_chat => 'Keep persona on new chat';
+  String get keep_persona_on_new_chat => '新規チャット時にペルソナを維持';
 
   @override
-  String get keep_persona_on_new_chat_desc =>
-      'Don\'t clear the selected persona(s) after starting a new chat';
+  String get keep_persona_on_new_chat_desc => '新しいチャットの開始時に選択したペルソナをクリアしない';
 
   @override
-  String get role_swap_button_enabled => 'Show role-swap button';
+  String get role_swap_button_enabled => 'ロール切替ボタンを表示';
 
   @override
   String get role_swap_button_enabled_desc =>
-      'Show a button in the chat input to send your message as the assistant instead of the user, without generating a response';
+      'チャット入力欄に、回答を生成せずにユーザーではなくアシスタントとしてメッセージを送信できるボタンを表示します';
 
   @override
-  String get send_as_user_tooltip => 'Send as user';
+  String get send_as_user_tooltip => 'ユーザーとして送信';
 
   @override
-  String get send_as_assistant_tooltip => 'Send as assistant (no response)';
+  String get send_as_assistant_tooltip => 'アシスタントとして送信 (回答なし)';
 
   @override
-  String get insert_without_generating_tooltip => 'Insert without generating';
+  String get insert_without_generating_tooltip => '回答を生成せずに挿入';
 
   @override
-  String get token_usage_title => 'Token Usage';
+  String get token_usage_title => 'トークン使用量';
 
   @override
-  String get total_tokens_label => 'Tokens used';
+  String get total_tokens_label => '使用トークン';
 
   @override
-  String get usage_percent_label => 'Context used';
+  String get usage_percent_label => '使用されたコンテキスト';
 
   @override
-  String get export_choice_title => 'Export';
+  String get export_choice_title => 'エクスポート';
 
   @override
-  String get export_choice_body => 'How would you like to export this?';
+  String get export_choice_body => 'どのようにエクスポートしますか？';
 
   @override
-  String get copy_to_clipboard => 'Copy to Clipboard';
+  String get copy_to_clipboard => 'クリップボードにコピー';
 
   @override
   String bulk_export_conversations_success(int count) {
-    return 'Exported $count conversations';
+    return '$count 件の会話をエクスポートしました';
   }
 
   @override
-  String get bulk_ai_rename_confirm_title => 'Rename with AI?';
+  String get bulk_ai_rename_confirm_title => 'AIで名前を変更しますか？';
 
   @override
   String bulk_ai_rename_confirm_body(int count) {
-    return 'This will ask the AI to generate a new title for each of the $count selected conversations, replacing their current titles. This can take a while and cannot be undone.';
+    return 'これにより、AIが選択した $count 件の会話それぞれに対して新しいタイトルを生成し、現在のタイトルを上書きします。処理には時間がかかる場合があり、元に戻すことはできません。';
   }
 
   @override
-  String get sort_by_modified_date => 'Last modified';
+  String get sort_by_modified_date => '最終更新日';
 
   @override
-  String get sort_by_created_date => 'Date created';
+  String get sort_by_created_date => '作成日';
 
   @override
-  String get sort_title => 'Sort';
+  String get sort_title => '並べ替え';
 
   @override
   String get clear_conversation_title => 'チャット履歴をクリアしますか？';
@@ -616,14 +612,14 @@ class AppLocalizationsJa extends AppLocalizations {
   String get enable_smart_reply => 'スマートリプライ';
 
   @override
-  String get ai_user_response_enabled => 'AI user message (hold send)';
+  String get ai_user_response_enabled => 'AIユーザーメッセージ (送信長押し)';
 
   @override
   String get ai_user_response_enabled_desc =>
-      'Hold the send button for 3 seconds to have the AI write and send your next message';
+      '送信ボタンを3秒間長押しすると、AIが次のメッセージを執筆して送信します';
 
   @override
-  String get ai_user_response_tooltip => 'Generate user message with AI';
+  String get ai_user_response_tooltip => 'AIでユーザーメッセージを生成';
 
   @override
   String get streaming_responses => 'ストリーミング応答';
@@ -639,14 +635,14 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get show_system_messages_desc =>
-      'When no persona is selected, send a default assistant system prompt with each request';
+      'ペルソナが選択されていない場合、リクエストごとに関連するデフォルトのアシスタントシステムプロンプトを送信する';
 
   @override
-  String get show_system_messages_in_chat => 'Show System Messages in Chat';
+  String get show_system_messages_in_chat => 'チャット内にシステムメッセージを表示';
 
   @override
   String get show_system_messages_in_chat_desc =>
-      'Display system messages (e.g. from an imported backup) as visible bubbles in the conversation';
+      'インポートされたバックアップなどからのシステムメッセージを、チャット画面上に吹き出しとして表示します';
 
   @override
   String get haptic_feedback => '触覚フィードバック';
@@ -703,11 +699,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get select_persona => 'ペルソナを選択';
 
   @override
-  String get manage_personas => 'Manage personas';
+  String get manage_personas => 'ペルソナの管理';
 
   @override
-  String get personas_combine_hint =>
-      'Select multiple personas in chat to stack their system prompts.';
+  String get personas_combine_hint => '選択したペルソナは統合されます';
 
   @override
   String get start_conversation => 'チャットを開始しましょう';
@@ -1678,28 +1673,28 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get unload_all_models => 'Unload all';
+  String get unload_all_models => 'すべてのモデルをアンロード';
 
   @override
   String loaded_models_count(int count) {
-    return '$count loaded';
+    return '$count 個のモデルがロード済み';
   }
 
   @override
-  String get all_models_unloaded => 'All models unloaded';
+  String get all_models_unloaded => 'すべてのモデルがアンロードされました';
 
   @override
-  String get branch_chat => 'Branch chat';
+  String get branch_chat => 'チャットを分岐';
 
   @override
-  String get branch_chat_desc => 'Start a new conversation from this message';
+  String get branch_chat_desc => 'このメッセージから新しいチャットを作成';
 
   @override
-  String get edit_assistant_message_desc => 'Edit the assistant response text.';
+  String get edit_assistant_message_desc => 'アシスタントメッセージの内容を編集';
 
   @override
-  String switch_to_model(String modelName) {
-    return 'Switch to $modelName';
+  String switch_to_model(String modelName, Object model) {
+    return 'モデル $model に切り替え';
   }
 
   @override
@@ -2134,507 +2129,509 @@ class AppLocalizationsJa extends AppLocalizations {
   String get tool_status_failed => 'Failed';
 
   @override
-  String get model_favorite_toggle => 'Toggle favorite';
+  String get model_favorite_toggle => 'お気に入りの切り替え';
 
   @override
-  String get model_note_label => 'Note';
+  String get model_note_label => 'メモ';
 
   @override
-  String get model_note_hint => 'Add a note about this model…';
+  String get model_note_hint => 'このモデル用の非公開メモを追加...';
 
   @override
-  String get unload_models_before_load =>
-      'Unload all models before loading a new one';
+  String get unload_models_before_load => 'ロード前にモデルをアンロード';
 
   @override
-  String get temp_chat_keyboard_incognito =>
-      'Incognito keyboard in temporary chat';
+  String get temp_chat_keyboard_incognito => '一時的なチャットでのシークレットキーボード';
 
   @override
   String get temp_chat_keyboard_incognito_desc =>
-      'Disables keyboard learning and suggestions in temporary chats (e.g. SwiftKey incognito).';
+      '一時的なチャットの実行中、システムキーボードに入力履歴を保存しないよう要求します';
 
   @override
-  String get resume_last_chat => 'Resume last chat on launch';
+  String get resume_last_chat => '前回のチャットを再開';
 
   @override
-  String get resume_last_chat_desc =>
-      'Restore your last open conversation when reopening the app.';
+  String get resume_last_chat_desc => '起動時に自動的に前回の有効な会話を開く';
 
   @override
-  String get export_all_data => 'Export all data';
+  String get export_all_data => 'すべてのデータをエクスポート';
 
   @override
-  String get import_all_data => 'Import all data';
+  String get import_all_data => 'すべてのデータをインポート';
 
   @override
-  String get export_data_success => 'Backup exported successfully';
+  String get export_data_success => 'データのエクスポートに成功しました';
 
   @override
-  String get import_data_success => 'Backup imported successfully';
+  String get import_data_success => 'データのインポートに成功しました';
 
   @override
   String import_data_failed(String error) {
-    return 'Failed to import backup: $error';
+    return 'データのインポートに失敗しました';
   }
 
   @override
   String get import_data_confirm =>
-      'Import conversations and custom personas from this backup? Existing items with the same IDs will be updated.';
+      'これにより、現在のすべてのデータがインポートされたデータに置き換わります。続行しますか？';
 
   @override
   String get import_settings_confirm =>
-      'Replace current settings with the imported backup?';
+      'これにより、現在の設定がインポートされた設定に置き換わります。続行しますか？';
 
   @override
-  String get export_conversations => 'Export conversations';
+  String get export_conversations => '会話をエクスポート';
 
   @override
-  String get import_conversations => 'Import conversations';
+  String get import_conversations => '会話をインポート';
 
   @override
-  String get export_personas => 'Export personas';
+  String get export_personas => 'ペルソナをエクスポート';
 
   @override
-  String get import_personas => 'Import personas';
+  String get import_personas => 'ペルソナをインポート';
 
   @override
-  String get export_settings => 'Export settings';
+  String get export_settings => '設定をエクスポート';
 
   @override
-  String get import_settings => 'Import settings';
+  String get import_settings => '設定をインポート';
 
   @override
-  String get export_all_zip => 'Export all (ZIP)';
+  String get export_all_zip => 'すべてエクスポート (ZIP)';
 
   @override
-  String get import_all_zip => 'Import all (ZIP)';
+  String get import_all_zip => 'すべてインポート (ZIP)';
 
   @override
-  String get duplicate_chat => 'Duplicate chat';
+  String get duplicate_chat => 'チャットを複製';
 
   @override
-  String get duplicate_chat_success => 'Chat duplicated';
+  String get duplicate_chat_success => 'チャットの複製に成功しました';
 
   @override
-  String get move_to_folder => 'Move to folder';
+  String get move_to_folder => 'フォルダーに移動';
 
   @override
-  String get remove_from_folder => 'Remove from folder';
+  String get remove_from_folder => 'フォルダーから削除';
 
   @override
-  String get create_folder => 'Create folder';
+  String get create_folder => 'フォルダーを作成';
 
   @override
-  String get new_folder => 'New folder';
+  String get new_folder => '新規フォルダー';
 
   @override
-  String get folder_name_hint => 'Folder name';
+  String get folder_name_hint => 'フォルダー名を入力...';
 
   @override
-  String get all_chats => 'All';
+  String get all_chats => 'すべてのチャット';
 
   @override
-  String get unfiled_chats => 'Unfiled';
+  String get unfiled_chats => '未分類のチャット';
 
   @override
-  String get create => 'Create';
+  String get create => '作成';
 
   @override
-  String get server_path_prefix_label => 'API path prefix';
+  String get server_path_prefix_label => 'サーバーパス接頭辞';
 
   @override
-  String get server_path_prefix_hint => '/your-secret-token';
+  String get server_path_prefix_hint => 'サーバーAPIパスのオプション接頭辞 (例: /v1)';
 
   @override
-  String get search_message_contents => 'Search message contents';
+  String get search_message_contents => 'メッセージ内容を検索...';
 
   @override
-  String get message_search_results => 'Message matches';
+  String get message_search_results => 'メッセージ検索結果';
 
   @override
-  String get saved_messages_title => 'Saved Messages';
+  String get saved_messages_title => '保存されたメッセージ';
 
   @override
-  String get nav_saved_messages => 'Saved Messages';
+  String get nav_saved_messages => '保存メッセージ';
 
   @override
-  String get saved_messages_empty =>
-      'No saved messages yet. Bookmark a message from its options menu.';
+  String get saved_messages_empty => '保存されたメッセージはまだありません';
 
   @override
-  String get save_message => 'Save message';
+  String get save_message => 'メッセージを保存';
 
   @override
-  String get message_saved => 'Message saved';
+  String get message_saved => 'メッセージが保存されました';
 
   @override
   String token_count(int count) {
-    return '$count tokens';
+    return 'トークン: $count';
   }
 
   @override
   String estimated_token_count(int count) {
-    return '~$count tokens (estimated)';
+    return '推定トークン: $count';
   }
 
   @override
-  String get test_tts_section_title => 'Test voice';
+  String get test_tts_section_title => '音声合成テスト';
 
   @override
-  String get test_tts_hint => 'Enter text to hear the current TTS engine…';
+  String get test_tts_hint => '音声をテストするには何か入力してください...';
 
   @override
-  String get test_speak_button => 'Speak';
+  String get test_speak_button => '発話';
 
   @override
-  String get scroll_to_bottom => 'Scroll to bottom';
+  String get scroll_to_bottom => '一番下までスクロール';
 
   @override
-  String get generate_ai_response => 'Generate AI response';
+  String get generate_ai_response => 'AIの回答を生成';
 
   @override
-  String get no_response => 'No response';
+  String get no_response => '回答なし';
 
   @override
-  String get export => 'Export';
+  String get export => 'エクスポート';
 
   @override
-  String get import => 'Import';
+  String get import => 'インポート';
 
   @override
-  String get conversations_label => 'Conversations';
+  String get conversations_label => '会話';
 
   @override
-  String get personas_label => 'Personas';
+  String get personas_label => 'ペルソナ';
 
   @override
-  String get settings_label => 'Settings';
+  String get settings_label => '設定';
 
   @override
-  String get export_conversation => 'Export conversation';
+  String get export_conversation => '会話をエクスポート';
 
   @override
-  String get tts_process_markdown => 'Process markdown for speech';
+  String get tts_process_markdown => 'Markdown処理';
 
   @override
-  String get tts_process_markdown_desc =>
-      'Strip formatting like **bold** before reading aloud';
+  String get tts_process_markdown_desc => '読み上げる前に**太字**などの装飾タグを取り除く';
 
   @override
-  String get tts_skip_seconds => 'Skip interval';
+  String get tts_skip_seconds => 'スキップ秒数';
 
   @override
-  String get tts_skip_seconds_desc =>
-      'Forward and rewind jump size during playback';
+  String get tts_skip_seconds_desc => '音声プレイヤーで前後にスキップする時間';
 
   @override
   String tts_skip_seconds_value(int seconds) {
-    return '${seconds}s';
+    return '$seconds秒';
   }
 
   @override
-  String get preview_system_prompts => 'Preview system prompts';
+  String get preview_system_prompts => 'システムプロンプトのプレビュー';
 
   @override
-  String get welcome_message_1 => 'What can I help you with today?';
+  String get welcome_message_1 => 'こんにちは！私はローカルAIアシスタントです。';
 
   @override
-  String get welcome_message_2 => 'Ask me anything — I\'m ready when you are.';
+  String get welcome_message_2 => '何でも質問してください。準備はいつでもできています。';
 
   @override
-  String get welcome_message_3 => 'Start a conversation below.';
+  String get welcome_message_3 => 'データはローカルで処理され、デバイスの外に出ることはありません。';
 
   @override
-  String get welcome_message_4 => 'Need ideas? Try one of the quick prompts.';
+  String get welcome_message_4 =>
+      '開始するには、上部のバーからモデルを選択するか、モデル管理セクションで新しいモデルを追加してください。';
 
   @override
-  String get temporary_chat => 'Temporary chat';
+  String get temporary_chat => '一時的なチャット';
 
   @override
-  String get temporary_chat_desc => 'Chats aren\'t saved to history.';
+  String get temporary_chat_desc => 'このチャット内のメッセージは履歴に保存されません';
 
   @override
-  String get temporary_chat_banner => 'Temporary chat — not saved to history';
+  String get temporary_chat_banner => '一時的なチャットが有効 — 履歴には保存されません';
 
   @override
-  String get temporary_chat_save_warning_title =>
-      'Save message in temporary chat?';
+  String get temporary_chat_save_warning_title => '一時的なチャットを保存しますか？';
 
   @override
   String get temporary_chat_save_warning_body =>
-      'This chat is temporary and hidden from history. The saved message will still appear in Saved Messages.';
+      'このチャットは履歴に保存されていません。今すぐ保存しますか？';
 
   @override
-  String get save_to_history => 'Save to history';
+  String get save_to_history => '履歴に保存';
 
   @override
-  String get share_conversation => 'Share conversation';
+  String get share_conversation => '会話を共有';
 
   @override
-  String get download_tts_audio => 'Download audio';
+  String get download_tts_audio => '音声をダウンロード';
 
   @override
-  String get tts_download_unavailable =>
-      'Download is only available for Piper and Kitten TTS';
+  String get tts_download_unavailable => '音声ダウンロードは利用できません';
 
   @override
-  String get tts_download_no_audio => 'No audio available to download yet';
+  String get tts_download_no_audio => 'ダウンロードする音声が生成されていません';
 
   @override
-  String get tts_download_success => 'Audio saved';
+  String get tts_download_success => '音声が保存されました';
 
   @override
-  String get return_to_chat => 'Return to chat';
+  String get return_to_chat => 'チャットに戻る';
 
   @override
-  String get return_to_temp_chat => 'Return to temporary chat';
+  String get return_to_temp_chat => '一時チャットに戻る';
 
   @override
-  String get insert_saved_message => 'Insert saved message';
+  String get insert_saved_message => '保存されたメッセージを挿入';
 
   @override
-  String get insert_saved_message_desc =>
-      'Choose a saved message to add to your input';
+  String get insert_saved_message_desc => '保存されたメッセージの断片をチャットに追加します';
 
   @override
-  String get model_info => 'Model info';
+  String get model_info => 'モデル情報';
 
   @override
-  String get model_name => 'Model name';
+  String get model_name => 'モデル名';
 
   @override
-  String get model_identifier => 'Identifier';
+  String get model_identifier => 'モデル識別子';
 
   @override
-  String get not_available => 'Not available';
+  String get not_available => '利用不可';
 
   @override
-  String get save_message_folders => 'Save message';
+  String get save_message_folders => 'フォルダーに保存';
 
   @override
-  String get remove_from_saved => 'Remove from saved';
+  String get remove_from_saved => '保存から削除';
 
   @override
-  String get message_already_saved => 'Saved';
+  String get message_already_saved => 'メッセージはすでに保存されています';
 
   @override
-  String get stream_ttft => 'Time to first token';
+  String get stream_ttft => '初回トークン生成時間';
 
   @override
-  String get stream_tokens_per_sec => 'Tokens per second';
+  String get stream_tokens_per_sec => 'トークン秒速';
 
   @override
-  String get stream_stop_reason => 'Stop reason';
+  String get stream_stop_reason => '終了理由';
 
   @override
-  String get stream_input_tokens => 'Input tokens';
+  String get stream_input_tokens => '入力トークン数';
 
   @override
-  String get stream_output_tokens => 'Output tokens';
+  String get stream_output_tokens => '出力トークン数';
 
   @override
-  String get stream_generation_time => 'Generation time';
+  String get stream_generation_time => '生成時間';
 
   @override
-  String get attach_image => 'Image';
+  String get attach_image => '画像を添付';
 
   @override
-  String get attach_text_document => 'Text document';
+  String get attach_text_document => 'テキストファイルを添付';
 
   @override
-  String get add_attachment => 'Add attachment';
+  String get add_attachment => '添付ファイルを追加';
 
   @override
-  String get photo_permission_denied =>
-      'Photo access is required to attach images';
+  String get photo_permission_denied => '写真のアクセス許可が拒否されました';
 
   @override
-  String get characters_label => 'Characters';
+  String get characters_label => '文字数';
 
   @override
-  String get exit_temporary_chat_title => 'Exit temporary chat?';
+  String get exit_temporary_chat_title => '一時チャットを終了しますか？';
 
   @override
-  String get exit_temporary_chat_body =>
-      'This will discard the current temporary chat and return to a new chat.';
+  String get exit_temporary_chat_body => 'これにより、現在の会話が完全に削除されます。続行しますか？';
 
   @override
   String get saved_message_temp_snap_unavailable =>
-      'This message was saved from a temporary chat and can\'t be opened in its original conversation.';
+      '一時チャットではメッセージのスナップショットは利用できません';
 
   @override
-  String get filter_title => 'Filter';
+  String get filter_title => 'チャットを絞り込み';
 
   @override
-  String get filter_pinned => 'Pinned';
+  String get filter_pinned => 'ピン留め済み';
 
   @override
-  String get filter_archived => 'Archived';
+  String get filter_archived => 'アーカイブ済み';
 
   @override
-  String get filter_temp_chats => 'Temporary chats';
+  String get filter_temp_chats => '一時チャット';
 
   @override
-  String get filter_user_messages => 'User messages';
+  String get filter_user_messages => 'ユーザーのメッセージ';
 
   @override
-  String get filter_assistant_messages => 'Assistant messages';
+  String get filter_assistant_messages => 'アシスタントのメッセージ';
 
   @override
-  String get archive_chat => 'Archive';
+  String get archive_chat => 'チャットをアーカイブ';
 
   @override
-  String get unarchive_chat => 'Unarchive';
+  String get unarchive_chat => 'アーカイブを解除';
 
   @override
   String conversation_message_count(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count messages',
-      one: '1 message',
-    );
-    return '$_temp0';
+    return '$count 件のメッセージ';
   }
 
   @override
   String conversation_character_count(int count) {
-    return '$count chars';
+    return '$count 文字';
   }
 
   @override
-  String get generate_title_with_ai => 'Generate with AI';
+  String get generate_title_with_ai => 'AIでタイトルを自動生成';
 
   @override
-  String get generating_title => 'Generating...';
+  String get generating_title => 'タイトルを生成中...';
 
   @override
-  String get generate_title_failed => 'Could not generate a title';
+  String get generate_title_failed => 'タイトルを生成できませんでした';
 
   @override
-  String get lm_studio_model_browser_title => 'Browse models';
+  String get lm_studio_model_browser_title => 'モデルブラウザー';
 
   @override
-  String get lm_studio_model_search_hint => 'Search models by name or author…';
+  String get lm_studio_model_search_hint => 'モデルを検索...';
 
   @override
-  String get lm_studio_staff_picks => 'Staff picks';
+  String get lm_studio_staff_picks => 'スタッフのおすすめ';
 
   @override
-  String get lm_studio_community_models => 'Community models';
+  String get lm_studio_community_models => 'コミュニティモデル';
 
   @override
-  String get lm_studio_no_models => 'No models found';
+  String get lm_studio_no_models => 'モデルが見つかりませんでした';
 
   @override
   String lm_studio_models_count(int count) {
-    return '$count models';
+    return '$count 個のモデル';
   }
 
   @override
-  String get lm_studio_browse_models => 'Browse & download';
+  String get lm_studio_browse_models => 'LM Studioでモデルを探す';
 
   @override
-  String get lm_studio_model_search => 'LMS Model Search';
+  String get lm_studio_model_search => 'モデル検索';
 
   @override
-  String get lm_studio_downloads_title => 'Downloads';
+  String get lm_studio_downloads_title => 'ダウンロード';
 
   @override
-  String get lm_studio_choose_quant => 'Choose a download option';
+  String get lm_studio_choose_quant => '量子化を選択';
 
   @override
-  String get lm_studio_use_default_quant => 'Use default';
+  String get lm_studio_use_default_quant => 'デフォルトの量子化を使用';
 
   @override
-  String get lm_studio_recommended => 'Recommended';
+  String get lm_studio_recommended => '推奨';
 
   @override
-  String get lm_studio_clear_downloads => 'Clear finished';
+  String get lm_studio_clear_downloads => '完了したダウンロードをクリア';
 
   @override
-  String get lm_studio_no_downloads => 'No downloads yet';
+  String get lm_studio_no_downloads => 'アクティブなダウンロードはありません';
 
   @override
   String get lm_studio_downloads_disclaimer =>
-      'Downloads run on the LM Studio host. Pausing, stopping, and deleting models must be done on that computer — not from this app.';
+      'モデルのダウンロードはHugging Faceから直接行われます。';
 
   @override
-  String get lm_studio_staff_pick => 'Staff pick';
+  String get lm_studio_staff_pick => '注目のモデル';
 
   @override
-  String get lm_studio_params => 'PARAMS';
+  String get lm_studio_params => 'パラメータ';
 
   @override
-  String get lm_studio_arch => 'ARCH';
+  String get lm_studio_arch => 'アーキテクチャ';
 
   @override
-  String get lm_studio_domain => 'DOMAIN';
+  String get lm_studio_domain => 'ドメイン';
 
   @override
-  String get lm_studio_format => 'FORMAT';
+  String get lm_studio_format => 'フォーマット';
 
   @override
-  String get lm_studio_vision => 'Vision';
+  String get lm_studio_vision => 'ビジョン';
 
   @override
-  String get lm_studio_tool_use => 'Tool use';
+  String get lm_studio_tool_use => 'ツール利用';
 
   @override
-  String get lm_studio_reasoning => 'Reasoning';
+  String get lm_studio_reasoning => '推論';
 
   @override
-  String get lm_studio_download_options => 'Download options';
+  String get lm_studio_download_options => 'ダウンロードオプション';
 
   @override
-  String get lm_studio_download => 'Download';
+  String get lm_studio_download => 'ダウンロード';
 
   @override
   String lm_studio_download_size(String size) {
-    return 'Download $size';
+    return 'ダウンロードサイズ';
   }
 
   @override
   String lm_studio_downloading_percent(int percent) {
-    return 'Downloading $percent%';
+    return 'ダウンロード中: $percent%';
   }
 
   @override
-  String get lm_studio_readme_unavailable =>
-      'README not available for this model.';
+  String get lm_studio_readme_unavailable => 'このモデルのREADMEは利用できません。';
 
   @override
-  String get lm_studio_full_gpu_offload => 'Full GPU offload possible';
+  String get lm_studio_full_gpu_offload => 'フルGPUオフロード可能';
 
   @override
-  String get lm_studio_partial_gpu_offload => 'Partial GPU offload possible';
+  String get lm_studio_partial_gpu_offload => '部分GPUオフロード可能';
 
   @override
-  String get lm_studio_likely_too_large => 'Likely too large';
+  String get lm_studio_likely_too_large => 'サイズが大きすぎる可能性があります';
 
   @override
-  String get lm_studio_available_ram_gb => 'Available RAM (GB, optional)';
+  String get lm_studio_available_ram_gb => '空きRAM容量 (GB, 任意)';
 
   @override
-  String get lm_studio_available_vram_gb => 'Available VRAM (GB, optional)';
+  String get lm_studio_available_vram_gb => '空きVRAM容量 (GB, 任意)';
 
   @override
-  String get lm_studio_memory_settings_title => 'Memory for recommendations';
+  String get lm_studio_memory_settings_title => '推奨用メモリ設定';
 
   @override
   String get lm_studio_memory_settings_desc =>
-      'Used to estimate whether models fit on your machine in the model browser.';
+      'モデルブラウザーでモデルがお使いのデバイスに収まるかどうかを判断するために使用されます。';
 
   @override
-  String get think_button_label => 'Think';
+  String get think_button_label => '思考';
 
   @override
-  String get reasoning_effort_low => 'Low';
+  String get reasoning_effort_low => '低';
 
   @override
-  String get reasoning_effort_medium => 'Medium';
+  String get reasoning_effort_medium => '中';
 
   @override
-  String get reasoning_effort_high => 'High';
+  String get reasoning_effort_high => '高';
+
+  @override
+  String get could_not_read_file => 'ファイルを読み込めませんでした';
+
+  @override
+  String get server_offline => 'サーバーがオフラインです';
+
+  @override
+  String get could_not_establish_connection =>
+      'サーバーへの接続を確立できませんでした。サーバーが稼働していること、およびホスト/ポートの設定が正しいことを確認してください。';
+
+  @override
+  String get retry_connection => '接続を再試行';
+
+  @override
+  String get tokens_label => 'トークン';
+
+  @override
+  String get enter_context_length => 'コンテキスト長を入力...';
 }

@@ -192,7 +192,7 @@ class _ModelListState extends ConsumerState<ModelList> {
               Icon(Icons.cloud_off_rounded, size: 64, color: Colors.red[300]),
               const SizedBox(height: 16),
               Text(
-                'Server Offline',
+                l10n.server_offline,
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -201,7 +201,7 @@ class _ModelListState extends ConsumerState<ModelList> {
               ),
               const SizedBox(height: 8),
               Text(
-                'Could not establish a connection to the server. Please check if your server is running and the host/port settings are correct.',
+                l10n.could_not_establish_connection,
                 style: TextStyle(
                   fontSize: 13,
                   color: widget.isDark ? AppColors.darkMutedText : AppColors.lightMutedText,
@@ -215,7 +215,7 @@ class _ModelListState extends ConsumerState<ModelList> {
                   ref.invalidate(availableModelsProvider(widget.serverId));
                 },
                 icon: const Icon(Icons.refresh),
-                label: const Text('Retry Connection'),
+                label: Text(l10n.retry_connection),
               ),
             ],
           ),

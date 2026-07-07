@@ -187,6 +187,7 @@ class _ModelCapabilityIcons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final color = isDark ? AppColors.darkMutedText : AppColors.lightMutedText;
 
     return Row(
@@ -195,19 +196,19 @@ class _ModelCapabilityIcons extends StatelessWidget {
         if (model.supportsVision)
           _CapabilityIcon(
             icon: LucideIcons.eye,
-            tooltip: 'Vision',
+            tooltip: l10n.lm_studio_vision,
             color: color,
           ),
         if (model.supportsReasoning)
           _CapabilityIcon(
             icon: LucideIcons.brain,
-            tooltip: 'Reasoning',
+            tooltip: l10n.lm_studio_reasoning,
             color: color,
           ),
         if (model.supportsToolUse)
           _CapabilityIcon(
             icon: LucideIcons.hammer,
-            tooltip: 'Tool use',
+            tooltip: l10n.lm_studio_tool_use,
             color: color,
           ),
       ],

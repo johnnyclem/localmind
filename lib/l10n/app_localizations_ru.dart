@@ -263,152 +263,155 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get delete_builtin_persona_body =>
-      'This is a built-in persona. You can restore it later from Settings.';
+      'Это встроенный персонаж. Вы можете восстановить его позже в Настройках.';
 
   @override
-  String get restore_builtin_personas => 'Restore default personas';
+  String get restore_builtin_personas => 'Восстановить стандартных персонажей';
 
   @override
   String get restore_builtin_personas_desc =>
-      'Re-add any built-in personas you\'ve deleted';
+      'Заново добавить всех удаленных встроенных персонажей';
 
   @override
-  String get restore_builtin_personas_success => 'Default personas restored';
+  String get restore_builtin_personas_success =>
+      'Персонажи по умолчанию восстановлены';
 
   @override
-  String get clear_personas => 'Clear personas';
+  String get clear_personas => 'Сбросить персонажей';
 
   @override
-  String get enable_image_compression => 'Compress images before sending';
+  String get enable_image_compression => 'Сжимать изображения перед отправкой';
 
   @override
   String get enable_image_compression_desc =>
-      'Resize and compress attached images so uploads stay within server limits';
+      'Изменять размер и сжимать прикрепленные изображения, чтобы размер загрузки оставался в пределах лимитов сервера';
 
   @override
-  String get image_compression_level => 'Compression aggressiveness';
+  String get image_compression_level => 'Агрессивность сжатия';
 
   @override
   String get image_compression_level_desc =>
-      'Higher aggressiveness produces smaller uploads at lower quality';
+      'Более высокая агрессивность дает файлы меньшего размера при более низком качестве';
 
   @override
-  String get image_compression_level_low => 'Low';
+  String get image_compression_level_low => 'Низкая';
 
   @override
-  String get image_compression_level_medium => 'Medium';
+  String get image_compression_level_medium => 'Средняя';
 
   @override
-  String get image_compression_level_high => 'High';
+  String get image_compression_level_high => 'Высокая';
 
   @override
-  String get sort_models_tooltip => 'Sort models';
+  String get sort_models_tooltip => 'Сортировка моделей';
 
   @override
-  String get sort_by_favorites => 'Favorites first';
+  String get sort_by_favorites => 'Сначала избранные';
 
   @override
-  String get sort_by_name => 'Name (A-Z)';
+  String get sort_by_name => 'По имени (А-Я)';
 
   @override
-  String get sort_by_size_smallest => 'Size (smallest first)';
+  String get sort_by_size_smallest => 'Размер (сначала меньшие)';
 
   @override
-  String get sort_by_size_largest => 'Size (largest first)';
+  String get sort_by_size_largest => 'Размер (сначала большие)';
 
   @override
-  String get sort_by_context_length => 'Context length';
+  String get sort_by_context_length => 'Длина контекста';
 
   @override
   String bulk_ai_rename_progress(int done, int total) {
-    return 'Renaming $done/$total...';
+    return 'Переименование $done/$total...';
   }
 
   @override
   String selected_count(int count) {
-    return '$count selected';
+    return 'Выбрано: $count';
   }
 
   @override
-  String get ai_rename_tooltip => 'Rename selected with AI';
+  String get ai_rename_tooltip => 'Переименовать выбранные с помощью ИИ';
 
   @override
-  String get new_chat_in_folder_tooltip => 'New chat in this folder';
+  String get new_chat_in_folder_tooltip => 'Новый чат в этой папке';
 
   @override
   String total_tokens_count(int count) {
-    return '$count tokens';
+    return 'Токенов: $count';
   }
 
   @override
-  String get smart_replies_use_persona => 'Use persona in smart replies';
+  String get smart_replies_use_persona =>
+      'Использовать персонаж в умных ответах';
 
   @override
   String get smart_replies_use_persona_desc =>
-      'Suggested replies match the tone of the active persona instead of a generic assistant';
+      'Предлагаемые ответы будут соответствовать тону активного персонажа, а не общего ассистента';
 
   @override
-  String get keep_persona_on_new_chat => 'Keep persona on new chat';
+  String get keep_persona_on_new_chat => 'Сохранять персонаж при новом чате';
 
   @override
   String get keep_persona_on_new_chat_desc =>
-      'Don\'t clear the selected persona(s) after starting a new chat';
+      'Не сбрасывать выбранных персонажей при создании нового чата';
 
   @override
-  String get role_swap_button_enabled => 'Show role-swap button';
+  String get role_swap_button_enabled => 'Показывать кнопку смены ролей';
 
   @override
   String get role_swap_button_enabled_desc =>
-      'Show a button in the chat input to send your message as the assistant instead of the user, without generating a response';
+      'Показывать кнопку в поле ввода чата для отправки сообщения от лица ассистента, а не пользователя (без генерации ответа)';
 
   @override
-  String get send_as_user_tooltip => 'Send as user';
+  String get send_as_user_tooltip => 'Отправить от пользователя';
 
   @override
-  String get send_as_assistant_tooltip => 'Send as assistant (no response)';
+  String get send_as_assistant_tooltip =>
+      'Отправить от ассистента (без ответа)';
 
   @override
-  String get insert_without_generating_tooltip => 'Insert without generating';
+  String get insert_without_generating_tooltip => 'Вставить без генерации';
 
   @override
-  String get token_usage_title => 'Token Usage';
+  String get token_usage_title => 'Использование токенов';
 
   @override
-  String get total_tokens_label => 'Tokens used';
+  String get total_tokens_label => 'Использовано токенов';
 
   @override
-  String get usage_percent_label => 'Context used';
+  String get usage_percent_label => 'Использовано контекста';
 
   @override
-  String get export_choice_title => 'Export';
+  String get export_choice_title => 'Экспорт';
 
   @override
-  String get export_choice_body => 'How would you like to export this?';
+  String get export_choice_body => 'Как вы хотите это экспортировать?';
 
   @override
-  String get copy_to_clipboard => 'Copy to Clipboard';
+  String get copy_to_clipboard => 'Копировать в буфер обмена';
 
   @override
   String bulk_export_conversations_success(int count) {
-    return 'Exported $count conversations';
+    return 'Экспортировано чатов: $count';
   }
 
   @override
-  String get bulk_ai_rename_confirm_title => 'Rename with AI?';
+  String get bulk_ai_rename_confirm_title => 'Переименовать с помощью ИИ?';
 
   @override
   String bulk_ai_rename_confirm_body(int count) {
-    return 'This will ask the AI to generate a new title for each of the $count selected conversations, replacing their current titles. This can take a while and cannot be undone.';
+    return 'ИИ сгенерирует новые заголовки для $count выбранных чатов, заменив текущие. Это может занять некоторое время и действие нельзя отменить.';
   }
 
   @override
-  String get sort_by_modified_date => 'Last modified';
+  String get sort_by_modified_date => 'Последнее изменение';
 
   @override
-  String get sort_by_created_date => 'Date created';
+  String get sort_by_created_date => 'Дата создания';
 
   @override
-  String get sort_title => 'Sort';
+  String get sort_title => 'Сортировка';
 
   @override
   String get clear_conversation_title => 'Ясный разговор?';
@@ -620,14 +623,16 @@ class AppLocalizationsRu extends AppLocalizations {
   String get enable_smart_reply => 'Умные ответы на устройстве';
 
   @override
-  String get ai_user_response_enabled => 'AI user message (hold send)';
+  String get ai_user_response_enabled =>
+      'Сообщение пользователя через ИИ (зажать кнопку)';
 
   @override
   String get ai_user_response_enabled_desc =>
-      'Hold the send button for 3 seconds to have the AI write and send your next message';
+      'Зажмите кнопку отправки на 3 секунды, чтобы ИИ написал и отправил следующее сообщение за вас';
 
   @override
-  String get ai_user_response_tooltip => 'Generate user message with AI';
+  String get ai_user_response_tooltip =>
+      'Сгенерировать сообщение пользователя с помощью ИИ';
 
   @override
   String get streaming_responses => 'Потоковая передача ответов';
@@ -643,14 +648,15 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get show_system_messages_desc =>
-      'When no persona is selected, send a default assistant system prompt with each request';
+      'Если персонаж не выбран, отправлять стандартный системный промпт ассистента с каждым запросом';
 
   @override
-  String get show_system_messages_in_chat => 'Show System Messages in Chat';
+  String get show_system_messages_in_chat =>
+      'Показывать системные сообщения в чате';
 
   @override
   String get show_system_messages_in_chat_desc =>
-      'Display system messages (e.g. from an imported backup) as visible bubbles in the conversation';
+      'Отображать системные сообщения (например, из импортированной резервной копии) в виде облачков сообщений в чате';
 
   @override
   String get haptic_feedback => 'Тактильная обратная связь';
@@ -708,11 +714,10 @@ class AppLocalizationsRu extends AppLocalizations {
   String get select_persona => 'Выберите Персону';
 
   @override
-  String get manage_personas => 'Manage personas';
+  String get manage_personas => 'Управление персонажами';
 
   @override
-  String get personas_combine_hint =>
-      'Select multiple personas in chat to stack their system prompts.';
+  String get personas_combine_hint => 'Выбранные персонажи будут объединены';
 
   @override
   String get start_conversation => 'Начать разговор';
@@ -1707,28 +1712,29 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
-  String get unload_all_models => 'Unload all';
+  String get unload_all_models => 'Выгрузить все модели';
 
   @override
   String loaded_models_count(int count) {
-    return '$count loaded';
+    return 'Загружено моделей: $count';
   }
 
   @override
-  String get all_models_unloaded => 'All models unloaded';
+  String get all_models_unloaded => 'Все модели выгружены';
 
   @override
-  String get branch_chat => 'Branch chat';
+  String get branch_chat => 'Создать ветку чата';
 
   @override
-  String get branch_chat_desc => 'Start a new conversation from this message';
+  String get branch_chat_desc => 'Создать новый чат на основе этого сообщения';
 
   @override
-  String get edit_assistant_message_desc => 'Edit the assistant response text.';
+  String get edit_assistant_message_desc =>
+      'Редактировать текст сообщения ассистента';
 
   @override
-  String switch_to_model(String modelName) {
-    return 'Switch to $modelName';
+  String switch_to_model(String modelName, Object model) {
+    return 'Переключить на модель $model';
   }
 
   @override
@@ -2173,343 +2179,344 @@ class AppLocalizationsRu extends AppLocalizations {
   String get tool_status_failed => 'Неуспешный';
 
   @override
-  String get model_favorite_toggle => 'Toggle favorite';
+  String get model_favorite_toggle => 'Добавить в избранное';
 
   @override
-  String get model_note_label => 'Note';
+  String get model_note_label => 'Заметка';
 
   @override
-  String get model_note_hint => 'Add a note about this model…';
+  String get model_note_hint => 'Добавить личную заметку для этой модели...';
 
   @override
-  String get unload_models_before_load =>
-      'Unload all models before loading a new one';
+  String get unload_models_before_load => 'Выгружать модели перед загрузкой';
 
   @override
   String get temp_chat_keyboard_incognito =>
-      'Приватная клавиатура во временном чате';
+      'Режим инкогнито клавиатуры во временном чате';
 
   @override
   String get temp_chat_keyboard_incognito_desc =>
-      'Отключает обучение и подсказки клавиатуры во временных чатах (например, режим инкогнито SwiftKey).';
+      'Запрашивать у клавиатуры системы не сохранять историю ввода во временных чатах';
 
   @override
-  String get resume_last_chat => 'Восстанавливать последний чат при запуске';
+  String get resume_last_chat => 'Возобновить последний чат';
 
   @override
   String get resume_last_chat_desc =>
-      'Открывать последнюю активную беседу при повторном запуске приложения.';
+      'Автоматически открывать последний активный чат при запуске';
 
   @override
-  String get export_all_data => 'Export all data';
+  String get export_all_data => 'Экспортировать все данные';
 
   @override
-  String get import_all_data => 'Import all data';
+  String get import_all_data => 'Импортировать все данные';
 
   @override
-  String get export_data_success => 'Backup exported successfully';
+  String get export_data_success => 'Данные успешно экспортированы';
 
   @override
-  String get import_data_success => 'Backup imported successfully';
+  String get import_data_success => 'Данные успешно импортированы';
 
   @override
   String import_data_failed(String error) {
-    return 'Failed to import backup: $error';
+    return 'Не удалось импортировать данные';
   }
 
   @override
   String get import_data_confirm =>
-      'Import conversations and custom personas from this backup? Existing items with the same IDs will be updated.';
+      'Это заменит все ваши текущие данные импортированными. Продолжить?';
 
   @override
   String get import_settings_confirm =>
-      'Replace current settings with the imported backup?';
+      'Это заменит ваши текущие настройки импортированными. Продолжить?';
 
   @override
-  String get export_conversations => 'Export conversations';
+  String get export_conversations => 'Экспорт чатов';
 
   @override
-  String get import_conversations => 'Import conversations';
+  String get import_conversations => 'Импорт чатов';
 
   @override
-  String get export_personas => 'Export personas';
+  String get export_personas => 'Экспорт персонажей';
 
   @override
-  String get import_personas => 'Import personas';
+  String get import_personas => 'Импорт персонажей';
 
   @override
-  String get export_settings => 'Export settings';
+  String get export_settings => 'Экспорт настроек';
 
   @override
-  String get import_settings => 'Import settings';
+  String get import_settings => 'Импорт настроек';
 
   @override
-  String get export_all_zip => 'Export all (ZIP)';
+  String get export_all_zip => 'Экспортировать все (ZIP)';
 
   @override
-  String get import_all_zip => 'Import all (ZIP)';
+  String get import_all_zip => 'Импортировать все (ZIP)';
 
   @override
-  String get duplicate_chat => 'Duplicate chat';
+  String get duplicate_chat => 'Дублировать чат';
 
   @override
-  String get duplicate_chat_success => 'Chat duplicated';
+  String get duplicate_chat_success => 'Чат успешно продублирован';
 
   @override
-  String get move_to_folder => 'Move to folder';
+  String get move_to_folder => 'Переместить в папку';
 
   @override
-  String get remove_from_folder => 'Remove from folder';
+  String get remove_from_folder => 'Удалить из папки';
 
   @override
-  String get create_folder => 'Create folder';
+  String get create_folder => 'Создать папку';
 
   @override
-  String get new_folder => 'New folder';
+  String get new_folder => 'Новая папка';
 
   @override
-  String get folder_name_hint => 'Folder name';
+  String get folder_name_hint => 'Введите имя папки...';
 
   @override
-  String get all_chats => 'All';
+  String get all_chats => 'Все чаты';
 
   @override
-  String get unfiled_chats => 'Unfiled';
+  String get unfiled_chats => 'Чаты без папки';
 
   @override
-  String get create => 'Create';
+  String get create => 'Создать';
 
   @override
-  String get server_path_prefix_label => 'API path prefix';
+  String get server_path_prefix_label => 'Префикс пути сервера';
 
   @override
-  String get server_path_prefix_hint => '/your-secret-token';
+  String get server_path_prefix_hint =>
+      'Необязательный префикс для путей API сервера (например, /v1)';
 
   @override
-  String get search_message_contents => 'Search message contents';
+  String get search_message_contents => 'Поиск по тексту сообщений...';
 
   @override
-  String get message_search_results => 'Message matches';
+  String get message_search_results => 'Результаты поиска сообщений';
 
   @override
-  String get saved_messages_title => 'Saved Messages';
+  String get saved_messages_title => 'Сохраненные сообщения';
 
   @override
-  String get nav_saved_messages => 'Saved Messages';
+  String get nav_saved_messages => 'Сохраненные сообщения';
 
   @override
-  String get saved_messages_empty =>
-      'No saved messages yet. Bookmark a message from its options menu.';
+  String get saved_messages_empty => 'Нет сохраненных сообщений';
 
   @override
-  String get save_message => 'Save message';
+  String get save_message => 'Сохранить сообщение';
 
   @override
-  String get message_saved => 'Message saved';
+  String get message_saved => 'Сообщение сохранено';
 
   @override
   String token_count(int count) {
-    return '$count tokens';
+    return 'Токенов: $count';
   }
 
   @override
   String estimated_token_count(int count) {
-    return '~$count tokens (estimated)';
+    return 'Оценка токенов: $count';
   }
 
   @override
-  String get test_tts_section_title => 'Test voice';
+  String get test_tts_section_title => 'Проверка озвучки текста';
 
   @override
-  String get test_tts_hint => 'Enter text to hear the current TTS engine…';
+  String get test_tts_hint => 'Введите текст для проверки голоса...';
 
   @override
-  String get test_speak_button => 'Speak';
+  String get test_speak_button => 'Озвучить';
 
   @override
-  String get scroll_to_bottom => 'Scroll to bottom';
+  String get scroll_to_bottom => 'Прокрутить вниз';
 
   @override
-  String get generate_ai_response => 'Generate AI response';
+  String get generate_ai_response => 'Сгенерировать ответ ИИ';
 
   @override
-  String get no_response => 'No response';
+  String get no_response => 'Нет ответа';
 
   @override
-  String get export => 'Export';
+  String get export => 'Экспорт';
 
   @override
-  String get import => 'Import';
+  String get import => 'Импорт';
 
   @override
-  String get conversations_label => 'Conversations';
+  String get conversations_label => 'Чаты';
 
   @override
-  String get personas_label => 'Personas';
+  String get personas_label => 'Персонажи';
 
   @override
-  String get settings_label => 'Settings';
+  String get settings_label => 'Настройки';
 
   @override
-  String get export_conversation => 'Export conversation';
+  String get export_conversation => 'Экспортировать чат';
 
   @override
-  String get tts_process_markdown => 'Process markdown for speech';
+  String get tts_process_markdown => 'Обрабатывать Markdown';
 
   @override
   String get tts_process_markdown_desc =>
-      'Strip formatting like **bold** before reading aloud';
+      'Удалять форматирование вроде **жирного** перед озвучкой';
 
   @override
-  String get tts_skip_seconds => 'Skip interval';
+  String get tts_skip_seconds => 'Секунды перемотки';
 
   @override
   String get tts_skip_seconds_desc =>
-      'Forward and rewind jump size during playback';
+      'Время для перемотки вперед/назад в аудиоплеере';
 
   @override
   String tts_skip_seconds_value(int seconds) {
-    return '${seconds}s';
+    return '$secondsс';
   }
 
   @override
-  String get preview_system_prompts => 'Preview system prompts';
+  String get preview_system_prompts => 'Предпросмотр системных промптов';
 
   @override
-  String get welcome_message_1 => 'What can I help you with today?';
+  String get welcome_message_1 => 'Привет! Я твой локальный ИИ-ассистент.';
 
   @override
-  String get welcome_message_2 => 'Ask me anything — I\'m ready when you are.';
+  String get welcome_message_2 => 'Спрашивай о чем угодно — я готов к работе.';
 
   @override
-  String get welcome_message_3 => 'Start a conversation below.';
+  String get welcome_message_3 =>
+      'Твои данные обрабатываются локально и никогда не покидают устройство.';
 
   @override
-  String get welcome_message_4 => 'Need ideas? Try one of the quick prompts.';
+  String get welcome_message_4 =>
+      'Для начала выбери модель на верхней панели или добавь новую в разделе управления моделями.';
 
   @override
-  String get temporary_chat => 'Temporary chat';
+  String get temporary_chat => 'Временный чат';
 
   @override
-  String get temporary_chat_desc => 'Chats aren\'t saved to history.';
+  String get temporary_chat_desc =>
+      'Сообщения из этого чата не будут сохранены в истории';
 
   @override
-  String get temporary_chat_banner => 'Temporary chat — not saved to history';
+  String get temporary_chat_banner =>
+      'Активен временный чат — история не сохраняется';
 
   @override
-  String get temporary_chat_save_warning_title =>
-      'Save message in temporary chat?';
+  String get temporary_chat_save_warning_title => 'Сохранить временный чат?';
 
   @override
   String get temporary_chat_save_warning_body =>
-      'This chat is temporary and hidden from history. The saved message will still appear in Saved Messages.';
+      'Этот чат не сохранен в истории. Хотите сохранить его сейчас?';
 
   @override
-  String get save_to_history => 'Save to history';
+  String get save_to_history => 'Сохранить в историю';
 
   @override
-  String get share_conversation => 'Share conversation';
+  String get share_conversation => 'Поделиться чатом';
 
   @override
-  String get download_tts_audio => 'Download audio';
+  String get download_tts_audio => 'Скачать аудио';
 
   @override
-  String get tts_download_unavailable =>
-      'Download is only available for Piper and Kitten TTS';
+  String get tts_download_unavailable => 'Скачивание аудио недоступно';
 
   @override
-  String get tts_download_no_audio => 'No audio available to download yet';
+  String get tts_download_no_audio =>
+      'Нет сгенерированного аудио для скачивания';
 
   @override
-  String get tts_download_success => 'Audio saved';
+  String get tts_download_success => 'Аудиофайл успешно сохранен';
 
   @override
-  String get return_to_chat => 'Return to chat';
+  String get return_to_chat => 'Вернуться в чат';
 
   @override
-  String get return_to_temp_chat => 'Return to temporary chat';
+  String get return_to_temp_chat => 'Вернуться во временный чат';
 
   @override
-  String get insert_saved_message => 'Insert saved message';
+  String get insert_saved_message => 'Вставить сохраненное сообщение';
 
   @override
   String get insert_saved_message_desc =>
-      'Choose a saved message to add to your input';
+      'Добавить фрагмент из сохраненных сообщений в чат';
 
   @override
-  String get model_info => 'Model info';
+  String get model_info => 'Информация о модели';
 
   @override
-  String get model_name => 'Model name';
+  String get model_name => 'Имя модели';
 
   @override
-  String get model_identifier => 'Identifier';
+  String get model_identifier => 'Идентификатор модели';
 
   @override
-  String get not_available => 'Not available';
+  String get not_available => 'Недоступно';
 
   @override
-  String get save_message_folders => 'Save message';
+  String get save_message_folders => 'Сохранить в папки';
 
   @override
-  String get remove_from_saved => 'Remove from saved';
+  String get remove_from_saved => 'Удалить из сохраненных';
 
   @override
-  String get message_already_saved => 'Saved';
+  String get message_already_saved => 'Сообщение уже сохранено';
 
   @override
-  String get stream_ttft => 'Time to first token';
+  String get stream_ttft => 'Время до первого токена';
 
   @override
-  String get stream_tokens_per_sec => 'Tokens per second';
+  String get stream_tokens_per_sec => 'Токенов в секунду';
 
   @override
-  String get stream_stop_reason => 'Stop reason';
+  String get stream_stop_reason => 'Причина остановки';
 
   @override
-  String get stream_input_tokens => 'Input tokens';
+  String get stream_input_tokens => 'Входные токены';
 
   @override
-  String get stream_output_tokens => 'Output tokens';
+  String get stream_output_tokens => 'Выходные токены';
 
   @override
-  String get stream_generation_time => 'Generation time';
+  String get stream_generation_time => 'Время генерации';
 
   @override
-  String get attach_image => 'Image';
+  String get attach_image => 'Прикрепить изображение';
 
   @override
-  String get attach_text_document => 'Text document';
+  String get attach_text_document => 'Прикрепить текстовый документ';
 
   @override
-  String get add_attachment => 'Add attachment';
+  String get add_attachment => 'Добавить вложение';
 
   @override
-  String get photo_permission_denied =>
-      'Photo access is required to attach images';
+  String get photo_permission_denied => 'Доступ к фото отклонен';
 
   @override
-  String get characters_label => 'Characters';
+  String get characters_label => 'Символы';
 
   @override
   String get exit_temporary_chat_title => 'Выйти из временного чата?';
 
   @override
   String get exit_temporary_chat_body =>
-      'Текущий временный чат будет удалён, и вы вернётесь к новому чату.';
+      'Это навсегда удалит текущий чат. Продолжить?';
 
   @override
   String get saved_message_temp_snap_unavailable =>
-      'Это сообщение сохранено из временного чата и не может быть открыто в исходной беседе.';
+      'Снимки сообщений недоступны во временных чатах';
 
   @override
-  String get filter_title => 'Фильтр';
+  String get filter_title => 'Фильтр чатов';
 
   @override
-  String get filter_pinned => 'Закреплённые';
+  String get filter_pinned => 'Закрепленные';
 
   @override
-  String get filter_archived => 'Архив';
+  String get filter_archived => 'Архивные';
 
   @override
   String get filter_temp_chats => 'Временные чаты';
@@ -2521,161 +2528,175 @@ class AppLocalizationsRu extends AppLocalizations {
   String get filter_assistant_messages => 'Сообщения ассистента';
 
   @override
-  String get archive_chat => 'Архивировать';
+  String get archive_chat => 'Архивировать чат';
 
   @override
-  String get unarchive_chat => 'Разархивировать';
+  String get unarchive_chat => 'Разархивировать чат';
 
   @override
   String conversation_message_count(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count сообщений',
-      many: '$count сообщений',
-      few: '$count сообщения',
-      one: '1 сообщение',
-    );
-    return '$_temp0';
+    return 'Сообщений: $count';
   }
 
   @override
   String conversation_character_count(int count) {
-    return '$count симв.';
+    return 'Символов: $count';
   }
 
   @override
-  String get generate_title_with_ai => 'Сгенерировать с ИИ';
+  String get generate_title_with_ai => 'Создать заголовок с помощью ИИ';
 
   @override
-  String get generating_title => 'Генерация...';
+  String get generating_title => 'Создание заголовка...';
 
   @override
-  String get generate_title_failed => 'Не удалось сгенерировать заголовок';
+  String get generate_title_failed => 'Не удалось создать заголовок';
 
   @override
-  String get lm_studio_model_browser_title => 'Browse models';
+  String get lm_studio_model_browser_title => 'Обзор моделей';
 
   @override
-  String get lm_studio_model_search_hint => 'Search models by name or author…';
+  String get lm_studio_model_search_hint => 'Поиск моделей...';
 
   @override
-  String get lm_studio_staff_picks => 'Staff picks';
+  String get lm_studio_staff_picks => 'Выбор редакции';
 
   @override
-  String get lm_studio_community_models => 'Community models';
+  String get lm_studio_community_models => 'Модели сообщества';
 
   @override
-  String get lm_studio_no_models => 'No models found';
+  String get lm_studio_no_models => 'Модели не найдены';
 
   @override
   String lm_studio_models_count(int count) {
-    return '$count models';
+    return 'Моделей: $count';
   }
 
   @override
-  String get lm_studio_browse_models => 'Browse & download';
+  String get lm_studio_browse_models => 'Найти модели в LM Studio';
 
   @override
-  String get lm_studio_model_search => 'LMS Model Search';
+  String get lm_studio_model_search => 'Поиск моделей';
 
   @override
-  String get lm_studio_downloads_title => 'Downloads';
+  String get lm_studio_downloads_title => 'Загрузки';
 
   @override
-  String get lm_studio_choose_quant => 'Choose a download option';
+  String get lm_studio_choose_quant => 'Выбрать квантование';
 
   @override
-  String get lm_studio_use_default_quant => 'Use default';
+  String get lm_studio_use_default_quant =>
+      'Использовать стандартное квантование';
 
   @override
-  String get lm_studio_recommended => 'Recommended';
+  String get lm_studio_recommended => 'Рекомендуется';
 
   @override
-  String get lm_studio_clear_downloads => 'Clear finished';
+  String get lm_studio_clear_downloads => 'Очистить завершенные загрузки';
 
   @override
-  String get lm_studio_no_downloads => 'No downloads yet';
+  String get lm_studio_no_downloads => 'Нет активных загрузок';
 
   @override
   String get lm_studio_downloads_disclaimer =>
-      'Downloads run on the LM Studio host. Pausing, stopping, and deleting models must be done on that computer — not from this app.';
+      'Загрузка моделей производится напрямую с Hugging Face.';
 
   @override
-  String get lm_studio_staff_pick => 'Staff pick';
+  String get lm_studio_staff_pick => 'Рекомендуемая модель';
 
   @override
-  String get lm_studio_params => 'PARAMS';
+  String get lm_studio_params => 'Параметры';
 
   @override
-  String get lm_studio_arch => 'ARCH';
+  String get lm_studio_arch => 'Архитектура';
 
   @override
-  String get lm_studio_domain => 'DOMAIN';
+  String get lm_studio_domain => 'Область применения';
 
   @override
-  String get lm_studio_format => 'FORMAT';
+  String get lm_studio_format => 'Формат';
 
   @override
-  String get lm_studio_vision => 'Vision';
+  String get lm_studio_vision => 'Зрение';
 
   @override
-  String get lm_studio_tool_use => 'Tool use';
+  String get lm_studio_tool_use => 'Вызов инструментов';
 
   @override
-  String get lm_studio_reasoning => 'Reasoning';
+  String get lm_studio_reasoning => 'Рассуждение';
 
   @override
-  String get lm_studio_download_options => 'Download options';
+  String get lm_studio_download_options => 'Параметры загрузки';
 
   @override
-  String get lm_studio_download => 'Download';
+  String get lm_studio_download => 'Скачать';
 
   @override
   String lm_studio_download_size(String size) {
-    return 'Download $size';
+    return 'Размер файла';
   }
 
   @override
   String lm_studio_downloading_percent(int percent) {
-    return 'Downloading $percent%';
+    return 'Загрузка: $percent%';
   }
 
   @override
   String get lm_studio_readme_unavailable =>
-      'README not available for this model.';
+      'README недоступен для этой модели.';
 
   @override
-  String get lm_studio_full_gpu_offload => 'Full GPU offload possible';
+  String get lm_studio_full_gpu_offload => 'Возможен полный перенос на GPU';
 
   @override
-  String get lm_studio_partial_gpu_offload => 'Partial GPU offload possible';
+  String get lm_studio_partial_gpu_offload =>
+      'Возможен частичный перенос на GPU';
 
   @override
-  String get lm_studio_likely_too_large => 'Likely too large';
+  String get lm_studio_likely_too_large => 'Возможно, слишком велика';
 
   @override
-  String get lm_studio_available_ram_gb => 'Available RAM (GB, optional)';
+  String get lm_studio_available_ram_gb => 'Доступная ОЗУ (ГБ, необязательно)';
 
   @override
-  String get lm_studio_available_vram_gb => 'Available VRAM (GB, optional)';
+  String get lm_studio_available_vram_gb =>
+      'Доступная видеопамять (ГБ, необязательно)';
 
   @override
-  String get lm_studio_memory_settings_title => 'Memory for recommendations';
+  String get lm_studio_memory_settings_title => 'Память для рекомендаций';
 
   @override
   String get lm_studio_memory_settings_desc =>
-      'Used to estimate whether models fit on your machine in the model browser.';
+      'Используется для оценки того, подходят ли модели для вашего устройства.';
 
   @override
-  String get think_button_label => 'Think';
+  String get think_button_label => 'Мыслить';
 
   @override
-  String get reasoning_effort_low => 'Low';
+  String get reasoning_effort_low => 'Низкая';
 
   @override
-  String get reasoning_effort_medium => 'Medium';
+  String get reasoning_effort_medium => 'Средняя';
 
   @override
-  String get reasoning_effort_high => 'High';
+  String get reasoning_effort_high => 'Высокая';
+
+  @override
+  String get could_not_read_file => 'Не удалось прочитать файл';
+
+  @override
+  String get server_offline => 'Сервер офлайн';
+
+  @override
+  String get could_not_establish_connection =>
+      'Не удалось подключиться к серверу. Убедитесь, что сервер запущен, а настройки хоста и порта указаны верно.';
+
+  @override
+  String get retry_connection => 'Повторить подключение';
+
+  @override
+  String get tokens_label => 'Токены';
+
+  @override
+  String get enter_context_length => 'Введите длину контекста...';
 }

@@ -263,152 +263,155 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get delete_builtin_persona_body =>
-      'This is a built-in persona. You can restore it later from Settings.';
+      'এটি একটি বিল্ট-ইন ব্যক্তিত্ব (Persona)। আপনি এটিকে পরবর্তীতে সেটিংস থেকে পুনরুদ্ধার করতে পারেন।';
 
   @override
-  String get restore_builtin_personas => 'Restore default personas';
+  String get restore_builtin_personas => 'ডিফল্ট ব্যক্তিত্ব পুনরুদ্ধার করুন';
 
   @override
   String get restore_builtin_personas_desc =>
-      'Re-add any built-in personas you\'ve deleted';
+      'আপনার মুছে ফেলা যেকোনো বিল্ট-ইন ব্যক্তিত্ব আবার যুক্ত করুন';
 
   @override
-  String get restore_builtin_personas_success => 'Default personas restored';
+  String get restore_builtin_personas_success =>
+      'ডিফল্ট ব্যক্তিত্ব পুনরুদ্ধার করা হয়েছে';
 
   @override
-  String get clear_personas => 'Clear personas';
+  String get clear_personas => 'ব্যক্তিত্ব পরিষ্কার করুন';
 
   @override
-  String get enable_image_compression => 'Compress images before sending';
+  String get enable_image_compression => 'পাঠানোর আগে ছবি কম্প্রেস করুন';
 
   @override
   String get enable_image_compression_desc =>
-      'Resize and compress attached images so uploads stay within server limits';
+      'সংযুক্ত চিত্রগুলির আকার পরিবর্তন এবং কম্প্রেস করুন যাতে আপলোডগুলি সার্ভার সীমার মধ্যে থাকে';
 
   @override
-  String get image_compression_level => 'Compression aggressiveness';
+  String get image_compression_level => 'কম্প্রেশনের আগ্রাসন';
 
   @override
   String get image_compression_level_desc =>
-      'Higher aggressiveness produces smaller uploads at lower quality';
+      'উচ্চতর আগ্রাসন কম মানের ছোট আকারের আপলোড তৈরি করে';
 
   @override
-  String get image_compression_level_low => 'Low';
+  String get image_compression_level_low => 'কম';
 
   @override
-  String get image_compression_level_medium => 'Medium';
+  String get image_compression_level_medium => 'মাঝারি';
 
   @override
-  String get image_compression_level_high => 'High';
+  String get image_compression_level_high => 'উচ্চ';
 
   @override
-  String get sort_models_tooltip => 'Sort models';
+  String get sort_models_tooltip => 'মডেল সাজান';
 
   @override
-  String get sort_by_favorites => 'Favorites first';
+  String get sort_by_favorites => 'প্রিয়গুলো আগে';
 
   @override
-  String get sort_by_name => 'Name (A-Z)';
+  String get sort_by_name => 'নাম (A-Z)';
 
   @override
-  String get sort_by_size_smallest => 'Size (smallest first)';
+  String get sort_by_size_smallest => 'আকার (সবচেয়ে ছোট আগে)';
 
   @override
-  String get sort_by_size_largest => 'Size (largest first)';
+  String get sort_by_size_largest => 'আকার (সবচেয়ে বড় আগে)';
 
   @override
-  String get sort_by_context_length => 'Context length';
+  String get sort_by_context_length => 'প্রসঙ্গের দৈর্ঘ্য';
 
   @override
   String bulk_ai_rename_progress(int done, int total) {
-    return 'Renaming $done/$total...';
+    return 'নাম পরিবর্তন করা হচ্ছে $done/$total...';
   }
 
   @override
   String selected_count(int count) {
-    return '$count selected';
+    return '$countটি নির্বাচিত';
   }
 
   @override
-  String get ai_rename_tooltip => 'Rename selected with AI';
+  String get ai_rename_tooltip => 'এআই দিয়ে নির্বাচিতগুলোর নাম পরিবর্তন করুন';
 
   @override
-  String get new_chat_in_folder_tooltip => 'New chat in this folder';
+  String get new_chat_in_folder_tooltip => 'এই ফোল্ডারে নতুন চ্যাট';
 
   @override
   String total_tokens_count(int count) {
-    return '$count tokens';
+    return '$countটি টোকেন';
   }
 
   @override
-  String get smart_replies_use_persona => 'Use persona in smart replies';
+  String get smart_replies_use_persona =>
+      'স্মার্ট উত্তরে ব্যক্তিত্ব ব্যবহার করুন';
 
   @override
   String get smart_replies_use_persona_desc =>
-      'Suggested replies match the tone of the active persona instead of a generic assistant';
+      'প্রস্তাবিত উত্তরগুলি সাধারণ সহকারীর পরিবর্তে সক্রিয় ব্যক্তিত্বের সুরের সাথে মেলে';
 
   @override
-  String get keep_persona_on_new_chat => 'Keep persona on new chat';
+  String get keep_persona_on_new_chat => 'নতুন চ্যাটে ব্যক্তিত্ব ধরে রাখুন';
 
   @override
   String get keep_persona_on_new_chat_desc =>
-      'Don\'t clear the selected persona(s) after starting a new chat';
+      'নতুন চ্যাট শুরু করার পরে নির্বাচিত ব্যক্তিত্ব পরিষ্কার করবেন না';
 
   @override
-  String get role_swap_button_enabled => 'Show role-swap button';
+  String get role_swap_button_enabled => 'ভূমিকা-বদল বোতাম দেখান';
 
   @override
   String get role_swap_button_enabled_desc =>
-      'Show a button in the chat input to send your message as the assistant instead of the user, without generating a response';
+      'কোনো প্রতিক্রিয়া তৈরি না করে, ব্যবহারকারীর পরিবর্তে সহকারী ভূমিকা হিসাবে আপনার বার্তা পাঠাতে চ্যাট ইনপুটে একটি বোতাম দেখান';
 
   @override
-  String get send_as_user_tooltip => 'Send as user';
+  String get send_as_user_tooltip => 'ব্যবহারকারী হিসেবে পাঠান';
 
   @override
-  String get send_as_assistant_tooltip => 'Send as assistant (no response)';
+  String get send_as_assistant_tooltip =>
+      'সহকারী হিসেবে পাঠান (কোনো প্রতিক্রিয়া নেই)';
 
   @override
-  String get insert_without_generating_tooltip => 'Insert without generating';
+  String get insert_without_generating_tooltip => 'তৈরি না করে ঢোকান';
 
   @override
-  String get token_usage_title => 'Token Usage';
+  String get token_usage_title => 'টোকেন ব্যবহার';
 
   @override
-  String get total_tokens_label => 'Tokens used';
+  String get total_tokens_label => 'ব্যবহৃত টোকেন';
 
   @override
-  String get usage_percent_label => 'Context used';
+  String get usage_percent_label => 'ব্যবহৃত প্রসঙ্গ';
 
   @override
-  String get export_choice_title => 'Export';
+  String get export_choice_title => 'রপ্তানি (Export) করুন';
 
   @override
-  String get export_choice_body => 'How would you like to export this?';
+  String get export_choice_body => 'আপনি এটি কীভাবে রপ্তানি করতে চান?';
 
   @override
-  String get copy_to_clipboard => 'Copy to Clipboard';
+  String get copy_to_clipboard => 'ক্লিপবোর্ডে কপি করুন';
 
   @override
   String bulk_export_conversations_success(int count) {
-    return 'Exported $count conversations';
+    return '$countটি কথোপকথন রপ্তানি করা হয়েছে';
   }
 
   @override
-  String get bulk_ai_rename_confirm_title => 'Rename with AI?';
+  String get bulk_ai_rename_confirm_title => 'এআই দিয়ে নাম পরিবর্তন করবেন?';
 
   @override
   String bulk_ai_rename_confirm_body(int count) {
-    return 'This will ask the AI to generate a new title for each of the $count selected conversations, replacing their current titles. This can take a while and cannot be undone.';
+    return 'এটি এআই-কে বর্তমান শিরোনামগুলি প্রতিস্থাপন করে নির্বাচিত $countটি কথোপকথনের প্রতিটির জন্য একটি নতুন শিরোনাম তৈরি করতে বলবে। এটি কিছুটা সময় নিতে পারে এবং পূর্বাবস্থায় ফেরানো যাবে না।';
   }
 
   @override
-  String get sort_by_modified_date => 'Last modified';
+  String get sort_by_modified_date => 'শেষ পরিবর্তন';
 
   @override
-  String get sort_by_created_date => 'Date created';
+  String get sort_by_created_date => 'তৈরির তারিখ';
 
   @override
-  String get sort_title => 'Sort';
+  String get sort_title => 'সাজান';
 
   @override
   String get clear_conversation_title => 'কথোপকথন মুছে ফেলবেন?';
@@ -620,14 +623,16 @@ class AppLocalizationsBn extends AppLocalizations {
   String get enable_smart_reply => 'অন-ডিভাইস স্মার্ট রিপ্লাই';
 
   @override
-  String get ai_user_response_enabled => 'AI user message (hold send)';
+  String get ai_user_response_enabled =>
+      'এআই ব্যবহারকারী বার্তা (সেন্ড বোতাম ধরে রাখুন)';
 
   @override
   String get ai_user_response_enabled_desc =>
-      'Hold the send button for 3 seconds to have the AI write and send your next message';
+      'এআই দিয়ে আপনার পরবর্তী বার্তাটি লেখাতে এবং পাঠাতে ৩ সেকেন্ডের জন্য সেন্ড বোতামটি চেপে ধরে রাখুন';
 
   @override
-  String get ai_user_response_tooltip => 'Generate user message with AI';
+  String get ai_user_response_tooltip =>
+      'এআই দিয়ে ব্যবহারকারী বার্তা তৈরি করুন';
 
   @override
   String get streaming_responses => 'স্ট্রিমিং প্রতিক্রিয়া';
@@ -643,14 +648,14 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get show_system_messages_desc =>
-      'When no persona is selected, send a default assistant system prompt with each request';
+      'যখন কোনো ব্যক্তিত্ব নির্বাচিত না থাকে, তখন প্রতিটি অনুরোধের সাথে একটি ডিফল্ট সহকারী সিস্টেম প্রম্পট পাঠান';
 
   @override
-  String get show_system_messages_in_chat => 'Show System Messages in Chat';
+  String get show_system_messages_in_chat => 'চ্যাটে সিস্টেম বার্তা দেখান';
 
   @override
   String get show_system_messages_in_chat_desc =>
-      'Display system messages (e.g. from an imported backup) as visible bubbles in the conversation';
+      'কথোপকথনে দৃশ্যমান বুদবুদ হিসাবে সিস্টেম বার্তাগুলি (যেমন আমদানিকৃত ব্যাকআপ থেকে) প্রদর্শন করুন';
 
   @override
   String get haptic_feedback => 'হ্যাপটিক ফিডব্যাক';
@@ -707,11 +712,11 @@ class AppLocalizationsBn extends AppLocalizations {
   String get select_persona => 'পার্সোনা নির্বাচন করুন';
 
   @override
-  String get manage_personas => 'Manage personas';
+  String get manage_personas => 'ব্যক্তিত্ব পরিচালনা করুন';
 
   @override
   String get personas_combine_hint =>
-      'Select multiple personas in chat to stack their system prompts.';
+      'নির্বাচিত ব্যক্তিত্বগুলো একত্রিত করা হবে';
 
   @override
   String get start_conversation => 'কথোপকথন শুরু করুন';
@@ -1703,28 +1708,30 @@ class AppLocalizationsBn extends AppLocalizations {
   }
 
   @override
-  String get unload_all_models => 'Unload all';
+  String get unload_all_models => 'সব মডেল আনলোড করুন';
 
   @override
   String loaded_models_count(int count) {
-    return '$count loaded';
+    return '$countটি মডেল লোড করা হয়েছে';
   }
 
   @override
-  String get all_models_unloaded => 'All models unloaded';
+  String get all_models_unloaded => 'সব মডেল আনলোড করা হয়েছে';
 
   @override
-  String get branch_chat => 'Branch chat';
+  String get branch_chat => 'ব্রাঞ্চ চ্যাট';
 
   @override
-  String get branch_chat_desc => 'Start a new conversation from this message';
+  String get branch_chat_desc =>
+      'এই বার্তা থেকে শুরু করে একটি নতুন চ্যাট তৈরি করুন';
 
   @override
-  String get edit_assistant_message_desc => 'Edit the assistant response text.';
+  String get edit_assistant_message_desc =>
+      'সহকারী বার্তার বিষয়বস্তু সম্পাদনা করুন';
 
   @override
-  String switch_to_model(String modelName) {
-    return 'Switch to $modelName';
+  String switch_to_model(String modelName, Object model) {
+    return '$model মডেলে পরিবর্তন করুন';
   }
 
   @override
@@ -2165,507 +2172,524 @@ class AppLocalizationsBn extends AppLocalizations {
   String get tool_status_failed => 'Failed';
 
   @override
-  String get model_favorite_toggle => 'Toggle favorite';
+  String get model_favorite_toggle => 'প্রিয় টগল করুন';
 
   @override
-  String get model_note_label => 'Note';
+  String get model_note_label => 'নোট';
 
   @override
-  String get model_note_hint => 'Add a note about this model…';
+  String get model_note_hint =>
+      'এই মডেলটির জন্য একটি ব্যক্তিগত নোট যোগ করুন...';
 
   @override
-  String get unload_models_before_load =>
-      'Unload all models before loading a new one';
+  String get unload_models_before_load => 'লোড করার আগে মডেল আনলোড করুন';
 
   @override
   String get temp_chat_keyboard_incognito =>
-      'Incognito keyboard in temporary chat';
+      'অস্থায়ী চ্যাটে ছদ্মবেশী (Incognito) কীবোর্ড';
 
   @override
   String get temp_chat_keyboard_incognito_desc =>
-      'Disables keyboard learning and suggestions in temporary chats (e.g. SwiftKey incognito).';
+      'অস্থায়ী চ্যাটের সময় টাইপিং ইতিহাস সংরক্ষণ না করার জন্য সিস্টেম কীবোর্ডের কাছে অনুরোধ করুন';
 
   @override
-  String get resume_last_chat => 'Resume last chat on launch';
+  String get resume_last_chat => 'শেষ চ্যাট পুনরায় শুরু করুন';
 
   @override
   String get resume_last_chat_desc =>
-      'Restore your last open conversation when reopening the app.';
+      'অ্যাপ চালুর সময় স্বয়ংক্রিয়ভাবে আপনার শেষ সক্রিয় কথোপকথনটি খুলুন';
 
   @override
-  String get export_all_data => 'Export all data';
+  String get export_all_data => 'সব ডেটা রপ্তানি করুন';
 
   @override
-  String get import_all_data => 'Import all data';
+  String get import_all_data => 'সব ডেটা আমদানি করুন';
 
   @override
-  String get export_data_success => 'Backup exported successfully';
+  String get export_data_success => 'ডেটা সফলভাবে রপ্তানি করা হয়েছে';
 
   @override
-  String get import_data_success => 'Backup imported successfully';
+  String get import_data_success => 'ডেটা সফলভাবে আমদানি করা হয়েছে';
 
   @override
   String import_data_failed(String error) {
-    return 'Failed to import backup: $error';
+    return 'ডেটা আমদানি করতে ব্যর্থ হয়েছে';
   }
 
   @override
   String get import_data_confirm =>
-      'Import conversations and custom personas from this backup? Existing items with the same IDs will be updated.';
+      'এটি আপনার বর্তমান সমস্ত ডেটা আমদানিকৃত ডেটা দিয়ে প্রতিস্থাপন করবে। আপনি কি চালিয়ে যেতে চান?';
 
   @override
   String get import_settings_confirm =>
-      'Replace current settings with the imported backup?';
+      'এটি আপনার বর্তমান সেটিংস আমদানিকৃত সেটিংস দিয়ে প্রতিস্থাপন করবে। আপনি কি চালিয়ে যেতে চান?';
 
   @override
-  String get export_conversations => 'Export conversations';
+  String get export_conversations => 'কথোপকথন রপ্তানি করুন';
 
   @override
-  String get import_conversations => 'Import conversations';
+  String get import_conversations => 'কথোপকথন আমদানি করুন';
 
   @override
-  String get export_personas => 'Export personas';
+  String get export_personas => 'ব্যক্তিত্ব রপ্তানি করুন';
 
   @override
-  String get import_personas => 'Import personas';
+  String get import_personas => 'ব্যক্তিত্ব আমদানি করুন';
 
   @override
-  String get export_settings => 'Export settings';
+  String get export_settings => 'সেটিংস রপ্তানি করুন';
 
   @override
-  String get import_settings => 'Import settings';
+  String get import_settings => 'সেটিংস আমদানি করুন';
 
   @override
-  String get export_all_zip => 'Export all (ZIP)';
+  String get export_all_zip => 'সব রপ্তানি করুন (ZIP)';
 
   @override
-  String get import_all_zip => 'Import all (ZIP)';
+  String get import_all_zip => 'সব আমদানি করুন (ZIP)';
 
   @override
-  String get duplicate_chat => 'Duplicate chat';
+  String get duplicate_chat => 'চ্যাট অনুলিপি করুন';
 
   @override
-  String get duplicate_chat_success => 'Chat duplicated';
+  String get duplicate_chat_success => 'চ্যাট সফলভাবে অনুলিপি করা হয়েছে';
 
   @override
-  String get move_to_folder => 'Move to folder';
+  String get move_to_folder => 'ফোল্ডারে সরান';
 
   @override
-  String get remove_from_folder => 'Remove from folder';
+  String get remove_from_folder => 'ফোল্ডার থেকে সরান';
 
   @override
-  String get create_folder => 'Create folder';
+  String get create_folder => 'ফোল্ডার তৈরি করুন';
 
   @override
-  String get new_folder => 'New folder';
+  String get new_folder => 'নতুন ফোল্ডার';
 
   @override
-  String get folder_name_hint => 'Folder name';
+  String get folder_name_hint => 'ফোল্ডারের নাম লিখুন...';
 
   @override
-  String get all_chats => 'All';
+  String get all_chats => 'সব চ্যাট';
 
   @override
-  String get unfiled_chats => 'Unfiled';
+  String get unfiled_chats => 'শ্রেণিবিহীন চ্যাট';
 
   @override
-  String get create => 'Create';
+  String get create => 'তৈরি করুন';
 
   @override
-  String get server_path_prefix_label => 'API path prefix';
+  String get server_path_prefix_label => 'সার্ভার পাথ প্রিফিক্স';
 
   @override
-  String get server_path_prefix_hint => '/your-secret-token';
+  String get server_path_prefix_hint =>
+      'সার্ভার এপিআই পাথের জন্য ঐচ্ছিক প্রিফিক্স (যেমন /v1)';
 
   @override
-  String get search_message_contents => 'Search message contents';
+  String get search_message_contents => 'বার্তার বিষয়বস্তু খুঁজুন...';
 
   @override
-  String get message_search_results => 'Message matches';
+  String get message_search_results => 'বার্তা অনুসন্ধানের ফলাফল';
 
   @override
-  String get saved_messages_title => 'Saved Messages';
+  String get saved_messages_title => 'সংরক্ষিত বার্তা';
 
   @override
-  String get nav_saved_messages => 'Saved Messages';
+  String get nav_saved_messages => 'সংরক্ষিত বার্তা';
 
   @override
-  String get saved_messages_empty =>
-      'No saved messages yet. Bookmark a message from its options menu.';
+  String get saved_messages_empty => 'এখনো কোনো সংরক্ষিত বার্তা নেই';
 
   @override
-  String get save_message => 'Save message';
+  String get save_message => 'বার্তা সংরক্ষণ করুন';
 
   @override
-  String get message_saved => 'Message saved';
+  String get message_saved => 'বার্তা সংরক্ষিত হয়েছে';
 
   @override
   String token_count(int count) {
-    return '$count tokens';
+    return 'টোকেন: $count';
   }
 
   @override
   String estimated_token_count(int count) {
-    return '~$count tokens (estimated)';
+    return 'আনুমানিক টোকেন: $count';
   }
 
   @override
-  String get test_tts_section_title => 'Test voice';
+  String get test_tts_section_title => 'টেক্সট-টু-স্পিচ পরীক্ষা';
 
   @override
-  String get test_tts_hint => 'Enter text to hear the current TTS engine…';
+  String get test_tts_hint => 'কণ্ঠস্বর পরীক্ষা করতে কিছু লিখুন...';
 
   @override
-  String get test_speak_button => 'Speak';
+  String get test_speak_button => 'বলুন';
 
   @override
-  String get scroll_to_bottom => 'Scroll to bottom';
+  String get scroll_to_bottom => 'নিচে স্ক্রল করুন';
 
   @override
-  String get generate_ai_response => 'Generate AI response';
+  String get generate_ai_response => 'এআই প্রতিক্রিয়া তৈরি করুন';
 
   @override
-  String get no_response => 'No response';
+  String get no_response => 'কোনো প্রতিক্রিয়া নেই';
 
   @override
-  String get export => 'Export';
+  String get export => 'রপ্তানি';
 
   @override
-  String get import => 'Import';
+  String get import => 'আমদানি';
 
   @override
-  String get conversations_label => 'Conversations';
+  String get conversations_label => 'কথোপকথন';
 
   @override
-  String get personas_label => 'Personas';
+  String get personas_label => 'ব্যক্তিত্ব';
 
   @override
-  String get settings_label => 'Settings';
+  String get settings_label => 'সেটিংস';
 
   @override
-  String get export_conversation => 'Export conversation';
+  String get export_conversation => 'কথোপকথন রপ্তানি করুন';
 
   @override
-  String get tts_process_markdown => 'Process markdown for speech';
+  String get tts_process_markdown => 'মার্কডাউন প্রক্রিয়া করুন';
 
   @override
   String get tts_process_markdown_desc =>
-      'Strip formatting like **bold** before reading aloud';
+      'উচ্চস্বরে পড়ার আগে **বোল্ড** এর মতো ফর্ম্যাটিং সরিয়ে দিন';
 
   @override
-  String get tts_skip_seconds => 'Skip interval';
+  String get tts_skip_seconds => 'এড়িয়ে যাওয়ার সেকেন্ড';
 
   @override
   String get tts_skip_seconds_desc =>
-      'Forward and rewind jump size during playback';
+      'ভয়েস প্লেয়ারে এগিয়ে/পিছিয়ে যাওয়ার সময়';
 
   @override
   String tts_skip_seconds_value(int seconds) {
-    return '${seconds}s';
+    return '$seconds সেকেন্ড';
   }
 
   @override
-  String get preview_system_prompts => 'Preview system prompts';
+  String get preview_system_prompts => 'সিস্টেম প্রম্পটগুলির পূর্বরূপ দেখুন';
 
   @override
-  String get welcome_message_1 => 'What can I help you with today?';
+  String get welcome_message_1 => 'হ্যালো! আমি আপনার স্থানীয় এআই সহকারী।';
 
   @override
-  String get welcome_message_2 => 'Ask me anything — I\'m ready when you are.';
+  String get welcome_message_2 =>
+      'আমাকে যেকোনো কিছু জিজ্ঞাসা করুন — আপনি প্রস্তুত হলে আমি প্রস্তুত।';
 
   @override
-  String get welcome_message_3 => 'Start a conversation below.';
+  String get welcome_message_3 =>
+      'আপনার ডেটা স্থানীয়ভাবে প্রক্রিয়াজাত হয় এবং কখনো আপনার ডিভাইস ছেড়ে যায় না।';
 
   @override
-  String get welcome_message_4 => 'Need ideas? Try one of the quick prompts.';
+  String get welcome_message_4 =>
+      'শুরু করতে, উপরের বার থেকে একটি মডেল নির্বাচন করুন বা মডেল পরিচালনা বিভাগে একটি নতুন মডেল যোগ করুন।';
 
   @override
-  String get temporary_chat => 'Temporary chat';
+  String get temporary_chat => 'অস্থায়ী চ্যাট';
 
   @override
-  String get temporary_chat_desc => 'Chats aren\'t saved to history.';
+  String get temporary_chat_desc =>
+      'এই চ্যাটের বার্তাগুলি ইতিহাসে সংরক্ষিত হবে না';
 
   @override
-  String get temporary_chat_banner => 'Temporary chat — not saved to history';
+  String get temporary_chat_banner =>
+      'অস্থায়ী চ্যাট সক্রিয় — ইতিহাস সংরক্ষিত হবে না';
 
   @override
   String get temporary_chat_save_warning_title =>
-      'Save message in temporary chat?';
+      'অস্থায়ী চ্যাট সংরক্ষণ করবেন?';
 
   @override
   String get temporary_chat_save_warning_body =>
-      'This chat is temporary and hidden from history. The saved message will still appear in Saved Messages.';
+      'এই চ্যাটটি আপনার ইতিহাসে সংরক্ষিত নেই। আপনি কি এটি এখন সংরক্ষণ করতে চান?';
 
   @override
-  String get save_to_history => 'Save to history';
+  String get save_to_history => 'ইতিহাসে সংরক্ষণ করুন';
 
   @override
-  String get share_conversation => 'Share conversation';
+  String get share_conversation => 'কথোপকথন ভাগ করুন';
 
   @override
-  String get download_tts_audio => 'Download audio';
+  String get download_tts_audio => 'ভয়েস অডিও ডাউনলোড করুন';
 
   @override
-  String get tts_download_unavailable =>
-      'Download is only available for Piper and Kitten TTS';
+  String get tts_download_unavailable => 'ভয়েস ডাউনলোড উপলব্ধ নেই';
 
   @override
-  String get tts_download_no_audio => 'No audio available to download yet';
+  String get tts_download_no_audio => 'ডাউনলোড করার জন্য কোনো তৈরি অডিও নেই';
 
   @override
-  String get tts_download_success => 'Audio saved';
+  String get tts_download_success => 'ভয়েস অডিও সফলভাবে সংরক্ষিত হয়েছে';
 
   @override
-  String get return_to_chat => 'Return to chat';
+  String get return_to_chat => 'চ্যাটে ফিরে যান';
 
   @override
-  String get return_to_temp_chat => 'Return to temporary chat';
+  String get return_to_temp_chat => 'অস্থায়ী চ্যাটে ফিরে যান';
 
   @override
-  String get insert_saved_message => 'Insert saved message';
+  String get insert_saved_message => 'সংরক্ষিত বার্তা ঢোকান';
 
   @override
   String get insert_saved_message_desc =>
-      'Choose a saved message to add to your input';
+      'আপনার সংরক্ষিত বার্তাগুলির একটি অংশ চ্যাটে যোগ করুন';
 
   @override
-  String get model_info => 'Model info';
+  String get model_info => 'মডেলের তথ্য';
 
   @override
-  String get model_name => 'Model name';
+  String get model_name => 'মডেলের নাম';
 
   @override
-  String get model_identifier => 'Identifier';
+  String get model_identifier => 'মডেল সনাক্তকারী';
 
   @override
-  String get not_available => 'Not available';
+  String get not_available => 'অনুপলব্ধ';
 
   @override
-  String get save_message_folders => 'Save message';
+  String get save_message_folders => 'ফোল্ডারে সংরক্ষণ করুন';
 
   @override
-  String get remove_from_saved => 'Remove from saved';
+  String get remove_from_saved => 'সংরক্ষিত থেকে সরান';
 
   @override
-  String get message_already_saved => 'Saved';
+  String get message_already_saved => 'বার্তাটি ইতিমধ্যে সংরক্ষিত হয়েছে';
 
   @override
-  String get stream_ttft => 'Time to first token';
+  String get stream_ttft => 'প্রথম টোকেন পর্যন্ত সময়';
 
   @override
-  String get stream_tokens_per_sec => 'Tokens per second';
+  String get stream_tokens_per_sec => 'প্রতি সেকেন্ডে টোকেন';
 
   @override
-  String get stream_stop_reason => 'Stop reason';
+  String get stream_stop_reason => 'থামার কারণ';
 
   @override
-  String get stream_input_tokens => 'Input tokens';
+  String get stream_input_tokens => 'ইনপুট টোকেন';
 
   @override
-  String get stream_output_tokens => 'Output tokens';
+  String get stream_output_tokens => 'আউটপুট টোকেন';
 
   @override
-  String get stream_generation_time => 'Generation time';
+  String get stream_generation_time => 'তৈরি করার সময়';
 
   @override
-  String get attach_image => 'Image';
+  String get attach_image => 'ছবি সংযুক্ত করুন';
 
   @override
-  String get attach_text_document => 'Text document';
+  String get attach_text_document => 'টেক্সট ডকুমেন্ট সংযুক্ত করুন';
 
   @override
-  String get add_attachment => 'Add attachment';
+  String get add_attachment => 'সংযুক্তি যোগ করুন';
 
   @override
-  String get photo_permission_denied =>
-      'Photo access is required to attach images';
+  String get photo_permission_denied => 'ছবির অনুমতি অস্বীকার করা হয়েছে';
 
   @override
-  String get characters_label => 'Characters';
+  String get characters_label => 'অক্ষর (Characters)';
 
   @override
-  String get exit_temporary_chat_title => 'Exit temporary chat?';
+  String get exit_temporary_chat_title => 'অস্থায়ী চ্যাট থেকে প্রস্থান করবেন?';
 
   @override
   String get exit_temporary_chat_body =>
-      'This will discard the current temporary chat and return to a new chat.';
+      'এটি বর্তমান কথোপকথনটি স্থায়ীভাবে মুছে ফেলবে। আপনি কি চালিয়ে যেতে চান?';
 
   @override
   String get saved_message_temp_snap_unavailable =>
-      'This message was saved from a temporary chat and can\'t be opened in its original conversation.';
+      'অস্থায়ী চ্যাটে বার্তার স্ন্যাপশট উপলব্ধ নেই';
 
   @override
-  String get filter_title => 'Filter';
+  String get filter_title => 'চ্যাট ফিল্টার করুন';
 
   @override
-  String get filter_pinned => 'Pinned';
+  String get filter_pinned => 'পিন করা';
 
   @override
-  String get filter_archived => 'Archived';
+  String get filter_archived => 'আর্কাইভ করা';
 
   @override
-  String get filter_temp_chats => 'Temporary chats';
+  String get filter_temp_chats => 'অস্থায়ী চ্যাট';
 
   @override
-  String get filter_user_messages => 'User messages';
+  String get filter_user_messages => 'ব্যবহারকারীর বার্তা';
 
   @override
-  String get filter_assistant_messages => 'Assistant messages';
+  String get filter_assistant_messages => 'সহকারীর বার্তা';
 
   @override
-  String get archive_chat => 'Archive';
+  String get archive_chat => 'চ্যাট আর্কাইভ করুন';
 
   @override
-  String get unarchive_chat => 'Unarchive';
+  String get unarchive_chat => 'চ্যাট আনআর্কাইভ করুন';
 
   @override
   String conversation_message_count(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count messages',
-      one: '1 message',
-    );
-    return '$_temp0';
+    return '$countটি বার্তা';
   }
 
   @override
   String conversation_character_count(int count) {
-    return '$count chars';
+    return '$countটি অক্ষর';
   }
 
   @override
-  String get generate_title_with_ai => 'Generate with AI';
+  String get generate_title_with_ai => 'এআই দিয়ে শিরোনাম তৈরি করুন';
 
   @override
-  String get generating_title => 'Generating...';
+  String get generating_title => 'শিরোনাম তৈরি করা হচ্ছে...';
 
   @override
-  String get generate_title_failed => 'Could not generate a title';
+  String get generate_title_failed => 'শিরোনাম তৈরি করা যায়নি';
 
   @override
-  String get lm_studio_model_browser_title => 'Browse models';
+  String get lm_studio_model_browser_title => 'মডেল ব্রাউজার';
 
   @override
-  String get lm_studio_model_search_hint => 'Search models by name or author…';
+  String get lm_studio_model_search_hint => 'মডেল খুঁজুন...';
 
   @override
-  String get lm_studio_staff_picks => 'Staff picks';
+  String get lm_studio_staff_picks => 'স্টাফদের পছন্দ';
 
   @override
-  String get lm_studio_community_models => 'Community models';
+  String get lm_studio_community_models => 'কমিউনিটি মডেল';
 
   @override
-  String get lm_studio_no_models => 'No models found';
+  String get lm_studio_no_models => 'কোনো মডেল পাওয়া যায়নি';
 
   @override
   String lm_studio_models_count(int count) {
-    return '$count models';
+    return '$countটি মডেল';
   }
 
   @override
-  String get lm_studio_browse_models => 'Browse & download';
+  String get lm_studio_browse_models => 'LM Studio-তে মডেল ব্রাউজ করুন';
 
   @override
-  String get lm_studio_model_search => 'LMS Model Search';
+  String get lm_studio_model_search => 'মডেল অনুসন্ধান';
 
   @override
-  String get lm_studio_downloads_title => 'Downloads';
+  String get lm_studio_downloads_title => 'ডাউনলোড';
 
   @override
-  String get lm_studio_choose_quant => 'Choose a download option';
+  String get lm_studio_choose_quant => 'কোয়ান্টাইজেশন চয়ন করুন';
 
   @override
-  String get lm_studio_use_default_quant => 'Use default';
+  String get lm_studio_use_default_quant =>
+      'ডিফল্ট কোয়ান্টাইজেশন ব্যবহার করুন';
 
   @override
-  String get lm_studio_recommended => 'Recommended';
+  String get lm_studio_recommended => 'প্রস্তাবিত';
 
   @override
-  String get lm_studio_clear_downloads => 'Clear finished';
+  String get lm_studio_clear_downloads => 'সম্পূর্ণ ডাউনলোডগুলি মুছুন';
 
   @override
-  String get lm_studio_no_downloads => 'No downloads yet';
+  String get lm_studio_no_downloads => 'কোনো সক্রিয় ডাউনলোড নেই';
 
   @override
   String get lm_studio_downloads_disclaimer =>
-      'Downloads run on the LM Studio host. Pausing, stopping, and deleting models must be done on that computer — not from this app.';
+      'মডেল ডাউনলোডগুলি সরাসরি Hugging Face থেকে করা হয়।';
 
   @override
-  String get lm_studio_staff_pick => 'Staff pick';
+  String get lm_studio_staff_pick => 'স্টাফদের বিশেষ পছন্দ';
 
   @override
-  String get lm_studio_params => 'PARAMS';
+  String get lm_studio_params => 'প্যারামিটার';
 
   @override
-  String get lm_studio_arch => 'ARCH';
+  String get lm_studio_arch => 'আর্কিটেকচার';
 
   @override
-  String get lm_studio_domain => 'DOMAIN';
+  String get lm_studio_domain => 'ডোমেন';
 
   @override
-  String get lm_studio_format => 'FORMAT';
+  String get lm_studio_format => 'ফরম্যাট';
 
   @override
-  String get lm_studio_vision => 'Vision';
+  String get lm_studio_vision => 'ভিশন';
 
   @override
-  String get lm_studio_tool_use => 'Tool use';
+  String get lm_studio_tool_use => 'টুল ব্যবহার';
 
   @override
-  String get lm_studio_reasoning => 'Reasoning';
+  String get lm_studio_reasoning => 'রিজনিং';
 
   @override
-  String get lm_studio_download_options => 'Download options';
+  String get lm_studio_download_options => 'ডাউনলোড বিকল্প';
 
   @override
-  String get lm_studio_download => 'Download';
+  String get lm_studio_download => 'ডাউনলোড করুন';
 
   @override
   String lm_studio_download_size(String size) {
-    return 'Download $size';
+    return 'ডাউনলোডের আকার';
   }
 
   @override
   String lm_studio_downloading_percent(int percent) {
-    return 'Downloading $percent%';
+    return 'ডাউনলোড হচ্ছে: $percent%';
   }
 
   @override
   String get lm_studio_readme_unavailable =>
-      'README not available for this model.';
+      'এই মডেলের জন্য README উপলব্ধ নেই।';
 
   @override
-  String get lm_studio_full_gpu_offload => 'Full GPU offload possible';
+  String get lm_studio_full_gpu_offload => 'সম্পূর্ণ GPU অফলোড সম্ভব';
 
   @override
-  String get lm_studio_partial_gpu_offload => 'Partial GPU offload possible';
+  String get lm_studio_partial_gpu_offload => 'আংশিক GPU অফলোড সম্ভব';
 
   @override
-  String get lm_studio_likely_too_large => 'Likely too large';
+  String get lm_studio_likely_too_large => 'সম্ভবত খুব বড়';
 
   @override
-  String get lm_studio_available_ram_gb => 'Available RAM (GB, optional)';
+  String get lm_studio_available_ram_gb => 'উপলব্ধ র‍্যাম (GB, ঐচ্ছিক)';
 
   @override
-  String get lm_studio_available_vram_gb => 'Available VRAM (GB, optional)';
+  String get lm_studio_available_vram_gb => 'উপলব্ধ ভি-র‍্যাম (GB, ঐচ্ছিক)';
 
   @override
-  String get lm_studio_memory_settings_title => 'Memory for recommendations';
+  String get lm_studio_memory_settings_title => 'সুপারিশের জন্য মেমরি';
 
   @override
   String get lm_studio_memory_settings_desc =>
-      'Used to estimate whether models fit on your machine in the model browser.';
+      'মডেল ব্রাউজারে মডেলগুলি আপনার ডিভাইসে চলবে কিনা তা অনুমান করতে ব্যবহৃত হয়।';
 
   @override
-  String get think_button_label => 'Think';
+  String get think_button_label => 'চিন্তা করুন';
 
   @override
-  String get reasoning_effort_low => 'Low';
+  String get reasoning_effort_low => 'কম';
 
   @override
-  String get reasoning_effort_medium => 'Medium';
+  String get reasoning_effort_medium => 'মাঝারি';
 
   @override
-  String get reasoning_effort_high => 'High';
+  String get reasoning_effort_high => 'উচ্চ';
+
+  @override
+  String get could_not_read_file => 'ফাইল পড়া যায়নি';
+
+  @override
+  String get server_offline => 'সার্ভার অফলাইন';
+
+  @override
+  String get could_not_establish_connection =>
+      'সার্ভারের সাথে সংযোগ স্থাপন করা যায়নি। অনুগ্রহ করে আপনার সার্ভারটি চলছে কিনা এবং হোস্ট/পোর্ট সেটিংস সঠিক কিনা তা পরীক্ষা করুন।';
+
+  @override
+  String get retry_connection => 'সংযোগের পুনরায় চেষ্টা করুন';
+
+  @override
+  String get tokens_label => 'টোকেন';
+
+  @override
+  String get enter_context_length => 'প্রসঙ্গের দৈর্ঘ্য লিখুন...';
 }

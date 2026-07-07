@@ -470,8 +470,8 @@ class __ContextLengthEditDialogState
                 autofocus: true,
                 keyboardType: TextInputType.number,
                 decoration: InputDecoration(
-                  labelText: 'Tokens',
-                  hintText: 'Enter context length...',
+                  labelText: l10n.tokens_label,
+                  hintText: l10n.enter_context_length,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),

@@ -3279,7 +3279,7 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'Switch to {modelName}'**
-  String switch_to_model(String modelName);
+  String switch_to_model(String modelName, Object model);
 
   /// Download notification title
   ///
@@ -4990,6 +4990,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'High'**
   String get reasoning_effort_high;
+
+  /// Error message when file cannot be read
+  ///
+  /// In en, this message translates to:
+  /// **'Could not read file'**
+  String get could_not_read_file;
+
+  /// Server offline status message
+  ///
+  /// In en, this message translates to:
+  /// **'Server Offline'**
+  String get server_offline;
+
+  /// Error message when connection to server fails
+  ///
+  /// In en, this message translates to:
+  /// **'Could not establish a connection to the server. Please check if your server is running and the host/port settings are correct.'**
+  String get could_not_establish_connection;
+
+  /// Retry connection button label
+  ///
+  /// In en, this message translates to:
+  /// **'Retry Connection'**
+  String get retry_connection;
+
+  /// Tokens input label
+  ///
+  /// In en, this message translates to:
+  /// **'Tokens'**
+  String get tokens_label;
+
+  /// Context length input placeholder text
+  ///
+  /// In en, this message translates to:
+  /// **'Enter context length...'**
+  String get enter_context_length;
 }
 
 class _AppLocalizationsDelegate
