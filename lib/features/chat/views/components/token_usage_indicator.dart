@@ -6,7 +6,7 @@ import 'package:localmind/features/chat/providers/chat_providers.dart';
 import 'package:localmind/l10n/app_localizations.dart';
 
 class TokenUsageIndicator extends ConsumerWidget {
-  const TokenUsageIndicator({required this.totalTokenCount});
+  const TokenUsageIndicator({super.key, required this.totalTokenCount});
 
   final int totalTokenCount;
 

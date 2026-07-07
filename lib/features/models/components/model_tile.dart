@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:localmind/core/models/enums.dart';
 import 'package:localmind/core/theme/colors.dart';
@@ -79,12 +80,6 @@ class ModelTile extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      if (model.supportsVision ||
-                          model.supportsReasoning ||
-                          model.supportsToolUse) ...[
-                        const SizedBox(width: 8),
-                        _ModelCapabilityIcons(model: model, isDark: isDark),
-                      ],
                     ],
                   ),
                   if (note != null && note!.isNotEmpty) ...[
@@ -152,22 +147,31 @@ class ModelTile extends StatelessWidget {
               ),
               const SizedBox(width: 8),
             ],
+            if (model.supportsVision ||
+                model.supportsReasoning ||
+                model.supportsToolUse) ...[
+              const SizedBox(width: 8),
+              _ModelCapabilityIcons(model: model, isDark: isDark),
+            ],
             if (isLoading)
               SizedBox(
                 width: 22,
                 height: 22,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: accent,
-                ),
+                child: CircularProgressIndicator(strokeWidth: 2, color: accent),
               )
             else if (isSelected)
-              Icon(Icons.check_circle, color: accent, size: 22)
+              HugeIcon(
+                icon: HugeIcons.strokeRoundedCheckmarkCircle01,
+                color: accent,
+                size: 22,
+              )
             else
-              Icon(
-                Icons.chevron_right,
+              HugeIcon(
+                icon: HugeIcons.strokeRoundedArrowRight01,
                 size: 20,
-                color: isDark ? AppColors.darkMutedText : AppColors.lightMutedText,
+                color: isDark
+                    ? AppColors.darkMutedText
+                    : AppColors.lightMutedText,
               ),
           ],
         ),
@@ -177,10 +181,7 @@ class ModelTile extends StatelessWidget {
 }
 
 class _ModelCapabilityIcons extends StatelessWidget {
-  const _ModelCapabilityIcons({
-    required this.model,
-    required this.isDark,
-  });
+  const _ModelCapabilityIcons({required this.model, required this.isDark});
 
   final ModelInfo model;
   final bool isDark;
