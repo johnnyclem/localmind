@@ -137,6 +137,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.3.1"
+  auto_size_text_plus:
+    dependency: "direct main"
+    description:
+      name: auto_size_text_plus
+      sha256: "21c522949ad4eadf16f5a525f348200783ebbefc02242d90624fc30279c53216"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.0.2"
   background_downloader:
     dependency: transitive
     description:

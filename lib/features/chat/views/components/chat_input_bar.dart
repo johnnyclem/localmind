@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:haptic_feedback/haptic_feedback.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:localmind/features/chat/views/components/token_usage_indicator.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../../../../core/models/enums.dart';
@@ -37,6 +38,8 @@ class ChatInputBar extends ConsumerStatefulWidget {
     this.focusNode,
 
     this.keyboardIncognito = false,
+
+    this.totalTokenCount = 0,
   });
 
   final void Function(String message, {List<File>? attachments}) onSend;
@@ -52,6 +55,8 @@ class ChatInputBar extends ConsumerStatefulWidget {
   final FocusNode? focusNode;
 
   final bool keyboardIncognito;
+
+  final int totalTokenCount;
 
   @override
   ConsumerState<ChatInputBar> createState() => ChatInputBarState();
@@ -743,6 +748,13 @@ class ChatInputBarState extends ConsumerState<ChatInputBar>
                             color: iconColor,
                             size: 18,
                           )
+                        : canSend
+                        ? HugeIcon(
+                            icon: HugeIcons.strokeRoundedArrowRight01,
+                            key: ValueKey(canSend),
+                            color: iconColor,
+                            size: 18,
+                          )
                         : HugeIcon(
                             icon: HugeIcons.strokeRoundedArrowUp01,
                             key: ValueKey(canSend),
@@ -1112,8 +1124,11 @@ class ChatInputBarState extends ConsumerState<ChatInputBar>
                   ),
                 ),
 
+                if (_controller.text.isEmpty) ...[
+                  const SizedBox(width: 8),
+                  TokenUsageIndicator(totalTokenCount: widget.totalTokenCount),
+                ],
                 const SizedBox(width: 8),
-
                 _buildMicButton(isListening, theme),
 
                 const SizedBox(width: 8),
