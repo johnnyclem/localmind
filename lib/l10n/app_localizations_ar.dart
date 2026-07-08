@@ -2672,4 +2672,15 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get enter_context_length => 'أدخل طول السياق...';
+
+  @override
+  String get openrouter_disclosure =>
+      'من خلال الاتصال بهذا المزود، سيتم إرسال رسائل الدردشة والمدخلات الخاصة بك إلى خوادمهم. لا يتتبع LocalMind محادثاتك أو يخزنها.';
+
+  @override
+  String get welcome_message_cloud =>
+      'يتم إرسال رسائلك إلى مزود الخدمة المتصل بك.';
+
+  @override
+  String get privacy_policy => 'سياسة الخصوصية';
 }

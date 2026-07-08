@@ -2843,7 +2843,7 @@
   "preview_system_prompts": "Preview system prompts",
   "welcome_message_1": "What can I help you with today?",
   "welcome_message_2": "Ask me anything — I'm ready when you are.",
-  "welcome_message_3": "Start a conversation below.",
+  "welcome_message_3": "Your data is processed locally and never leaves your device.",
   "welcome_message_4": "Need ideas? Try one of the quick prompts.",
   "temporary_chat": "Temporary chat",
   "temporary_chat_desc": "Chats aren't saved to history.",
@@ -2997,5 +2997,17 @@
   "enter_context_length": "Enter context length...",
   "@enter_context_length": {
     "description": "Context length input placeholder text"
+  },
+  "openrouter_disclosure": "By connecting this provider, your chat messages and inputs will be sent to their servers. LocalMind does not track or store your conversations.",
+  "@openrouter_disclosure": {
+    "description": "Disclosure shown when connecting to OpenRouter about data being sent to their servers"
+  },
+  "welcome_message_cloud": "Your messages are sent to your connected provider.",
+  "@welcome_message_cloud": {
+    "description": "Welcome message shown when a cloud provider (e.g. OpenRouter) is active"
+  },
+  "privacy_policy": "Privacy Policy",
+  "@privacy_policy": {
+    "description": "Privacy Policy link label"
   }
 }

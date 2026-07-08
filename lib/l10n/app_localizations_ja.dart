@@ -2634,4 +2634,14 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get enter_context_length => 'コンテキスト長を入力...';
+
+  @override
+  String get openrouter_disclosure =>
+      'このプロバイダーに接続すると、チャットメッセージと入力がそのサーバーに送信されます。LocalMindはお客様の会話を追跡または保存することはありません。';
+
+  @override
+  String get welcome_message_cloud => 'メッセージは接続されたプロバイダーに送信されます。';
+
+  @override
+  String get privacy_policy => 'プライバシーポリシー';
 }

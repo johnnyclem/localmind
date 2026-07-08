@@ -2366,7 +2366,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get welcome_message_2 => 'Ask me anything — I\'m ready when you are.';
 
   @override
-  String get welcome_message_3 => 'Start a conversation below.';
+  String get welcome_message_3 =>
+      'Your data is processed locally and never leaves your device.';
 
   @override
   String get welcome_message_4 => 'Need ideas? Try one of the quick prompts.';
@@ -2679,4 +2680,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get enter_context_length => 'Enter context length...';
+
+  @override
+  String get openrouter_disclosure =>
+      'By connecting this provider, your chat messages and inputs will be sent to their servers. LocalMind does not track or store your conversations.';
+
+  @override
+  String get welcome_message_cloud =>
+      'Your messages are sent to your connected provider.';
+
+  @override
+  String get privacy_policy => 'Privacy Policy';
 }

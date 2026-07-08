@@ -821,5 +821,8 @@
   "could_not_establish_connection": "No se pudo establecer una conexión con el servidor. Por favor, comprueba si tu servidor está funcionando y si la configuración de host/puerto es correcta.",
   "retry_connection": "Reintentar conexión",
   "tokens_label": "Tokens",
-  "enter_context_length": "Introduce la longitud del contexto..."
+  "enter_context_length": "Introduce la longitud del contexto...",
+  "openrouter_disclosure": "Al conectar este proveedor, tus mensajes de chat y entradas se enviarán a sus servidores. LocalMind no rastrea ni almacena tus conversaciones.",
+  "welcome_message_cloud": "Tus mensajes se envían a tu proveedor conectado.",
+  "privacy_policy": "Política de privacidad"
 }

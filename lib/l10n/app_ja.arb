@@ -821,5 +821,8 @@
   "could_not_establish_connection": "サーバーへの接続を確立できませんでした。サーバーが稼働していること、およびホスト/ポートの設定が正しいことを確認してください。",
   "retry_connection": "接続を再試行",
   "tokens_label": "トークン",
-  "enter_context_length": "コンテキスト長を入力..."
+  "enter_context_length": "コンテキスト長を入力...",
+  "openrouter_disclosure": "このプロバイダーに接続すると、チャットメッセージと入力がそのサーバーに送信されます。LocalMindはお客様の会話を追跡または保存することはありません。",
+  "welcome_message_cloud": "メッセージは接続されたプロバイダーに送信されます。",
+  "privacy_policy": "プライバシーポリシー"
 }

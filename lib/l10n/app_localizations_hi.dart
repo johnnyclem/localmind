@@ -2685,4 +2685,15 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get enter_context_length => 'संदर्भ की लंबाई दर्ज करें...';
+
+  @override
+  String get openrouter_disclosure =>
+      'इस प्रदाता को कनेक्ट करके, आपके चैट संदेश और इनपुट उनके सर्वर पर भेजे जाएंगे। LocalMind आपकी बातचीत को ट्रैक या संग्रहीत नहीं करता है।';
+
+  @override
+  String get welcome_message_cloud =>
+      'आपके संदेश आपके कनेक्टेड प्रदाता को भेजे जाते हैं।';
+
+  @override
+  String get privacy_policy => 'गोपनीयता नीति';
 }

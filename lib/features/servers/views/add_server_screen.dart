@@ -477,19 +477,56 @@ class _AddServerScreenState extends ConsumerState<AddServerScreen> {
               subtitle: _requiresMandatoryApiKey
                   ? l10n.server_authentication_required_desc
                   : l10n.server_authentication_optional_desc,
-              child: TextFormField(
-                controller: _apiKeyController,
-                decoration: InputDecoration(
-                  labelText: _requiresMandatoryApiKey
-                      ? l10n.api_key_required
-                      : l10n.api_key_optional,
-                  hintText: _requiresMandatoryApiKey
-                      ? l10n.api_key_hint_openrouter
-                      : l10n.api_key_hint_generic,
-                ),
-                validator: _validateApiKey,
-                obscureText: true,
-                textInputAction: TextInputAction.done,
+              child: Column(
+                children: [
+                  TextFormField(
+                    controller: _apiKeyController,
+                    decoration: InputDecoration(
+                      labelText: _requiresMandatoryApiKey
+                          ? l10n.api_key_required
+                          : l10n.api_key_optional,
+                      hintText: _requiresMandatoryApiKey
+                          ? l10n.api_key_hint_openrouter
+                          : l10n.api_key_hint_generic,
+                    ),
+                    validator: _validateApiKey,
+                    obscureText: true,
+                    textInputAction: TextInputAction.done,
+                  ),
+                  if (_requiresMandatoryApiKey) ...[
+                    const SizedBox(height: 12),
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.primary.withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: theme.colorScheme.primary.withValues(alpha: 0.2),
+                        ),
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          HugeIcon(
+                            icon: HugeIcons.strokeRoundedShield01,
+                            size: 18,
+                            color: theme.colorScheme.primary,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              l10n.openrouter_disclosure,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
+                                height: 1.4,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ],
               ),
             ),
             if (_testResult != null) ...[

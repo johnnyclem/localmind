@@ -821,5 +821,8 @@
   "could_not_establish_connection": "無法與伺服器建立連線。請檢查您的伺服器是否正在運行，以及主機/埠設定是否正確。",
   "retry_connection": "重試連線",
   "tokens_label": "Token 數",
-  "enter_context_length": "輸入上下文長度..."
+  "enter_context_length": "輸入上下文長度...",
+  "openrouter_disclosure": "連接此提供者後，您的聊天訊息和輸入將被發送到他們的伺服器。LocalMind 不會追蹤或儲存您的對話。",
+  "welcome_message_cloud": "您的訊息將發送到您連接的提供者。",
+  "privacy_policy": "隱私權政策"
 }

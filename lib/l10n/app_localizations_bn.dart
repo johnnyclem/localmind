@@ -2692,4 +2692,15 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get enter_context_length => 'প্রসঙ্গের দৈর্ঘ্য লিখুন...';
+
+  @override
+  String get openrouter_disclosure =>
+      'এই প্রদানকারীকে সংযুক্ত করার মাধ্যমে, আপনার চ্যাট বার্তা এবং ইনপুট তাদের সার্ভারে পাঠানো হবে। LocalMind আপনার কথোপকথন ট্র্যাক বা সংরক্ষণ করে না।';
+
+  @override
+  String get welcome_message_cloud =>
+      'আপনার বার্তাগুলি আপনার সংযুক্ত প্রদানকারীর কাছে পাঠানো হয়।';
+
+  @override
+  String get privacy_policy => 'গোপনীয়তা নীতি';
 }

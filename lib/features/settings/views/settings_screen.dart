@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'package:localmind/l10n/app_localizations.dart';
 
@@ -529,6 +530,8 @@ class SettingsViews extends ConsumerWidget {
                                 aboutCard,
                               ],
                             ),
+                            const SizedBox(height: 24),
+                            _PrivacyPolicyLink(),
                         ],
                       ),
                     ),
@@ -2258,6 +2261,53 @@ class _HuggingFaceTokenSetting extends StatelessWidget {
             ],
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _PrivacyPolicyLink extends StatelessWidget {
+  static final Uri _privacyUrl = Uri.parse(
+    'https://momin.pro/privacy-policy-localmind/',
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Center(
+      child: InkWell(
+        onTap: () => launchUrl(_privacyUrl, mode: LaunchMode.externalApplication),
+        borderRadius: BorderRadius.circular(8),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              HugeIcon(
+                icon: HugeIcons.strokeRoundedShield01,
+                size: 16,
+                color: colorScheme.onSurfaceVariant,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                l10n.privacy_policy,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(width: 6),
+              HugeIcon(
+                icon: HugeIcons.strokeRoundedShare01,
+                size: 14,
+                color: colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

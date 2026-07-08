@@ -2696,4 +2696,15 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get enter_context_length => 'Introduce la longitud del contexto...';
+
+  @override
+  String get openrouter_disclosure =>
+      'Al conectar este proveedor, tus mensajes de chat y entradas se enviarán a sus servidores. LocalMind no rastrea ni almacena tus conversaciones.';
+
+  @override
+  String get welcome_message_cloud =>
+      'Tus mensajes se envían a tu proveedor conectado.';
+
+  @override
+  String get privacy_policy => 'Política de privacidad';
 }

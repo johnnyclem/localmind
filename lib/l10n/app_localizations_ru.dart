@@ -2699,4 +2699,15 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get enter_context_length => 'Введите длину контекста...';
+
+  @override
+  String get openrouter_disclosure =>
+      'Подключая этого поставщика, ваши сообщения чата и вводные данные будут отправлены на их серверы. LocalMind не отслеживает и не хранит ваши разговоры.';
+
+  @override
+  String get welcome_message_cloud =>
+      'Ваши сообщения отправляются вашему подключенному поставщику.';
+
+  @override
+  String get privacy_policy => 'Политика конфиденциальности';
 }

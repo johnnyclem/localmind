@@ -17,6 +17,7 @@ class EmptyState extends StatefulWidget {
     required this.onModelTap,
     this.selectedPersonas = const [],
     required this.onPersonaTap,
+    this.isCloudProvider = false,
   });
 
   final void Function(String) onQuickPrompt;
@@ -27,6 +28,7 @@ class EmptyState extends StatefulWidget {
   final VoidCallback onModelTap;
   final List<dynamic> selectedPersonas;
   final VoidCallback onPersonaTap;
+  final bool isCloudProvider;
 
   @override
   State<EmptyState> createState() => _EmptyStateState();
@@ -94,7 +96,7 @@ class _EmptyStateState extends State<EmptyState>
   List<String> _welcomeMessages(AppLocalizations l10n) => [
         l10n.welcome_message_1,
         l10n.welcome_message_2,
-        l10n.welcome_message_3,
+        widget.isCloudProvider ? l10n.welcome_message_cloud : l10n.welcome_message_3,
         l10n.welcome_message_4,
       ];
 

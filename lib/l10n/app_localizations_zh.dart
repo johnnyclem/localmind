@@ -2615,6 +2615,16 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get enter_context_length => '输入上下文长度...';
+
+  @override
+  String get openrouter_disclosure =>
+      '连接此提供商后，您的聊天消息和输入将被发送到他们的服务器。LocalMind 不会跟踪或存储您的对话。';
+
+  @override
+  String get welcome_message_cloud => '您的消息将发送到您连接的提供商。';
+
+  @override
+  String get privacy_policy => '隐私政策';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -5229,4 +5239,14 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get enter_context_length => '輸入上下文長度...';
+
+  @override
+  String get openrouter_disclosure =>
+      '連接此提供者後，您的聊天訊息和輸入將被發送到他們的伺服器。LocalMind 不會追蹤或儲存您的對話。';
+
+  @override
+  String get welcome_message_cloud => '您的訊息將發送到您連接的提供者。';
+
+  @override
+  String get privacy_policy => '隱私權政策';
 }

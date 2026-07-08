@@ -16,6 +16,8 @@ import 'package:localmind/features/chat/views/components/message_list/empty_stat
 import 'package:localmind/features/chat/views/components/message_list/corrupted_state.dart';
 import 'package:localmind/features/saved_messages/views/components/save_message_sheet.dart';
 import 'package:localmind/features/personas/views/components/persona_picker_sheet.dart';
+import 'package:localmind/core/models/enums.dart';
+import 'package:localmind/features/servers/providers/server_providers.dart';
 
 class MessageArea extends ConsumerWidget {
   const MessageArea({
@@ -61,7 +63,11 @@ class MessageArea extends ConsumerWidget {
     }
 
     if (messages.isEmpty) {
+      final activeServer = ref.watch(activeServerProvider);
+      final isCloudProvider = activeServer?.type == ServerType.openRouter;
+
       return EmptyState(
+        isCloudProvider: isCloudProvider,
         onQuickPrompt: (prompt) =>
             ref.read(chatProvider.notifier).sendMessage(prompt),
         quickPrompts: [

@@ -4454,7 +4454,7 @@ abstract class AppLocalizations {
   /// No description provided for @welcome_message_3.
   ///
   /// In en, this message translates to:
-  /// **'Start a conversation below.'**
+  /// **'Your data is processed locally and never leaves your device.'**
   String get welcome_message_3;
 
   /// No description provided for @welcome_message_4.
@@ -5026,6 +5026,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Enter context length...'**
   String get enter_context_length;
+
+  /// Disclosure shown when connecting to OpenRouter about data being sent to their servers
+  ///
+  /// In en, this message translates to:
+  /// **'By connecting this provider, your chat messages and inputs will be sent to their servers. LocalMind does not track or store your conversations.'**
+  String get openrouter_disclosure;
+
+  /// Welcome message shown when a cloud provider (e.g. OpenRouter) is active
+  ///
+  /// In en, this message translates to:
+  /// **'Your messages are sent to your connected provider.'**
+  String get welcome_message_cloud;
+
+  /// Privacy Policy link label
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy Policy'**
+  String get privacy_policy;
 }
 
 class _AppLocalizationsDelegate
