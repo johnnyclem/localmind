@@ -11,8 +11,10 @@ import '../core/providers/storage_providers.dart';
 import '../core/storage/objectbox_store.dart';
 import '../features/on_device/data/on_device_gemma_service.dart';
 import '../core/models/enums.dart';
+import '../features/personas/providers/personas_providers.dart';
 import '../features/servers/data/models/server.dart';
 import '../features/servers/providers/server_providers.dart';
+import '../features/cloud_sync/views/cloud_sync_lifecycle_host.dart';
 import '../core/logger/app_logger.dart';
 import '../core/utils/locale_utils.dart';
 import 'bootstrap_screen.dart';
@@ -48,6 +50,9 @@ class _BootstrapHostState extends State<BootstrapHost> {
 
       final prefs = results[1] as SharedPreferences;
       final database = results[2] as ObjectBoxStore;
+
+      // Seed built-in personas once before any provider reads the database.
+      PersonasNotifier.seedIfNeeded(database);
 
       _updateStage(BootstrapStage.preparingApp, 'Preparing app...');
 
@@ -132,7 +137,7 @@ class _BootstrapHostState extends State<BootstrapHost> {
     if (_container != null) {
       return UncontrolledProviderScope(
         container: _container!,
-        child: const App(),
+        child: const CloudSyncLifecycleHost(child: App()),
       );
     }
 

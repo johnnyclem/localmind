@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/providers/storage_providers.dart';
 import '../../../core/storage/entities.dart';
+import '../../../core/storage/objectbox_store.dart';
 import '../../../objectbox.g.dart';
 import '../data/models/persona.dart';
 import '../utils/persona_prompt_utils.dart';
@@ -84,16 +85,20 @@ final personasNotifierProvider =
 class PersonasNotifier extends AsyncNotifier<List<Persona>> {
   @override
   Future<List<Persona>> build() async {
-    return _loadAndSeed();
+    return _loadAll();
   }
 
-  Future<List<Persona>> _loadAndSeed() async {
-    final db = ref.read(databaseProvider);
+  /// Seeds built-in personas when the database is first created. Called once
+  /// during app bootstrap so the provider [build] stays a pure read.
+  static void seedIfNeeded(ObjectBoxStore db) {
     if (db.personaBox.isEmpty()) {
-      for (final preset in _builtInPersonas) {
+      for (final preset in builtInPersonas) {
         db.personaBox.put(PersonaEntity.fromDomain(preset));
       }
     }
+  }
+
+  Future<List<Persona>> _loadAll() async {
     return _loadWithoutSeeding();
   }
 
@@ -120,7 +125,7 @@ class PersonasNotifier extends AsyncNotifier<List<Persona>> {
       preferredParams: preferredParams,
     );
     db.personaBox.put(PersonaEntity.fromDomain(persona));
-    state = AsyncData(await _loadAndSeed());
+    state = AsyncData(await _loadAll());
     return persona;
   }
 
@@ -140,7 +145,7 @@ class PersonasNotifier extends AsyncNotifier<List<Persona>> {
     }
     db.personaBox.put(entity);
 
-    state = AsyncData(await _loadAndSeed());
+    state = AsyncData(await _loadAll());
   }
 
   Future<void> deletePersona(String id) async {
@@ -166,7 +171,7 @@ class PersonasNotifier extends AsyncNotifier<List<Persona>> {
   Future<void> restoreBuiltInPersonas() async {
     final db = ref.read(databaseProvider);
     final existingIds = db.personaBox.getAll().map((e) => e.id).toSet();
-    for (final preset in _builtInPersonas) {
+    for (final preset in builtInPersonas) {
       if (!existingIds.contains(preset.id)) {
         db.personaBox.put(PersonaEntity.fromDomain(preset));
       }
@@ -209,11 +214,11 @@ class PersonasNotifier extends AsyncNotifier<List<Persona>> {
     );
     final db = ref.read(databaseProvider);
     db.personaBox.put(PersonaEntity.fromDomain(clone));
-    state = AsyncData(await _loadAndSeed());
+    state = AsyncData(await _loadAll());
     return clone;
   }
 
-  static final List<Persona> _builtInPersonas = [
+  static final List<Persona> builtInPersonas = [
     Persona(
       id: 'builtin-general',
       name: 'General Assistant',

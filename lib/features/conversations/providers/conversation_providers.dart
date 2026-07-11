@@ -580,15 +580,30 @@ class ActiveConversationNotifier extends Notifier<Conversation?> {
 
   @override
   Conversation? build() {
-    final conversationsAsync = ref.watch(conversationsProvider);
-    final conversations = conversationsAsync.value ?? [];
+    // Use ref.listen instead of ref.watch to avoid triggering invalidateSelf
+    // during a rebuild cycle, which causes a Riverpod assertion error on
+    // pausedActiveSubscriptionCount.
+    ref.listen<AsyncValue<List<Conversation>>>(conversationsProvider, (prev, next) {
+      if (next.hasValue) {
+        Future.microtask(() => _updateFromConversations(next.value!));
+      }
+    });
 
-    if (_activeConversationId != null) {
-      return conversations
-          .where((c) => c.id == _activeConversationId)
-          .firstOrNull;
+    final conversationsAsync = ref.read(conversationsProvider);
+    final conversations = conversationsAsync.value ?? [];
+    return _resolveConversation(conversations, _activeConversationId);
+  }
+
+  Conversation? _resolveConversation(List<Conversation> conversations, String? id) {
+    if (id == null) return null;
+    return conversations.where((c) => c.id == id).firstOrNull;
+  }
+
+  void _updateFromConversations(List<Conversation> conversations) {
+    final resolved = _resolveConversation(conversations, _activeConversationId);
+    if (resolved?.id != state?.id) {
+      state = resolved;
     }
-    return null;
   }
 
   void setActiveConversation(Conversation? conversation) {

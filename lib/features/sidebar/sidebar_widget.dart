@@ -34,7 +34,8 @@ class SidebarWidget extends ConsumerWidget {
     final isPersonas = location.startsWith(AppRoutes.personas);
     final isLocalModels = location.startsWith(AppRoutes.onDeviceModels);
     final isTtsModels = location.startsWith(AppRoutes.ttsModels);
-    final isSettings = location.startsWith(AppRoutes.settings);
+    final isCloudSync = location.startsWith(AppRoutes.cloudSync);
+    final isSettings = location == AppRoutes.settings;
     final isHome = location == AppRoutes.home || location == '/';
     final hasActiveChat = ref.watch(hasActiveChatSessionProvider);
     final isTemporary = ref.watch(chatProvider.select((s) => s.isTemporary));
@@ -60,7 +61,10 @@ class SidebarWidget extends ConsumerWidget {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: ShadButton(
                 width: double.infinity,
-                leading: const HugeIcon(icon: HugeIcons.strokeRoundedAdd01, size: 20),
+                leading: const HugeIcon(
+                  icon: HugeIcons.strokeRoundedAdd01,
+                  size: 20,
+                ),
                 onPressed: () {
                   ref.read(chatProvider.notifier).startNewConversation();
                   context.go(AppRoutes.home);
@@ -78,7 +82,10 @@ class SidebarWidget extends ConsumerWidget {
                 child: isTemporary
                     ? ShadButton.outline(
                         width: double.infinity,
-                        leading: const HugeIcon(icon: HugeIcons.strokeRoundedArrowLeft01, size: 18),
+                        leading: const HugeIcon(
+                          icon: HugeIcons.strokeRoundedArrowLeft01,
+                          size: 18,
+                        ),
                         onPressed: () {
                           if (!isHome) context.go(AppRoutes.home);
                           if (Scaffold.maybeOf(context)?.isDrawerOpen ??
@@ -90,7 +97,10 @@ class SidebarWidget extends ConsumerWidget {
                       )
                     : ShadButton.secondary(
                         width: double.infinity,
-                        leading: const HugeIcon(icon: HugeIcons.strokeRoundedArrowLeft01, size: 18),
+                        leading: const HugeIcon(
+                          icon: HugeIcons.strokeRoundedArrowLeft01,
+                          size: 18,
+                        ),
                         onPressed: () {
                           if (!isHome) context.go(AppRoutes.home);
                           if (Scaffold.maybeOf(context)?.isDrawerOpen ??
@@ -161,9 +171,12 @@ class SidebarWidget extends ConsumerWidget {
                         iconData: HugeIcons.strokeRoundedAiSearch,
                         label: l10n.lm_studio_model_search,
                         isSelected: false,
-                        trailing: const LmDownloadIndicatorButton(compact: true),
+                        trailing: const LmDownloadIndicatorButton(
+                          compact: true,
+                        ),
                         onTap: () {
-                          if (Scaffold.maybeOf(context)?.isDrawerOpen ?? false) {
+                          if (Scaffold.maybeOf(context)?.isDrawerOpen ??
+                              false) {
                             Navigator.pop(context);
                           }
                           context.push(
@@ -208,6 +221,17 @@ class SidebarWidget extends ConsumerWidget {
                     const SizedBox(height: 8),
                     const Divider(height: 1, indent: 16, endIndent: 16),
                     const SizedBox(height: 8),
+                    DrawerNavItem(
+                      iconData: HugeIcons.strokeRoundedCloudSavingDone02,
+                      label: l10n.cloud_sync,
+                      isSelected: isCloudSync,
+                      onTap: () {
+                        if (Scaffold.maybeOf(context)?.isDrawerOpen ?? false) {
+                          Navigator.pop(context);
+                        }
+                        context.go(AppRoutes.cloudSync);
+                      },
+                    ),
                     DrawerNavItem(
                       iconData: HugeIcons.strokeRoundedSettings01,
                       label: l10n.nav_settings,

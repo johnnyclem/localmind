@@ -2696,4 +2696,72 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get privacy_policy => 'गोपनीयता नीति';
+
+  @override
+  String get cloud_sync => 'S3 क्लाउड सिंक';
+
+  @override
+  String get cloud_sync_description =>
+      'अपने S3-संगत सर्वर पर एंड-टू-एंड एन्क्रिप्टेड सिंक';
+
+  @override
+  String get cloud_sync_endpoint => 'एंडपॉइंट URL';
+
+  @override
+  String get cloud_sync_bucket => 'बकेट';
+
+  @override
+  String get cloud_sync_region => 'क्षेत्र';
+
+  @override
+  String get cloud_sync_prefix => 'प्रीफ़िक्स';
+
+  @override
+  String get cloud_sync_access_key => 'एक्सेस कुंजी ID';
+
+  @override
+  String get cloud_sync_secret_key => 'गुप्त एक्सेस कुंजी';
+
+  @override
+  String get cloud_sync_session_token => 'सत्र टोकन (वैकल्पिक)';
+
+  @override
+  String get cloud_sync_passphrase => 'एन्क्रिप्शन पासफ़्रेज़';
+
+  @override
+  String get cloud_sync_confirm_passphrase => 'पासफ़्रेज़ की पुष्टि करें';
+
+  @override
+  String get cloud_sync_path_style => 'पाथ-स्टाइल एड्रेसिंग का उपयोग करें';
+
+  @override
+  String get cloud_sync_allow_http => 'असुरक्षित HTTP की अनुमति दें';
+
+  @override
+  String get cloud_sync_http_warning =>
+      'HTTP नेटवर्क पर अनुरोध की जानकारी और क्रेडेंशियल उजागर करता है। इसे केवल विश्वसनीय स्थानीय S3 सर्वर के लिए उपयोग करें।';
+
+  @override
+  String get cloud_sync_test => 'कनेक्शन जाँचें';
+
+  @override
+  String get cloud_sync_enable => 'एन्क्रिप्टेड सिंक चालू करें';
+
+  @override
+  String get cloud_sync_now => 'अभी सिंक करें';
+
+  @override
+  String get cloud_sync_disconnect => 'इस डिवाइस को डिस्कनेक्ट करें';
+
+  @override
+  String get cloud_sync_last_synced => 'अंतिम सिंक';
+
+  @override
+  String get cloud_sync_never => 'कभी नहीं';
+
+  @override
+  String get cloud_sync_conflicts => 'सहेजे गए विरोध';
+
+  @override
+  String get cloud_sync_passphrase_mismatch => 'पासफ़्रेज़ मेल नहीं खाते';
 }

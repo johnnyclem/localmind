@@ -2703,4 +2703,72 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get privacy_policy => 'গোপনীয়তা নীতি';
+
+  @override
+  String get cloud_sync => 'S3 ক্লাউড সিঙ্ক';
+
+  @override
+  String get cloud_sync_description =>
+      'আপনার নিজস্ব S3-সামঞ্জস্যপূর্ণ সার্ভারে এন্ড-টু-এন্ড এনক্রিপ্টেড সিঙ্ক';
+
+  @override
+  String get cloud_sync_endpoint => 'এন্ডপয়েন্ট URL';
+
+  @override
+  String get cloud_sync_bucket => 'বাকেট';
+
+  @override
+  String get cloud_sync_region => 'অঞ্চল';
+
+  @override
+  String get cloud_sync_prefix => 'প্রিফিক্স';
+
+  @override
+  String get cloud_sync_access_key => 'অ্যাক্সেস কী আইডি';
+
+  @override
+  String get cloud_sync_secret_key => 'গোপন অ্যাক্সেস কী';
+
+  @override
+  String get cloud_sync_session_token => 'সেশন টোকেন (ঐচ্ছিক)';
+
+  @override
+  String get cloud_sync_passphrase => 'এনক্রিপশন পাসফ্রেজ';
+
+  @override
+  String get cloud_sync_confirm_passphrase => 'পাসফ্রেজ নিশ্চিত করুন';
+
+  @override
+  String get cloud_sync_path_style => 'পাথ-স্টাইল অ্যাড্রেসিং ব্যবহার করুন';
+
+  @override
+  String get cloud_sync_allow_http => 'অনিরাপদ HTTP অনুমতি দিন';
+
+  @override
+  String get cloud_sync_http_warning =>
+      'HTTP নেটওয়ার্কে অনুরোধের তথ্য ও পরিচয়পত্র প্রকাশ করে। শুধু বিশ্বস্ত স্থানীয় S3 সার্ভারে এটি ব্যবহার করুন।';
+
+  @override
+  String get cloud_sync_test => 'সংযোগ পরীক্ষা করুন';
+
+  @override
+  String get cloud_sync_enable => 'এনক্রিপ্টেড সিঙ্ক চালু করুন';
+
+  @override
+  String get cloud_sync_now => 'এখন সিঙ্ক করুন';
+
+  @override
+  String get cloud_sync_disconnect => 'এই ডিভাইস সংযোগ বিচ্ছিন্ন করুন';
+
+  @override
+  String get cloud_sync_last_synced => 'সর্বশেষ সিঙ্ক';
+
+  @override
+  String get cloud_sync_never => 'কখনও নয়';
+
+  @override
+  String get cloud_sync_conflicts => 'সংরক্ষিত দ্বন্দ্ব';
+
+  @override
+  String get cloud_sync_passphrase_mismatch => 'পাসফ্রেজ মিলছে না';
 }

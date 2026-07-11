@@ -2625,6 +2625,72 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get privacy_policy => '隐私政策';
+
+  @override
+  String get cloud_sync => 'S3 云同步';
+
+  @override
+  String get cloud_sync_description => '与您自己的 S3 兼容服务器进行端到端加密同步';
+
+  @override
+  String get cloud_sync_endpoint => '端点 URL';
+
+  @override
+  String get cloud_sync_bucket => '存储桶';
+
+  @override
+  String get cloud_sync_region => '区域';
+
+  @override
+  String get cloud_sync_prefix => '前缀';
+
+  @override
+  String get cloud_sync_access_key => '访问密钥 ID';
+
+  @override
+  String get cloud_sync_secret_key => '秘密访问密钥';
+
+  @override
+  String get cloud_sync_session_token => '会话令牌（可选）';
+
+  @override
+  String get cloud_sync_passphrase => '加密密码短语';
+
+  @override
+  String get cloud_sync_confirm_passphrase => '确认密码短语';
+
+  @override
+  String get cloud_sync_path_style => '使用路径样式寻址';
+
+  @override
+  String get cloud_sync_allow_http => '允许不安全的 HTTP';
+
+  @override
+  String get cloud_sync_http_warning => 'HTTP 会向网络暴露请求信息和凭据。仅在可信的本地 S3 服务器上使用。';
+
+  @override
+  String get cloud_sync_test => '测试连接';
+
+  @override
+  String get cloud_sync_enable => '启用加密同步';
+
+  @override
+  String get cloud_sync_now => '立即同步';
+
+  @override
+  String get cloud_sync_disconnect => '断开此设备';
+
+  @override
+  String get cloud_sync_last_synced => '上次同步';
+
+  @override
+  String get cloud_sync_never => '从未';
+
+  @override
+  String get cloud_sync_conflicts => '已保留冲突';
+
+  @override
+  String get cloud_sync_passphrase_mismatch => '密码短语不匹配';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -5249,4 +5315,70 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get privacy_policy => '隱私權政策';
+
+  @override
+  String get cloud_sync => 'S3 雲端同步';
+
+  @override
+  String get cloud_sync_description => '與您自己的 S3 相容伺服器進行端對端加密同步';
+
+  @override
+  String get cloud_sync_endpoint => '端點 URL';
+
+  @override
+  String get cloud_sync_bucket => '儲存桶';
+
+  @override
+  String get cloud_sync_region => '區域';
+
+  @override
+  String get cloud_sync_prefix => '前綴';
+
+  @override
+  String get cloud_sync_access_key => '存取金鑰 ID';
+
+  @override
+  String get cloud_sync_secret_key => '秘密存取金鑰';
+
+  @override
+  String get cloud_sync_session_token => '工作階段權杖（選填）';
+
+  @override
+  String get cloud_sync_passphrase => '加密密碼片語';
+
+  @override
+  String get cloud_sync_confirm_passphrase => '確認密碼片語';
+
+  @override
+  String get cloud_sync_path_style => '使用路徑樣式定址';
+
+  @override
+  String get cloud_sync_allow_http => '允許不安全的 HTTP';
+
+  @override
+  String get cloud_sync_http_warning => 'HTTP 會向網路公開請求資訊與憑證。僅限可信任的本機 S3 伺服器使用。';
+
+  @override
+  String get cloud_sync_test => '測試連線';
+
+  @override
+  String get cloud_sync_enable => '啟用加密同步';
+
+  @override
+  String get cloud_sync_now => '立即同步';
+
+  @override
+  String get cloud_sync_disconnect => '中斷此裝置連線';
+
+  @override
+  String get cloud_sync_last_synced => '上次同步';
+
+  @override
+  String get cloud_sync_never => '從未';
+
+  @override
+  String get cloud_sync_conflicts => '已保留衝突';
+
+  @override
+  String get cloud_sync_passphrase_mismatch => '密碼片語不相符';
 }

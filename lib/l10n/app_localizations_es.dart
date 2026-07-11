@@ -2707,4 +2707,72 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get privacy_policy => 'Política de privacidad';
+
+  @override
+  String get cloud_sync => 'Sincronización S3';
+
+  @override
+  String get cloud_sync_description =>
+      'Sincronización cifrada de extremo a extremo con tu servidor compatible con S3';
+
+  @override
+  String get cloud_sync_endpoint => 'URL del endpoint';
+
+  @override
+  String get cloud_sync_bucket => 'Bucket';
+
+  @override
+  String get cloud_sync_region => 'Región';
+
+  @override
+  String get cloud_sync_prefix => 'Prefijo';
+
+  @override
+  String get cloud_sync_access_key => 'ID de clave de acceso';
+
+  @override
+  String get cloud_sync_secret_key => 'Clave de acceso secreta';
+
+  @override
+  String get cloud_sync_session_token => 'Token de sesión (opcional)';
+
+  @override
+  String get cloud_sync_passphrase => 'Frase de cifrado';
+
+  @override
+  String get cloud_sync_confirm_passphrase => 'Confirmar frase';
+
+  @override
+  String get cloud_sync_path_style => 'Usar direccionamiento por ruta';
+
+  @override
+  String get cloud_sync_allow_http => 'Permitir HTTP inseguro';
+
+  @override
+  String get cloud_sync_http_warning =>
+      'HTTP expone metadatos y credenciales a la red. Úsalo solo con un servidor S3 local de confianza.';
+
+  @override
+  String get cloud_sync_test => 'Probar conexión';
+
+  @override
+  String get cloud_sync_enable => 'Activar sincronización cifrada';
+
+  @override
+  String get cloud_sync_now => 'Sincronizar ahora';
+
+  @override
+  String get cloud_sync_disconnect => 'Desconectar este dispositivo';
+
+  @override
+  String get cloud_sync_last_synced => 'Última sincronización';
+
+  @override
+  String get cloud_sync_never => 'Nunca';
+
+  @override
+  String get cloud_sync_conflicts => 'Conflictos conservados';
+
+  @override
+  String get cloud_sync_passphrase_mismatch => 'Las frases no coinciden';
 }

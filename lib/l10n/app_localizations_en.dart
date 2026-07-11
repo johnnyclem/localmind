@@ -2691,4 +2691,72 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get privacy_policy => 'Privacy Policy';
+
+  @override
+  String get cloud_sync => 'S3 Cloud Sync';
+
+  @override
+  String get cloud_sync_description =>
+      'End-to-end encrypted sync to your own S3-compatible server';
+
+  @override
+  String get cloud_sync_endpoint => 'Endpoint URL';
+
+  @override
+  String get cloud_sync_bucket => 'Bucket';
+
+  @override
+  String get cloud_sync_region => 'Region';
+
+  @override
+  String get cloud_sync_prefix => 'Prefix';
+
+  @override
+  String get cloud_sync_access_key => 'Access key ID';
+
+  @override
+  String get cloud_sync_secret_key => 'Secret access key';
+
+  @override
+  String get cloud_sync_session_token => 'Session token (optional)';
+
+  @override
+  String get cloud_sync_passphrase => 'Encryption passphrase';
+
+  @override
+  String get cloud_sync_confirm_passphrase => 'Confirm passphrase';
+
+  @override
+  String get cloud_sync_path_style => 'Use path-style addressing';
+
+  @override
+  String get cloud_sync_allow_http => 'Allow insecure HTTP';
+
+  @override
+  String get cloud_sync_http_warning =>
+      'HTTP exposes request metadata and credentials to the network. Use it only for a trusted local S3 server.';
+
+  @override
+  String get cloud_sync_test => 'Test connection';
+
+  @override
+  String get cloud_sync_enable => 'Enable encrypted sync';
+
+  @override
+  String get cloud_sync_now => 'Sync now';
+
+  @override
+  String get cloud_sync_disconnect => 'Disconnect this device';
+
+  @override
+  String get cloud_sync_last_synced => 'Last synced';
+
+  @override
+  String get cloud_sync_never => 'Never';
+
+  @override
+  String get cloud_sync_conflicts => 'Conflicts preserved';
+
+  @override
+  String get cloud_sync_passphrase_mismatch => 'Passphrases do not match';
 }

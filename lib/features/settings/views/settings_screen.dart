@@ -20,7 +20,6 @@ import '../../servers/providers/server_providers.dart';
 import '../data/models/app_settings.dart';
 import 'data_backup_actions.dart';
 
-
 class SettingsViews extends ConsumerWidget {
   const SettingsViews({super.key});
 
@@ -395,8 +394,9 @@ class SettingsViews extends ConsumerWidget {
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content:
-                                Text(l10n.restore_builtin_personas_success),
+                            content: Text(
+                              l10n.restore_builtin_personas_success,
+                            ),
                           ),
                         );
                       }
@@ -426,6 +426,12 @@ class SettingsViews extends ConsumerWidget {
                 icon: HugeIcons.strokeRoundedRefresh,
                 accent: const Color(0xFFEF4444),
                 children: [
+                  _SectionActionButton(
+                    icon: HugeIcons.strokeRoundedCloud,
+                    label: l10n.cloud_sync,
+                    onPressed: () => context.push(AppRoutes.cloudSync),
+                  ),
+                  const SizedBox(height: 8),
                   const DataBackupActions(),
                   const SizedBox(height: 8),
                   _DangerousAction(
@@ -530,8 +536,8 @@ class SettingsViews extends ConsumerWidget {
                                 aboutCard,
                               ],
                             ),
-                            const SizedBox(height: 24),
-                            _PrivacyPolicyLink(),
+                          const SizedBox(height: 24),
+                          _PrivacyPolicyLink(),
                         ],
                       ),
                     ),
@@ -593,8 +599,8 @@ class _SettingsHero extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Center(
-                    child: HugeIcon(icon: 
-                      HugeIcons.strokeRoundedSettings01,
+                    child: HugeIcon(
+                      icon: HugeIcons.strokeRoundedSettings01,
                       size: 18,
                       color: primary,
                     ),
@@ -787,8 +793,8 @@ class _MutedCallout extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          HugeIcon(icon: 
-            HugeIcons.strokeRoundedMoon02,
+          HugeIcon(
+            icon: HugeIcons.strokeRoundedMoon02,
             size: 18,
             color: _mutedColor(context),
           ),
@@ -856,8 +862,10 @@ class _AboutPanel extends StatelessWidget {
             runSpacing: 6,
             children: providers
                 .map(
-                  (provider) =>
-                      _AboutChip(label: provider, icon: HugeIcons.strokeRoundedShare01),
+                  (provider) => _AboutChip(
+                    label: provider,
+                    icon: HugeIcons.strokeRoundedShare01,
+                  ),
                 )
                 .toList(),
           ),
@@ -884,7 +892,10 @@ class _AboutPanel extends StatelessWidget {
             runSpacing: 6,
             children: stack
                 .map(
-                  (item) => _AboutChip(label: item, icon: HugeIcons.strokeRoundedCode),
+                  (item) => _AboutChip(
+                    label: item,
+                    icon: HugeIcons.strokeRoundedCode,
+                  ),
                 )
                 .toList(),
           ),
@@ -900,8 +911,8 @@ class _AboutPanel extends StatelessWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                HugeIcon(icon: 
-                  HugeIcons.strokeRoundedShare01,
+                HugeIcon(
+                  icon: HugeIcons.strokeRoundedShare01,
                   size: 15,
                   color: _mutedColor(context),
                 ),
@@ -1016,8 +1027,8 @@ class _LanguageSetting extends StatelessWidget {
                     value: null,
                     child: Row(
                       children: [
-                        HugeIcon(icon: 
-                          HugeIcons.strokeRoundedSettings01,
+                        HugeIcon(
+                          icon: HugeIcons.strokeRoundedSettings01,
                           size: 18,
                           color: _mutedColor(context),
                         ),
@@ -1320,10 +1331,7 @@ class _ImageCompressionLevelSetting extends StatelessWidget {
 }
 
 class _TtsSkipSecondsSetting extends StatelessWidget {
-  const _TtsSkipSecondsSetting({
-    required this.value,
-    required this.onChanged,
-  });
+  const _TtsSkipSecondsSetting({required this.value, required this.onChanged});
 
   final int value;
   final ValueChanged<int> onChanged;
@@ -1529,8 +1537,8 @@ class _ThemeOption extends StatelessWidget {
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Center(
-                  child: HugeIcon(icon: 
-                    icon,
+                  child: HugeIcon(
+                    icon: icon,
                     size: 16,
                     color: isSelected ? primary : _mutedColor(context),
                   ),
@@ -1546,8 +1554,8 @@ class _ThemeOption extends StatelessWidget {
                   ),
                 ),
               ),
-              HugeIcon(icon: 
-                isSelected
+              HugeIcon(
+                icon: isSelected
                     ? HugeIcons.strokeRoundedCheckmarkCircle01
                     : HugeIcons.strokeRoundedCircle,
                 size: 16,
@@ -1611,7 +1619,11 @@ class _DropdownSetting extends StatelessWidget {
                       value: item.$1,
                       child: Row(
                         children: [
-                          HugeIcon(icon: icon, size: 16, color: _mutedColor(context)),
+                          HugeIcon(
+                            icon: icon,
+                            size: 16,
+                            color: _mutedColor(context),
+                          ),
                           const SizedBox(width: 8),
                           Flexible(
                             child: Text(
@@ -2006,8 +2018,8 @@ class _VoiceChip extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              HugeIcon(icon: 
-                selected
+              HugeIcon(
+                icon: selected
                     ? HugeIcons.strokeRoundedCheckmarkCircle01
                     : HugeIcons.strokeRoundedCircle,
                 size: 16,
@@ -2279,7 +2291,8 @@ class _PrivacyPolicyLink extends StatelessWidget {
 
     return Center(
       child: InkWell(
-        onTap: () => launchUrl(_privacyUrl, mode: LaunchMode.externalApplication),
+        onTap: () =>
+            launchUrl(_privacyUrl, mode: LaunchMode.externalApplication),
         borderRadius: BorderRadius.circular(8),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),

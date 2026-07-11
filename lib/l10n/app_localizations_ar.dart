@@ -2683,4 +2683,72 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get privacy_policy => 'سياسة الخصوصية';
+
+  @override
+  String get cloud_sync => 'مزامنة S3 السحابية';
+
+  @override
+  String get cloud_sync_description =>
+      'مزامنة مشفرة من طرف إلى طرف مع خادمك المتوافق مع S3';
+
+  @override
+  String get cloud_sync_endpoint => 'عنوان نقطة النهاية';
+
+  @override
+  String get cloud_sync_bucket => 'الحاوية';
+
+  @override
+  String get cloud_sync_region => 'المنطقة';
+
+  @override
+  String get cloud_sync_prefix => 'البادئة';
+
+  @override
+  String get cloud_sync_access_key => 'معرّف مفتاح الوصول';
+
+  @override
+  String get cloud_sync_secret_key => 'مفتاح الوصول السري';
+
+  @override
+  String get cloud_sync_session_token => 'رمز الجلسة (اختياري)';
+
+  @override
+  String get cloud_sync_passphrase => 'عبارة مرور التشفير';
+
+  @override
+  String get cloud_sync_confirm_passphrase => 'تأكيد عبارة المرور';
+
+  @override
+  String get cloud_sync_path_style => 'استخدام العنونة بنمط المسار';
+
+  @override
+  String get cloud_sync_allow_http => 'السماح باتصال HTTP غير الآمن';
+
+  @override
+  String get cloud_sync_http_warning =>
+      'يكشف HTTP بيانات الطلب وبيانات الاعتماد للشبكة. استخدمه فقط مع خادم S3 محلي موثوق.';
+
+  @override
+  String get cloud_sync_test => 'اختبار الاتصال';
+
+  @override
+  String get cloud_sync_enable => 'تفعيل المزامنة المشفرة';
+
+  @override
+  String get cloud_sync_now => 'المزامنة الآن';
+
+  @override
+  String get cloud_sync_disconnect => 'فصل هذا الجهاز';
+
+  @override
+  String get cloud_sync_last_synced => 'آخر مزامنة';
+
+  @override
+  String get cloud_sync_never => 'أبدًا';
+
+  @override
+  String get cloud_sync_conflicts => 'التعارضات المحفوظة';
+
+  @override
+  String get cloud_sync_passphrase_mismatch => 'عبارتا المرور غير متطابقتين';
 }

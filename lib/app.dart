@@ -30,6 +30,7 @@ import 'features/servers/views/server_list_screen.dart';
 import 'features/tts/views/tts_model_manager_screen.dart';
 import 'features/saved_messages/views/saved_messages_screen.dart';
 import 'features/settings/views/settings_screen.dart';
+import 'features/cloud_sync/views/cloud_sync_screen.dart';
 import 'features/lm_studio_catalog/views/lm_studio_model_browser_screen.dart';
 import 'features/sidebar/sidebar_drawer.dart';
 import 'features/sidebar/sidebar_widget.dart';
@@ -137,6 +138,11 @@ final routerProvider = Provider<GoRouter>((ref) {
             path: AppRoutes.settings,
             pageBuilder: (context, state) =>
                 const NoTransitionPage(child: SettingsViews()),
+          ),
+          GoRoute(
+            path: AppRoutes.cloudSync,
+            pageBuilder: (context, state) =>
+                const MaterialPage(child: CloudSyncScreen()),
           ),
           GoRoute(
             path: AppRoutes.chatHistory,

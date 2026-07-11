@@ -14,8 +14,6 @@ import '../../on_device/data/models/on_device_model.dart';
 
 final _modelCache = ModelCache();
 
-bool _onDeviceServerEnsured = false;
-
 void invalidateAvailableModelsCache(String serverId) {
   _modelCache.invalidate(serverId);
 }
@@ -23,36 +21,6 @@ void invalidateAvailableModelsCache(String serverId) {
 void invalidateAllAvailableModelsCache() {
   _modelCache.invalidateAll();
 }
-
-final ensureOnDeviceServerProvider = FutureProvider<void>((ref) async {
-  if (_onDeviceServerEnsured) return;
-
-  final serversAsync = ref.watch(serversProvider);
-
-  if (!serversAsync.hasValue) return;
-
-  final servers = serversAsync.value!;
-  final hasOnDevice = servers.any((s) => s.type == ServerType.onDevice);
-  if (hasOnDevice) {
-    _onDeviceServerEnsured = true;
-    return;
-  }
-
-  final server = Server(
-    id: 'on-device',
-    name: 'On-Device',
-    type: ServerType.onDevice,
-    host: '',
-    port: 0,
-    isDefault: false,
-    createdAt: DateTime.now(),
-    lastConnectedAt: DateTime.now(),
-    status: ConnectionStatus.connected,
-    iconName: 'strokeRoundedSmartPhone01',
-  );
-  await ref.read(serversProvider.notifier).addServer(server);
-  _onDeviceServerEnsured = true;
-});
 
 final serversProvider = AsyncNotifierProvider<ServersNotifier, List<Server>>(
   () {

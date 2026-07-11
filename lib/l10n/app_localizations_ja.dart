@@ -2644,4 +2644,71 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get privacy_policy => 'プライバシーポリシー';
+
+  @override
+  String get cloud_sync => 'S3クラウド同期';
+
+  @override
+  String get cloud_sync_description => 'お使いのS3互換サーバーへのエンドツーエンド暗号化同期';
+
+  @override
+  String get cloud_sync_endpoint => 'エンドポイントURL';
+
+  @override
+  String get cloud_sync_bucket => 'バケット';
+
+  @override
+  String get cloud_sync_region => 'リージョン';
+
+  @override
+  String get cloud_sync_prefix => 'プレフィックス';
+
+  @override
+  String get cloud_sync_access_key => 'アクセスキーID';
+
+  @override
+  String get cloud_sync_secret_key => 'シークレットアクセスキー';
+
+  @override
+  String get cloud_sync_session_token => 'セッショントークン（任意）';
+
+  @override
+  String get cloud_sync_passphrase => '暗号化パスフレーズ';
+
+  @override
+  String get cloud_sync_confirm_passphrase => 'パスフレーズを確認';
+
+  @override
+  String get cloud_sync_path_style => 'パス形式のアドレス指定を使用';
+
+  @override
+  String get cloud_sync_allow_http => '安全でないHTTPを許可';
+
+  @override
+  String get cloud_sync_http_warning =>
+      'HTTPではリクエスト情報と認証情報がネットワークに公開されます。信頼できるローカルS3サーバーでのみ使用してください。';
+
+  @override
+  String get cloud_sync_test => '接続をテスト';
+
+  @override
+  String get cloud_sync_enable => '暗号化同期を有効化';
+
+  @override
+  String get cloud_sync_now => '今すぐ同期';
+
+  @override
+  String get cloud_sync_disconnect => 'このデバイスを切断';
+
+  @override
+  String get cloud_sync_last_synced => '最終同期';
+
+  @override
+  String get cloud_sync_never => '未実行';
+
+  @override
+  String get cloud_sync_conflicts => '保持された競合';
+
+  @override
+  String get cloud_sync_passphrase_mismatch => 'パスフレーズが一致しません';
 }

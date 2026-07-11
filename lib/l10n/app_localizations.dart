@@ -5044,6 +5044,138 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Privacy Policy'**
   String get privacy_policy;
+
+  /// No description provided for @cloud_sync.
+  ///
+  /// In en, this message translates to:
+  /// **'S3 Cloud Sync'**
+  String get cloud_sync;
+
+  /// No description provided for @cloud_sync_description.
+  ///
+  /// In en, this message translates to:
+  /// **'End-to-end encrypted sync to your own S3-compatible server'**
+  String get cloud_sync_description;
+
+  /// No description provided for @cloud_sync_endpoint.
+  ///
+  /// In en, this message translates to:
+  /// **'Endpoint URL'**
+  String get cloud_sync_endpoint;
+
+  /// No description provided for @cloud_sync_bucket.
+  ///
+  /// In en, this message translates to:
+  /// **'Bucket'**
+  String get cloud_sync_bucket;
+
+  /// No description provided for @cloud_sync_region.
+  ///
+  /// In en, this message translates to:
+  /// **'Region'**
+  String get cloud_sync_region;
+
+  /// No description provided for @cloud_sync_prefix.
+  ///
+  /// In en, this message translates to:
+  /// **'Prefix'**
+  String get cloud_sync_prefix;
+
+  /// No description provided for @cloud_sync_access_key.
+  ///
+  /// In en, this message translates to:
+  /// **'Access key ID'**
+  String get cloud_sync_access_key;
+
+  /// No description provided for @cloud_sync_secret_key.
+  ///
+  /// In en, this message translates to:
+  /// **'Secret access key'**
+  String get cloud_sync_secret_key;
+
+  /// No description provided for @cloud_sync_session_token.
+  ///
+  /// In en, this message translates to:
+  /// **'Session token (optional)'**
+  String get cloud_sync_session_token;
+
+  /// No description provided for @cloud_sync_passphrase.
+  ///
+  /// In en, this message translates to:
+  /// **'Encryption passphrase'**
+  String get cloud_sync_passphrase;
+
+  /// No description provided for @cloud_sync_confirm_passphrase.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm passphrase'**
+  String get cloud_sync_confirm_passphrase;
+
+  /// No description provided for @cloud_sync_path_style.
+  ///
+  /// In en, this message translates to:
+  /// **'Use path-style addressing'**
+  String get cloud_sync_path_style;
+
+  /// No description provided for @cloud_sync_allow_http.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow insecure HTTP'**
+  String get cloud_sync_allow_http;
+
+  /// No description provided for @cloud_sync_http_warning.
+  ///
+  /// In en, this message translates to:
+  /// **'HTTP exposes request metadata and credentials to the network. Use it only for a trusted local S3 server.'**
+  String get cloud_sync_http_warning;
+
+  /// No description provided for @cloud_sync_test.
+  ///
+  /// In en, this message translates to:
+  /// **'Test connection'**
+  String get cloud_sync_test;
+
+  /// No description provided for @cloud_sync_enable.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable encrypted sync'**
+  String get cloud_sync_enable;
+
+  /// No description provided for @cloud_sync_now.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync now'**
+  String get cloud_sync_now;
+
+  /// No description provided for @cloud_sync_disconnect.
+  ///
+  /// In en, this message translates to:
+  /// **'Disconnect this device'**
+  String get cloud_sync_disconnect;
+
+  /// No description provided for @cloud_sync_last_synced.
+  ///
+  /// In en, this message translates to:
+  /// **'Last synced'**
+  String get cloud_sync_last_synced;
+
+  /// No description provided for @cloud_sync_never.
+  ///
+  /// In en, this message translates to:
+  /// **'Never'**
+  String get cloud_sync_never;
+
+  /// No description provided for @cloud_sync_conflicts.
+  ///
+  /// In en, this message translates to:
+  /// **'Conflicts preserved'**
+  String get cloud_sync_conflicts;
+
+  /// No description provided for @cloud_sync_passphrase_mismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Passphrases do not match'**
+  String get cloud_sync_passphrase_mismatch;
 }
 
 class _AppLocalizationsDelegate

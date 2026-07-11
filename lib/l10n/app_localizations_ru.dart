@@ -2710,4 +2710,72 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get privacy_policy => 'Политика конфиденциальности';
+
+  @override
+  String get cloud_sync => 'Синхронизация S3';
+
+  @override
+  String get cloud_sync_description =>
+      'Сквозное шифрование и синхронизация с вашим S3-совместимым сервером';
+
+  @override
+  String get cloud_sync_endpoint => 'URL-адрес сервера';
+
+  @override
+  String get cloud_sync_bucket => 'Бакет';
+
+  @override
+  String get cloud_sync_region => 'Регион';
+
+  @override
+  String get cloud_sync_prefix => 'Префикс';
+
+  @override
+  String get cloud_sync_access_key => 'ID ключа доступа';
+
+  @override
+  String get cloud_sync_secret_key => 'Секретный ключ доступа';
+
+  @override
+  String get cloud_sync_session_token => 'Токен сеанса (необязательно)';
+
+  @override
+  String get cloud_sync_passphrase => 'Пароль шифрования';
+
+  @override
+  String get cloud_sync_confirm_passphrase => 'Подтвердите пароль';
+
+  @override
+  String get cloud_sync_path_style => 'Использовать адресацию по пути';
+
+  @override
+  String get cloud_sync_allow_http => 'Разрешить небезопасный HTTP';
+
+  @override
+  String get cloud_sync_http_warning =>
+      'HTTP раскрывает сетевые метаданные и учётные данные. Используйте его только для доверенного локального S3-сервера.';
+
+  @override
+  String get cloud_sync_test => 'Проверить подключение';
+
+  @override
+  String get cloud_sync_enable => 'Включить зашифрованную синхронизацию';
+
+  @override
+  String get cloud_sync_now => 'Синхронизировать сейчас';
+
+  @override
+  String get cloud_sync_disconnect => 'Отключить это устройство';
+
+  @override
+  String get cloud_sync_last_synced => 'Последняя синхронизация';
+
+  @override
+  String get cloud_sync_never => 'Никогда';
+
+  @override
+  String get cloud_sync_conflicts => 'Сохранённые конфликты';
+
+  @override
+  String get cloud_sync_passphrase_mismatch => 'Пароли не совпадают';
 }

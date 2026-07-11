@@ -9,12 +9,53 @@ import '../models/enums.dart';
 import '../storage/entities.dart';
 import 'data_backup_import_helpers.dart';
 import '../../features/chat/data/models/message.dart';
+import '../../features/chat/data/tools/tool_event.dart';
 import '../../features/conversations/data/models/conversation.dart';
 import '../../features/personas/data/models/persona.dart';
 import '../../features/servers/data/models/server.dart';
 import '../../objectbox.g.dart';
 
 class DataBackupService {
+  static const _synchronizedSettingKeys = {
+    'temperature',
+    'topP',
+    'maxTokens',
+    'contextLength',
+    'themeMode',
+    'fontSize',
+    'showSystemMessages',
+    'hapticFeedbackEnabled',
+    'sendOnEnter',
+    'showDataIndicator',
+    'autoGenerateTitle',
+    'streamingEnabled',
+    'defaultPersonaId',
+    'mcpEnabled',
+    'newChatMcpEnabled',
+    'codeThemeDark',
+    'codeThemeLight',
+    'preferredBackend',
+    'ttsEngine',
+    'ttsVoiceId',
+    'ttsSpeed',
+    'kittenTtsModelVariant',
+    'autoSpeakEnabled',
+    'ttsProcessMarkdown',
+    'ttsSkipSeconds',
+    'smartReplyEnabled',
+    'aiUserResponseEnabled',
+    'localeCode',
+    'unloadModelsBeforeLoad',
+    'tempChatKeyboardIncognito',
+    'resumeLastChat',
+    'imageCompressionEnabled',
+    'imageCompressionLevel',
+    'smartRepliesUsePersona',
+    'keepPersonaOnNewChat',
+    'roleSwapButtonEnabled',
+    'showSystemMessagesInChat',
+  };
+
   Map<String, dynamic> _messageToMap(Message message) => {
     'id': message.id,
     'conversationId': message.conversationId,
@@ -24,18 +65,25 @@ class DataBackupService {
     'status': message.status.name,
     'modelId': message.modelId,
     'tokenCount': message.tokenCount,
+    'inputTokenCount': message.inputTokenCount,
+    'tokensPerSecond': message.tokensPerSecond,
+    'ttftMs': message.ttftMs,
+    'stopReason': message.stopReason,
     'errorMessage': message.errorMessage,
     'attachmentPaths': message.attachmentPaths,
     'generationTimeMs': message.generationTimeMs,
     'reasoningContent': message.reasoningContent,
+    'toolCalls': message.toolCalls?.map((e) => e.toMap()).toList(),
     'toolCallId': message.toolCallId,
     'isProcessing': message.isProcessing,
     'toolSessionId': message.toolSessionId,
+    'toolEvents': message.toolEvents?.map((e) => e.toMap()).toList(),
     'variantGroupId': message.variantGroupId,
     'variantIndex': message.variantIndex,
     'threadOrder': message.threadOrder,
     'isActiveVariant': message.isActiveVariant,
     'parentMessageId': message.parentMessageId,
+    'contentTokenCount': message.contentTokenCount,
   };
 
   Map<String, dynamic> _conversationToMap(Conversation domain) => {
@@ -199,6 +247,87 @@ class DataBackupService {
       'conversationFolders': _exportConversationFolders(store),
       'modelMetadata': modelMetadata,
     };
+  }
+
+  Map<String, dynamic> exportCloudSync(Store store, String settingsJson) {
+    final all = exportAll(store);
+    final persistentConversations = (all['conversations'] as List)
+        .where((item) => (item as Map)['isTemporary'] != true)
+        .cast<Map<String, dynamic>>()
+        .toList();
+    final conversationIds = persistentConversations
+        .map((item) => item['id'] as String)
+        .toSet();
+    final allSettings = Map<String, dynamic>.from(
+      jsonDecode(settingsJson) as Map,
+    );
+    final settings = <String, dynamic>{
+      for (final entry in allSettings.entries)
+        if (_synchronizedSettingKeys.contains(entry.key))
+          entry.key: entry.value,
+    };
+    return {
+      'version': 1,
+      'type': 'cloudSync',
+      'settings': settings,
+      'conversations': persistentConversations,
+      'messages': (all['messages'] as List)
+          .where(
+            (item) => conversationIds.contains((item as Map)['conversationId']),
+          )
+          .toList(),
+      'personas': all['personas'],
+      'savedMessages': all['savedMessages'],
+      'savedMessageFolders': all['savedMessageFolders'],
+      'conversationFolders': all['conversationFolders'],
+    };
+  }
+
+  Future<void> importCloudSync(
+    Store store,
+    Map<String, dynamic> payload,
+  ) async {
+    _validateCloudPayload(payload);
+    await importFromJson(store, jsonEncode(payload), replaceCloudData: true);
+  }
+
+  void _validateCloudPayload(Map<String, dynamic> payload) {
+    const collections = {
+      'conversations',
+      'messages',
+      'personas',
+      'savedMessages',
+      'savedMessageFolders',
+      'conversationFolders',
+    };
+    if (payload['version'] != 1 ||
+        payload['type'] != 'cloudSync' ||
+        payload['settings'] is! Map ||
+        !(payload['settings'] as Map).keys.every(
+          (key) => key is String && _synchronizedSettingKeys.contains(key),
+        )) {
+      throw const FormatException('Invalid cloud sync payload');
+    }
+    for (final collection in collections) {
+      final records = payload[collection];
+      if (records is! List ||
+          !records.every(
+            (record) =>
+                record is Map &&
+                record['id'] is String &&
+                (record['id'] as String).isNotEmpty,
+          )) {
+        throw FormatException('Invalid cloud sync collection: $collection');
+      }
+    }
+    if ((payload['conversations'] as List).any(
+          (record) => (record as Map)['isTemporary'] == true,
+        ) ||
+        (payload['personas'] as List).any(
+          (record) => (record as Map)['isBuiltIn'] == true,
+        )) {
+      throw const FormatException('Cloud payload contains excluded records');
+    }
   }
 
   Map<String, dynamic> exportConversations(Store store) {
@@ -377,7 +506,11 @@ class DataBackupService {
     ).convert(exportAll(store, prefs: prefs));
   }
 
-  Future<void> importFromJson(Store store, String jsonString) async {
+  Future<void> importFromJson(
+    Store store,
+    String jsonString, {
+    bool replaceCloudData = false,
+  }) async {
     final decoded = jsonDecode(jsonString);
     if (decoded is! Map<String, dynamic>) {
       throw FormatException('Invalid backup format');
@@ -392,7 +525,7 @@ class DataBackupService {
     final attachmentsDir = p.normalize(p.join(appDir.path, 'attachments'));
 
     await store.runInTransactionAsync(TxMode.write, (store, data) {
-      final (decoded, attachmentsDir) = data;
+      final (decoded, attachmentsDir, replaceCloudData) = data;
       final convBox = store.box<ConversationEntity>();
       final messageBox = store.box<MessageEntity>();
       final personaBox = store.box<PersonaEntity>();
@@ -642,6 +775,10 @@ class DataBackupService {
             ),
             modelId: item['modelId'] as String?,
             tokenCount: item['tokenCount'] as int?,
+            inputTokenCount: item['inputTokenCount'] as int?,
+            tokensPerSecond: (item['tokensPerSecond'] as num?)?.toDouble(),
+            ttftMs: item['ttftMs'] as int?,
+            stopReason: item['stopReason'] as String?,
             errorMessage: item['errorMessage'] as String?,
             attachmentPaths: _sanitizedAttachmentPaths(
               item['attachmentPaths'],
@@ -649,14 +786,32 @@ class DataBackupService {
             ),
             generationTimeMs: item['generationTimeMs'] as int?,
             reasoningContent: item['reasoningContent'] as String?,
+            toolCalls: item['toolCalls'] is List
+                ? (item['toolCalls'] as List)
+                      .whereType<Map>()
+                      .map(
+                        (e) =>
+                            ToolCallData.fromMap(Map<String, dynamic>.from(e)),
+                      )
+                      .toList()
+                : null,
             toolCallId: item['toolCallId'] as String?,
             isProcessing: item['isProcessing'] as bool? ?? false,
             toolSessionId: item['toolSessionId'] as String?,
+            toolEvents: item['toolEvents'] is List
+                ? (item['toolEvents'] as List)
+                      .whereType<Map>()
+                      .map(
+                        (e) => ToolEvent.fromMap(Map<String, dynamic>.from(e)),
+                      )
+                      .toList()
+                : null,
             variantGroupId: item['variantGroupId'] as String?,
             variantIndex: item['variantIndex'] as int? ?? 0,
             threadOrder: item['threadOrder'] as int? ?? 0,
             isActiveVariant: item['isActiveVariant'] as bool? ?? true,
             parentMessageId: item['parentMessageId'] as String?,
+            contentTokenCount: item['contentTokenCount'] as int?,
           );
 
           final entity = MessageEntity.fromDomain(message)
@@ -670,7 +825,85 @@ class DataBackupService {
           messageBox.put(entity);
         }
       }
-    }, (decoded, attachmentsDir));
+
+      if (replaceCloudData) {
+        Set<String> ids(dynamic records) => records is List
+            ? records
+                  .whereType<Map>()
+                  .map((item) => item['id'])
+                  .whereType<String>()
+                  .toSet()
+            : <String>{};
+
+        void removeMissing<T>(
+          Box<T> box,
+          Set<String> expected,
+          String Function(T) idOf,
+          int Function(T) internalIdOf,
+        ) {
+          box.removeMany(
+            box
+                .getAll()
+                .where((item) => !expected.contains(idOf(item)))
+                .map(internalIdOf)
+                .toList(),
+          );
+        }
+
+        final conversationIds = ids(decoded['conversations']);
+        final messageIds = ids(decoded['messages']);
+        final personaIds = ids(decoded['personas']);
+        final temporaryConversationIds = convBox
+            .getAll()
+            .where((item) => item.isTemporary)
+            .map((item) => item.id)
+            .toSet();
+        convBox.removeMany(
+          convBox
+              .getAll()
+              .where((item) => !item.isTemporary)
+              .where((item) => !conversationIds.contains(item.id))
+              .map((item) => item.internalId)
+              .toList(),
+        );
+        messageBox.removeMany(
+          messageBox
+              .getAll()
+              .where((item) => !messageIds.contains(item.id))
+              .where(
+                (item) =>
+                    !temporaryConversationIds.contains(item.conversationUid),
+              )
+              .map((item) => item.internalId)
+              .toList(),
+        );
+        personaBox.removeMany(
+          personaBox
+              .getAll()
+              .where((item) => !item.isBuiltIn && !personaIds.contains(item.id))
+              .map((item) => item.internalId)
+              .toList(),
+        );
+        removeMissing<SavedMessageEntity>(
+          savedBox,
+          ids(decoded['savedMessages']),
+          (item) => item.id,
+          (item) => item.internalId,
+        );
+        removeMissing<SavedMessageFolderEntity>(
+          savedFolderBox,
+          ids(decoded['savedMessageFolders']),
+          (item) => item.id,
+          (item) => item.internalId,
+        );
+        removeMissing<ConversationFolderEntity>(
+          conversationFolderBox,
+          ids(decoded['conversationFolders']),
+          (item) => item.id,
+          (item) => item.internalId,
+        );
+      }
+    }, (decoded, attachmentsDir, replaceCloudData));
   }
 
   List<String>? _sanitizedAttachmentPaths(dynamic raw, String attachmentsDir) {

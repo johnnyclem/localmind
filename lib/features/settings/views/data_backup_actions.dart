@@ -181,10 +181,14 @@ class DataBackupActions extends ConsumerWidget {
         await _applySettingsPayload(ref, decoded);
       }
 
-      ref.invalidate(conversationsProvider);
-      ref.invalidate(personasNotifierProvider);
-      ref.invalidate(savedMessagesProvider);
-      ref.invalidate(savedMessageFoldersProvider);
+      // Defer invalidations until after the current build frame so widgets that
+      // watch these providers (e.g. SettingsViews) don't flush them during build.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ref.invalidate(conversationsProvider);
+        ref.invalidate(personasNotifierProvider);
+        ref.invalidate(savedMessagesProvider);
+        ref.invalidate(savedMessageFoldersProvider);
+      });
 
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
