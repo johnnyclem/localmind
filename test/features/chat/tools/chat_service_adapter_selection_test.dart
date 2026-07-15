@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -40,6 +41,18 @@ class StreamInterceptor extends Interceptor {
       }
       await controller.close();
     });
+  }
+}
+
+class CapturingStreamInterceptor extends StreamInterceptor {
+  RequestOptions? capturedRequest;
+
+  CapturingStreamInterceptor(super.lines);
+
+  @override
+  void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
+    capturedRequest = options;
+    super.onRequest(options, handler);
   }
 }
 
@@ -171,4 +184,142 @@ void main() {
       expect(toolCalls.first!.arguments['b'], 6);
     });
   });
+
+  group('Ollama vision message formatting', () {
+    late Directory tempDirectory;
+
+    setUp(() async {
+      tempDirectory = await Directory.systemTemp.createTemp(
+        'localmind_ollama_vision_test_',
+      );
+    });
+
+    tearDown(() async {
+      if (await tempDirectory.exists()) {
+        await tempDirectory.delete(recursive: true);
+      }
+    });
+
+    test('sends multiple images as ordered raw base64 values', () async {
+      final firstBytes = [1, 2, 3];
+      final secondBytes = [4, 5, 6];
+      final firstImage = await File(
+        '${tempDirectory.path}/first.png',
+      ).writeAsBytes(firstBytes);
+      final secondImage = await File(
+        '${tempDirectory.path}/second.jpg',
+      ).writeAsBytes(secondBytes);
+      final interceptor = CapturingStreamInterceptor(['{"done":true}']);
+      final service = OllamaChatService(
+        Dio()..interceptors.add(interceptor),
+        imageCompressionEnabled: false,
+      );
+
+      final responses = await service
+          .sendMessage(
+            server: _ollamaTestServer(),
+            modelId: 'vision-model',
+            messages: [
+              Message(
+                id: 'vision-message',
+                conversationId: 'conversation',
+                role: MessageRole.user,
+                content: 'What is shown?',
+                attachmentPaths: [firstImage.path, secondImage.path],
+                createdAt: DateTime.now(),
+              ),
+            ],
+            params: ChatParameters.defaults(),
+          )
+          .toList();
+
+      final body = interceptor.capturedRequest!.data as Map<String, dynamic>;
+      final message = (body['messages'] as List).single as Map<String, dynamic>;
+      expect(message['content'], 'What is shown?');
+      expect(message['images'], [
+        base64Encode(firstBytes),
+        base64Encode(secondBytes),
+      ]);
+      expect(responses.last.type, ChatResponseType.done);
+    });
+
+    test(
+      'keeps text-only messages unchanged and appends text attachments',
+      () async {
+        final textFile = await File(
+          '${tempDirectory.path}/notes.txt',
+        ).writeAsString('attachment text');
+        final interceptor = CapturingStreamInterceptor(['{"done":true}']);
+        final service = OllamaChatService(Dio()..interceptors.add(interceptor));
+
+        await service
+            .sendMessage(
+              server: _ollamaTestServer(),
+              modelId: 'text-model',
+              messages: [
+                Message(
+                  id: 'text-message',
+                  conversationId: 'conversation',
+                  role: MessageRole.user,
+                  content: 'Summarize this',
+                  attachmentPaths: [textFile.path],
+                  createdAt: DateTime.now(),
+                ),
+              ],
+              params: ChatParameters.defaults(),
+            )
+            .toList();
+
+        final body = interceptor.capturedRequest!.data as Map<String, dynamic>;
+        final message =
+            (body['messages'] as List).single as Map<String, dynamic>;
+        expect(
+          message['content'],
+          'Summarize this\n\n--- notes.txt ---\nattachment text',
+        );
+        expect(message.containsKey('images'), isFalse);
+      },
+    );
+
+    test('skips missing images without aborting the request', () async {
+      final interceptor = CapturingStreamInterceptor(['{"done":true}']);
+      final service = OllamaChatService(Dio()..interceptors.add(interceptor));
+
+      final responses = await service
+          .sendMessage(
+            server: _ollamaTestServer(),
+            modelId: 'vision-model',
+            messages: [
+              Message(
+                id: 'missing-image-message',
+                conversationId: 'conversation',
+                role: MessageRole.user,
+                content: 'Continue without the missing image',
+                attachmentPaths: ['${tempDirectory.path}/missing.png'],
+                createdAt: DateTime.now(),
+              ),
+            ],
+            params: ChatParameters.defaults(),
+          )
+          .toList();
+
+      final body = interceptor.capturedRequest!.data as Map<String, dynamic>;
+      final message = (body['messages'] as List).single as Map<String, dynamic>;
+      expect(message['content'], 'Continue without the missing image');
+      expect(message.containsKey('images'), isFalse);
+      expect(responses.last.type, ChatResponseType.done);
+    });
+  });
+}
+
+Server _ollamaTestServer() {
+  return Server(
+    id: 'test-ollama',
+    name: 'Test Ollama',
+    type: ServerType.ollama,
+    host: 'localhost',
+    port: 11434,
+    createdAt: DateTime.now(),
+    lastConnectedAt: DateTime.now(),
+  );
 }

@@ -11,7 +11,7 @@ class _CompressionConfig {
   final List<int> dimensions;
 }
 
-/// Resize/compress images so LM Studio requests stay under payload limits.
+/// Resize/compress images so vision-model requests stay under payload limits.
 class ImageUploadUtils {
   ImageUploadUtils._();
 

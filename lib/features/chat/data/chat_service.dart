@@ -51,7 +51,11 @@ abstract class ChatService {
       case ServerType.openAICompatible:
         return OpenAICompatibleChatService(dio);
       case ServerType.ollama:
-        return OllamaChatService(dio);
+        return OllamaChatService(
+          dio,
+          imageCompressionEnabled: imageCompressionEnabled,
+          imageCompressionLevel: imageCompressionLevel,
+        );
       case ServerType.openRouter:
         return OpenRouterChatService(dio);
       case ServerType.onDevice:
@@ -673,9 +677,15 @@ class OpenAICompatibleChatService implements ChatService {
 
 class OllamaChatService implements ChatService {
   final Dio _dio;
+  final bool imageCompressionEnabled;
+  final ImageCompressionLevel imageCompressionLevel;
   CancelToken? _cancelToken;
 
-  OllamaChatService(this._dio);
+  OllamaChatService(
+    this._dio, {
+    this.imageCompressionEnabled = true,
+    this.imageCompressionLevel = ImageCompressionLevel.medium,
+  });
 
   @override
   Stream<ChatResponse> sendMessage({
@@ -691,9 +701,14 @@ class OllamaChatService implements ChatService {
     _cancelToken = CancelToken();
     final toolAdapter = OllamaToolAdapter();
 
+    final apiMessages = <Map<String, dynamic>>[];
+    for (final message in messages) {
+      apiMessages.add(await _messageToOllamaMapWithImages(message));
+    }
+
     final body = <String, dynamic>{
       'model': modelId,
-      'messages': messages.map(_messageToApiMap).toList(),
+      'messages': apiMessages,
       'stream': true,
       'options': {
         'temperature': params.temperature,
@@ -785,6 +800,74 @@ class OllamaChatService implements ChatService {
       return;
     }
     yield const ChatResponse(type: ChatResponseType.done);
+  }
+
+  Future<Map<String, dynamic>> _messageToOllamaMapWithImages(Message m) async {
+    var textContent = m.content;
+    final images = <String>[];
+
+    for (final path in m.attachmentPaths ?? const <String>[]) {
+      if (AttachmentHelpers.isTextPath(path)) {
+        final text = await AttachmentHelpers.readTextFile(path);
+        if (text != null) {
+          textContent = AttachmentHelpers.appendTextAttachment(
+            textContent,
+            AttachmentHelpers.fileNameOf(path),
+            text,
+          );
+        }
+        continue;
+      }
+
+      if (!AttachmentHelpers.isImagePath(path)) continue;
+
+      try {
+        final file = File(path);
+        if (!await file.exists()) continue;
+
+        final fileBytes = await ImageUploadUtils.prepareImageBytes(
+          file,
+          enabled: imageCompressionEnabled,
+          level: imageCompressionLevel,
+        );
+        final base64Image = await Isolate.run(() {
+          try {
+            return base64Encode(fileBytes);
+          } catch (_) {
+            return null;
+          }
+        });
+
+        if (base64Image != null) images.add(base64Image);
+      } catch (e) {
+        Log.error('Failed to read attachment for Ollama format: $e');
+      }
+    }
+
+    final map = <String, dynamic>{
+      'role': _roleToString(m.role),
+      'content': textContent,
+    };
+    if (images.isNotEmpty) map['images'] = images;
+
+    if (m.role == MessageRole.tool && m.toolCallId != null) {
+      map['tool_call_id'] = m.toolCallId;
+    }
+    if (m.role == MessageRole.assistant &&
+        m.toolCalls != null &&
+        m.toolCalls!.isNotEmpty) {
+      map['tool_calls'] = m.toolCalls!.map((tc) {
+        return {
+          'id': tc.id,
+          'type': 'function',
+          'function': {
+            'name': tc.toolName,
+            'arguments': jsonEncode(tc.arguments),
+          },
+        };
+      }).toList();
+    }
+    return map;
   }
 
   @override
