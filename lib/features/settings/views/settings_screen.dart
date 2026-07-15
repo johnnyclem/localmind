@@ -10,6 +10,7 @@ import 'package:localmind/l10n/app_localizations.dart';
 import '../../../core/models/enums.dart';
 import '../../../core/providers/app_providers.dart';
 import '../../../core/routes/app_routes.dart';
+import '../../../core/services/crash_report_service.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/system_insets.dart';
 import '../../chat/utils/image_upload_utils.dart';
@@ -473,6 +474,11 @@ class SettingsViews extends ConsumerWidget {
                     ],
                     stack: const ['Flutter', 'Riverpod', 'shadcn_ui'],
                     openSource: l10n.open_source_desc,
+                  ),
+                  _SectionActionButton(
+                    icon: HugeIcons.strokeRoundedAlertCircle,
+                    label: 'Report a problem',
+                    onPressed: () => _openFeedbackIssue(context),
                   ),
                 ],
               );
@@ -2389,4 +2395,23 @@ String _languageLabel(String? localeCode, AppLocalizations l10n) {
   }
 
   return localeCode.toUpperCase();
+}
+
+Future<void> _openFeedbackIssue(BuildContext context) async {
+  final uri = CrashReportService.instance.buildFeedbackIssueUrl();
+  final messenger = ScaffoldMessenger.maybeOf(context);
+  try {
+    final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (!ok && messenger != null) {
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text('Could not open GitHub. Please try again later.'),
+        ),
+      );
+    }
+  } catch (e) {
+    if (messenger != null) {
+      messenger.showSnackBar(SnackBar(content: Text('Failed to open URL: $e')));
+    }
+  }
 }
