@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
-import 'package:supabase_flutter/supabase_flutter.dart' as sb;
 
 import '../../../core/network/hypervault_api_exception.dart';
+import '../../../core/providers/artifact_identity_providers.dart';
+import '../../auth/providers/auth_providers.dart';
 import '../../vault/data/models/artifact.dart';
 import '../../vault/providers/vault_providers.dart';
 import '../data/models/connection.dart';
@@ -46,11 +47,15 @@ class _ConnectSheetState extends ConsumerState<_ConnectSheet> {
   final _searchController = TextEditingController();
   String _query = '';
 
-  // Existing-connections state. Hydrating a[the raw connections id]-only
+  // Existing-connections state. Hydrating the raw connections id-only
   // response into slugs/titles needs this artifact's own internal id, which
   // no REST endpoint exposes (GET /api/artifacts never returns `id`) — so
-  // this is resolved with a best-effort direct Supabase read, same class of
-  // gap as the "Shared with you" screen's inbound-shares read.
+  // this is resolved through the shared [ArtifactIdentityCache] (the same
+  // identity map `_connect` below writes to), not a bespoke direct-Supabase
+  // read. A connection whose other end this device has never learned an id
+  // for (e.g. made purely from the web app) can't be resolved yet and is
+  // simply omitted — see that cache's doc comment for the accepted
+  // limitation.
   bool _loadingConnections = true;
   String? _connectionsError;
   List<ArtifactConnectionRow> _connections = const [];
@@ -79,14 +84,12 @@ class _ConnectSheetState extends ConsumerState<_ConnectSheet> {
       _connectionsError = null;
     });
     try {
-      final client = sb.Supabase.instance.client;
-      final ownRow = await client
-          .from('artifacts')
-          .select('id')
-          .eq('slug', widget.artifactSlug)
-          .maybeSingle();
-      final ownId = ownRow?['id'] as String?;
+      final cache = ref.read(artifactIdentityCacheProvider);
+      final userId = ref.read(authProvider).user?.id;
+      final ownId = cache.idForSlug(userId, widget.artifactSlug);
       if (ownId == null) {
+        // This device has never learned this artifact's database id (no
+        // mobile-made connection has touched it yet) — nothing to resolve.
         if (mounted) {
           setState(() {
             _connections = const [];
@@ -102,36 +105,31 @@ class _ConnectSheetState extends ConsumerState<_ConnectSheet> {
       final mine = response.connections
           .where((c) => c.involves(ownId))
           .toList();
-      final otherIds = mine.map((c) => c.otherId(ownId)).toSet().toList();
 
-      final otherById = <String, Map<String, dynamic>>{};
-      if (otherIds.isNotEmpty) {
-        final rows = await client
-            .from('artifacts')
-            .select('id, slug, title, type')
-            .inFilter('id', otherIds);
-        for (final row in (rows as List)) {
-          if (row is Map<String, dynamic>) {
-            final id = row['id'] as String?;
-            if (id != null) otherById[id] = row;
-          }
-        }
-      }
+      final vaultList = ref.read(vaultListProvider).value ?? const <Artifact>[];
+      final artifactBySlug = {for (final a in vaultList) a.slug: a};
 
-      final display = mine.map((c) {
+      final display = <ArtifactConnectionRow>[];
+      for (final c in mine) {
         final otherId = c.otherId(ownId);
-        final other = otherById[otherId];
-        final rawTitle = other?['title'] as String?;
-        return ArtifactConnectionRow(
-          connectionId: c.id,
-          otherArtifactId: otherId,
-          otherSlug: other?['slug'] as String?,
-          otherTitle: (rawTitle != null && rawTitle.trim().isNotEmpty)
-              ? rawTitle
-              : (other == null ? 'Unknown artifact' : 'Untitled'),
-          otherType: other?['type'] as String?,
+        final otherSlug = cache.slugForId(userId, otherId);
+        if (otherSlug == null) {
+          // Can't resolve this edge's other end yet — likely a web-made
+          // connection this device hasn't touched. Omit rather than show a
+          // dead entry with no title.
+          continue;
+        }
+        final other = artifactBySlug[otherSlug];
+        display.add(
+          ArtifactConnectionRow(
+            connectionId: c.id,
+            otherArtifactId: otherId,
+            otherSlug: otherSlug,
+            otherTitle: other?.title ?? otherSlug,
+            otherType: other?.type,
+          ),
         );
-      }).toList();
+      }
 
       if (mounted) {
         setState(() {
@@ -172,7 +170,7 @@ class _ConnectSheetState extends ConsumerState<_ConnectSheet> {
     });
     try {
       await ref
-          .read(connectionsApiServiceProvider)
+          .read(connectionsControllerProvider)
           .connect(source: widget.artifactSlug, target: target.slug);
       _searchController.clear();
       if (mounted) {

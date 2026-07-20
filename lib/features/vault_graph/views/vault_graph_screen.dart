@@ -5,7 +5,10 @@ import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
 
 import '../../../core/network/hypervault_api_exception.dart';
+import '../../../core/providers/artifact_identity_providers.dart';
 import '../../../core/routes/app_routes.dart';
+import '../../../core/storage/artifact_identity_cache.dart';
+import '../../auth/providers/auth_providers.dart';
 import '../../vault/data/models/artifact.dart';
 import '../../vault/providers/vault_providers.dart';
 import '../data/models/vault_connection.dart';
@@ -58,6 +61,8 @@ class _VaultGraphScreenState extends ConsumerState<VaultGraphScreen>
   void _initGraph(
     List<Artifact> artifacts,
     List<VaultConnection> connections,
+    ArtifactIdentityCache identityCache,
+    String? userId,
     bool reduceMotion,
   ) {
     _built = true;
@@ -82,11 +87,27 @@ class _VaultGraphScreenState extends ConsumerState<VaultGraphScreen>
       for (var i = 0; i < _nodes.length; i++) _nodes[i].slug: i,
     };
 
+    // `connection.aId`/`bId` are database ids, not slugs (the model's
+    // fallback field names are defensive for a future backend change, but
+    // today they never actually come through as slugs) — so a direct
+    // `indexBySlug` lookup only ever matches by coincidence. Resolve
+    // through the identity cache first: any id learned from a mobile-made
+    // `POST /api/connections` response (see `ArtifactIdentityCache`) maps
+    // back to the slug that identifies a node here. An id this device has
+    // never learned (e.g. a web-only connection) stays unresolved, which is
+    // the cache's documented limitation, not a bug in this lookup.
+    int? resolveIndex(String rawId) {
+      if (indexBySlug.containsKey(rawId)) return indexBySlug[rawId];
+      final slug = identityCache.slugForId(userId, rawId);
+      if (slug == null) return null;
+      return indexBySlug[slug];
+    }
+
     final edges = <GraphEdge>[];
     final seenPairs = <String>{};
     for (final connection in connections) {
-      final aIndex = indexBySlug[connection.aId];
-      final bIndex = indexBySlug[connection.bId];
+      final aIndex = resolveIndex(connection.aId);
+      final bIndex = resolveIndex(connection.bId);
       if (aIndex == null || bIndex == null || aIndex == bIndex) {
         continue; // Can't resolve both endpoints — skip, don't crash.
       }
@@ -149,11 +170,19 @@ class _VaultGraphScreenState extends ConsumerState<VaultGraphScreen>
   Widget build(BuildContext context) {
     final vaultAsync = ref.watch(vaultListProvider);
     final connectionsAsync = ref.watch(vaultConnectionsProvider);
+    final identityCache = ref.watch(artifactIdentityCacheProvider);
+    final userId = ref.watch(authProvider).user?.id;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Vault Graph')),
       body: vaultAsync.when(
-        data: (artifacts) => _buildBody(context, artifacts, connectionsAsync),
+        data: (artifacts) => _buildBody(
+          context,
+          artifacts,
+          connectionsAsync,
+          identityCache,
+          userId,
+        ),
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, _) => _buildErrorState(context, err),
       ),
@@ -164,6 +193,8 @@ class _VaultGraphScreenState extends ConsumerState<VaultGraphScreen>
     BuildContext context,
     List<Artifact> artifacts,
     AsyncValue<List<VaultConnection>> connectionsAsync,
+    ArtifactIdentityCache identityCache,
+    String? userId,
   ) {
     if (!_built) {
       if (connectionsAsync.isLoading) {
@@ -173,6 +204,8 @@ class _VaultGraphScreenState extends ConsumerState<VaultGraphScreen>
       _initGraph(
         artifacts,
         connections,
+        identityCache,
+        userId,
         MediaQuery.of(context).disableAnimations,
       );
     }

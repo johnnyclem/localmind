@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart' as sb;
 
 import '../../../core/logger/app_logger.dart';
 import '../../../core/models/hypervault_capabilities.dart';
+import '../../../core/network/hypervault_api_exception.dart';
 import '../../../core/providers/hypervault_providers.dart';
 import '../../../core/storage/secure_supabase_storage.dart';
 import '../data/models/auth_gate_status.dart';
@@ -111,28 +112,41 @@ class AuthNotifier extends Notifier<HyperVaultAuthState> {
     }
 
     state = HyperVaultAuthState(status: AuthGateStatus.loading, session: session);
-    final gate = await _resolveGate(session);
-    state = HyperVaultAuthState(status: gate, session: session);
+    try {
+      final gate = await _resolveGate(session);
+      state = HyperVaultAuthState(status: gate, session: session);
+    } catch (e) {
+      // Unlike the old direct `account_access` read, this probe can tell
+      // "actually waitlisted" (403, handled inside _resolveGate) apart from
+      // a genuine network/server hiccup — so a hiccup here no longer fails
+      // open to approved. Surface it and let the user retry from sign-in.
+      Log.error('[auth] gate probe failed: $e');
+      state = HyperVaultAuthState(
+        status: AuthGateStatus.unauthenticated,
+        errorMessage: 'Could not verify access. Check your connection and try again.',
+      );
+      return;
+    }
 
     // Bearer is now attached; pull the enriched capabilities.user block.
     unawaited(ref.read(capabilitiesProvider.notifier).refresh());
   }
 
+  /// Resolves the invite/waitlist gate by probing a real
+  /// `resolveApiIdentity`-gated HyperVault route (`GET /api/artifacts`)
+  /// instead of reading the `account_access` table directly. The server
+  /// enforces the gate on every request regardless of what the client
+  /// believes, so a 403 here is ground truth for "waitlisted" — and an admin
+  /// (who bypasses the waitlist server-side) simply gets a 200 back, so they
+  /// come out "approved" with zero extra client-side admin logic.
   Future<AuthGateStatus> _resolveGate(sb.Session session) async {
+    final client = ref.read(hypervaultClientProvider);
     try {
-      final row = await sb.Supabase.instance.client
-          .from('account_access')
-          .select('user_id')
-          .eq('user_id', session.user.id)
-          .maybeSingle();
-      return row != null ? AuthGateStatus.approved : AuthGateStatus.waitlisted;
-    } catch (e) {
-      // Fail open: the gate is advisory only (spec T-M2-06) — the server
-      // enforces it on every request regardless, so a client-side read
-      // failure (RLS hiccup, schema drift) shouldn't strand the user on a
-      // blank waitlist screen. Surface real 403s via the API error toast.
-      Log.warning('[auth] account_access gate check failed, defaulting to approved: $e');
+      await client.get<dynamic>('/api/artifacts');
       return AuthGateStatus.approved;
+    } on HyperVaultApiException catch (e) {
+      if (e.isForbidden) return AuthGateStatus.waitlisted;
+      rethrow;
     }
   }
 
@@ -174,8 +188,16 @@ class AuthNotifier extends Notifier<HyperVaultAuthState> {
       if (resultString == 'ok' || resultString == 'already_approved') {
         final session = sb.Supabase.instance.client.auth.currentSession;
         if (session != null) {
-          final gate = await _resolveGate(session);
-          state = HyperVaultAuthState(status: gate, session: session);
+          try {
+            final gate = await _resolveGate(session);
+            state = HyperVaultAuthState(status: gate, session: session);
+          } catch (e) {
+            Log.error('[auth] post-redeem gate probe failed: $e');
+            state = state.copyWith(
+              errorMessage:
+                  'Code redeemed, but could not verify access yet. Try again in a moment.',
+            );
+          }
         }
       } else {
         state = state.copyWith(

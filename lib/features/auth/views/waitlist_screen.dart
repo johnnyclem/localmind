@@ -12,14 +12,22 @@ import '../providers/auth_providers.dart';
 /// Offers an invite-code redeem field; on success the gate re-resolves and
 /// the router bounces to the vault.
 class WaitlistScreen extends ConsumerStatefulWidget {
-  const WaitlistScreen({super.key});
+  /// Prefills the redeem field — set when a `?invite=<code>` deep link
+  /// (`hypervault://open?invite=CODE` or `/?invite=CODE`) routed here via
+  /// `lib/app.dart`'s router redirect, carried through as a `?code=` query
+  /// param on this route (see `lib/features/deep_links/data/hv_deep_link.dart`).
+  final String? initialCode;
+
+  const WaitlistScreen({super.key, this.initialCode});
 
   @override
   ConsumerState<WaitlistScreen> createState() => _WaitlistScreenState();
 }
 
 class _WaitlistScreenState extends ConsumerState<WaitlistScreen> {
-  final _codeController = TextEditingController();
+  late final _codeController = TextEditingController(
+    text: widget.initialCode ?? '',
+  );
   bool _submitting = false;
 
   @override

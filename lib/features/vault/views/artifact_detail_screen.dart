@@ -11,6 +11,7 @@ import '../../connections/views/connect_sheet.dart';
 import '../../connections/views/share_sheet.dart';
 import '../data/models/artifact.dart';
 import '../providers/vault_providers.dart';
+import 'components/source_sheet.dart';
 
 /// Artifact detail/viewer (mobile PRD T-M3-02 through T-M3-12, scoped to
 /// v1). Deep-linkable by [slug] alone — if the artifact isn't already in
@@ -227,11 +228,7 @@ class _ArtifactDetailScreenState extends ConsumerState<ArtifactDetailScreen> {
   }
 
   void _showSourceSheet() {
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      builder: (context) => _SourceSheet(slug: widget.slug),
-    );
+    showSourceSheet(context, slug: widget.slug);
   }
 
   void _showConnectSheet() {
@@ -443,101 +440,6 @@ class _ArtifactDetailScreenState extends ConsumerState<ArtifactDetailScreen> {
           ],
         ),
       ),
-    );
-  }
-}
-
-class _SourceSheet extends ConsumerStatefulWidget {
-  final String slug;
-
-  const _SourceSheet({required this.slug});
-
-  @override
-  ConsumerState<_SourceSheet> createState() => _SourceSheetState();
-}
-
-class _SourceSheetState extends ConsumerState<_SourceSheet> {
-  String? _content;
-  String? _error;
-  bool _loading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _load();
-  }
-
-  Future<void> _load() async {
-    try {
-      final content = await ref
-          .read(vaultApiServiceProvider)
-          .fetchSource(widget.slug);
-      if (mounted) setState(() => _content = content);
-    } catch (e) {
-      final message = e is HyperVaultApiException ? e.message : e.toString();
-      if (mounted) setState(() => _error = message);
-    } finally {
-      if (mounted) setState(() => _loading = false);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return DraggableScrollableSheet(
-      initialChildSize: 0.75,
-      minChildSize: 0.4,
-      maxChildSize: 0.95,
-      expand: false,
-      builder: (context, scrollController) {
-        return Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      'Source',
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                  ),
-                  if (_content != null)
-                    IconButton(
-                      icon: const HugeIcon(
-                        icon: HugeIcons.strokeRoundedCopy01,
-                      ),
-                      tooltip: 'Copy source',
-                      onPressed: () {
-                        Clipboard.setData(ClipboardData(text: _content!));
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Copied!')),
-                        );
-                      },
-                    ),
-                ],
-              ),
-              const Divider(),
-              Expanded(
-                child: _loading
-                    ? const Center(child: CircularProgressIndicator())
-                    : _error != null
-                    ? Center(child: Text(_error!))
-                    : SingleChildScrollView(
-                        controller: scrollController,
-                        child: SelectableText(
-                          _content ?? '',
-                          style: const TextStyle(
-                            fontFamily: 'monospace',
-                            fontSize: 12,
-                          ),
-                        ),
-                      ),
-              ),
-            ],
-          ),
-        );
-      },
     );
   }
 }
