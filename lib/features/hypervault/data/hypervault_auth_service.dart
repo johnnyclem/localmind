@@ -2,7 +2,9 @@ import 'package:flutter/widgets.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/logger/app_logger.dart';
+import 'hv_invite_redeem.dart';
 import 'hv_secure_local_storage.dart';
+import 'models/hv_api_error.dart';
 import 'models/hv_capabilities.dart';
 
 /// The `hypervault://` deep link the Supabase project's redirect allow-list
@@ -71,4 +73,42 @@ class HyperVaultAuthService {
   }
 
   Future<void> signOut() => _auth.signOut();
+
+  /// Redeems an invite code for the signed-in (waitlisted) user by calling
+  /// the `redeem_invite_code(p_code)` Postgres function directly via
+  /// Supabase RPC, per the API contract's "Direct Supabase" section. This
+  /// deliberately does *not* call `POST /api/invite/redeem`: that REST route
+  /// is still session-cookie-only server-side (HyperVault
+  /// docs/mobile/prd/02-auth-onboarding.md, T-M2-09), so a bearer-only
+  /// mobile client can't use it yet.
+  ///
+  /// Returns the raw result code (`ok`, `already_approved`, `invalid`,
+  /// `disabled`, `exhausted`, or `not_authenticated`) — map it to
+  /// user-facing copy with [hvRedeemMessages]. Throws [HvApiError] if the
+  /// RPC call itself fails (network error, or this deployment hasn't
+  /// applied migration `0011_invite_gate.sql` yet).
+  Future<String> redeemInviteCode(String code) async {
+    if (!_initialized) {
+      throw const HvApiError(
+        error: 'Not connected to a HyperVault deployment.',
+      );
+    }
+    try {
+      final result = await Supabase.instance.client.rpc(
+        'redeem_invite_code',
+        params: {'p_code': normalizeInviteCode(code)},
+      );
+      if (result is String) return result;
+      throw const HvApiError(
+        error: 'Unexpected response redeeming invite code.',
+      );
+    } on PostgrestException catch (e) {
+      if (e.code == 'PGRST202' || e.code == '42883') {
+        throw const HvApiError(
+          error: 'Invite redemption isn’t set up on this deployment yet.',
+        );
+      }
+      throw HvApiError(error: e.message);
+    }
+  }
 }
