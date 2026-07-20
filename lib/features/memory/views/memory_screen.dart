@@ -5,6 +5,7 @@ import 'package:hugeicons/hugeicons.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
 import '../../../core/routes/app_routes.dart';
+import '../../../core/widgets/hv_error_toast.dart';
 import '../data/models/memory.dart';
 import '../providers/memory_providers.dart';
 import 'components/import_sheet.dart';
@@ -57,6 +58,13 @@ class _MemoryScreenState extends ConsumerState<MemoryScreen> {
   Widget build(BuildContext context) {
     final listState = ref.watch(memoryListProvider);
     final search = ref.watch(memorySearchProvider);
+
+    ref.listen<AsyncValue<List<MemoryListItem>>>(memoryListProvider, (
+      previous,
+      next,
+    ) {
+      next.whenOrNull(error: (err, _) => showHvError(context, err));
+    });
 
     return Scaffold(
       appBar: AppBar(

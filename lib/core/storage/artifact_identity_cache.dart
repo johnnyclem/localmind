@@ -39,7 +39,9 @@ class ArtifactIdentityCache {
   Map<String, String> _readMap(String? userId) {
     final raw = _cache.read(_key, userId: userId);
     if (raw is Map) {
-      return raw.map((key, value) => MapEntry(key.toString(), value.toString()));
+      return raw.map(
+        (key, value) => MapEntry(key.toString(), value.toString()),
+      );
     }
     return {};
   }

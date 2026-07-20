@@ -49,21 +49,17 @@ class BackendsNotifier extends AsyncNotifier<BackendsListResult> {
   Future<BackendsListResult> _fetch() async {
     final api = ref.read(backendsApiServiceProvider);
     final result = await api.fetchBackends();
-    await ref.read(hyperVaultCacheProvider).put(
-      _cacheKey,
-      result.toJson(),
-      userId: _userId,
-    );
+    await ref
+        .read(hyperVaultCacheProvider)
+        .put(_cacheKey, result.toJson(), userId: _userId);
     return result;
   }
 
   Future<void> _persist(BackendsListResult next) async {
     state = AsyncData(next);
-    await ref.read(hyperVaultCacheProvider).put(
-      _cacheKey,
-      next.toJson(),
-      userId: _userId,
-    );
+    await ref
+        .read(hyperVaultCacheProvider)
+        .put(_cacheKey, next.toJson(), userId: _userId);
   }
 
   Future<BackendMutationResult> addBackend({
@@ -84,7 +80,8 @@ class BackendsNotifier extends AsyncNotifier<BackendsListResult> {
       embeddingModel: embeddingModel,
     );
 
-    final current = state.value ?? const BackendsListResult(backends: [], providers: []);
+    final current =
+        state.value ?? const BackendsListResult(backends: [], providers: []);
     await _persist(
       current.copyWith(backends: [result.backend, ...current.backends]),
     );
@@ -109,7 +106,8 @@ class BackendsNotifier extends AsyncNotifier<BackendsListResult> {
       embeddingModel: embeddingModel,
     );
 
-    final current = state.value ?? const BackendsListResult(backends: [], providers: []);
+    final current =
+        state.value ?? const BackendsListResult(backends: [], providers: []);
     final updatedList = current.backends
         .map((b) => b.id == id ? result.backend : b)
         .toList();
@@ -129,11 +127,9 @@ class BackendsNotifier extends AsyncNotifier<BackendsListResult> {
     try {
       final api = ref.read(backendsApiServiceProvider);
       final message = await api.deleteBackend(id);
-      await ref.read(hyperVaultCacheProvider).put(
-        _cacheKey,
-        optimistic.toJson(),
-        userId: _userId,
-      );
+      await ref
+          .read(hyperVaultCacheProvider)
+          .put(_cacheKey, optimistic.toJson(), userId: _userId);
       return message;
     } catch (e) {
       // Rollback: the server never removed it, so restore the row.

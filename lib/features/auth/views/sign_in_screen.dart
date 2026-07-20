@@ -70,10 +70,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const HugeIcon(
-                    icon: HugeIcons.strokeRoundedSafe,
-                    size: 56,
-                  ),
+                  const HugeIcon(icon: HugeIcons.strokeRoundedSafe, size: 56),
                   const SizedBox(height: 24),
                   Text(
                     'HyperVault',
@@ -101,7 +98,9 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                       ),
                       child: Text(
                         auth.errorMessage!,
-                        style: TextStyle(color: theme.colorScheme.onErrorContainer),
+                        style: TextStyle(
+                          color: theme.colorScheme.onErrorContainer,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -131,7 +130,9 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                   Text(
                     'Signing in connects this device to the same vault, memory wiki, and chats as hypervault.store.',
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurface.withValues(alpha: 0.55),
+                      color: theme.colorScheme.onSurface.withValues(
+                        alpha: 0.55,
+                      ),
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -161,7 +162,9 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                     Text(
                       'Currently connecting to $effectiveBaseUrl',
                       style: theme.textTheme.labelSmall?.copyWith(
-                        color: theme.colorScheme.onSurface.withValues(alpha: 0.55),
+                        color: theme.colorScheme.onSurface.withValues(
+                          alpha: 0.55,
+                        ),
                       ),
                       textAlign: TextAlign.center,
                     ),

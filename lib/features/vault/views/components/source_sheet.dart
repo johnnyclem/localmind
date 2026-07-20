@@ -75,9 +75,7 @@ class _SourceSheetState extends ConsumerState<_SourceSheet> {
                   ),
                   if (_content != null)
                     IconButton(
-                      icon: const HugeIcon(
-                        icon: HugeIcons.strokeRoundedCopy01,
-                      ),
+                      icon: const HugeIcon(icon: HugeIcons.strokeRoundedCopy01),
                       tooltip: 'Copy source',
                       onPressed: () {
                         Clipboard.setData(ClipboardData(text: _content!));

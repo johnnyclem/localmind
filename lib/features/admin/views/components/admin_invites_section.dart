@@ -59,9 +59,7 @@ class _AdminInvitesSectionState extends ConsumerState<AdminInvitesSection> {
             ),
             actions: [
               TextButton(
-                onPressed: busy
-                    ? null
-                    : () => Navigator.of(context).pop(false),
+                onPressed: busy ? null : () => Navigator.of(context).pop(false),
                 child: const Text('Cancel'),
               ),
               TextButton(

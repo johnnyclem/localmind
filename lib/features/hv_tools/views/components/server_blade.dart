@@ -156,7 +156,10 @@ class _ServerBladeState extends State<ServerBlade> {
               const SizedBox(width: 8),
               ShadBadge.secondary(child: Text(countLabel)),
               const SizedBox(width: 8),
-              ShadSwitch(value: entry.enabled, onChanged: widget.onToggleEnabled),
+              ShadSwitch(
+                value: entry.enabled,
+                onChanged: widget.onToggleEnabled,
+              ),
             ],
           ),
           const SizedBox(height: 4),
@@ -173,7 +176,9 @@ class _ServerBladeState extends State<ServerBlade> {
                   size: 16,
                 ),
                 label: Text(
-                  _expanded ? 'Hide tools' : 'Show $total tool${total == 1 ? '' : 's'}',
+                  _expanded
+                      ? 'Hide tools'
+                      : 'Show $total tool${total == 1 ? '' : 's'}',
                 ),
               ),
               const Spacer(),
@@ -214,7 +219,10 @@ class _ServerBladeState extends State<ServerBlade> {
     if (total == 0) {
       return Padding(
         padding: const EdgeInsets.only(top: 8),
-        child: Text('No tools discovered yet.', style: theme.textTheme.bodySmall),
+        child: Text(
+          'No tools discovered yet.',
+          style: theme.textTheme.bodySmall,
+        ),
       );
     }
     return Column(
@@ -260,9 +268,12 @@ class _ServerBladeState extends State<ServerBlade> {
                     ),
                   ),
                   ShadSwitch(
-                    value: entry.enabled && !entry.disabledTools.contains(tool.name),
+                    value:
+                        entry.enabled &&
+                        !entry.disabledTools.contains(tool.name),
                     enabled: entry.enabled,
-                    onChanged: (value) => widget.onToggleTool(tool.name, !value),
+                    onChanged: (value) =>
+                        widget.onToggleTool(tool.name, !value),
                   ),
                 ],
               ),

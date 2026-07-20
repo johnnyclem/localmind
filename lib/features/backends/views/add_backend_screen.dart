@@ -42,13 +42,20 @@ class _AddBackendScreenState extends ConsumerState<AddBackendScreen> {
     _nameController = TextEditingController(text: editing?.name ?? '');
     _apiKeyController = TextEditingController();
     _baseUrlController = TextEditingController(text: editing?.baseUrl ?? '');
-    _defaultModelController = TextEditingController(text: editing?.defaultModel ?? '');
-    _embeddingModelController = TextEditingController(text: editing?.embeddingModel ?? '');
+    _defaultModelController = TextEditingController(
+      text: editing?.defaultModel ?? '',
+    );
+    _embeddingModelController = TextEditingController(
+      text: editing?.embeddingModel ?? '',
+    );
     _baseUrlController.addListener(_onBaseUrlChanged);
 
     final providers = _providers;
-    _selectedProviderId = editing?.provider ??
-        (providers.isNotEmpty ? providers.first.id : fallbackProviders.first.id);
+    _selectedProviderId =
+        editing?.provider ??
+        (providers.isNotEmpty
+            ? providers.first.id
+            : fallbackProviders.first.id);
 
     if (!_isEditing) {
       _applyProviderDefaults(_specFor(_selectedProviderId));
@@ -80,16 +87,20 @@ class _AddBackendScreenState extends ConsumerState<AddBackendScreen> {
     );
   }
 
-  bool _requiresKey(HyperVaultProvider spec) => providerRawBool(spec, 'requiresKey');
-  bool _optionalKey(HyperVaultProvider spec) => providerRawBool(spec, 'optionalKey');
+  bool _requiresKey(HyperVaultProvider spec) =>
+      providerRawBool(spec, 'requiresKey');
+  bool _optionalKey(HyperVaultProvider spec) =>
+      providerRawBool(spec, 'optionalKey');
   bool _showApiKeyField(HyperVaultProvider spec) =>
       _requiresKey(spec) ||
       _optionalKey(spec) ||
-      (!spec.raw.containsKey('requiresKey') && !spec.raw.containsKey('optionalKey'));
+      (!spec.raw.containsKey('requiresKey') &&
+          !spec.raw.containsKey('optionalKey'));
 
   bool _baseUrlRequired() => isLocalOrCustomProviderId(_selectedProviderId);
 
-  bool _modelRequired() => _selectedProviderId.toLowerCase().startsWith('custom');
+  bool _modelRequired() =>
+      _selectedProviderId.toLowerCase().startsWith('custom');
 
   bool _showBaseUrlField(HyperVaultProvider spec) {
     final defaultBaseUrl = providerRawString(spec, 'defaultBaseUrl');
@@ -112,7 +123,10 @@ class _AddBackendScreenState extends ConsumerState<AddBackendScreen> {
   void _applyProviderDefaults(HyperVaultProvider spec) {
     final defaultBaseUrl = providerRawString(spec, 'defaultBaseUrl');
     final defaultModel = providerRawString(spec, 'defaultModel');
-    final defaultEmbeddingModel = providerRawString(spec, 'defaultEmbeddingModel');
+    final defaultEmbeddingModel = providerRawString(
+      spec,
+      'defaultEmbeddingModel',
+    );
 
     if (defaultBaseUrl != null && defaultBaseUrl.isNotEmpty) {
       _baseUrlController.text = defaultBaseUrl;
@@ -161,7 +175,8 @@ class _AddBackendScreenState extends ConsumerState<AddBackendScreen> {
   Future<void> _save() async {
     if (_limitReachedRead()) {
       setState(() {
-        _errorText = "You've reached the limit of connected backends. "
+        _errorText =
+            "You've reached the limit of connected backends. "
             'Remove one before adding another.';
       });
       return;
@@ -181,28 +196,36 @@ class _AddBackendScreenState extends ConsumerState<AddBackendScreen> {
 
     try {
       final result = _isEditing
-          ? await ref.read(backendsProvider.notifier).updateBackend(
-                id: widget.editBackend!.id,
-                name: name.isEmpty ? null : name,
-                apiKey: apiKey.isEmpty ? null : apiKey,
-                baseUrl: baseUrl.isEmpty ? null : baseUrl,
-                defaultModel: defaultModel.isEmpty ? null : defaultModel,
-                embeddingModel: embeddingModel.isEmpty ? null : embeddingModel,
-              )
-          : await ref.read(backendsProvider.notifier).addBackend(
-                provider: _selectedProviderId,
-                name: name.isEmpty ? null : name,
-                apiKey: apiKey.isEmpty ? null : apiKey,
-                baseUrl: baseUrl.isEmpty ? null : baseUrl,
-                defaultModel: defaultModel.isEmpty ? null : defaultModel,
-                embeddingModel: embeddingModel.isEmpty ? null : embeddingModel,
-              );
+          ? await ref
+                .read(backendsProvider.notifier)
+                .updateBackend(
+                  id: widget.editBackend!.id,
+                  name: name.isEmpty ? null : name,
+                  apiKey: apiKey.isEmpty ? null : apiKey,
+                  baseUrl: baseUrl.isEmpty ? null : baseUrl,
+                  defaultModel: defaultModel.isEmpty ? null : defaultModel,
+                  embeddingModel: embeddingModel.isEmpty
+                      ? null
+                      : embeddingModel,
+                )
+          : await ref
+                .read(backendsProvider.notifier)
+                .addBackend(
+                  provider: _selectedProviderId,
+                  name: name.isEmpty ? null : name,
+                  apiKey: apiKey.isEmpty ? null : apiKey,
+                  baseUrl: baseUrl.isEmpty ? null : baseUrl,
+                  defaultModel: defaultModel.isEmpty ? null : defaultModel,
+                  embeddingModel: embeddingModel.isEmpty
+                      ? null
+                      : embeddingModel,
+                );
 
       if (mounted) {
         context.pop();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(result.message)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(result.message)));
       }
     } on HyperVaultApiException catch (e) {
       setState(() {
@@ -273,7 +296,8 @@ class _AddBackendScreenState extends ConsumerState<AddBackendScreen> {
             _buildSectionCard(
               context,
               title: 'Details',
-              subtitle: 'A name is optional — it defaults to the provider name.',
+              subtitle:
+                  'A name is optional — it defaults to the provider name.',
               child: Column(
                 children: [
                   TextFormField(
@@ -293,7 +317,8 @@ class _AddBackendScreenState extends ConsumerState<AddBackendScreen> {
                             ? 'API key'
                             : 'API key (optional)',
                         hintText: _isEditing
-                            ? (widget.editBackend?.keyHint ?? 'Leave blank to keep the current key')
+                            ? (widget.editBackend?.keyHint ??
+                                  'Leave blank to keep the current key')
                             : 'sk-...',
                       ),
                       obscureText: true,
@@ -350,7 +375,8 @@ class _AddBackendScreenState extends ConsumerState<AddBackendScreen> {
                     controller: _defaultModelController,
                     decoration: InputDecoration(
                       labelText: 'Default model',
-                      hintText: providerRawString(spec, 'defaultModel') ?? 'model-id',
+                      hintText:
+                          providerRawString(spec, 'defaultModel') ?? 'model-id',
                     ),
                     validator: _validateModel,
                     textInputAction: _showEmbeddingField(spec)
@@ -363,7 +389,8 @@ class _AddBackendScreenState extends ConsumerState<AddBackendScreen> {
                       controller: _embeddingModelController,
                       decoration: InputDecoration(
                         labelText: 'Embedding model (optional)',
-                        hintText: providerRawString(spec, 'defaultEmbeddingModel') ??
+                        hintText:
+                            providerRawString(spec, 'defaultEmbeddingModel') ??
                             'text-embedding-3-small',
                       ),
                       textInputAction: TextInputAction.done,
@@ -396,7 +423,11 @@ class _AddBackendScreenState extends ConsumerState<AddBackendScreen> {
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: _buildSaveBar(context, bottomInset: systemBottomInset, limitReached: limitReached),
+      floatingActionButton: _buildSaveBar(
+        context,
+        bottomInset: systemBottomInset,
+        limitReached: limitReached,
+      ),
     );
   }
 
@@ -445,7 +476,9 @@ class _AddBackendScreenState extends ConsumerState<AddBackendScreen> {
         children: [
           Text(
             title,
-            style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
           ),
           const SizedBox(height: 4),
           Text(
@@ -469,7 +502,9 @@ class _AddBackendScreenState extends ConsumerState<AddBackendScreen> {
       decoration: BoxDecoration(
         color: theme.colorScheme.primary.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: theme.colorScheme.primary.withValues(alpha: 0.2)),
+        border: Border.all(
+          color: theme.colorScheme.primary.withValues(alpha: 0.2),
+        ),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -538,7 +573,9 @@ class _AddBackendScreenState extends ConsumerState<AddBackendScreen> {
         decoration: BoxDecoration(
           color: colorScheme.surface.withValues(alpha: 0.96),
           borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: colorScheme.outline.withValues(alpha: 0.14)),
+          border: Border.all(
+            color: colorScheme.outline.withValues(alpha: 0.14),
+          ),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.08),
@@ -553,7 +590,9 @@ class _AddBackendScreenState extends ConsumerState<AddBackendScreen> {
             onPressed: disabled ? null : _save,
             style: ElevatedButton.styleFrom(
               minimumSize: const Size.fromHeight(52),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
             ),
             icon: _isSaving
                 ? const SizedBox(

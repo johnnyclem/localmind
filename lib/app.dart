@@ -68,7 +68,10 @@ final _shellNavigatorKey = GlobalKey<NavigatorState>();
 /// explicit navigation).
 class _RouterRefreshNotifier extends ChangeNotifier {
   _RouterRefreshNotifier(Ref ref) {
-    ref.listen(authProvider.select((s) => s.status), (_, _) => notifyListeners());
+    ref.listen(
+      authProvider.select((s) => s.status),
+      (_, _) => notifyListeners(),
+    );
     ref.listen(
       settingsProvider.select((s) => s.hasCompletedOnboarding),
       (_, _) => notifyListeners(),
@@ -162,7 +165,8 @@ final routerProvider = Provider<GoRouter>((ref) {
             // rather than from the link directly — honor it once, then
             // fall back to the plain waitlist redirect.
             final pendingInvite = ref.read(deepLinkProvider);
-            if (pendingInvite is HvInviteDeepLink && pendingInvite.code != null) {
+            if (pendingInvite is HvInviteDeepLink &&
+                pendingInvite.code != null) {
               final target =
                   '${AppRoutes.authWaitlist}?code=${Uri.encodeQueryComponent(pendingInvite.code!)}';
               if (location != target) {
@@ -322,15 +326,13 @@ final routerProvider = Provider<GoRouter>((ref) {
           // HyperVault — placeholder screens until each epic lands.
           GoRoute(
             path: AppRoutes.vault,
-            pageBuilder: (context, state) => const NoTransitionPage(
-              child: VaultListScreen(),
-            ),
+            pageBuilder: (context, state) =>
+                const NoTransitionPage(child: VaultListScreen()),
           ),
           GoRoute(
             path: AppRoutes.vaultGraph,
-            pageBuilder: (context, state) => const MaterialPage(
-              child: VaultGraphScreen(),
-            ),
+            pageBuilder: (context, state) =>
+                const MaterialPage(child: VaultGraphScreen()),
           ),
           GoRoute(
             path: AppRoutes.artifactDetail,
@@ -353,22 +355,21 @@ final routerProvider = Provider<GoRouter>((ref) {
           ),
           GoRoute(
             path: AppRoutes.sharedWithMe,
-            pageBuilder: (context, state) => const MaterialPage(
-              child: SharedWithMeScreen(),
-            ),
+            pageBuilder: (context, state) =>
+                const MaterialPage(child: SharedWithMeScreen()),
           ),
           GoRoute(
             path: AppRoutes.memory,
-            pageBuilder: (context, state) => const NoTransitionPage(
-              child: MemoryScreen(),
-            ),
+            pageBuilder: (context, state) =>
+                const NoTransitionPage(child: MemoryScreen()),
           ),
           GoRoute(
             path: AppRoutes.memoryDetail,
             pageBuilder: (context, state) {
               // `state.extra` for normal in-app navigation; `?memoryId=` for
               // the deep-link redirect in lib/app.dart's `redirect:`.
-              final memoryId = (state.extra as String?) ??
+              final memoryId =
+                  (state.extra as String?) ??
                   state.uri.queryParameters['memoryId'];
               if (memoryId == null) {
                 return const MaterialPage(child: SizedBox.shrink());
@@ -386,29 +387,30 @@ final routerProvider = Provider<GoRouter>((ref) {
           ),
           GoRoute(
             path: AppRoutes.gitMind,
-            pageBuilder: (context, state) => const MaterialPage(
-              child: GitMindScreen(),
-            ),
+            pageBuilder: (context, state) =>
+                const MaterialPage(child: GitMindScreen()),
           ),
           GoRoute(
             path: AppRoutes.hvChat,
-            pageBuilder: (context, state) => const NoTransitionPage(
-              child: HvChatListScreen(),
-            ),
+            pageBuilder: (context, state) =>
+                const NoTransitionPage(child: HvChatListScreen()),
           ),
           GoRoute(
             path: AppRoutes.hvChatThread,
             pageBuilder: (context, state) => MaterialPage(
               child: HvChatThreadScreen(
-                conversationId: state.extra as String?,
+                // `state.extra` for normal in-app navigation;
+                // `?conversationId=` for a `/c/<slug>` deep-link redirect.
+                conversationId:
+                    (state.extra as String?) ??
+                    state.uri.queryParameters['conversationId'],
               ),
             ),
           ),
           GoRoute(
             path: AppRoutes.backends,
-            pageBuilder: (context, state) => const NoTransitionPage(
-              child: BackendsListScreen(),
-            ),
+            pageBuilder: (context, state) =>
+                const NoTransitionPage(child: BackendsListScreen()),
           ),
           GoRoute(
             path: AppRoutes.addBackend,
@@ -420,27 +422,23 @@ final routerProvider = Provider<GoRouter>((ref) {
           ),
           GoRoute(
             path: AppRoutes.mcpToolsConsole,
-            pageBuilder: (context, state) => const NoTransitionPage(
-              child: McpToolsConsoleScreen(),
-            ),
+            pageBuilder: (context, state) =>
+                const NoTransitionPage(child: McpToolsConsoleScreen()),
           ),
           GoRoute(
             path: AppRoutes.importHistory,
-            pageBuilder: (context, state) => const MaterialPage(
-              child: ImportHistoryScreen(),
-            ),
+            pageBuilder: (context, state) =>
+                const MaterialPage(child: ImportHistoryScreen()),
           ),
           GoRoute(
             path: AppRoutes.domains,
-            pageBuilder: (context, state) => const NoTransitionPage(
-              child: DomainsScreen(),
-            ),
+            pageBuilder: (context, state) =>
+                const NoTransitionPage(child: DomainsScreen()),
           ),
           GoRoute(
             path: AppRoutes.admin,
-            pageBuilder: (context, state) => const NoTransitionPage(
-              child: AdminScreen(),
-            ),
+            pageBuilder: (context, state) =>
+                const NoTransitionPage(child: AdminScreen()),
           ),
         ],
       ),

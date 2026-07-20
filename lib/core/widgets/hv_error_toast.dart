@@ -38,7 +38,11 @@ void showHvError(BuildContext context, Object error) {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              HugeIcon(icon: copy.icon, color: theme.colorScheme.error, size: 20),
+              HugeIcon(
+                icon: copy.icon,
+                color: theme.colorScheme.error,
+                size: 20,
+              ),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
@@ -91,7 +95,8 @@ _HvErrorCopy _copyFor(Object error) {
     if (error.isRateLimited) {
       return const _HvErrorCopy(
         title: 'Slow down a little',
-        message: "You've hit HyperVault's rate limit — give it a few "
+        message:
+            "You've hit HyperVault's rate limit — give it a few "
             'seconds and try again.',
         icon: HugeIcons.strokeRoundedTimer02,
       );
@@ -99,7 +104,8 @@ _HvErrorCopy _copyFor(Object error) {
     if (error.isServiceUnavailable) {
       return const _HvErrorCopy(
         title: 'HyperVault is temporarily unavailable',
-        message: 'The service is having trouble right now. Your changes '
+        message:
+            'The service is having trouble right now. Your changes '
             "weren't lost — try again shortly.",
         icon: HugeIcons.strokeRoundedCloudServer,
         duration: Duration(seconds: 6),
@@ -116,7 +122,8 @@ _HvErrorCopy _copyFor(Object error) {
     if (error.isNetworkError) {
       return const _HvErrorCopy(
         title: 'Connection trouble',
-        message: 'Could not reach HyperVault. Check your connection and try again.',
+        message:
+            'Could not reach HyperVault. Check your connection and try again.',
         icon: HugeIcons.strokeRoundedWifiDisconnected01,
       );
     }

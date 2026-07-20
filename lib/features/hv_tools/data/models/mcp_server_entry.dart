@@ -98,9 +98,8 @@ class McpServerEntry {
     'disabled_tools': disabledTools,
   };
 
-  int get enabledToolCount => tools
-      .where((t) => !disabledTools.contains(t.name))
-      .length;
+  int get enabledToolCount =>
+      tools.where((t) => !disabledTools.contains(t.name)).length;
 
   McpServerEntry copyWith({
     String? id,

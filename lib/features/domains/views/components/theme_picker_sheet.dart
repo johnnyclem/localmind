@@ -240,8 +240,9 @@ class _ThemePickerSheetBodyState extends State<_ThemePickerSheetBody> {
                                           style: TextStyle(
                                             fontSize: 12,
                                             color: isCurrent
-                                                ? colorScheme.primary
-                                                      .withAlpha(150)
+                                                ? colorScheme.primary.withAlpha(
+                                                    150,
+                                                  )
                                                 : colorScheme.onSurfaceVariant,
                                           ),
                                         ),

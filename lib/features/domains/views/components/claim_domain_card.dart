@@ -336,7 +336,10 @@ class _ClaimedRealmTile extends ConsumerWidget {
                   ),
                   onPressed: uri == null
                       ? null
-                      : () => launchUrl(uri, mode: LaunchMode.externalApplication),
+                      : () => launchUrl(
+                          uri,
+                          mode: LaunchMode.externalApplication,
+                        ),
                   child: const Text('Visit'),
                 ),
               ),

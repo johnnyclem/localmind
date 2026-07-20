@@ -19,10 +19,8 @@ Future<void> showShareSheet(
     context: context,
     isScrollControlled: true,
     useSafeArea: true,
-    builder: (context) => _ShareSheet(
-      artifactSlug: artifactSlug,
-      artifactTitle: artifactTitle,
-    ),
+    builder: (context) =>
+        _ShareSheet(artifactSlug: artifactSlug, artifactTitle: artifactTitle),
   );
 }
 
@@ -131,9 +129,7 @@ class _ShareSheetState extends ConsumerState<_ShareSheet> {
     setState(() => _revokingIds.add(share.id));
     final previous = _shares;
     try {
-      final message = await ref
-          .read(sharesApiServiceProvider)
-          .revoke(share.id);
+      final message = await ref.read(sharesApiServiceProvider).revoke(share.id);
       if (mounted) {
         setState(() {
           _shares = _shares.where((s) => s.id != share.id).toList();

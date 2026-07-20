@@ -317,9 +317,7 @@ class _ImportHistoryScreenState extends ConsumerState<ImportHistoryScreen> {
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : const HugeIcon(icon: HugeIcons.strokeRoundedFileUpload),
-              label: Text(
-                _busy ? 'Reconstructing your threads…' : 'Import',
-              ),
+              label: Text(_busy ? 'Reconstructing your threads…' : 'Import'),
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size.fromHeight(52),
               ),

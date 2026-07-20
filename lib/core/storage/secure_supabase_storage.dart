@@ -19,7 +19,8 @@ class SecureLocalStorage extends LocalStorage {
   Future<void> initialize() async {}
 
   @override
-  Future<bool> hasAccessToken() async => (await _storage.read(key: _key)) != null;
+  Future<bool> hasAccessToken() async =>
+      (await _storage.read(key: _key)) != null;
 
   @override
   Future<String?> accessToken() => _storage.read(key: _key);

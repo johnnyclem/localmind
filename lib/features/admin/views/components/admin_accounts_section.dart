@@ -46,10 +46,9 @@ class _AdminAccountsSectionState extends ConsumerState<AdminAccountsSection> {
     final nextPlan = account.plan == 'pro' ? 'free' : 'pro';
     return _run(
       account.id,
-      () => ref.read(adminAccountsProvider.notifier).setPlan(
-        account.id,
-        nextPlan,
-      ),
+      () => ref
+          .read(adminAccountsProvider.notifier)
+          .setPlan(account.id, nextPlan),
     );
   }
 
@@ -95,8 +94,7 @@ class _AdminAccountsSectionState extends ConsumerState<AdminAccountsSection> {
             loading: () => const AdminSectionLoading(),
             error: (err, _) => AdminSectionError(
               message: _errorMessage(err),
-              onRetry: () =>
-                  ref.read(adminAccountsProvider.notifier).refresh(),
+              onRetry: () => ref.read(adminAccountsProvider.notifier).refresh(),
             ),
             data: (accounts) {
               if (accounts.isEmpty) {
@@ -190,7 +188,8 @@ class _AccountRow extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             [
-              if (account.displayName != null && account.displayName!.isNotEmpty)
+              if (account.displayName != null &&
+                  account.displayName!.isNotEmpty)
                 account.displayName!,
               if (account.vanitySubdomain != null &&
                   account.vanitySubdomain!.isNotEmpty)

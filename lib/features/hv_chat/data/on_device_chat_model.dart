@@ -5,7 +5,8 @@ import '../../../core/models/enums.dart';
 import '../../chat/data/chat_service.dart';
 import '../../chat/data/models/chat_parameters.dart';
 import '../../chat/data/models/message.dart';
-import '../../chat/providers/chat_service_providers.dart' show createChatServiceForServer;
+import '../../chat/providers/chat_service_providers.dart'
+    show createChatServiceForServer;
 import '../../on_device/data/models/on_device_model.dart';
 import '../../on_device/data/on_device_gemma_service.dart';
 import '../../on_device/data/on_device_llama_service.dart';

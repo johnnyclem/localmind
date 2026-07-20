@@ -17,7 +17,8 @@ class BackendCard extends StatelessWidget {
     required this.onDelete,
   });
 
-  bool get _showsEmbeddingBadge => (backend.embeddingModel?.isNotEmpty ?? false);
+  bool get _showsEmbeddingBadge =>
+      (backend.embeddingModel?.isNotEmpty ?? false);
 
   @override
   Widget build(BuildContext context) {
@@ -75,9 +76,7 @@ class BackendCard extends StatelessWidget {
                         child: Text(providerDisplayNameFor(backend.provider)),
                       ),
                       if (_showsEmbeddingBadge)
-                        ShadBadge.outline(
-                          child: const Text('embeddings'),
-                        ),
+                        ShadBadge.outline(child: const Text('embeddings')),
                     ],
                   ),
                   if (backend.defaultModel?.isNotEmpty ?? false) ...[

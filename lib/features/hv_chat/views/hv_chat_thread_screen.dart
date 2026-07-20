@@ -10,6 +10,7 @@ import '../../../core/models/enums.dart';
 import '../../../core/network/hypervault_api_exception.dart';
 import '../../../core/providers/hypervault_providers.dart';
 import '../../../core/routes/app_routes.dart';
+import '../../../core/widgets/hv_error_toast.dart';
 import '../../backends/data/models/backend.dart';
 import '../../backends/providers/backends_providers.dart';
 import '../../on_device/providers/on_device_providers.dart';
@@ -64,7 +65,8 @@ class _HvChatThreadScreenState extends ConsumerState<HvChatThreadScreen> {
       }
       return;
     }
-    if (_selectedBackendId == null || !backends.any((b) => b.id == _selectedBackendId)) {
+    if (_selectedBackendId == null ||
+        !backends.any((b) => b.id == _selectedBackendId)) {
       setState(() => _selectedBackendId = backends.first.id);
     }
   }
@@ -102,7 +104,8 @@ class _HvChatThreadScreenState extends ConsumerState<HvChatThreadScreen> {
     final showDeepMemory = capabilities?.features.deepMemory ?? false;
     final maxChars = capabilities?.limits.chatMessageChars ?? 100000;
     final showOnDevice = capabilities?.features.onDeviceInference ?? false;
-    final onDeviceReady = onDeviceEngineState.status == OnDeviceEngineStatus.loaded &&
+    final onDeviceReady =
+        onDeviceEngineState.status == OnDeviceEngineStatus.loaded &&
         onDeviceEngineState.loadedModelId != null;
 
     return Column(
@@ -132,7 +135,9 @@ class _HvChatThreadScreenState extends ConsumerState<HvChatThreadScreen> {
                     ),
                     const SizedBox(height: 12),
                     TextButton(
-                      onPressed: () => ref.invalidate(hvThreadProvider(widget.conversationId)),
+                      onPressed: () => ref.invalidate(
+                        hvThreadProvider(widget.conversationId),
+                      ),
                       child: const Text('Retry'),
                     ),
                   ],
@@ -172,11 +177,18 @@ class _HvChatThreadScreenState extends ConsumerState<HvChatThreadScreen> {
     final canShare = threadState?.conversationId != null;
 
     return Container(
-      padding: EdgeInsets.only(left: 8, right: 8, top: topPadding + 8, bottom: 16),
+      padding: EdgeInsets.only(
+        left: 8,
+        right: 8,
+        top: topPadding + 8,
+        bottom: 16,
+      ),
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF0A0A0A) : const Color(0xFFFAFAFA),
         border: Border(
-          bottom: BorderSide(color: isDark ? const Color(0xFF2A2A2A) : const Color(0xFFE5E5E5)),
+          bottom: BorderSide(
+            color: isDark ? const Color(0xFF2A2A2A) : const Color(0xFFE5E5E5),
+          ),
         ),
       ),
       child: Row(
@@ -206,10 +218,14 @@ class _HvChatThreadScreenState extends ConsumerState<HvChatThreadScreen> {
           IconButton(
             icon: HugeIcon(
               icon: HugeIcons.strokeRoundedShare08,
-              color: canShare ? null : theme.colorScheme.outline.withValues(alpha: 0.4),
+              color: canShare
+                  ? null
+                  : theme.colorScheme.outline.withValues(alpha: 0.4),
             ),
             tooltip: 'Share',
-            onPressed: canShare ? () => _openShareMenu(context, threadState!) : null,
+            onPressed: canShare
+                ? () => _openShareMenu(context, threadState!)
+                : null,
           ),
         ],
       ),
@@ -231,11 +247,16 @@ class _HvChatThreadScreenState extends ConsumerState<HvChatThreadScreen> {
                 color: theme.colorScheme.outline,
               ),
               const SizedBox(height: 20),
-              Text('Your whole AI life, one surface', style: theme.textTheme.titleMedium),
+              Text(
+                'Your whole AI life, one surface',
+                style: theme.textTheme.titleMedium,
+              ),
               const SizedBox(height: 8),
               Text(
                 'Pick a backend below and send your first message.',
-                style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.outline),
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.outline,
+                ),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -269,7 +290,9 @@ class _HvChatThreadScreenState extends ConsumerState<HvChatThreadScreen> {
         children: [
           Text(
             'Thinking… ${_thinkingSeconds}s',
-            style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.outline,
+            ),
           ),
           const SizedBox(height: 4),
           ClipRRect(
@@ -294,8 +317,10 @@ class _HvChatThreadScreenState extends ConsumerState<HvChatThreadScreen> {
     bool onDeviceReady,
   ) {
     final isDark = theme.brightness == Brightness.dark;
-    final isOnDeviceSelected = _selectedBackendId == HvBackendPicker.onDeviceBackendId;
-    final canSend = !isSending &&
+    final isOnDeviceSelected =
+        _selectedBackendId == HvBackendPicker.onDeviceBackendId;
+    final canSend =
+        !isSending &&
         _selectedBackendId != null &&
         _textController.text.trim().isNotEmpty &&
         (!isOnDeviceSelected || onDeviceReady);
@@ -306,7 +331,9 @@ class _HvChatThreadScreenState extends ConsumerState<HvChatThreadScreen> {
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF0A0A0A) : const Color(0xFFFAFAFA),
         border: Border(
-          top: BorderSide(color: isDark ? const Color(0xFF2A2A2A) : const Color(0xFFE5E5E5)),
+          top: BorderSide(
+            color: isDark ? const Color(0xFF2A2A2A) : const Color(0xFFE5E5E5),
+          ),
         ),
       ),
       child: Column(
@@ -340,7 +367,8 @@ class _HvChatThreadScreenState extends ConsumerState<HvChatThreadScreen> {
                 showOnDevice: showOnDevice,
                 onDeviceReady: onDeviceReady,
                 onChanged: (value) {
-                  if (value == HvBackendPicker.onDeviceBackendId && !onDeviceReady) {
+                  if (value == HvBackendPicker.onDeviceBackendId &&
+                      !onDeviceReady) {
                     context.push(AppRoutes.onDeviceModels);
                     return;
                   }
@@ -400,9 +428,14 @@ class _HvChatThreadScreenState extends ConsumerState<HvChatThreadScreen> {
                         : isOnDeviceSelected
                         ? 'Message the on-device model…'
                         : 'Message ${backends.firstWhere((b) => b.id == _selectedBackendId, orElse: () => backends.first).name}…',
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(20)),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
                     isDense: true,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 10,
+                    ),
                     counterText: '',
                   ),
                 ),
@@ -433,7 +466,9 @@ class _HvChatThreadScreenState extends ConsumerState<HvChatThreadScreen> {
     });
 
     try {
-      final notifier = ref.read(hvThreadProvider(widget.conversationId).notifier);
+      final notifier = ref.read(
+        hvThreadProvider(widget.conversationId).notifier,
+      );
       if (backendId == HvBackendPicker.onDeviceBackendId) {
         await notifier.sendMessageOnDevice(
           text: text,
@@ -466,13 +501,13 @@ class _HvChatThreadScreenState extends ConsumerState<HvChatThreadScreen> {
         );
       }
     } on HyperVaultApiException catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
-      }
+      if (mounted) showHvError(context, e);
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to send message. Check your connection.')),
+          const SnackBar(
+            content: Text('Failed to send message. Check your connection.'),
+          ),
         );
       }
     } finally {
@@ -487,9 +522,7 @@ class _HvChatThreadScreenState extends ConsumerState<HvChatThreadScreen> {
           .read(hvThreadProvider(widget.conversationId).notifier)
           .setFeedback(messageId, feedback);
     } on HyperVaultApiException catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
-      }
+      if (mounted) showHvError(context, e);
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -499,7 +532,10 @@ class _HvChatThreadScreenState extends ConsumerState<HvChatThreadScreen> {
     }
   }
 
-  Future<void> _openShareMenu(BuildContext context, HvThreadState threadState) async {
+  Future<void> _openShareMenu(
+    BuildContext context,
+    HvThreadState threadState,
+  ) async {
     final appUrl = ref.read(capabilitiesProvider).value?.appUrl;
     String currentVisibility = threadState.visibility;
     String? currentShareSlug = threadState.shareSlug;
@@ -529,15 +565,13 @@ class _HvChatThreadScreenState extends ConsumerState<HvChatThreadScreen> {
                   if (value == 'private') currentShareSlug = null;
                 });
               } on HyperVaultApiException catch (e) {
-                if (sheetContext.mounted) {
-                  ScaffoldMessenger.of(
-                    sheetContext,
-                  ).showSnackBar(SnackBar(content: Text(e.message)));
-                }
+                if (sheetContext.mounted) showHvError(sheetContext, e);
               } catch (e) {
                 if (sheetContext.mounted) {
                   ScaffoldMessenger.of(sheetContext).showSnackBar(
-                    const SnackBar(content: Text('Failed to update visibility.')),
+                    const SnackBar(
+                      content: Text('Failed to update visibility.'),
+                    ),
                   );
                 }
               }
@@ -583,12 +617,16 @@ class _HvChatThreadScreenState extends ConsumerState<HvChatThreadScreen> {
                         padding: const EdgeInsets.only(top: 8),
                         child: OutlinedButton.icon(
                           onPressed: () {
-                            Clipboard.setData(ClipboardData(text: resolvedShareUrl));
+                            Clipboard.setData(
+                              ClipboardData(text: resolvedShareUrl),
+                            );
                             ScaffoldMessenger.of(sheetContext).showSnackBar(
                               const SnackBar(content: Text('Link copied')),
                             );
                           },
-                          icon: const HugeIcon(icon: HugeIcons.strokeRoundedCopy01),
+                          icon: const HugeIcon(
+                            icon: HugeIcons.strokeRoundedCopy01,
+                          ),
                           label: const Text('Copy link'),
                         ),
                       ),
@@ -619,7 +657,9 @@ class _ToggleChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final color = active ? theme.colorScheme.primary : theme.colorScheme.outline;
+    final color = active
+        ? theme.colorScheme.primary
+        : theme.colorScheme.outline;
     return Padding(
       padding: const EdgeInsets.only(bottom: 4),
       child: InkWell(
@@ -630,7 +670,9 @@ class _ToggleChip extends StatelessWidget {
           decoration: BoxDecoration(
             border: Border.all(color: color),
             borderRadius: BorderRadius.circular(16),
-            color: active ? theme.colorScheme.primary.withValues(alpha: 0.1) : null,
+            color: active
+                ? theme.colorScheme.primary.withValues(alpha: 0.1)
+                : null,
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,

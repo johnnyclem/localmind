@@ -69,7 +69,8 @@ class BackendsListScreen extends ConsumerWidget {
                 data: (result) => result.backends.isEmpty
                     ? _buildEmptyState(context, theme)
                     : RefreshIndicator(
-                        onRefresh: () => ref.read(backendsProvider.notifier).refresh(),
+                        onRefresh: () =>
+                            ref.read(backendsProvider.notifier).refresh(),
                         child: ListView.builder(
                           padding: EdgeInsets.fromLTRB(
                             16,
@@ -88,7 +89,8 @@ class BackendsListScreen extends ConsumerWidget {
                                   AppRoutes.addBackend,
                                   extra: backend,
                                 ),
-                                onDelete: () => _confirmDelete(context, ref, backend),
+                                onDelete: () =>
+                                    _confirmDelete(context, ref, backend),
                               ),
                             );
                           },
@@ -151,7 +153,10 @@ class BackendsListScreen extends ConsumerWidget {
               color: theme.colorScheme.outline,
             ),
             const SizedBox(height: 24),
-            Text('No backends connected yet', style: theme.textTheme.headlineSmall),
+            Text(
+              'No backends connected yet',
+              style: theme.textTheme.headlineSmall,
+            ),
             const SizedBox(height: 8),
             Text(
               'No backends connected yet — add one to chat with OpenAI, '
@@ -196,15 +201,15 @@ class BackendsListScreen extends ConsumerWidget {
                       .read(backendsProvider.notifier)
                       .deleteBackend(backend.id);
                   if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(message)),
-                    );
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(SnackBar(content: Text(message)));
                   }
                 } on HyperVaultApiException catch (e) {
                   if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(e.message)),
-                    );
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(SnackBar(content: Text(e.message)));
                   }
                 }
               },

@@ -36,7 +36,9 @@ class HyperVaultCache {
   }
 
   Future<void> clearForUser(String userId) async {
-    final keys = prefs.getKeys().where((k) => k.startsWith('$_prefix$userId::'));
+    final keys = prefs.getKeys().where(
+      (k) => k.startsWith('$_prefix$userId::'),
+    );
     for (final k in keys.toList()) {
       await prefs.remove(k);
     }

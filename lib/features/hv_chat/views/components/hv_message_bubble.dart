@@ -16,7 +16,8 @@ class HvMessageBubble extends StatelessWidget {
   final HvMessage message;
   final void Function(String? feedback)? onFeedback;
 
-  bool get _isPersisted => message.id.isNotEmpty && !message.id.startsWith('local-');
+  bool get _isPersisted =>
+      message.id.isNotEmpty && !message.id.startsWith('local-');
 
   @override
   Widget build(BuildContext context) {
@@ -27,13 +28,17 @@ class HvMessageBubble extends StatelessWidget {
     final bubbleColor = isUser
         ? theme.colorScheme.primary
         : (isDark ? const Color(0xFF1E1E1E) : const Color(0xFFF1F1F1));
-    final textColor = isUser ? theme.colorScheme.onPrimary : theme.colorScheme.onSurface;
+    final textColor = isUser
+        ? theme.colorScheme.onPrimary
+        : theme.colorScheme.onSurface;
     final captionColor = textColor.withValues(alpha: 0.65);
 
     return Align(
       alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
-        constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.82),
+        constraints: BoxConstraints(
+          maxWidth: MediaQuery.of(context).size.width * 0.82,
+        ),
         margin: const EdgeInsets.symmetric(vertical: 6),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
@@ -70,7 +75,10 @@ class HvMessageBubble extends StatelessWidget {
                   spacing: 6,
                   children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
                       decoration: BoxDecoration(
                         border: Border.all(color: captionColor),
                         borderRadius: BorderRadius.circular(10),
@@ -83,7 +91,10 @@ class HvMessageBubble extends StatelessWidget {
                     if (message.tools!.isStale)
                       Text(
                         'Recompile your toolkit under Tools',
-                        style: TextStyle(fontSize: 11, color: theme.colorScheme.error),
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: theme.colorScheme.error,
+                        ),
                       ),
                   ],
                 ),
@@ -111,8 +122,9 @@ class HvMessageBubble extends StatelessWidget {
                         active: message.feedback == 'down',
                         color: textColor,
                         enabled: _isPersisted,
-                        onPressed: () =>
-                            onFeedback!(message.feedback == 'down' ? null : 'down'),
+                        onPressed: () => onFeedback!(
+                          message.feedback == 'down' ? null : 'down',
+                        ),
                       ),
                     ],
                   ],
@@ -244,7 +256,9 @@ class _FeedbackButton extends StatelessWidget {
       icon: HugeIcon(
         icon: icon,
         size: 16,
-        color: active ? theme.colorScheme.primary : color.withValues(alpha: 0.55),
+        color: active
+            ? theme.colorScheme.primary
+            : color.withValues(alpha: 0.55),
       ),
       onPressed: enabled ? onPressed : null,
     );

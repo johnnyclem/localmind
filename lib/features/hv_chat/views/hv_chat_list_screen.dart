@@ -29,12 +29,21 @@ class HvChatListScreen extends ConsumerWidget {
         Column(
           children: [
             Container(
-              padding: EdgeInsets.only(left: 16, right: 16, top: topPadding + 8, bottom: 16),
+              padding: EdgeInsets.only(
+                left: 16,
+                right: 16,
+                top: topPadding + 8,
+                bottom: 16,
+              ),
               decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF0A0A0A) : const Color(0xFFFAFAFA),
+                color: isDark
+                    ? const Color(0xFF0A0A0A)
+                    : const Color(0xFFFAFAFA),
                 border: Border(
                   bottom: BorderSide(
-                    color: isDark ? const Color(0xFF2A2A2A) : const Color(0xFFE5E5E5),
+                    color: isDark
+                        ? const Color(0xFF2A2A2A)
+                        : const Color(0xFFE5E5E5),
                   ),
                 ),
               ),
@@ -63,13 +72,19 @@ class HvChatListScreen extends ConsumerWidget {
                 data: (conversations) => conversations.isEmpty
                     ? _buildEmptyState(context, theme)
                     : RefreshIndicator(
-                        onRefresh: () => ref.read(hvConversationsProvider.notifier).refresh(),
+                        onRefresh: () => ref
+                            .read(hvConversationsProvider.notifier)
+                            .refresh(),
                         child: ListView.separated(
-                          padding: EdgeInsets.only(bottom: systemBottomInset + 96),
+                          padding: EdgeInsets.only(
+                            bottom: systemBottomInset + 96,
+                          ),
                           itemCount: conversations.length,
                           separatorBuilder: (context, index) => Divider(
                             height: 1,
-                            color: isDark ? const Color(0xFF1F1F1F) : const Color(0xFFECECEC),
+                            color: isDark
+                                ? const Color(0xFF1F1F1F)
+                                : const Color(0xFFECECEC),
                           ),
                           itemBuilder: (context, index) {
                             final conversation = conversations[index];
@@ -79,7 +94,8 @@ class HvChatListScreen extends ConsumerWidget {
                                 AppRoutes.hvChatThread,
                                 extra: conversation.id,
                               ),
-                              onDelete: () => _handleDelete(context, ref, conversation),
+                              onDelete: () =>
+                                  _handleDelete(context, ref, conversation),
                             );
                           },
                         ),
@@ -105,7 +121,8 @@ class HvChatListScreen extends ConsumerWidget {
                         ),
                         const SizedBox(height: 12),
                         TextButton(
-                          onPressed: () => ref.invalidate(hvConversationsProvider),
+                          onPressed: () =>
+                              ref.invalidate(hvConversationsProvider),
                           child: const Text('Retry'),
                         ),
                       ],
@@ -142,12 +159,17 @@ class HvChatListScreen extends ConsumerWidget {
               color: theme.colorScheme.outline,
             ),
             const SizedBox(height: 24),
-            Text('No HyperVault chats yet', style: theme.textTheme.headlineSmall),
+            Text(
+              'No HyperVault chats yet',
+              style: theme.textTheme.headlineSmall,
+            ),
             const SizedBox(height: 8),
             Text(
               'Start a new chat with any connected backend — your history lives '
               'on the server, so it follows you across devices.',
-              style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.outline),
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.outline,
+              ),
               textAlign: TextAlign.center,
             ),
           ],
@@ -162,10 +184,14 @@ class HvChatListScreen extends ConsumerWidget {
     HvConversation conversation,
   ) async {
     try {
-      await ref.read(hvConversationsProvider.notifier).deleteConversation(conversation.id);
+      await ref
+          .read(hvConversationsProvider.notifier)
+          .deleteConversation(conversation.id);
     } on HyperVaultApiException catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(e.message)));
       }
     } catch (e) {
       if (context.mounted) {

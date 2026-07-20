@@ -340,7 +340,10 @@ class DiffResult {
     }
     final rows = (json['hunks'] as List?) ?? const [];
     return DiffResult(
-      hunks: rows.whereType<Map<String, dynamic>>().map(DiffHunk.fromJson).toList(),
+      hunks: rows
+          .whereType<Map<String, dynamic>>()
+          .map(DiffHunk.fromJson)
+          .toList(),
       oversize: false,
     );
   }

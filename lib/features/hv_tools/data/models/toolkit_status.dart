@@ -49,8 +49,8 @@ class ToolkitStatus {
         'uniqueSelectorCount',
       ),
       embedder: toolkit['embedder']?.toString(),
-      embedderLabel:
-          (toolkit['embedder_label'] ?? toolkit['embedderLabel'])?.toString(),
+      embedderLabel: (toolkit['embedder_label'] ?? toolkit['embedderLabel'])
+          ?.toString(),
       stale: stale,
     );
   }

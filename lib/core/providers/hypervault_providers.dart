@@ -79,7 +79,9 @@ final hypervaultClientProvider = Provider<HyperVaultClient>((ref) {
     baseUrlProvider: () => baseUrlHolder.baseUrl,
     tokenHolder: tokenHolder,
     onRequestComplete: (method, path, status, elapsed) {
-      Log.debug('[hypervault] $method $path -> $status (${elapsed.inMilliseconds}ms)');
+      Log.debug(
+        '[hypervault] $method $path -> $status (${elapsed.inMilliseconds}ms)',
+      );
     },
   );
   return HyperVaultClient(dio);

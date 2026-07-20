@@ -64,11 +64,11 @@ class AuthNotifier extends Notifier<HyperVaultAuthState> {
       await _ensureClientInitialized(capabilities);
       ref.read(authTokenHolderProvider).onUnauthorized = _refreshAccessToken;
 
-      _subscription = sb.Supabase.instance.client.auth.onAuthStateChange.listen((
-        event,
-      ) {
-        _onAuthEvent(event.session);
-      });
+      _subscription = sb.Supabase.instance.client.auth.onAuthStateChange.listen(
+        (event) {
+          _onAuthEvent(event.session);
+        },
+      );
 
       final currentSession = sb.Supabase.instance.client.auth.currentSession;
       await _onAuthEvent(currentSession);
@@ -76,7 +76,8 @@ class AuthNotifier extends Notifier<HyperVaultAuthState> {
       Log.error('[auth] bootstrap failed: $e');
       state = state.copyWith(
         status: AuthGateStatus.unauthenticated,
-        errorMessage: 'Could not reach HyperVault. Check your connection and retry.',
+        errorMessage:
+            'Could not reach HyperVault. Check your connection and retry.',
       );
     }
   }
@@ -88,7 +89,9 @@ class AuthNotifier extends Notifier<HyperVaultAuthState> {
     final url = capabilities.auth.supabaseUrl;
     final anonKey = capabilities.auth.supabaseAnonKey;
     if (url == null || url.isEmpty || anonKey == null || anonKey.isEmpty) {
-      throw StateError('HyperVault capabilities did not include Supabase auth config.');
+      throw StateError(
+        'HyperVault capabilities did not include Supabase auth config.',
+      );
     }
     await sb.Supabase.initialize(
       url: url,
@@ -111,7 +114,10 @@ class AuthNotifier extends Notifier<HyperVaultAuthState> {
       return;
     }
 
-    state = HyperVaultAuthState(status: AuthGateStatus.loading, session: session);
+    state = HyperVaultAuthState(
+      status: AuthGateStatus.loading,
+      session: session,
+    );
     try {
       final gate = await _resolveGate(session);
       state = HyperVaultAuthState(status: gate, session: session);
@@ -123,7 +129,8 @@ class AuthNotifier extends Notifier<HyperVaultAuthState> {
       Log.error('[auth] gate probe failed: $e');
       state = HyperVaultAuthState(
         status: AuthGateStatus.unauthenticated,
-        errorMessage: 'Could not verify access. Check your connection and try again.',
+        errorMessage:
+            'Could not verify access. Check your connection and try again.',
       );
       return;
     }
@@ -170,9 +177,7 @@ class AuthNotifier extends Notifier<HyperVaultAuthState> {
         redirectTo: 'hypervault://auth/callback',
       );
     } catch (e) {
-      state = state.copyWith(
-        errorMessage: 'Sign-in failed. Please try again.',
-      );
+      state = state.copyWith(errorMessage: 'Sign-in failed. Please try again.');
     }
   }
 
@@ -201,12 +206,15 @@ class AuthNotifier extends Notifier<HyperVaultAuthState> {
         }
       } else {
         state = state.copyWith(
-          errorMessage: resultString ?? 'That invite code did not work. Double-check it and try again.',
+          errorMessage:
+              resultString ??
+              'That invite code did not work. Double-check it and try again.',
         );
       }
     } catch (e) {
       state = state.copyWith(
-        errorMessage: 'That invite code did not work. Double-check it and try again.',
+        errorMessage:
+            'That invite code did not work. Double-check it and try again.',
       );
     }
   }
@@ -222,9 +230,7 @@ class AuthNotifier extends Notifier<HyperVaultAuthState> {
       // Local state is cleared regardless below.
     }
     ref.read(authTokenHolderProvider).clear();
-    await ref.read(hyperVaultCacheProvider).clearForUser(
-      state.user?.id ?? '',
-    );
+    await ref.read(hyperVaultCacheProvider).clearForUser(state.user?.id ?? '');
     state = const HyperVaultAuthState(status: AuthGateStatus.unauthenticated);
   }
 }

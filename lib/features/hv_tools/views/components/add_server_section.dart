@@ -91,14 +91,16 @@ class _AddServerSectionState extends ConsumerState<AddServerSection> {
     }
     setState(() => _submitting = true);
     try {
-      await ref.read(hvToolsProvider.notifier).addServer(
-        url: _urlController.text.trim(),
-        name: _nameController.text.trim().isEmpty
-            ? null
-            : _nameController.text.trim(),
-        headers: headers.isEmpty ? null : headers,
-        maxServers: _maxServers,
-      );
+      await ref
+          .read(hvToolsProvider.notifier)
+          .addServer(
+            url: _urlController.text.trim(),
+            name: _nameController.text.trim().isEmpty
+                ? null
+                : _nameController.text.trim(),
+            headers: headers.isEmpty ? null : headers,
+            maxServers: _maxServers,
+          );
       if (mounted) {
         _urlController.clear();
         _nameController.clear();
@@ -106,9 +108,9 @@ class _AddServerSectionState extends ConsumerState<AddServerSection> {
           h.dispose();
         }
         setState(() => _headers.clear());
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Server connected.')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Server connected.')));
       }
     } catch (e) {
       _showError(e, 'Failed to connect that server.');
@@ -128,12 +130,14 @@ class _AddServerSectionState extends ConsumerState<AddServerSection> {
     if (entry.url == null || entry.registryId == null) return;
     setState(() => _addingRegistryId = entry.registryId);
     try {
-      await ref.read(hvToolsProvider.notifier).addServerFromRegistry(
-        url: entry.url!,
-        name: entry.name,
-        registryId: entry.registryId!,
-        maxServers: _maxServers,
-      );
+      await ref
+          .read(hvToolsProvider.notifier)
+          .addServerFromRegistry(
+            url: entry.url!,
+            name: entry.name,
+            registryId: entry.registryId!,
+            maxServers: _maxServers,
+          );
       if (mounted) setState(() => _justAdded.add(entry.registryId!));
     } catch (e) {
       _showError(e, 'Failed to connect that server.');
@@ -154,9 +158,10 @@ class _AddServerSectionState extends ConsumerState<AddServerSection> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final searchState = ref.watch(registrySearchProvider);
-    final connectedUrls = (ref.watch(hvToolsProvider).value?.persisted ?? const [])
-        .map((s) => s.url.trim().toLowerCase())
-        .toSet();
+    final connectedUrls =
+        (ref.watch(hvToolsProvider).value?.persisted ?? const [])
+            .map((s) => s.url.trim().toLowerCase())
+            .toSet();
     final results = searchState.query.isEmpty
         ? searchState.suggested
         : searchState.servers;
@@ -209,7 +214,10 @@ class _AddServerSectionState extends ConsumerState<AddServerSection> {
             alignment: Alignment.centerLeft,
             child: TextButton.icon(
               onPressed: _addHeaderRow,
-              icon: const HugeIcon(icon: HugeIcons.strokeRoundedAdd01, size: 16),
+              icon: const HugeIcon(
+                icon: HugeIcons.strokeRoundedAdd01,
+                size: 16,
+              ),
               label: const Text('Add auth header'),
             ),
           ),
@@ -267,11 +275,14 @@ class _AddServerSectionState extends ConsumerState<AddServerSection> {
             for (final entry in results)
               _RegistryResultTile(
                 entry: entry,
-                alreadyConnected: entry.url != null &&
+                alreadyConnected:
+                    entry.url != null &&
                     connectedUrls.contains(entry.url!.trim().toLowerCase()),
-                added: entry.registryId != null &&
+                added:
+                    entry.registryId != null &&
                     _justAdded.contains(entry.registryId),
-                busy: entry.registryId != null &&
+                busy:
+                    entry.registryId != null &&
                     _addingRegistryId == entry.registryId,
                 onAdd: () => _addFromRegistry(entry),
               ),
@@ -300,7 +311,8 @@ class _RegistryResultTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isAdded = alreadyConnected || added;
-    final canAdd = !isAdded && !busy && entry.url != null && entry.registryId != null;
+    final canAdd =
+        !isAdded && !busy && entry.url != null && entry.registryId != null;
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),

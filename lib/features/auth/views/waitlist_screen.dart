@@ -39,7 +39,9 @@ class _WaitlistScreenState extends ConsumerState<WaitlistScreen> {
   Future<void> _redeem() async {
     setState(() => _submitting = true);
     ref.read(authProvider.notifier).clearError();
-    await ref.read(authProvider.notifier).redeemInviteCode(_codeController.text);
+    await ref
+        .read(authProvider.notifier)
+        .redeemInviteCode(_codeController.text);
     if (mounted) setState(() => _submitting = false);
   }
 
@@ -75,7 +77,10 @@ class _WaitlistScreenState extends ConsumerState<WaitlistScreen> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const HugeIcon(icon: HugeIcons.strokeRoundedHourglass, size: 48),
+                  const HugeIcon(
+                    icon: HugeIcons.strokeRoundedHourglass,
+                    size: 48,
+                  ),
                   const SizedBox(height: 20),
                   Text(
                     'HyperVault is invite-only right now.',

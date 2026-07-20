@@ -229,9 +229,7 @@ class _MergeSheetState extends ConsumerState<_MergeSheet> {
         decoration: const InputDecoration(labelText: 'Merge from branch'),
         items: widget.branches
             .where((b) => b.name != widget.targetBranch)
-            .map(
-              (b) => DropdownMenuItem(value: b.name, child: Text(b.name)),
-            )
+            .map((b) => DropdownMenuItem(value: b.name, child: Text(b.name)))
             .toList(),
         onChanged: (value) => setState(() => _source = value),
       ),
@@ -256,13 +254,14 @@ class _MergeSheetState extends ConsumerState<_MergeSheet> {
         ),
       ),
       const SizedBox(height: 12),
-      ...conflicts.map((conflict) => _ConflictCard(
-            conflict: conflict,
-            selected: _resolutions[conflict.memoryId],
-            onSelected: (choice) => setState(
-              () => _resolutions[conflict.memoryId] = choice,
-            ),
-          )),
+      ...conflicts.map(
+        (conflict) => _ConflictCard(
+          conflict: conflict,
+          selected: _resolutions[conflict.memoryId],
+          onSelected: (choice) =>
+              setState(() => _resolutions[conflict.memoryId] = choice),
+        ),
+      ),
     ];
   }
 }

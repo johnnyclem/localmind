@@ -5,6 +5,8 @@ import 'package:hugeicons/hugeicons.dart';
 
 import '../../../core/network/hypervault_api_exception.dart';
 import '../../../core/routes/app_routes.dart';
+import '../../../core/widgets/hv_error_toast.dart';
+import '../data/models/artifact.dart';
 import '../providers/vault_providers.dart';
 import 'components/artifact_card.dart';
 
@@ -16,6 +18,10 @@ class VaultListScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final vaultAsync = ref.watch(vaultListProvider);
+
+    ref.listen<AsyncValue<List<Artifact>>>(vaultListProvider, (previous, next) {
+      next.whenOrNull(error: (err, _) => showHvError(context, err));
+    });
 
     return Scaffold(
       appBar: AppBar(

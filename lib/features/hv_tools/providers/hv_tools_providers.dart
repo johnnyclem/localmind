@@ -91,7 +91,9 @@ class HvToolsState {
       toolkit: clearToolkit ? null : (toolkit ?? this.toolkit),
       lastCompileResult: lastCompileResult ?? this.lastCompileResult,
       compiling: compiling ?? this.compiling,
-      compileError: clearCompileError ? null : (compileError ?? this.compileError),
+      compileError: clearCompileError
+          ? null
+          : (compileError ?? this.compileError),
     );
   }
 }
@@ -293,7 +295,8 @@ class HvToolsNotifier extends AsyncNotifier<HvToolsState> {
   Future<void> refreshServer(String id) async {
     final current = state.value;
     if (current == null) return;
-    final existing = _findById(current.persisted, id) ?? _findById(current.draft, id);
+    final existing =
+        _findById(current.persisted, id) ?? _findById(current.draft, id);
     if (existing == null) return;
     final api = ref.read(hvToolsApiServiceProvider);
     final refreshed = await api.refreshServer(id, existing);
@@ -344,7 +347,9 @@ class HvToolsNotifier extends AsyncNotifier<HvToolsState> {
       }
     } on HyperVaultApiException catch (e) {
       final latest = state.value ?? current;
-      state = AsyncData(latest.copyWith(compiling: false, compileError: e.message));
+      state = AsyncData(
+        latest.copyWith(compiling: false, compileError: e.message),
+      );
       rethrow;
     } catch (e) {
       final latest = state.value ?? current;

@@ -139,14 +139,16 @@ class _MindStateSheetState extends ConsumerState<_MindStateSheet> {
                                   Wrap(
                                     spacing: 6,
                                     children: memory.tags
-                                        .map((t) => Text(
-                                              '#$t',
-                                              style: theme
-                                                  .textTheme.labelSmall
-                                                  ?.copyWith(
-                                                color: theme.colorScheme.primary,
-                                              ),
-                                            ))
+                                        .map(
+                                          (t) => Text(
+                                            '#$t',
+                                            style: theme.textTheme.labelSmall
+                                                ?.copyWith(
+                                                  color:
+                                                      theme.colorScheme.primary,
+                                                ),
+                                          ),
+                                        )
                                         .toList(),
                                   ),
                                 ],

@@ -28,7 +28,10 @@ class PlanCompareCard extends StatelessWidget {
         padding: const EdgeInsets.only(top: 4),
         child: ShadButton(
           width: double.infinity,
-          leading: const HugeIcon(icon: HugeIcons.strokeRoundedRocket, size: 18),
+          leading: const HugeIcon(
+            icon: HugeIcons.strokeRoundedRocket,
+            size: 18,
+          ),
           onPressed: () =>
               launchUrl(_upgradeUrl, mode: LaunchMode.externalApplication),
           child: const Text('Upgrade to Pro'),
@@ -95,9 +98,7 @@ class _PlanColumn extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: highlighted
-              ? colorScheme.primary
-              : colorScheme.outlineVariant,
+          color: highlighted ? colorScheme.primary : colorScheme.outlineVariant,
           width: highlighted ? 1.5 : 1,
         ),
         color: highlighted ? colorScheme.primary.withAlpha(15) : null,
@@ -142,9 +143,7 @@ class _PlanColumn extends StatelessWidget {
                     color: colorScheme.onSurfaceVariant,
                   ),
                   const SizedBox(width: 6),
-                  Expanded(
-                    child: Text(b, style: theme.textTheme.bodySmall),
-                  ),
+                  Expanded(child: Text(b, style: theme.textTheme.bodySmall)),
                 ],
               ),
             ),

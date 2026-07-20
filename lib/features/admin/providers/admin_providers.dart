@@ -63,9 +63,7 @@ class AdminInvitesNotifier extends AsyncNotifier<List<AdminInvite>> {
   Future<void> create({int? maxUses, String? note}) async {
     final api = ref.read(adminApiServiceProvider);
     final json = await api.createInvite(maxUses: maxUses, note: note);
-    final invite = AdminInvite.fromJson(
-      json['invite'] as Map<String, dynamic>,
-    );
+    final invite = AdminInvite.fromJson(json['invite'] as Map<String, dynamic>);
     final previous = state.value ?? const [];
     state = AsyncData([invite, ...previous]);
   }
@@ -175,7 +173,9 @@ class AdminAccountsNotifier extends AsyncNotifier<List<AdminAccount>> {
       final results = await Future.wait([
         client
             .from('profiles')
-            .select('id, email, display_name, plan, vanity_subdomain, created_at')
+            .select(
+              'id, email, display_name, plan, vanity_subdomain, created_at',
+            )
             .order('created_at', ascending: false),
         client.from('account_access').select('user_id, source'),
       ]);

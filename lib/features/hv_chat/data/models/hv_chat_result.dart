@@ -6,7 +6,10 @@ class HvConversationDetail {
   final HvConversation conversation;
   final List<HvMessage> messages;
 
-  const HvConversationDetail({required this.conversation, required this.messages});
+  const HvConversationDetail({
+    required this.conversation,
+    required this.messages,
+  });
 }
 
 /// `PATCH /api/conversations/[id]` response.
@@ -28,7 +31,11 @@ class HvFeedbackResult {
   final String? feedback;
   final String message;
 
-  const HvFeedbackResult({required this.id, this.feedback, required this.message});
+  const HvFeedbackResult({
+    required this.id,
+    this.feedback,
+    required this.message,
+  });
 }
 
 /// `GET`/`PATCH /api/chat-settings` shape — the persisted defaults for the

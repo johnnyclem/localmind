@@ -58,7 +58,10 @@ class ClaimedDomainsNotifier extends Notifier<List<ClaimedDomain>> {
 
   /// Optimistically applies [themeId] to the realm identified by [domain],
   /// persists via `PATCH /api/claim-domain`, and rolls back on failure.
-  Future<void> restyle({required String domain, required String themeId}) async {
+  Future<void> restyle({
+    required String domain,
+    required String themeId,
+  }) async {
     final previous = state;
     final idx = previous.indexWhere((d) => d.domain == domain);
     if (idx == -1) return;

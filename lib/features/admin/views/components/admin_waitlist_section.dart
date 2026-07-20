@@ -66,8 +66,7 @@ class _AdminWaitlistSectionState extends ConsumerState<AdminWaitlistSection> {
             loading: () => const AdminSectionLoading(),
             error: (err, _) => AdminSectionError(
               message: _errorMessage(err),
-              onRetry: () =>
-                  ref.read(adminWaitlistProvider.notifier).refresh(),
+              onRetry: () => ref.read(adminWaitlistProvider.notifier).refresh(),
             ),
             data: (entries) {
               if (entries.isEmpty) {

@@ -32,7 +32,9 @@ class HvChatApiService {
   }
 
   Future<HvConversationDetail> fetchConversation(String id) async {
-    final json = await _client.get<Map<String, dynamic>>('/api/conversations/$id');
+    final json = await _client.get<Map<String, dynamic>>(
+      '/api/conversations/$id',
+    );
     final conversation = HvConversation.fromJson(
       (json['conversation'] as Map<String, dynamic>?) ?? const {},
     );
@@ -61,7 +63,9 @@ class HvChatApiService {
   }
 
   Future<String> deleteConversation(String id) async {
-    final json = await _client.delete<Map<String, dynamic>>('/api/conversations/$id');
+    final json = await _client.delete<Map<String, dynamic>>(
+      '/api/conversations/$id',
+    );
     return json['message'] as String? ?? 'Conversation deleted.';
   }
 
@@ -88,7 +92,10 @@ class HvChatApiService {
     return HvChatResult.fromJson(json);
   }
 
-  Future<HvFeedbackResult> setFeedback(String messageId, String? feedback) async {
+  Future<HvFeedbackResult> setFeedback(
+    String messageId,
+    String? feedback,
+  ) async {
     final json = await _client.post<Map<String, dynamic>>(
       '/api/messages/$messageId/feedback',
       data: {'feedback': feedback},
@@ -119,7 +126,9 @@ class HvChatApiService {
     return HvChatSettings.fromJson(json);
   }
 
-  Future<Map<String, dynamic>> _sendChatRequest(Map<String, dynamic> data) async {
+  Future<Map<String, dynamic>> _sendChatRequest(
+    Map<String, dynamic> data,
+  ) async {
     late final Response<dynamic> response;
     try {
       response = await _client.dio.request<dynamic>(
@@ -155,6 +164,10 @@ class HvChatApiService {
     } else if (body is String && body.isNotEmpty) {
       message = body;
     }
-    return HyperVaultApiException(statusCode: status, message: message, code: code);
+    return HyperVaultApiException(
+      statusCode: status,
+      message: message,
+      code: code,
+    );
   }
 }

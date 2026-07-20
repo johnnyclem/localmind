@@ -57,7 +57,8 @@ class HyperVaultClient {
           _emitTelemetry(response.requestOptions, status, onRequestComplete);
 
           if (status == 401 && tokenHolder.onUnauthorized != null) {
-            final retried = response.requestOptions.extra['__retried401'] == true;
+            final retried =
+                response.requestOptions.extra['__retried401'] == true;
             if (!retried) {
               final freshToken = await tokenHolder.onUnauthorized!.call();
               if (freshToken != null && freshToken.isNotEmpty) {
@@ -80,8 +81,7 @@ class HyperVaultClient {
             final idempotent = method == 'GET' || method == 'DELETE';
             if (idempotent && retryCount < 3) {
               final delayMs =
-                  (pow(2, retryCount) * 300).toInt() +
-                  Random().nextInt(200);
+                  (pow(2, retryCount) * 300).toInt() + Random().nextInt(200);
               await Future<void>.delayed(Duration(milliseconds: delayMs));
               final retryOptions = response.requestOptions
                 ..extra['__retryCount'] = retryCount + 1;
@@ -179,6 +179,10 @@ class HyperVaultClient {
     } else if (body is String && body.isNotEmpty) {
       message = body;
     }
-    return HyperVaultApiException(statusCode: status, message: message, code: code);
+    return HyperVaultApiException(
+      statusCode: status,
+      message: message,
+      code: code,
+    );
   }
 }

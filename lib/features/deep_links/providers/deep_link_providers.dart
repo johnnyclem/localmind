@@ -46,7 +46,8 @@ class DeepLinkNotifier extends Notifier<HvDeepLink?> {
 
     _subscription = appLinks.uriLinkStream.listen(
       _handleUri,
-      onError: (Object e) => Log.warning('[deep_links] uriLinkStream error: $e'),
+      onError: (Object e) =>
+          Log.warning('[deep_links] uriLinkStream error: $e'),
     );
   }
 

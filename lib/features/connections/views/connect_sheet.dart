@@ -26,10 +26,8 @@ Future<void> showConnectSheet(
     context: context,
     isScrollControlled: true,
     useSafeArea: true,
-    builder: (context) => _ConnectSheet(
-      artifactSlug: artifactSlug,
-      artifactTitle: artifactTitle,
-    ),
+    builder: (context) =>
+        _ConnectSheet(artifactSlug: artifactSlug, artifactTitle: artifactTitle),
   );
 }
 
@@ -37,7 +35,10 @@ class _ConnectSheet extends ConsumerStatefulWidget {
   final String artifactSlug;
   final String artifactTitle;
 
-  const _ConnectSheet({required this.artifactSlug, required this.artifactTitle});
+  const _ConnectSheet({
+    required this.artifactSlug,
+    required this.artifactTitle,
+  });
 
   @override
   ConsumerState<_ConnectSheet> createState() => _ConnectSheetState();
@@ -250,7 +251,10 @@ class _ConnectSheetState extends ConsumerState<_ConnectSheet> {
             children: [
               Row(
                 children: [
-                  const HugeIcon(icon: HugeIcons.strokeRoundedConnect, size: 20),
+                  const HugeIcon(
+                    icon: HugeIcons.strokeRoundedConnect,
+                    size: 20,
+                  ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
@@ -267,7 +271,10 @@ class _ConnectSheetState extends ConsumerState<_ConnectSheet> {
                 placeholder: const Text('Search your artifacts'),
                 leading: const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 4),
-                  child: HugeIcon(icon: HugeIcons.strokeRoundedSearch01, size: 16),
+                  child: HugeIcon(
+                    icon: HugeIcons.strokeRoundedSearch01,
+                    size: 16,
+                  ),
                 ),
               ),
               if (_connectError != null) ...[

@@ -171,7 +171,8 @@ class HyperVaultLimits {
   });
 
   factory HyperVaultLimits.fromJson(Map<String, dynamic> json) {
-    final rate = json['rate_limit_per_min'] as Map<String, dynamic>? ?? const {};
+    final rate =
+        json['rate_limit_per_min'] as Map<String, dynamic>? ?? const {};
     return HyperVaultLimits(
       artifactBytes: json['artifact_bytes'] as int? ?? 1000000,
       sourcePromptChars: json['source_prompt_chars'] as int? ?? 10000,

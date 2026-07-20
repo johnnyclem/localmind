@@ -123,7 +123,8 @@ class HvUnknownDeepLink extends HvDeepLink {
   const HvUnknownDeepLink(this.uri);
 
   @override
-  bool operator ==(Object other) => other is HvUnknownDeepLink && other.uri == uri;
+  bool operator ==(Object other) =>
+      other is HvUnknownDeepLink && other.uri == uri;
   @override
   int get hashCode => Object.hash(HvUnknownDeepLink, uri);
   @override
@@ -170,7 +171,9 @@ List<String> _pathSegments(Uri uri) {
 /// param — those should fall through to [HvUnknownDeepLink] only when the
 /// caller wants to still resolve `?next=`; call that helper directly if so.
 HvDeepLink? parseHyperVaultDeepLink(Uri uri) {
-  if (uri.scheme != 'hypervault' && uri.scheme != 'http' && uri.scheme != 'https') {
+  if (uri.scheme != 'hypervault' &&
+      uri.scheme != 'http' &&
+      uri.scheme != 'https') {
     return null;
   }
   if (isHvAuthCallbackDeepLink(uri)) return null;

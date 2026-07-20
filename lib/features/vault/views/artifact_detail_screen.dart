@@ -357,9 +357,7 @@ class _ArtifactDetailScreenState extends ConsumerState<ArtifactDetailScreen> {
                         value: artifact.isPublic,
                         enabled: !_visibilityBusy,
                         onChanged: _toggleVisibility,
-                        label: Text(
-                          artifact.isPublic ? 'Public' : 'Private',
-                        ),
+                        label: Text(artifact.isPublic ? 'Public' : 'Private'),
                         sublabel: Text(
                           artifact.isPublic
                               ? 'Anyone with the link can view this.'

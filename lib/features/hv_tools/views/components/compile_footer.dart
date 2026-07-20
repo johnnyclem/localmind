@@ -25,7 +25,9 @@ class CompileFooter extends ConsumerWidget {
       }
     } catch (e) {
       // Also surfaced inline via state.compileError; toast for visibility.
-      final message = e is HyperVaultApiException ? e.message : 'Compile failed.';
+      final message = e is HyperVaultApiException
+          ? e.message
+          : 'Compile failed.';
       if (context.mounted) {
         ScaffoldMessenger.of(
           context,

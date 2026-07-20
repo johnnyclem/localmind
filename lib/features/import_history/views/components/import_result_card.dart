@@ -60,9 +60,7 @@ class ImportResultCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text('•  ', style: theme.textTheme.bodySmall),
-                    Expanded(
-                      child: Text(m, style: theme.textTheme.bodySmall),
-                    ),
+                    Expanded(child: Text(m, style: theme.textTheme.bodySmall)),
                   ],
                 ),
               ),

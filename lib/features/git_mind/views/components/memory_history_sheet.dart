@@ -129,8 +129,9 @@ class _MemoryHistorySheetState extends ConsumerState<_MemoryHistorySheet> {
                               currentTags: widget.currentTags,
                               isLatest: index == 0,
                               onTap: () => setState(() {
-                                _expandedRevisionId =
-                                    expanded ? null : revision.revisionId;
+                                _expandedRevisionId = expanded
+                                    ? null
+                                    : revision.revisionId;
                               }),
                             );
                           },
@@ -241,7 +242,9 @@ class _RevisionTileState extends ConsumerState<_RevisionTile> {
       unawaited(
         ref.read(memoryHistoryProvider(widget.memoryId).notifier).refresh(),
       );
-      unawaited(ref.read(memoryDetailProvider(widget.memoryId).notifier).refresh());
+      unawaited(
+        ref.read(memoryDetailProvider(widget.memoryId).notifier).refresh(),
+      );
       if (mounted) {
         ScaffoldMessenger.of(
           context,
@@ -468,12 +471,14 @@ class _SnapshotColumn extends StatelessWidget {
               runSpacing: 4,
               children: tags
                   .take(4)
-                  .map((t) => Text(
-                        '#$t',
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: theme.colorScheme.primary,
-                        ),
-                      ))
+                  .map(
+                    (t) => Text(
+                      '#$t',
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: theme.colorScheme.primary,
+                      ),
+                    ),
+                  )
                   .toList(),
             ),
           ],

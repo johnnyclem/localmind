@@ -83,7 +83,9 @@ class HvBackendPicker extends StatelessWidget {
                     const SizedBox(width: 6),
                     Flexible(
                       child: Text(
-                        onDeviceReady ? 'On-device' : 'On-device — set up a model',
+                        onDeviceReady
+                            ? 'On-device'
+                            : 'On-device — set up a model',
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),

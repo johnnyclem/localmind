@@ -147,6 +147,10 @@ class BackendsApiService {
     } else if (body is String && body.isNotEmpty) {
       message = body;
     }
-    return HyperVaultApiException(statusCode: status, message: message, code: code);
+    return HyperVaultApiException(
+      statusCode: status,
+      message: message,
+      code: code,
+    );
   }
 }

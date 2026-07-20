@@ -204,7 +204,10 @@ class GitMindScreen extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 20),
-            Text('Latest commits on $selectedBranch', style: theme.textTheme.titleMedium),
+            Text(
+              'Latest commits on $selectedBranch',
+              style: theme.textTheme.titleMedium,
+            ),
             const SizedBox(height: 8),
             Consumer(
               builder: (context, ref, _) {
@@ -440,7 +443,10 @@ class _CommitRow extends ConsumerWidget {
             ),
             IconButton(
               tooltip: 'View as of this commit',
-              icon: const HugeIcon(icon: HugeIcons.strokeRoundedTime04, size: 18),
+              icon: const HugeIcon(
+                icon: HugeIcons.strokeRoundedTime04,
+                size: 18,
+              ),
               onPressed: () => showMindStateSheet(
                 context,
                 at: commit.id,

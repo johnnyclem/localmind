@@ -22,8 +22,7 @@ class SharedWithMeScreen extends ConsumerStatefulWidget {
   const SharedWithMeScreen({super.key});
 
   @override
-  ConsumerState<SharedWithMeScreen> createState() =>
-      _SharedWithMeScreenState();
+  ConsumerState<SharedWithMeScreen> createState() => _SharedWithMeScreenState();
 }
 
 class _SharedWithMeScreenState extends ConsumerState<SharedWithMeScreen> {
@@ -216,7 +215,10 @@ class _SharedWithMeScreenState extends ConsumerState<SharedWithMeScreen> {
               size: 48,
             ),
             const SizedBox(height: 16),
-            Text(_error ?? 'Something went wrong.', textAlign: TextAlign.center),
+            Text(
+              _error ?? 'Something went wrong.',
+              textAlign: TextAlign.center,
+            ),
             const SizedBox(height: 16),
             TextButton(onPressed: _load, child: const Text('Retry')),
           ],

@@ -26,7 +26,9 @@ final connectionsListProvider = FutureProvider<List<RawConnection>>((
   ref,
 ) async {
   try {
-    final response = await ref.watch(connectionsApiServiceProvider).fetchConnections();
+    final response = await ref
+        .watch(connectionsApiServiceProvider)
+        .fetchConnections();
     return response.connections;
   } catch (e) {
     Log.warning('[connections] connections fetch failed: $e');

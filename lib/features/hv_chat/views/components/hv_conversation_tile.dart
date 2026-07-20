@@ -19,7 +19,8 @@ class HvConversationTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final subtitle = conversation.model != null && conversation.model!.isNotEmpty
+    final subtitle =
+        conversation.model != null && conversation.model!.isNotEmpty
         ? '${HvConversation.platformLabel(conversation.sourcePlatform)} · ${conversation.model}'
         : HvConversation.platformLabel(conversation.sourcePlatform);
 

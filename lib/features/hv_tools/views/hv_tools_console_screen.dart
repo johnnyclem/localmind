@@ -142,7 +142,10 @@ class _EmptyState extends StatelessWidget {
             color: theme.colorScheme.outline,
           ),
           const SizedBox(height: 16),
-          Text('No MCP servers connected yet', style: theme.textTheme.titleMedium),
+          Text(
+            'No MCP servers connected yet',
+            style: theme.textTheme.titleMedium,
+          ),
           const SizedBox(height: 8),
           Text(
             'Search the registry or add one by URL below to give chat '

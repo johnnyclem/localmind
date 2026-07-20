@@ -8,6 +8,7 @@ import 'package:shadcn_ui/shadcn_ui.dart';
 
 import '../../../core/network/hypervault_api_exception.dart';
 import '../../../core/providers/hypervault_providers.dart';
+import '../../../core/widgets/hv_error_toast.dart';
 import '../data/models/artifact.dart';
 import '../providers/vault_providers.dart';
 
@@ -18,8 +19,7 @@ class SaveArtifactScreen extends ConsumerStatefulWidget {
   const SaveArtifactScreen({super.key});
 
   @override
-  ConsumerState<SaveArtifactScreen> createState() =>
-      _SaveArtifactScreenState();
+  ConsumerState<SaveArtifactScreen> createState() => _SaveArtifactScreenState();
 }
 
 class _SaveArtifactScreenState extends ConsumerState<SaveArtifactScreen> {
@@ -113,13 +113,9 @@ class _SaveArtifactScreenState extends ConsumerState<SaveArtifactScreen> {
       if (!mounted) return;
       Navigator.of(context).pop();
     } on HyperVaultApiException catch (e) {
-      setState(() {
-        _errorMessage = e.message;
-      });
+      if (mounted) showHvError(context, e);
     } catch (e) {
-      setState(() {
-        _errorMessage = e.toString();
-      });
+      if (mounted) showHvError(context, e);
     } finally {
       if (mounted) {
         setState(() {
@@ -163,9 +159,9 @@ class _SaveArtifactScreenState extends ConsumerState<SaveArtifactScreen> {
                 tooltip: 'Copy link',
                 onPressed: () {
                   Clipboard.setData(ClipboardData(text: result.url));
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Link copied')),
-                  );
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(const SnackBar(content: Text('Link copied')));
                 },
               ),
             ],
@@ -252,14 +248,18 @@ class _SaveArtifactScreenState extends ConsumerState<SaveArtifactScreen> {
               value: _makePwa,
               onChanged: (v) => setState(() => _makePwa = v),
               label: const Text('Make it installable'),
-              sublabel: const Text('Adds a PWA manifest so it can be added to a home screen.'),
+              sublabel: const Text(
+                'Adds a PWA manifest so it can be added to a home screen.',
+              ),
             ),
             const SizedBox(height: 12),
             ShadSwitch(
               value: _forceHtml,
               onChanged: (v) => setState(() => _forceHtml = v),
               label: const Text('Force plain HTML'),
-              sublabel: const Text('Skips React/JSX auto-detection (done server-side).'),
+              sublabel: const Text(
+                'Skips React/JSX auto-detection (done server-side).',
+              ),
             ),
             if (_errorMessage != null) ...[
               const SizedBox(height: 16),

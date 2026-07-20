@@ -31,11 +31,12 @@ class GitMindApiService {
 
   /// `GET /api/mind/branches`.
   Future<List<MindBranch>> fetchBranches() async {
-    final json = await _client.get<Map<String, dynamic>>(
-      '/api/mind/branches',
-    );
+    final json = await _client.get<Map<String, dynamic>>('/api/mind/branches');
     final rows = (json['branches'] as List?) ?? const [];
-    return rows.whereType<Map<String, dynamic>>().map(MindBranch.fromJson).toList();
+    return rows
+        .whereType<Map<String, dynamic>>()
+        .map(MindBranch.fromJson)
+        .toList();
   }
 
   /// `POST /api/mind/branches`.
@@ -61,7 +62,10 @@ class GitMindApiService {
   }
 
   /// `GET /api/mind/commits?branch=&limit=`.
-  Future<CommitLog> fetchCommits({required String branch, int limit = 30}) async {
+  Future<CommitLog> fetchCommits({
+    required String branch,
+    int limit = 30,
+  }) async {
     final json = await _client.get<Map<String, dynamic>>(
       '/api/mind/commits',
       query: {'branch': branch, 'limit': limit},
@@ -171,13 +175,16 @@ class GitMindApiService {
       return MergeResult.fromJson(body as Map<String, dynamic>);
     }
 
-    if (status == 409 && body is Map<String, dynamic> && body['conflicts'] is List) {
+    if (status == 409 &&
+        body is Map<String, dynamic> &&
+        body['conflicts'] is List) {
       final conflicts = (body['conflicts'] as List)
           .whereType<Map<String, dynamic>>()
           .map(MergeConflict.fromJson)
           .toList();
       throw MergeConflictException(
-        message: body['error'] as String? ?? 'This merge has conflicts to resolve.',
+        message:
+            body['error'] as String? ?? 'This merge has conflicts to resolve.',
         conflicts: conflicts,
       );
     }
