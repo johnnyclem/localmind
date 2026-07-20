@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
 import '../../../core/models/enums.dart';
+import '../../../core/providers/storage_providers.dart';
+import '../../../core/routes/app_routes.dart';
+import '../../hypervault_vault/data/hv_vault_cache.dart';
 import '../data/models/hv_api_error.dart';
 import '../providers/hypervault_providers.dart';
 
@@ -66,6 +70,9 @@ class _HyperVaultAccountScreenState
   Future<void> _signOut() async {
     await ref.read(hyperVaultAuthServiceProvider).signOut();
     ref.invalidate(hyperVaultGateProvider);
+    // Cached vault/artifact data is keyed per HyperVault user id but still
+    // shouldn't linger on a shared device once nobody's signed in.
+    await HvVaultCache.clearCache(ref.read(sharedPreferencesProvider));
   }
 
   void _applyBaseUrl() {
@@ -296,7 +303,7 @@ class _SignedInPanel extends ConsumerWidget {
                     style: theme.textTheme.bodySmall,
                   ),
                 )
-              : const SizedBox.shrink(),
+              : const _FeatureHub(),
           orElse: () => const SizedBox.shrink(),
         ),
         SizedBox(
@@ -315,6 +322,127 @@ class _SignedInPanel extends ConsumerWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _HubTile {
+  final String route;
+  final String label;
+  final List<List<dynamic>> icon;
+
+  const _HubTile(this.route, this.label, this.icon);
+}
+
+const _hubTiles = [
+  _HubTile(
+    AppRoutes.hyperVaultVault,
+    'Vault',
+    HugeIcons.strokeRoundedFile01,
+  ),
+  _HubTile(
+    AppRoutes.hyperVaultMemory,
+    'Memory',
+    HugeIcons.strokeRoundedBrain,
+  ),
+  _HubTile(
+    AppRoutes.hyperVaultBackends,
+    'LLM Backends',
+    HugeIcons.strokeRoundedCloudServer,
+  ),
+  _HubTile(
+    AppRoutes.hyperVaultMcp,
+    'MCP Tools',
+    HugeIcons.strokeRoundedServerStack02,
+  ),
+  _HubTile(
+    AppRoutes.hyperVaultImport,
+    'Import History',
+    HugeIcons.strokeRoundedFileImport,
+  ),
+  _HubTile(
+    AppRoutes.hyperVaultDomains,
+    'Domains & Upgrade',
+    HugeIcons.strokeRoundedGlobe,
+  ),
+  _HubTile(
+    AppRoutes.hyperVaultThemes,
+    'Themes',
+    HugeIcons.strokeRoundedPaintBoard,
+  ),
+  _HubTile(
+    AppRoutes.hyperVaultAdmin,
+    'Admin',
+    HugeIcons.strokeRoundedShieldUser,
+  ),
+];
+
+/// Entry points into every HyperVault feature area, shown once the account
+/// is signed in and approved. Kept as one grid on the account screen rather
+/// than a dozen individual sidebar entries.
+class _FeatureHub extends StatelessWidget {
+  const _FeatureHub();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: GridView.count(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        crossAxisCount: 2,
+        mainAxisSpacing: 10,
+        crossAxisSpacing: 10,
+        childAspectRatio: 2.4,
+        children: [
+          for (final tile in _hubTiles)
+            Semantics(
+              button: true,
+              label: tile.label,
+              child: Material(
+                color: theme.colorScheme.surface,
+                borderRadius: BorderRadius.circular(12),
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(12),
+                  onTap: () => context.push(tile.route),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    constraints: const BoxConstraints(minHeight: 44),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: theme.colorScheme.outline.withValues(
+                          alpha: 0.2,
+                        ),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        ExcludeSemantics(
+                          child: HugeIcon(
+                            icon: tile.icon,
+                            size: 18,
+                            color: theme.colorScheme.primary,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            tile.label,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.labelMedium,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
     );
   }
 }
