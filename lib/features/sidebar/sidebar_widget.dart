@@ -8,6 +8,7 @@ import '../../core/routes/app_routes.dart';
 import '../../core/components/app_sizes.dart';
 import '../../core/models/enums.dart';
 import '../../l10n/app_localizations.dart';
+import '../../core/providers/hypervault_providers.dart';
 import '../auth/providers/auth_providers.dart';
 import '../chat/providers/chat_providers.dart';
 import '../lm_studio_catalog/views/lm_studio_download_widgets.dart';
@@ -49,7 +50,10 @@ class SidebarWidget extends ConsumerWidget {
     final isBackends = location.startsWith(AppRoutes.backends);
     final isHvTools = location.startsWith(AppRoutes.mcpToolsConsole);
     final isDomains = location.startsWith(AppRoutes.domains);
-    final isAdmin = location.startsWith(AppRoutes.admin);
+    final isAdminRoute = location.startsWith(AppRoutes.admin);
+    final isHyperVaultAdmin = ref.watch(
+      capabilitiesProvider.select((c) => c.value?.user?.isAdmin ?? false),
+    );
     final authEmail = ref.watch(authProvider.select((s) => s.email));
 
     return Container(
@@ -198,17 +202,19 @@ class SidebarWidget extends ConsumerWidget {
                         context.go(AppRoutes.domains);
                       },
                     ),
-                    DrawerNavItem(
-                      iconData: HugeIcons.strokeRoundedShield01,
-                      label: 'Admin',
-                      isSelected: isAdmin,
-                      onTap: () {
-                        if (Scaffold.maybeOf(context)?.isDrawerOpen ?? false) {
-                          Navigator.pop(context);
-                        }
-                        context.go(AppRoutes.admin);
-                      },
-                    ),
+                    if (isHyperVaultAdmin)
+                      DrawerNavItem(
+                        iconData: HugeIcons.strokeRoundedShield01,
+                        label: 'Admin',
+                        isSelected: isAdminRoute,
+                        onTap: () {
+                          if (Scaffold.maybeOf(context)?.isDrawerOpen ??
+                              false) {
+                            Navigator.pop(context);
+                          }
+                          context.go(AppRoutes.admin);
+                        },
+                      ),
                     const SizedBox(height: 8),
                     const Divider(height: 1, indent: 16, endIndent: 16),
                     const SizedBox(height: 8),
@@ -340,7 +346,8 @@ class SidebarWidget extends ConsumerWidget {
                         label: 'Sign out',
                         isSelected: false,
                         onTap: () {
-                          if (Scaffold.maybeOf(context)?.isDrawerOpen ?? false) {
+                          if (Scaffold.maybeOf(context)?.isDrawerOpen ??
+                              false) {
                             Navigator.pop(context);
                           }
                           ref.read(authProvider.notifier).signOut();
@@ -357,7 +364,10 @@ class SidebarWidget extends ConsumerWidget {
             // Bottom Section
             if (authEmail != null)
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 4,
+                ),
                 child: Text(
                   authEmail,
                   style: theme.textTheme.bodySmall?.copyWith(

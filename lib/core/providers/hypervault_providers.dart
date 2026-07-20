@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../constants/app_constants.dart';
 import '../logger/app_logger.dart';
 import '../models/hypervault_capabilities.dart';
 import '../network/auth_token_holder.dart';
@@ -14,12 +15,57 @@ import 'storage_providers.dart';
 /// window trigger the soft "update available" prompt (M16).
 const _supportedApiVersion = '2026-07-15';
 
+const _customBaseUrlPrefsKey = 'hypervaultCustomBaseUrl';
+
 final authTokenHolderProvider = Provider<AuthTokenHolder>((ref) {
   return AuthTokenHolder();
 });
 
+/// User-supplied override for the HyperVault deployment origin, for people
+/// running a self-hosted instance instead of the hosted
+/// [AppConstants.hypervaultDefaultBaseUrl]. `null` (the default) means "use
+/// the hosted deployment". Persisted so the choice survives restarts; set
+/// from the "Self-hosted deployment?" field on the sign-in screen.
+final customBaseUrlProvider = NotifierProvider<CustomBaseUrlNotifier, String?>(
+  CustomBaseUrlNotifier.new,
+);
+
+class CustomBaseUrlNotifier extends Notifier<String?> {
+  @override
+  String? build() {
+    final prefs = ref.watch(sharedPreferencesProvider);
+    return prefs.getString(_customBaseUrlPrefsKey);
+  }
+
+  /// Sets (or, given `null`/empty, clears) the self-hosted base URL.
+  void setCustomBaseUrl(String? url) {
+    final prefs = ref.read(sharedPreferencesProvider);
+    if (url == null || url.trim().isEmpty) {
+      prefs.remove(_customBaseUrlPrefsKey);
+      state = null;
+      return;
+    }
+    final normalized = url.trim().replaceAll(RegExp(r'/+$'), '');
+    prefs.setString(_customBaseUrlPrefsKey, normalized);
+    state = normalized;
+  }
+}
+
 final baseUrlHolderProvider = Provider<BaseUrlHolder>((ref) {
-  return BaseUrlHolder();
+  final holder = BaseUrlHolder();
+  holder.setOverride(ref.watch(customBaseUrlProvider));
+  return holder;
+});
+
+/// The base URL [CapabilitiesNotifier] targets right now: the user's
+/// self-hosted override if one is set, else the hosted default. Handy for UI
+/// that wants to show which deployment it's talking to without reaching into
+/// [BaseUrlHolder] directly.
+final effectiveBaseUrlProvider = Provider<String>((ref) {
+  final custom = ref.watch(customBaseUrlProvider);
+  return (custom != null && custom.isNotEmpty)
+      ? custom
+      : AppConstants.hypervaultDefaultBaseUrl;
 });
 
 final hyperVaultCacheProvider = Provider<HyperVaultCache>((ref) {
