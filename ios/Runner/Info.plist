@@ -90,5 +90,16 @@
 	<string>This app requires speech recognition access to convert your voice messages into text.</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>store.hypervault.auth</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>hypervault</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>

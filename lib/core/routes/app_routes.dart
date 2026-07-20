@@ -19,4 +19,5 @@ class AppRoutes {
   static const String ttsModels = '/tts-models';
   static const String savedMessages = '/saved-messages';
   static const String lmStudioModelBrowser = '/lm-studio-models';
+  static const String hyperVaultAccount = '/hypervault';
 }

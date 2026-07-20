@@ -37,6 +37,10 @@ String displayServerAddress(String host, int port, ServerType type) {
   if (type == ServerType.onDevice) {
     return 'Local inference';
   }
+  if (type == ServerType.hyperVault) {
+    final uri = Uri.tryParse(host);
+    return uri?.host.isNotEmpty == true ? uri!.host : host;
+  }
 
   final trimmedHost = host.trim();
   if (trimmedHost.isEmpty) {
@@ -67,6 +71,11 @@ String buildServerBaseUrl(String host, int port, ServerType type) {
   }
   if (type == ServerType.onDevice) {
     return 'on-device';
+  }
+  if (type == ServerType.hyperVault) {
+    // `host` already holds the full HyperVault deployment origin (e.g.
+    // https://hypervault.store), kept in sync by hyperVaultServerSyncProvider.
+    return host.trim().replaceAll(RegExp(r'/+$'), '');
   }
 
   final trimmedHost = host.trim();
@@ -172,6 +181,8 @@ class Server {
         return '$baseUrl/chat/completions';
       case ServerType.onDevice:
         return '';
+      case ServerType.hyperVault:
+        return '$baseUrl/api/chat';
     }
   }
 
@@ -187,6 +198,8 @@ class Server {
         return '$baseUrl/models';
       case ServerType.onDevice:
         return '';
+      case ServerType.hyperVault:
+        return '$baseUrl/api/backends';
     }
   }
 
@@ -201,6 +214,8 @@ class Server {
       case ServerType.openRouter:
         return '';
       case ServerType.onDevice:
+        return '';
+      case ServerType.hyperVault:
         return '';
     }
   }
@@ -217,6 +232,8 @@ class Server {
         return '';
       case ServerType.onDevice:
         return '';
+      case ServerType.hyperVault:
+        return '';
     }
   }
 
@@ -231,6 +248,8 @@ class Server {
       case ServerType.openRouter:
         return '';
       case ServerType.onDevice:
+        return '';
+      case ServerType.hyperVault:
         return '';
     }
   }

@@ -43,6 +43,8 @@ class ServerCard extends StatelessWidget {
         return l10n.server_type_openrouter_display;
       case ServerType.onDevice:
         return l10n.server_type_on_device_display;
+      case ServerType.hyperVault:
+        return 'HyperVault';
     }
   }
 

@@ -14,6 +14,8 @@ import 'features/chat/providers/chat_providers.dart';
 import 'features/conversations/providers/conversation_providers.dart' as conv;
 import 'features/chat/views/chat_screen.dart';
 import 'features/conversations/views/chat_history_screen.dart';
+import 'features/hypervault/providers/hypervault_providers.dart';
+import 'features/hypervault/views/hypervault_account_screen.dart';
 import 'features/mcp/views/mcp_tools_screen.dart';
 import 'features/on_device/views/model_manager_screen.dart';
 import 'features/onboarding/screens/onboarding_language_screen.dart';
@@ -181,6 +183,11 @@ final routerProvider = Provider<GoRouter>((ref) {
               );
             },
           ),
+          GoRoute(
+            path: AppRoutes.hyperVaultAccount,
+            pageBuilder: (context, state) =>
+                const NoTransitionPage(child: HyperVaultAccountScreen()),
+          ),
         ],
       ),
     ],
@@ -284,6 +291,9 @@ class AppShell extends ConsumerWidget {
     final location = GoRouterState.of(context).uri.path;
     final isHome = location == AppRoutes.home;
     final hasActiveChat = ref.watch(conv.activeConversationProvider) != null;
+    // Only reconnects/refreshes the session if the user has signed in to
+    // HyperVault before; a no-op (no network) for local-only users.
+    ref.watch(hyperVaultAutoConnectProvider);
 
     return PopScope(
       canPop: isHome && !hasActiveChat,
