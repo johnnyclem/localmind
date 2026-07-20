@@ -803,6 +803,7 @@ class _AddServerScreenState extends ConsumerState<AddServerScreen> {
       ServerType.ollama => l10n.server_type_ollama,
       ServerType.openRouter => l10n.server_type_openrouter,
       ServerType.onDevice => l10n.server_type_on_device_display,
+      ServerType.hyperVault => 'HyperVault',
     };
   }
 }

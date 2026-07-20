@@ -36,7 +36,16 @@ class SidebarWidget extends ConsumerWidget {
     final isTtsModels = location.startsWith(AppRoutes.ttsModels);
     final isCloudSync = location.startsWith(AppRoutes.cloudSync);
     final isSettings = location == AppRoutes.settings;
+    final isHyperVault = location.startsWith(AppRoutes.hyperVaultAccount);
     final isHome = location == AppRoutes.home || location == '/';
+    // Local-only check (no network): whether a HyperVault server entry is
+    // already stored, i.e. the user has connected before. Deliberately does
+    // not watch the live session provider here, which would eagerly fetch
+    // capabilities on every sidebar render (see hyperVaultAutoConnectProvider).
+    final hyperVaultConnected = ref
+        .watch(serversProvider)
+        .value
+        ?.any((s) => s.type == ServerType.hyperVault) ?? false;
     final hasActiveChat = ref.watch(hasActiveChatSessionProvider);
     final isTemporary = ref.watch(chatProvider.select((s) => s.isTemporary));
     final activeServer = ref.watch(activeServerProvider);
@@ -221,6 +230,24 @@ class SidebarWidget extends ConsumerWidget {
                     const SizedBox(height: 8),
                     const Divider(height: 1, indent: 16, endIndent: 16),
                     const SizedBox(height: 8),
+                    DrawerNavItem(
+                      iconData: HugeIcons.strokeRoundedCloudServer,
+                      label: 'HyperVault',
+                      isSelected: isHyperVault,
+                      trailing: hyperVaultConnected
+                          ? const HugeIcon(
+                              icon: HugeIcons.strokeRoundedCheckmarkCircle02,
+                              size: 16,
+                              color: Colors.green,
+                            )
+                          : null,
+                      onTap: () {
+                        if (Scaffold.maybeOf(context)?.isDrawerOpen ?? false) {
+                          Navigator.pop(context);
+                        }
+                        context.go(AppRoutes.hyperVaultAccount);
+                      },
+                    ),
                     DrawerNavItem(
                       iconData: HugeIcons.strokeRoundedCloudSavingDone02,
                       label: l10n.cloud_sync,

@@ -19,4 +19,15 @@ class AppRoutes {
   static const String ttsModels = '/tts-models';
   static const String savedMessages = '/saved-messages';
   static const String lmStudioModelBrowser = '/lm-studio-models';
+  static const String hyperVaultAccount = '/hypervault';
+  static const String hyperVaultVault = '/hypervault/vault';
+  static const String hyperVaultVaultNew = '/hypervault/vault/new';
+  static const String hyperVaultMemory = '/hypervault/memory';
+  static const String hyperVaultBackends = '/hypervault/backends';
+  static const String hyperVaultContextBridge = '/hypervault/context-bridge';
+  static const String hyperVaultMcp = '/hypervault/mcp';
+  static const String hyperVaultImport = '/hypervault/import';
+  static const String hyperVaultDomains = '/hypervault/domains';
+  static const String hyperVaultAdmin = '/hypervault/admin';
+  static const String hyperVaultThemes = '/hypervault/themes';
 }

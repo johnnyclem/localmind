@@ -14,6 +14,18 @@ import 'features/chat/providers/chat_providers.dart';
 import 'features/conversations/providers/conversation_providers.dart' as conv;
 import 'features/chat/views/chat_screen.dart';
 import 'features/conversations/views/chat_history_screen.dart';
+import 'features/hypervault/providers/hypervault_providers.dart';
+import 'features/hypervault/views/hypervault_account_screen.dart';
+import 'features/hypervault_backends/views/hypervault_backends_screen.dart';
+import 'features/hypervault_backends/views/hypervault_context_bridge_screen.dart';
+import 'features/hypervault_extras/admin/views/hv_admin_screen.dart';
+import 'features/hypervault_extras/domains/views/hv_domains_screen.dart';
+import 'features/hypervault_extras/import/views/hv_import_screen.dart';
+import 'features/hypervault_mcp/views/hypervault_mcp_screen.dart';
+import 'features/hypervault_memory/views/hypervault_memory_screen.dart';
+import 'features/hypervault_polish/views/hv_theme_gallery_screen.dart';
+import 'features/hypervault_vault/views/new_from_chat_screen.dart';
+import 'features/hypervault_vault/views/vault_screen.dart';
 import 'features/mcp/views/mcp_tools_screen.dart';
 import 'features/on_device/views/model_manager_screen.dart';
 import 'features/onboarding/screens/onboarding_language_screen.dart';
@@ -181,6 +193,64 @@ final routerProvider = Provider<GoRouter>((ref) {
               );
             },
           ),
+          GoRoute(
+            path: AppRoutes.hyperVaultAccount,
+            pageBuilder: (context, state) =>
+                const NoTransitionPage(child: HyperVaultAccountScreen()),
+          ),
+          GoRoute(
+            path: AppRoutes.hyperVaultVault,
+            pageBuilder: (context, state) =>
+                const NoTransitionPage(child: VaultScreen()),
+          ),
+          GoRoute(
+            path: AppRoutes.hyperVaultVaultNew,
+            pageBuilder: (context, state) => MaterialPage(
+              child: NewFromChatScreen(
+                initialSourcePrompt: state.uri.queryParameters['source_prompt'],
+              ),
+            ),
+          ),
+          GoRoute(
+            path: AppRoutes.hyperVaultMemory,
+            pageBuilder: (context, state) =>
+                const NoTransitionPage(child: HypervaultMemoryScreen()),
+          ),
+          GoRoute(
+            path: AppRoutes.hyperVaultBackends,
+            pageBuilder: (context, state) =>
+                const NoTransitionPage(child: HyperVaultBackendsScreen()),
+          ),
+          GoRoute(
+            path: AppRoutes.hyperVaultContextBridge,
+            pageBuilder: (context, state) =>
+                const NoTransitionPage(child: HyperVaultContextBridgeScreen()),
+          ),
+          GoRoute(
+            path: AppRoutes.hyperVaultMcp,
+            pageBuilder: (context, state) =>
+                const NoTransitionPage(child: HyperVaultMcpScreen()),
+          ),
+          GoRoute(
+            path: AppRoutes.hyperVaultImport,
+            pageBuilder: (context, state) =>
+                const NoTransitionPage(child: HvImportScreen()),
+          ),
+          GoRoute(
+            path: AppRoutes.hyperVaultDomains,
+            pageBuilder: (context, state) =>
+                const NoTransitionPage(child: HvDomainsScreen()),
+          ),
+          GoRoute(
+            path: AppRoutes.hyperVaultAdmin,
+            pageBuilder: (context, state) =>
+                const NoTransitionPage(child: HvAdminScreen()),
+          ),
+          GoRoute(
+            path: AppRoutes.hyperVaultThemes,
+            pageBuilder: (context, state) =>
+                const NoTransitionPage(child: HvThemeGalleryScreen()),
+          ),
         ],
       ),
     ],
@@ -284,6 +354,9 @@ class AppShell extends ConsumerWidget {
     final location = GoRouterState.of(context).uri.path;
     final isHome = location == AppRoutes.home;
     final hasActiveChat = ref.watch(conv.activeConversationProvider) != null;
+    // Only reconnects/refreshes the session if the user has signed in to
+    // HyperVault before; a no-op (no network) for local-only users.
+    ref.watch(hyperVaultAutoConnectProvider);
 
     return PopScope(
       canPop: isHome && !hasActiveChat,

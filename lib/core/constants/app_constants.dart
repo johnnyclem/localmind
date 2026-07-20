@@ -22,4 +22,8 @@ class AppConstants {
   static const int ollamaDefaultPort = 11434;
 
   static const String openRouterBaseUrl = 'https://openrouter.ai/api/v1';
+
+  /// Canonical hosted HyperVault deployment. Self-hosters can point the app
+  /// at a different origin from the HyperVault sign-in screen.
+  static const String hyperVaultDefaultBaseUrl = 'https://hypervault.store';
 }
