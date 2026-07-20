@@ -19,15 +19,25 @@ class AppRoutes {
   static const String ttsModels = '/tts-models';
   static const String savedMessages = '/saved-messages';
   static const String lmStudioModelBrowser = '/lm-studio-models';
-  static const String hyperVaultAccount = '/hypervault';
-  static const String hyperVaultVault = '/hypervault/vault';
-  static const String hyperVaultVaultNew = '/hypervault/vault/new';
-  static const String hyperVaultMemory = '/hypervault/memory';
-  static const String hyperVaultBackends = '/hypervault/backends';
-  static const String hyperVaultContextBridge = '/hypervault/context-bridge';
-  static const String hyperVaultMcp = '/hypervault/mcp';
-  static const String hyperVaultImport = '/hypervault/import';
-  static const String hyperVaultDomains = '/hypervault/domains';
-  static const String hyperVaultAdmin = '/hypervault/admin';
-  static const String hyperVaultThemes = '/hypervault/themes';
+
+  // HyperVault
+  static const String authSignIn = '/auth/sign-in';
+  static const String authWaitlist = '/auth/waitlist';
+  static const String vault = '/vault';
+  static const String vaultGraph = '/vault/graph';
+  static const String artifactDetail = '/vault/artifact';
+  static const String saveArtifact = '/vault/save';
+  static const String sharedWithMe = '/vault/shared';
+  static const String memory = '/memory';
+  static const String memoryDetail = '/memory/detail';
+  static const String memoryGraph = '/memory/graph';
+  static const String gitMind = '/memory/git-mind';
+  static const String hvChat = '/hv-chat';
+  static const String hvChatThread = '/hv-chat/thread';
+  static const String backends = '/backends';
+  static const String addBackend = '/backends/add';
+  static const String mcpToolsConsole = '/hv-tools';
+  static const String importHistory = '/import';
+  static const String domains = '/domains';
+  static const String admin = '/admin';
 }
