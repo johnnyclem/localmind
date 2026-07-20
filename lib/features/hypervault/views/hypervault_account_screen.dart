@@ -8,6 +8,7 @@ import '../../../core/models/enums.dart';
 import '../../../core/providers/storage_providers.dart';
 import '../../../core/routes/app_routes.dart';
 import '../../hypervault_vault/data/hv_vault_cache.dart';
+import '../data/hv_invite_redeem.dart';
 import '../data/models/hv_api_error.dart';
 import '../providers/hypervault_providers.dart';
 
@@ -294,14 +295,9 @@ class _SignedInPanel extends ConsumerWidget {
         const SizedBox(height: 16),
         gate.maybeWhen(
           data: (status) => status == HyperVaultGateStatus.waitlisted
-              ? Padding(
-                  padding: const EdgeInsets.only(bottom: 16),
-                  child: Text(
-                    'Your account is on the HyperVault waitlist. Redeem an '
-                    'invite code or claim access from the web app, then tap '
-                    'below to re-check.',
-                    style: theme.textTheme.bodySmall,
-                  ),
+              ? const Padding(
+                  padding: EdgeInsets.only(bottom: 16),
+                  child: _InviteRedeemForm(),
                 )
               : const _FeatureHub(),
           orElse: () => const SizedBox.shrink(),
@@ -319,6 +315,118 @@ class _SignedInPanel extends ConsumerWidget {
           child: ShadButton.destructive(
             onPressed: onSignOut,
             child: const Text('Sign out'),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Lets a waitlisted user unlock their account with an invite code without
+/// leaving the app. Redeems via [HyperVaultAuthService.redeemInviteCode]
+/// (a direct Supabase RPC — see that method's doc comment for why this
+/// doesn't call the REST `/api/invite/redeem` route).
+class _InviteRedeemForm extends ConsumerStatefulWidget {
+  const _InviteRedeemForm();
+
+  @override
+  ConsumerState<_InviteRedeemForm> createState() => _InviteRedeemFormState();
+}
+
+class _InviteRedeemFormState extends ConsumerState<_InviteRedeemForm> {
+  final _codeController = TextEditingController();
+  bool _redeeming = false;
+  String? _error;
+
+  @override
+  void dispose() {
+    _codeController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _redeem() async {
+    final code = _codeController.text.trim();
+    if (code.isEmpty) return;
+    setState(() {
+      _redeeming = true;
+      _error = null;
+    });
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      final result = await ref
+          .read(hyperVaultAuthServiceProvider)
+          .redeemInviteCode(code);
+      if (hvRedeemResultIsSuccess(result)) {
+        _codeController.clear();
+        ref.invalidate(hyperVaultGateProvider);
+        if (mounted) {
+          messenger.showSnackBar(
+            const SnackBar(content: Text('Invite code redeemed — welcome!')),
+          );
+        }
+      } else if (mounted) {
+        setState(
+          () => _error =
+              hvRedeemMessages[result] ?? 'Could not redeem that code.',
+        );
+      }
+    } on HvApiError catch (e) {
+      if (mounted) setState(() => _error = e.error);
+    } catch (e) {
+      if (mounted) setState(() => _error = 'Network hiccup — try again.');
+    } finally {
+      if (mounted) setState(() => _redeeming = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Your account is on the HyperVault waitlist. Enter an invite code '
+          'to unlock it, or claim access from the web app and tap "Re-check '
+          'access" below.',
+          style: theme.textTheme.bodySmall,
+        ),
+        const SizedBox(height: 12),
+        ShadInputFormField(
+          controller: _codeController,
+          label: const Text('Invite code'),
+          placeholder: const Text('HV-XXXX-XXXX'),
+          textCapitalization: TextCapitalization.characters,
+          enabled: !_redeeming,
+          onSubmitted: (_) => _redeem(),
+        ),
+        if (_error != null) ...[
+          const SizedBox(height: 6),
+          Semantics(
+            liveRegion: true,
+            child: Text(
+              _error!,
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: theme.colorScheme.error,
+              ),
+            ),
+          ),
+        ],
+        const SizedBox(height: 8),
+        SizedBox(
+          height: 44,
+          child: ShadButton(
+            width: double.infinity,
+            enabled: !_redeeming,
+            leading: _redeeming
+                ? const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : null,
+            onPressed: _redeem,
+            child: const Text('Redeem invite code'),
           ),
         ),
       ],
