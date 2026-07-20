@@ -91,15 +91,19 @@ class _HyperVaultAccountScreenState
             children: [
               Row(
                 children: [
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.primary.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: HugeIcon(
-                      icon: HugeIcons.strokeRoundedCloudServer,
-                      color: theme.colorScheme.primary,
+                  ExcludeSemantics(
+                    child: Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.primary.withValues(
+                          alpha: 0.12,
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: HugeIcon(
+                        icon: HugeIcons.strokeRoundedCloudServer,
+                        color: theme.colorScheme.primary,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -122,44 +126,75 @@ class _HyperVaultAccountScreenState
                   ),
                 ),
                 const SizedBox(height: 20),
-                ShadButton(
-                  width: double.infinity,
+                Semantics(
+                  button: true,
                   enabled: !_signingIn,
-                  leading: _signingIn
-                      ? const SizedBox(
-                          width: 16,
-                          height: 16,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const HugeIcon(icon: HugeIcons.strokeRoundedGoogle),
-                  onPressed: _signIn,
-                  child: const Text('Continue with Google'),
+                  label: _signingIn
+                      ? 'Continue with Google, signing in'
+                      : 'Continue with Google',
+                  child: SizedBox(
+                    height: 44,
+                    child: ShadButton(
+                      width: double.infinity,
+                      enabled: !_signingIn,
+                      leading: _signingIn
+                          ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const HugeIcon(
+                              icon: HugeIcons.strokeRoundedGoogle,
+                            ),
+                      onPressed: _signIn,
+                      child: const Text('Continue with Google'),
+                    ),
+                  ),
                 ),
                 const SizedBox(height: 8),
                 capabilities.when(
                   data: (_) => const SizedBox.shrink(),
                   loading: () => Padding(
                     padding: const EdgeInsets.only(top: 8),
-                    child: Text(
-                      'Connecting to ${ref.watch(hyperVaultBaseUrlProvider)}…',
-                      style: theme.textTheme.labelSmall,
+                    child: Semantics(
+                      liveRegion: true,
+                      child: Text(
+                        'Connecting to ${ref.watch(hyperVaultBaseUrlProvider)}…',
+                        style: theme.textTheme.labelSmall,
+                      ),
                     ),
                   ),
                   error: (e, _) => Padding(
                     padding: const EdgeInsets.only(top: 8),
-                    child: Text(
-                      e is HvApiError ? e.error : 'Could not reach deployment',
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: theme.colorScheme.error,
+                    child: Semantics(
+                      liveRegion: true,
+                      child: Text(
+                        e is HvApiError
+                            ? e.error
+                            : 'Could not reach deployment',
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: theme.colorScheme.error,
+                        ),
                       ),
                     ),
                   ),
                 ),
                 const SizedBox(height: 16),
-                TextButton(
-                  onPressed: () =>
-                      setState(() => _showAdvanced = !_showAdvanced),
-                  child: Text(_showAdvanced ? 'Hide advanced' : 'Self-hosted deployment?'),
+                Semantics(
+                  button: true,
+                  toggled: _showAdvanced,
+                  child: SizedBox(
+                    height: 44,
+                    child: TextButton(
+                      onPressed: () =>
+                          setState(() => _showAdvanced = !_showAdvanced),
+                      child: Text(
+                        _showAdvanced
+                            ? 'Hide advanced'
+                            : 'Self-hosted deployment?',
+                      ),
+                    ),
+                  ),
                 ),
                 if (_showAdvanced) ...[
                   ShadInputFormField(
@@ -168,9 +203,13 @@ class _HyperVaultAccountScreenState
                     placeholder: const Text('https://hypervault.store'),
                   ),
                   const SizedBox(height: 8),
-                  ShadButton.outline(
-                    onPressed: _applyBaseUrl,
-                    child: const Text('Use this deployment'),
+                  Semantics(
+                    button: true,
+                    hint: 'Applies the deployment URL above',
+                    child: ShadButton.outline(
+                      onPressed: _applyBaseUrl,
+                      child: const Text('Use this deployment'),
+                    ),
                   ),
                 ],
               ] else ...[
@@ -205,32 +244,37 @@ class _SignedInPanel extends ConsumerWidget {
           padding: const EdgeInsets.all(16),
           child: Row(
             children: [
-              const HugeIcon(icon: HugeIcons.strokeRoundedUserCircle02),
+              const ExcludeSemantics(
+                child: HugeIcon(icon: HugeIcons.strokeRoundedUserCircle02),
+              ),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(email, style: theme.textTheme.titleSmall),
-                    gate.when(
-                      data: (status) => Text(
-                        status == HyperVaultGateStatus.waitlisted
-                            ? 'Waitlisted'
-                            : 'Connected',
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: status == HyperVaultGateStatus.waitlisted
-                              ? Colors.orange
-                              : Colors.green,
+                    Semantics(
+                      liveRegion: true,
+                      child: gate.when(
+                        data: (status) => Text(
+                          status == HyperVaultGateStatus.waitlisted
+                              ? 'Waitlisted'
+                              : 'Connected',
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: status == HyperVaultGateStatus.waitlisted
+                                ? Colors.orange
+                                : Colors.green,
+                          ),
                         ),
-                      ),
-                      loading: () => Text(
-                        'Checking access…',
-                        style: theme.textTheme.labelSmall,
-                      ),
-                      error: (_, _) => Text(
-                        'Could not verify access',
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: theme.colorScheme.error,
+                        loading: () => Text(
+                          'Checking access…',
+                          style: theme.textTheme.labelSmall,
+                        ),
+                        error: (_, _) => Text(
+                          'Could not verify access',
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: theme.colorScheme.error,
+                          ),
                         ),
                       ),
                     ),
@@ -255,14 +299,20 @@ class _SignedInPanel extends ConsumerWidget {
               : const SizedBox.shrink(),
           orElse: () => const SizedBox.shrink(),
         ),
-        ShadButton.outline(
-          onPressed: () => ref.invalidate(hyperVaultGateProvider),
-          child: const Text('Re-check access'),
+        SizedBox(
+          height: 44,
+          child: ShadButton.outline(
+            onPressed: () => ref.invalidate(hyperVaultGateProvider),
+            child: const Text('Re-check access'),
+          ),
         ),
         const SizedBox(height: 8),
-        ShadButton.destructive(
-          onPressed: onSignOut,
-          child: const Text('Sign out'),
+        SizedBox(
+          height: 44,
+          child: ShadButton.destructive(
+            onPressed: onSignOut,
+            child: const Text('Sign out'),
+          ),
         ),
       ],
     );
