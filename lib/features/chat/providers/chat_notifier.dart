@@ -19,7 +19,6 @@ import 'package:localmind/features/models/data/models/model_info.dart';
 import 'package:localmind/features/on_device/providers/on_device_providers.dart';
 import 'package:localmind/features/personas/providers/personas_providers.dart';
 import 'package:localmind/features/personas/utils/persona_prompt_utils.dart';
-import 'package:localmind/features/hypervault/providers/hypervault_providers.dart';
 import 'package:localmind/features/servers/data/models/server.dart';
 import 'package:localmind/features/servers/providers/server_providers.dart';
 import 'package:localmind/objectbox.g.dart';
@@ -814,7 +813,6 @@ class ChatNotifier extends Notifier<ChatState> {
       String reasoningContent = '';
       var streamingAssistantMessage = assistantMessage;
       _latestStreamingMessage = streamingAssistantMessage;
-      String? hyperVaultResponseId;
 
       if (chatService != null) {
         final mcpConfig = ref.read(chatMcpConfigProvider);
@@ -857,9 +855,6 @@ class ChatNotifier extends Notifier<ChatState> {
               params: chatParams,
               integrations: integrations,
               tools: tools,
-              previousResponseId: ref
-                  .read(hyperVaultConversationLinkServiceProvider)
-                  .remoteIdFor(_activeConversationId),
             )
             .listen(
               (response) async {
@@ -961,9 +956,6 @@ class ChatNotifier extends Notifier<ChatState> {
                     if (response.stats != null) {
                       _streamStats = response.stats;
                     }
-                    if (response.responseId != null) {
-                      hyperVaultResponseId = response.responseId;
-                    }
                     break;
                 }
               },
@@ -978,11 +970,6 @@ class ChatNotifier extends Notifier<ChatState> {
               ref.read(chatBackgroundServiceProvider).stop();
               final streamConvId = assistantMessage.conversationId;
               final isCurrentContext = _activeConversationId == streamConvId;
-              if (hyperVaultResponseId != null) {
-                await ref
-                    .read(hyperVaultConversationLinkServiceProvider)
-                    .link(streamConvId, hyperVaultResponseId!);
-              }
                 final streamingMessage = streamingAssistantMessage;
                 final hasContent =
                     streamingMessage.content.isNotEmpty ||
@@ -1788,7 +1775,6 @@ class ChatNotifier extends Notifier<ChatState> {
       var streamingAssistantMessage = assistantMessage;
       _latestStreamingMessage = streamingAssistantMessage;
       var isFirstContinueChunk = continueGeneration;
-      String? hyperVaultResponseId;
 
       final mcpConfig = ref.read(chatMcpConfigProvider);
       final integrations =
@@ -1825,9 +1811,6 @@ class ChatNotifier extends Notifier<ChatState> {
             integrations: integrations,
             tools: tools,
             continueGeneration: continueGeneration,
-            previousResponseId: ref
-                .read(hyperVaultConversationLinkServiceProvider)
-                .remoteIdFor(_activeConversationId),
           )
           .listen(
             (response) async {
@@ -1923,9 +1906,6 @@ class ChatNotifier extends Notifier<ChatState> {
                   if (response.stats != null) {
                     _streamStats = response.stats;
                   }
-                  if (response.responseId != null) {
-                    hyperVaultResponseId = response.responseId;
-                  }
                   break;
                 default:
                   break;
@@ -1936,11 +1916,6 @@ class ChatNotifier extends Notifier<ChatState> {
               _uiUpdateTimer = null;
               final streamConvId = assistantMessage.conversationId;
               final isCurrentContext = _activeConversationId == streamConvId;
-              if (hyperVaultResponseId != null) {
-                await ref
-                    .read(hyperVaultConversationLinkServiceProvider)
-                    .link(streamConvId, hyperVaultResponseId!);
-              }
 
               final finalMessage = _finalizeStreamMessage(
                 streamingAssistantMessage.copyWith(

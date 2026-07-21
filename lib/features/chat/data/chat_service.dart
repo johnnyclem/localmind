@@ -65,8 +65,6 @@ abstract class ChatService {
           );
         }
         return OnDeviceChatService(onDeviceGemma);
-      case ServerType.hyperVault:
-        return HyperVaultChatService(dio);
     }
   }
 }
@@ -79,12 +77,6 @@ class ChatResponse {
   final InvalidToolCallData? invalidToolCall;
   final ChatStats? stats;
 
-  /// Provider-side conversation/response id to continue from on the next
-  /// turn (echoed back via [ChatService.sendMessage]'s `previousResponseId`
-  /// parameter). Only populated by services backed by a stateful server-side
-  /// conversation, e.g. HyperVault's `conversation_id`.
-  final String? responseId;
-
   const ChatResponse({
     required this.type,
     this.content,
@@ -92,7 +84,6 @@ class ChatResponse {
     this.toolCall,
     this.invalidToolCall,
     this.stats,
-    this.responseId,
   });
 }
 
@@ -1112,102 +1103,6 @@ class OpenRouterChatService implements ChatService {
   }
 }
 
-/// Chat backed by HyperVault's `POST /api/chat` — a non-streaming, stateful
-/// endpoint (server holds the conversation; the client sends only the
-/// newest user turn plus the returned `conversation_id` to continue it, via
-/// [ChatService.sendMessage]'s `previousResponseId`/[ChatResponse.responseId]
-/// round-trip). `modelId` here is a HyperVault `backend_id` (one of the
-/// user's connected LLM backends, from `GET /api/backends`). Tool dispatch
-/// happens server-side against HyperVault's own compiled toolkit, so
-/// [tools]/[integrations] (LocalMind's own MCP loop) are not sent — see
-/// HyperVault docs/mobile/00-engineering-spec.md §4.3.
-class HyperVaultChatService implements ChatService {
-  final Dio _dio;
-  CancelToken? _cancelToken;
-
-  HyperVaultChatService(this._dio);
-
-  @override
-  Stream<ChatResponse> sendMessage({
-    required Server server,
-    required String modelId,
-    required List<Message> messages,
-    required ChatParameters params,
-    List<McpIntegration>? integrations,
-    List<ToolDefinition>? tools,
-    String? previousResponseId,
-    bool continueGeneration = false,
-  }) async* {
-    _cancelToken = CancelToken();
-
-    final lastUserMessage = messages.lastWhere(
-      (m) => m.role == MessageRole.user,
-      orElse: () => messages.last,
-    );
-
-    try {
-      final response = await _dio.post<Map<String, dynamic>>(
-        server.chatEndpoint,
-        data: {
-          'backend_id': modelId,
-          'message': lastUserMessage.content,
-          if (previousResponseId != null && previousResponseId.isNotEmpty)
-            'conversation_id': previousResponseId,
-          'use_recall': true,
-        },
-        options: Options(
-          headers: {
-            'Content-Type': 'application/json',
-            ...buildServerAuthHeaders(server),
-          },
-          // POST /api/chat has a 120s server-side budget (maxDuration 120).
-          receiveTimeout: const Duration(seconds: 130),
-          sendTimeout: const Duration(seconds: 30),
-        ),
-        cancelToken: _cancelToken,
-      );
-
-      final data = response.data ?? const {};
-      final reply = (data['reply'] as Map?)?.cast<String, dynamic>();
-      final content = reply?['content'] as String? ?? '';
-      final conversationId = data['conversation_id']?.toString();
-
-      if (content.isNotEmpty) {
-        yield ChatResponse(type: ChatResponseType.message, content: content);
-      }
-
-      final toolTurns = (data['tools'] as Map?)?['turns'];
-      if (toolTurns is List) {
-        for (final turn in toolTurns) {
-          if (turn is! Map) continue;
-          yield ChatResponse(
-            type: ChatResponseType.toolCall,
-            toolCall: ToolCallData(
-              tool: turn['tool']?.toString() ?? turn['intent']?.toString() ?? '',
-              arguments: const {},
-              output: turn['preview']?.toString(),
-            ),
-          );
-        }
-      }
-
-      yield ChatResponse(type: ChatResponseType.done, responseId: conversationId);
-    } on DioException catch (e) {
-      Log.error('HyperVault chat error: $e');
-      yield ChatResponse(type: ChatResponseType.error, content: _handleChatError(e));
-      return;
-    } catch (e) {
-      Log.error('HyperVault chat error: $e');
-      yield ChatResponse(type: ChatResponseType.error, content: e.toString());
-    }
-  }
-
-  @override
-  void cancelStream() {
-    _cancelToken?.cancel('User cancelled');
-  }
-}
-
 /// Applies the Think toggle to a request body. Different local/hosted
 /// backends expose "disable reasoning for this hybrid model" a handful of
 /// different ways (a `reasoning` object, a top-level `reasoning_effort`,
@@ -1347,8 +1242,4 @@ ToolTransportAdapter createAdapterForServerType(ServerType type) => switch (type
   ServerType.lmStudio => OpenAiToolAdapter(),
   ServerType.onDevice => OpenAiToolAdapter(),
   ServerType.ollama => OllamaToolAdapter(),
-  // HyperVault dispatches tools server-side and returns completed turns
-  // directly in the response body (see HyperVaultChatService) rather than
-  // streaming tool-call deltas, so no adapter parses them here.
-  ServerType.hyperVault => OpenAiToolAdapter(),
 };

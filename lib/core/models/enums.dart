@@ -200,18 +200,7 @@ Voice? voiceFromSettings(String? voiceId, EngineId engine) {
   }
 }
 
-enum ServerType {
-  lmStudio,
-  openAICompatible,
-  ollama,
-  openRouter,
-  onDevice,
-  hyperVault,
-}
-
-/// Invite/waitlist gate outcome for a signed-in HyperVault account, mirroring
-/// the web app's `account_access` resolution (see HyperVault PRD M2).
-enum HyperVaultGateStatus { approved, waitlisted, admin }
+enum ServerType { lmStudio, openAICompatible, ollama, openRouter, onDevice }
 
 enum ConnectionStatus { connected, disconnected, checking, error }
 

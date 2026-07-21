@@ -56,8 +56,6 @@ class ServerApiService {
           return _parseOpenRouterModels(response.data, server);
         case ServerType.onDevice:
           return [];
-        case ServerType.hyperVault:
-          return _parseHyperVaultBackends(response.data, server);
       }
     } catch (e) {
       throw Exception('Failed to fetch models: $e');
@@ -67,8 +65,7 @@ class ServerApiService {
   Future<Set<String>> fetchRunningModels(Server server) async {
     if (server.type == ServerType.openRouter ||
         server.type == ServerType.openAICompatible ||
-        server.type == ServerType.onDevice ||
-        server.type == ServerType.hyperVault) {
+        server.type == ServerType.onDevice) {
       return {};
     }
 
@@ -89,8 +86,7 @@ class ServerApiService {
 
   Future<void> loadModel(Server server, String modelId) async {
     if (server.type == ServerType.openRouter ||
-        server.type == ServerType.onDevice ||
-        server.type == ServerType.hyperVault) {
+        server.type == ServerType.onDevice) {
       return;
     }
 
@@ -114,7 +110,6 @@ class ServerApiService {
         return;
       case ServerType.openRouter:
       case ServerType.onDevice:
-      case ServerType.hyperVault:
         break;
     }
   }
@@ -125,8 +120,7 @@ class ServerApiService {
     int? contextLength,
   }) async {
     if (server.type == ServerType.openRouter ||
-        server.type == ServerType.onDevice ||
-        server.type == ServerType.hyperVault) {
+        server.type == ServerType.onDevice) {
       return null;
     }
 
@@ -158,7 +152,6 @@ class ServerApiService {
         return null;
       case ServerType.openRouter:
       case ServerType.onDevice:
-      case ServerType.hyperVault:
         return null;
     }
   }
@@ -188,8 +181,7 @@ class ServerApiService {
     String? instanceId,
   }) async {
     if (server.type == ServerType.openRouter ||
-        server.type == ServerType.onDevice ||
-        server.type == ServerType.hyperVault) {
+        server.type == ServerType.onDevice) {
       return;
     }
 
@@ -219,7 +211,6 @@ class ServerApiService {
         break;
       case ServerType.openRouter:
       case ServerType.onDevice:
-      case ServerType.hyperVault:
         break;
     }
   }
@@ -443,35 +434,6 @@ class ServerApiService {
           ),
         );
       }
-    }
-    return models;
-  }
-
-  /// Maps `GET /api/backends` — the user's connected HyperVault LLM
-  /// backends (OpenAI, Anthropic, xAI, Gemini, Mistral, Ollama, LM Studio,
-  /// or a custom endpoint) — onto [ModelInfo] so each backend can be picked
-  /// from the same model picker as any other server. The backend's `id` is
-  /// what `POST /api/chat` expects as `backend_id`.
-  List<ModelInfo> _parseHyperVaultBackends(dynamic data, Server server) {
-    final List<ModelInfo> models = [];
-    if (data == null) return models;
-    final items = data['backends'];
-    if (items is! List) return models;
-    for (final item in items) {
-      if (item is! Map) continue;
-      final id = item['id']?.toString() ?? '';
-      if (id.isEmpty) continue;
-      final provider = item['provider']?.toString();
-      final defaultModel = item['default_model']?.toString();
-      models.add(
-        ModelInfo(
-          id: id,
-          name: item['name']?.toString() ?? provider ?? id,
-          description: [?provider, ?defaultModel].join(' · '),
-          serverType: server.type,
-          serverId: server.id,
-        ),
-      );
     }
     return models;
   }

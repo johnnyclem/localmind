@@ -1,7 +1,8 @@
 class AppConstants {
   static const String appName = 'LocalMind';
   static const String appTagline = 'Your AI. Your Device. Your Rules.';
-  static const String version = '1.0.0'; // Fallback; prefer PackageInfo.version at runtime
+  static const String version =
+      '1.0.0'; // Fallback; prefer PackageInfo.version at runtime
 
   static const double defaultTemperature = 0.7;
   static const double defaultTopP = 0.9;
@@ -23,7 +24,10 @@ class AppConstants {
 
   static const String openRouterBaseUrl = 'https://openrouter.ai/api/v1';
 
-  /// Canonical hosted HyperVault deployment. Self-hosters can point the app
-  /// at a different origin from the HyperVault sign-in screen.
-  static const String hyperVaultDefaultBaseUrl = 'https://hypervault.store';
+  /// Canonical HyperVault app URL used to bootstrap `GET /api/capabilities`
+  /// before the real `capabilities.app_url` is known. Every subsequent call
+  /// targets `capabilities.app_url` once it has loaded successfully.
+  static const String hypervaultDefaultBaseUrl = 'https://hypervault.store';
+  static const String hypervaultDeepLinkScheme = 'hypervault';
+  static const String hypervaultAuthCallbackUrl = 'hypervault://auth/callback';
 }

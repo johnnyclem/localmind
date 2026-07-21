@@ -8,6 +8,8 @@ import '../../core/routes/app_routes.dart';
 import '../../core/components/app_sizes.dart';
 import '../../core/models/enums.dart';
 import '../../l10n/app_localizations.dart';
+import '../../core/providers/hypervault_providers.dart';
+import '../auth/providers/auth_providers.dart';
 import '../chat/providers/chat_providers.dart';
 import '../lm_studio_catalog/views/lm_studio_download_widgets.dart';
 import '../servers/providers/server_providers.dart';
@@ -36,21 +38,23 @@ class SidebarWidget extends ConsumerWidget {
     final isTtsModels = location.startsWith(AppRoutes.ttsModels);
     final isCloudSync = location.startsWith(AppRoutes.cloudSync);
     final isSettings = location == AppRoutes.settings;
-    final isHyperVault = location.startsWith(AppRoutes.hyperVaultAccount);
     final isHome = location == AppRoutes.home || location == '/';
-    // Local-only check (no network): whether a HyperVault server entry is
-    // already stored, i.e. the user has connected before. Deliberately does
-    // not watch the live session provider here, which would eagerly fetch
-    // capabilities on every sidebar render (see hyperVaultAutoConnectProvider).
-    final hyperVaultConnected = ref
-        .watch(serversProvider)
-        .value
-        ?.any((s) => s.type == ServerType.hyperVault) ?? false;
     final hasActiveChat = ref.watch(hasActiveChatSessionProvider);
     final isTemporary = ref.watch(chatProvider.select((s) => s.isTemporary));
     final activeServer = ref.watch(activeServerProvider);
     final isLmStudio =
         activeServer != null && activeServer.type == ServerType.lmStudio;
+    final isVault = location.startsWith(AppRoutes.vault);
+    final isMemory = location.startsWith(AppRoutes.memory);
+    final isHvChat = location.startsWith(AppRoutes.hvChat);
+    final isBackends = location.startsWith(AppRoutes.backends);
+    final isHvTools = location.startsWith(AppRoutes.mcpToolsConsole);
+    final isDomains = location.startsWith(AppRoutes.domains);
+    final isAdminRoute = location.startsWith(AppRoutes.admin);
+    final isHyperVaultAdmin = ref.watch(
+      capabilitiesProvider.select((c) => c.value?.user?.isAdmin ?? false),
+    );
+    final authEmail = ref.watch(authProvider.select((s) => s.email));
 
     return Container(
       width: AppSizes.sidebarWidth,
@@ -131,6 +135,90 @@ class SidebarWidget extends ConsumerWidget {
               child: SingleChildScrollView(
                 child: Column(
                   children: [
+                    // HyperVault
+                    DrawerNavItem(
+                      iconData: HugeIcons.strokeRoundedSafe,
+                      label: 'Vault',
+                      isSelected: isVault,
+                      onTap: () {
+                        if (Scaffold.maybeOf(context)?.isDrawerOpen ?? false) {
+                          Navigator.pop(context);
+                        }
+                        context.go(AppRoutes.vault);
+                      },
+                    ),
+                    DrawerNavItem(
+                      iconData: HugeIcons.strokeRoundedBrain02,
+                      label: 'Memory',
+                      isSelected: isMemory,
+                      onTap: () {
+                        if (Scaffold.maybeOf(context)?.isDrawerOpen ?? false) {
+                          Navigator.pop(context);
+                        }
+                        context.go(AppRoutes.memory);
+                      },
+                    ),
+                    DrawerNavItem(
+                      iconData: HugeIcons.strokeRoundedBubbleChatSpark,
+                      label: 'HyperVault Chat',
+                      isSelected: isHvChat,
+                      onTap: () {
+                        if (Scaffold.maybeOf(context)?.isDrawerOpen ?? false) {
+                          Navigator.pop(context);
+                        }
+                        context.go(AppRoutes.hvChat);
+                      },
+                    ),
+                    DrawerNavItem(
+                      iconData: HugeIcons.strokeRoundedCloudServer,
+                      label: 'Backends',
+                      isSelected: isBackends,
+                      onTap: () {
+                        if (Scaffold.maybeOf(context)?.isDrawerOpen ?? false) {
+                          Navigator.pop(context);
+                        }
+                        context.go(AppRoutes.backends);
+                      },
+                    ),
+                    DrawerNavItem(
+                      iconData: HugeIcons.strokeRoundedToolbox,
+                      label: 'Tools',
+                      isSelected: isHvTools,
+                      onTap: () {
+                        if (Scaffold.maybeOf(context)?.isDrawerOpen ?? false) {
+                          Navigator.pop(context);
+                        }
+                        context.go(AppRoutes.mcpToolsConsole);
+                      },
+                    ),
+                    DrawerNavItem(
+                      iconData: HugeIcons.strokeRoundedGlobe02,
+                      label: 'Domains',
+                      isSelected: isDomains,
+                      onTap: () {
+                        if (Scaffold.maybeOf(context)?.isDrawerOpen ?? false) {
+                          Navigator.pop(context);
+                        }
+                        context.go(AppRoutes.domains);
+                      },
+                    ),
+                    if (isHyperVaultAdmin)
+                      DrawerNavItem(
+                        iconData: HugeIcons.strokeRoundedShield01,
+                        label: 'Admin',
+                        isSelected: isAdminRoute,
+                        onTap: () {
+                          if (Scaffold.maybeOf(context)?.isDrawerOpen ??
+                              false) {
+                            Navigator.pop(context);
+                          }
+                          context.go(AppRoutes.admin);
+                        },
+                      ),
+                    const SizedBox(height: 8),
+                    const Divider(height: 1, indent: 16, endIndent: 16),
+                    const SizedBox(height: 8),
+                    // Local / on-device
                     DrawerNavItem(
                       iconData: HugeIcons.strokeRoundedChatting01,
                       label: l10n.nav_history,
@@ -231,24 +319,6 @@ class SidebarWidget extends ConsumerWidget {
                     const Divider(height: 1, indent: 16, endIndent: 16),
                     const SizedBox(height: 8),
                     DrawerNavItem(
-                      iconData: HugeIcons.strokeRoundedCloudServer,
-                      label: 'HyperVault',
-                      isSelected: isHyperVault,
-                      trailing: hyperVaultConnected
-                          ? const HugeIcon(
-                              icon: HugeIcons.strokeRoundedCheckmarkCircle02,
-                              size: 16,
-                              color: Colors.green,
-                            )
-                          : null,
-                      onTap: () {
-                        if (Scaffold.maybeOf(context)?.isDrawerOpen ?? false) {
-                          Navigator.pop(context);
-                        }
-                        context.go(AppRoutes.hyperVaultAccount);
-                      },
-                    ),
-                    DrawerNavItem(
                       iconData: HugeIcons.strokeRoundedCloudSavingDone02,
                       label: l10n.cloud_sync,
                       isSelected: isCloudSync,
@@ -270,6 +340,19 @@ class SidebarWidget extends ConsumerWidget {
                         context.go(AppRoutes.settings);
                       },
                     ),
+                    if (authEmail != null)
+                      DrawerNavItem(
+                        iconData: HugeIcons.strokeRoundedLogout01,
+                        label: 'Sign out',
+                        isSelected: false,
+                        onTap: () {
+                          if (Scaffold.maybeOf(context)?.isDrawerOpen ??
+                              false) {
+                            Navigator.pop(context);
+                          }
+                          ref.read(authProvider.notifier).signOut();
+                        },
+                      ),
                   ],
                 ),
               ),
@@ -279,6 +362,20 @@ class SidebarWidget extends ConsumerWidget {
             const TtsPlayerBar(),
 
             // Bottom Section
+            if (authEmail != null)
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 4,
+                ),
+                child: Text(
+                  authEmail,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
             const GitHubRepoCard(),
             const Divider(height: 1),
             const ActiveServerIndicator(),
