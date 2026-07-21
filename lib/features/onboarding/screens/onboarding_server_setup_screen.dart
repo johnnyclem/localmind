@@ -66,13 +66,6 @@ class _OnboardingServerSetupScreenState
         defaultName = 'On-Device';
         defaultPort = '0';
         break;
-      case ServerType.hyperVault:
-        // HyperVault is set up via OAuth sign-in (see
-        // HyperVaultSignInScreen), not this host/port form; the onboarding
-        // server-type picker routes it there directly.
-        defaultName = 'HyperVault';
-        defaultPort = '0';
-        break;
     }
 
     _nameController = TextEditingController(text: defaultName);
