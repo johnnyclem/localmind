@@ -174,4 +174,31 @@ void main() {
       );
     });
   });
+
+  group('isMcpOAuthCallbackDeepLink', () {
+    test('true for hypervault://mcp-oauth-callback', () {
+      expect(
+        isMcpOAuthCallbackDeepLink(
+          Uri.parse('hypervault://mcp-oauth-callback?code=abc&state=xyz'),
+        ),
+        isTrue,
+      );
+    });
+
+    test('false for the unrelated auth callback host', () {
+      expect(
+        isMcpOAuthCallbackDeepLink(Uri.parse('hypervault://auth/callback')),
+        isFalse,
+      );
+    });
+
+    test('false for a universal-link URL, even with a matching path', () {
+      expect(
+        isMcpOAuthCallbackDeepLink(
+          Uri.parse('https://hypervault.store/mcp-oauth-callback'),
+        ),
+        isFalse,
+      );
+    });
+  });
 }

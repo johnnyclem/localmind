@@ -39,6 +39,7 @@ import 'features/conversations/providers/conversation_providers.dart' as conv;
 import 'features/chat/views/chat_screen.dart';
 import 'features/conversations/views/chat_history_screen.dart';
 import 'features/mcp/views/mcp_tools_screen.dart';
+import 'features/mcp_registry/views/mcp_registry_screen.dart';
 import 'features/on_device/views/model_manager_screen.dart';
 import 'features/onboarding/screens/onboarding_language_screen.dart';
 import 'features/onboarding/screens/onboarding_model_download_screen.dart';
@@ -295,6 +296,11 @@ final routerProvider = Provider<GoRouter>((ref) {
             path: AppRoutes.mcpTools,
             pageBuilder: (context, state) =>
                 const NoTransitionPage(child: McpToolsScreen()),
+          ),
+          GoRoute(
+            path: AppRoutes.mcpRegistry,
+            pageBuilder: (context, state) =>
+                const NoTransitionPage(child: McpRegistryScreen()),
           ),
           GoRoute(
             path: AppRoutes.onDeviceModels,

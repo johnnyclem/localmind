@@ -3,6 +3,7 @@ import '../../../core/providers/app_providers.dart';
 import '../data/tools/tool_registry.dart';
 import '../data/tools/builtin_tool_provider.dart';
 import '../data/tools/mcp_tool_provider.dart';
+import '../data/mcp_saved_servers_store.dart';
 import '../data/mcp_server_manager.dart';
 
 final mcpServerManagerProvider = Provider<McpServerManager>((ref) {
@@ -10,6 +11,10 @@ final mcpServerManagerProvider = Provider<McpServerManager>((ref) {
   return McpServerManager(
     appVersion: packageInfo.value?.version ?? '1.0.0',
   );
+});
+
+final mcpSavedServersStoreProvider = Provider<McpSavedServersStore>((ref) {
+  return const McpSavedServersStore();
 });
 
 final builtInToolProviderProvider = Provider<BuiltInToolProvider>((ref) {

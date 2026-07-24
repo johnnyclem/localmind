@@ -33,6 +33,7 @@ class SidebarWidget extends ConsumerWidget {
     final isSavedMessages = location.startsWith(AppRoutes.savedMessages);
     final isServers = location.startsWith(AppRoutes.servers);
     final isMcpTools = location.startsWith(AppRoutes.mcpTools);
+    final isMcpRegistry = location.startsWith(AppRoutes.mcpRegistry);
     final isPersonas = location.startsWith(AppRoutes.personas);
     final isLocalModels = location.startsWith(AppRoutes.onDeviceModels);
     final isTtsModels = location.startsWith(AppRoutes.ttsModels);
@@ -261,6 +262,20 @@ class SidebarWidget extends ConsumerWidget {
                           Navigator.pop(context);
                         }
                         context.go(AppRoutes.mcpTools);
+                      },
+                    ),
+                    DrawerNavItem(
+                      // Not yet in AppLocalizations — flutter gen-l10n needs
+                      // to run to pick up the "mcp_registry_title" key added
+                      // to the .arb files alongside this screen.
+                      iconData: HugeIcons.strokeRoundedDownload01,
+                      label: 'GitHub MCP Registry',
+                      isSelected: isMcpRegistry,
+                      onTap: () {
+                        if (Scaffold.maybeOf(context)?.isDrawerOpen ?? false) {
+                          Navigator.pop(context);
+                        }
+                        context.go(AppRoutes.mcpRegistry);
                       },
                     ),
                     if (isLmStudio)

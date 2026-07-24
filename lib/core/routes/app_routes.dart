@@ -14,6 +14,7 @@ class AppRoutes {
   static const String cloudSync = '/settings/cloud-sync';
   static const String models = '/models';
   static const String mcpTools = '/mcp-tools';
+  static const String mcpRegistry = '/mcp-registry';
   static const String chatHistory = '/history';
   static const String onDeviceModels = '/on-device-models';
   static const String ttsModels = '/tts-models';

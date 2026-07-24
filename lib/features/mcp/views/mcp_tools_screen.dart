@@ -1,10 +1,12 @@
 import "package:localmind/core/theme/colors.dart";
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:localmind/l10n/app_localizations.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
+import '../../../core/routes/app_routes.dart';
 import '../../chat/data/mcp_server_manager.dart';
 import '../../chat/data/tools/tool_definition.dart';
 import '../../chat/providers/tooling_providers.dart';
@@ -100,6 +102,10 @@ class _McpToolsScreenState extends ConsumerState<McpToolsScreen> {
             child: ListView(
               padding: const EdgeInsets.all(16),
               children: [
+                _BrowseRegistryBanner(
+                  onTap: () => context.push(AppRoutes.mcpRegistry),
+                ),
+                const SizedBox(height: 12),
                 _ExampleServerPanel(
                   enabled: hasExampleServer,
                   onToggle: _toggleExampleServer,
@@ -153,6 +159,69 @@ class _McpToolsScreenState extends ConsumerState<McpToolsScreen> {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _BrowseRegistryBanner extends StatelessWidget {
+  const _BrowseRegistryBanner({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF141414) : const Color(0xFFF8FAFC),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: isDark ? AppColors.darkSurfaceCard : AppColors.lightSurface,
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: theme.colorScheme.primary.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: HugeIcon(
+              icon: HugeIcons.strokeRoundedDownload01,
+              color: theme.colorScheme.primary,
+              size: 22,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'GitHub MCP Registry',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'Browse and one-click install MCP servers.',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          ShadButton.outline(onPressed: onTap, child: const Text('Browse')),
+        ],
+      ),
     );
   }
 }
