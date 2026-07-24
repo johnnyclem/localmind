@@ -584,6 +584,7 @@
   "server_authentication_required_desc": "OpenRouter requires an API key before testing.",
   "server_authentication_optional_desc": "Leave the API key empty if this server does not require one.",
   "mcp_tools_title": "MCP Tools",
+  "mcp_registry_title": "GitHub MCP Registry",
   "available_tools": "Available tools",
   "unable_load_tools": "Unable to load tools",
   "no_tools_registered": "No tools registered",

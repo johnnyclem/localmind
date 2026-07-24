@@ -2,11 +2,13 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
 import '../../../../core/network/hypervault_api_exception.dart';
 import '../../../../core/providers/hypervault_providers.dart';
+import '../../../../core/routes/app_routes.dart';
 import '../../data/models/registry_entry.dart';
 import '../../providers/hv_tools_providers.dart';
 
@@ -237,7 +239,20 @@ class _AddServerSectionState extends ConsumerState<AddServerSection> {
             ),
           ),
           const Divider(height: 32),
-          Text('Search the registry', style: theme.textTheme.titleMedium),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'Search the registry',
+                  style: theme.textTheme.titleMedium,
+                ),
+              ),
+              TextButton(
+                onPressed: () => context.push(AppRoutes.mcpRegistry),
+                child: const Text('Browse full registry'),
+              ),
+            ],
+          ),
           const SizedBox(height: 8),
           ShadInput(
             controller: _searchController,

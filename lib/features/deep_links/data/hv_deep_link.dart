@@ -152,6 +152,17 @@ bool isHvAuthCallbackDeepLink(Uri uri) {
   return false;
 }
 
+/// `hypervault://mcp-oauth-callback?...` — the redirect URI
+/// `McpOAuthService` (lib/features/mcp_registry/data/mcp_oauth_service.dart)
+/// hands to a registry server's authorization endpoint. Recognized here only
+/// so the generic deep-link router skips it: `McpOAuthService` has its own
+/// `AppLinks` subscription (a broadcast stream, so both listeners see the
+/// same event) and resolves it directly rather than through app.dart's
+/// `redirect:` callback.
+bool isMcpOAuthCallbackDeepLink(Uri uri) {
+  return uri.scheme == 'hypervault' && uri.host == 'mcp-oauth-callback';
+}
+
 List<String> _pathSegments(Uri uri) {
   final segments = <String>[];
   // Custom-scheme links parse the authority as `host`, e.g.

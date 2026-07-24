@@ -55,6 +55,9 @@ class DeepLinkNotifier extends Notifier<HvDeepLink?> {
     // Not ours to handle — Supabase's own listener resolves the session
     // from this URL.
     if (isHvAuthCallbackDeepLink(uri)) return;
+    // Not ours either — McpOAuthService has its own subscription and
+    // resolves this one directly.
+    if (isMcpOAuthCallbackDeepLink(uri)) return;
 
     final parsed = parseHyperVaultDeepLink(uri);
     if (parsed == null) return;

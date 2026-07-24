@@ -248,6 +248,7 @@ class HvToolsNotifier extends AsyncNotifier<HvToolsState> {
     required String url,
     required String name,
     required String registryId,
+    Map<String, String>? headers,
     int maxServers = 20,
   }) async {
     final current = state.value ?? const HvToolsState();
@@ -262,6 +263,7 @@ class HvToolsNotifier extends AsyncNotifier<HvToolsState> {
       url: url,
       name: name,
       registryId: registryId,
+      headers: headers,
     );
     final persisted = [...current.persisted, created];
     final draft = [...current.draft, created];
